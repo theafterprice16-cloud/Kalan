@@ -6,21 +6,9 @@ import '../core/routing/router.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'providers.dart';
 
-/// App languages in picker order. Portuguese is Brazilian, Chinese is
-/// Simplified.
-const appLanguageCodes = [
-  'tr', 'en', 'es', 'fr', 'de', 'pt', 'ru', 'zh', 'it', 'id', //
-];
-
-/// A language's name in that language ("Deutsch", "中文").
-String nativeLanguageName(String code) =>
-    lookupAppLocalizations(Locale(code)).languageNativeName;
-
-/// The device language when Kalan has it, English otherwise.
-Locale resolveLocale(Locale? device, Iterable<Locale> supported) {
-  final code = device?.languageCode;
-  return appLanguageCodes.contains(code) ? Locale(code!) : const Locale('en');
-}
+/// Turkish for Turkish devices, English otherwise.
+Locale resolveLocale(Locale? device, Iterable<Locale> supported) =>
+    device?.languageCode == 'tr' ? const Locale('tr') : const Locale('en');
 
 class KalanApp extends ConsumerWidget {
   const KalanApp({super.key});

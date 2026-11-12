@@ -13,9 +13,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Kalan';
 
   @override
-  String get languageNativeName => 'English';
-
-  @override
   String get actionSave => 'Save';
 
   @override
@@ -553,6 +550,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSystem => 'System language';
+
+  @override
+  String get languageTurkish => 'Türkçe';
+
+  @override
+  String get languageEnglish => 'English';
 
   @override
   String get settingsCurrency => 'Currency';

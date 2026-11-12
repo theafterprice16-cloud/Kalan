@@ -1,7 +1,6 @@
 {
   "@@locale": "tr",
   "appTitle": "Kalan",
-  "languageNativeName": "Türkçe",
   "actionSave": "Kaydet",
   "actionCancel": "Vazgeç",
   "actionDelete": "Sil",
@@ -157,6 +156,8 @@
   "recurringEnded": "Bitti",
   "settingsLanguage": "Dil",
   "languageSystem": "Sistem dili",
+  "languageTurkish": "Türkçe",
+  "languageEnglish": "English",
   "settingsCurrency": "Para birimi",
   "settingsCurrencyNote": "Tutarlar çevrilmez, yalnızca para birimi etiketi değişir.",
   "currencyName": "{code, select, TRY{Türk lirası} USD{ABD doları} EUR{Euro} GBP{İngiliz sterlini} BRL{Brezilya reali} MXN{Meksika pesosu} COP{Kolombiya pesosu} CLP{Şili pesosu} RUB{Rus rublesi} KZT{Kazak tengesi} CNY{Çin yuanı} SGD{Singapur doları} MYR{Malezya ringgiti} IDR{Endonezya rupisi} CAD{Kanada doları} AUD{Avustralya doları} CHF{İsviçre frangı} other{{code}}}",

@@ -1,10 +1,6 @@
 {
   "@@locale": "en",
   "appTitle": "Kalan",
-  "languageNativeName": "English",
-  "@languageNativeName": {
-    "description": "This language's name, written in this language."
-  },
   "actionSave": "Save",
   "actionCancel": "Cancel",
   "actionDelete": "Delete",
@@ -323,6 +319,8 @@
   "recurringEnded": "Ended",
   "settingsLanguage": "Language",
   "languageSystem": "System language",
+  "languageTurkish": "Türkçe",
+  "languageEnglish": "English",
   "settingsCurrency": "Currency",
   "settingsCurrencyNote": "Amounts aren't converted; only the currency label changes.",
   "currencyName": "{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} other{{code}}}",

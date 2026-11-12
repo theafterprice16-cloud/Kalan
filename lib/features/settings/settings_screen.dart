@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../app/app.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/date/local_date.dart';
@@ -50,7 +49,8 @@ class SettingsScreen extends ConsumerWidget {
         selected: s.localeCode,
         options: [
           (null, l10n.languageSystem),
-          for (final code in appLanguageCodes) (code, nativeLanguageName(code)),
+          ('tr', l10n.languageTurkish),
+          ('en', l10n.languageEnglish),
         ],
       ),
     );
@@ -113,8 +113,9 @@ class SettingsScreen extends ConsumerWidget {
         '${currency.symbolFor(ref.watch(deviceRegionProvider))} · '
         '${currency.code} · ${currencyName(context, currency)}';
     final languageLabel = switch (s.localeCode) {
-      null => l10n.languageSystem,
-      final code => nativeLanguageName(code),
+      'tr' => l10n.languageTurkish,
+      'en' => l10n.languageEnglish,
+      _ => l10n.languageSystem,
     };
 
     return Scaffold(

@@ -12,6 +12,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 8. **Pro satın alma**: aylık, yıllık, ömür boyu. `EntitlementService` arkasına bağlanır.
 9. **Ana ekran widget'ı**, iOS ve Android (Subby).
 10. **Türkiye resmi tatil kaydırması**; mağaza hazırlığı.
+11. **8 dili ekle** (docs/ceviriler-beklemede/ dosyalarından başla): İspanyolca, Fransızca, Almanca, Portekizce-Brezilya, Rusça, Çince Basitleştirilmiş, İtalyanca, Endonezce.
 
 ## Notlar
 
