@@ -688,4 +688,138 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get themeDark => 'Koyu';
+
+  @override
+  String reminderWhen(String offset) {
+    String _temp0 = intl.Intl.selectLogic(offset, {
+      'days7': '7 gün sonra',
+      'days3': '3 gün sonra',
+      'days1': 'Yarın',
+      'sameDay': 'Bugün',
+      'other': 'Yakında',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String reminderSingle(String when, String name, String amount) {
+    return '$when: $name · $amount';
+  }
+
+  @override
+  String reminderSummary(String when, int count, String total) {
+    return '$when $count ödemen var · toplam $total';
+  }
+
+  @override
+  String reminderCountOnly(String when, int count) {
+    return '$when $count ödemen var';
+  }
+
+  @override
+  String get reminderChannelName => 'Ödeme hatırlatmaları';
+
+  @override
+  String get reminderChannelDescription =>
+      'Ödeme gününden önce kısa hatırlatmalar.';
+
+  @override
+  String get notificationPaidAction => 'Ödendi';
+
+  @override
+  String get reminderPromptTitle => 'Hatırlatmalar';
+
+  @override
+  String get reminderPromptBody =>
+      'Ödeme gününden önce sana haber verelim mi? Bildirimler yalnızca bu telefonda hazırlanır.';
+
+  @override
+  String get reminderPromptAccept => 'Hatırlat';
+
+  @override
+  String get reminderPromptLater => 'Şimdi değil';
+
+  @override
+  String get settingsReminders => 'Hatırlatmalar';
+
+  @override
+  String get remindersEnabled => 'Ödeme hatırlatmaları';
+
+  @override
+  String get reminderDays7 => '7 gün önce';
+
+  @override
+  String get reminderDays3 => '3 gün önce';
+
+  @override
+  String get reminderDays1 => '1 gün önce';
+
+  @override
+  String get reminderSameDay => 'Ödeme günü';
+
+  @override
+  String get reminderTime => 'Saat';
+
+  @override
+  String get reminderHideAmounts => 'Bildirimlerde tutarı gizle';
+
+  @override
+  String get remindersPermissionOff =>
+      'Kalan için bildirimler kapalı, bu yüzden hatırlatmalar görünmez.';
+
+  @override
+  String get openPhoneSettings => 'Telefon ayarlarını aç';
+
+  @override
+  String get remindersHelpLink => 'Bildirimler gelmiyor mu?';
+
+  @override
+  String get remindersHelpIntro =>
+      'Telefonun hatırlatmaları bekletebilir. En sık nedenler bunlar.';
+
+  @override
+  String get remindersHelpPermissionTitle => 'Bildirim izni';
+
+  @override
+  String get remindersHelpPermissionBody =>
+      'Telefon ayarlarını aç, Kalan’ı bul ve bildirimleri aç.';
+
+  @override
+  String get remindersHelpIosTitle => 'iPhone: Odak';
+
+  @override
+  String get remindersHelpIosBody =>
+      'Rahatsız Etme ya da Uyku gibi bir Odak modu hatırlatmaları susturabilir. Ayarlar > Odak bölümünde modu seç ve İzin Verilen Uygulamalar’a Kalan’ı ekle.';
+
+  @override
+  String get remindersHelpAndroidTitle => 'Android: pil tasarrufu';
+
+  @override
+  String get remindersHelpAndroidBody =>
+      'Pil tasarrufu hatırlatmaları geciktirebilir. Ayarlar > Uygulamalar > Kalan > Pil bölümünde Kısıtlanmamış’ı seç. Hatırlatmalar yine de birkaç dakika geç gelebilir.';
+
+  @override
+  String get remindersWebOnly => 'Bu özellik telefonda çalışır.';
+
+  @override
+  String get debugTestNotification => 'Test bildirimi gönder (10 sn sonra)';
+
+  @override
+  String get testNotificationScheduled =>
+      '10 saniye içinde bir test bildirimi gelecek.';
+
+  @override
+  String get testNotificationText =>
+      'Test: hatırlatmalar bu telefonda çalışıyor.';
+
+  @override
+  String get planReminderToggle => 'Bu plan için hatırlatma';
+
+  @override
+  String dayPaymentsTitle(String date) {
+    return '$date ödemeleri';
+  }
+
+  @override
+  String get dayPaymentsEmpty => 'Bu gün ödeme yok.';
 }

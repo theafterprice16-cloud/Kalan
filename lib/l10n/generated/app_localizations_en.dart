@@ -694,4 +694,143 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeDark => 'Dark';
+
+  @override
+  String reminderWhen(String offset) {
+    String _temp0 = intl.Intl.selectLogic(offset, {
+      'days7': 'In 7 days',
+      'days3': 'In 3 days',
+      'days1': 'Tomorrow',
+      'sameDay': 'Today',
+      'other': 'Soon',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String reminderSingle(String when, String name, String amount) {
+    return '$when: $name · $amount';
+  }
+
+  @override
+  String reminderSummary(String when, int count, String total) {
+    return '$when you have $count payments · $total in total';
+  }
+
+  @override
+  String reminderCountOnly(String when, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+    );
+    return '$when you have $_temp0';
+  }
+
+  @override
+  String get reminderChannelName => 'Payment reminders';
+
+  @override
+  String get reminderChannelDescription =>
+      'Short reminders before a payment is due.';
+
+  @override
+  String get notificationPaidAction => 'Paid';
+
+  @override
+  String get reminderPromptTitle => 'Reminders';
+
+  @override
+  String get reminderPromptBody =>
+      'Shall we let you know before a payment is due? Reminders are prepared only on this phone.';
+
+  @override
+  String get reminderPromptAccept => 'Remind me';
+
+  @override
+  String get reminderPromptLater => 'Not now';
+
+  @override
+  String get settingsReminders => 'Reminders';
+
+  @override
+  String get remindersEnabled => 'Payment reminders';
+
+  @override
+  String get reminderDays7 => '7 days before';
+
+  @override
+  String get reminderDays3 => '3 days before';
+
+  @override
+  String get reminderDays1 => '1 day before';
+
+  @override
+  String get reminderSameDay => 'On the day';
+
+  @override
+  String get reminderTime => 'Time';
+
+  @override
+  String get reminderHideAmounts => 'Hide amounts in notifications';
+
+  @override
+  String get remindersPermissionOff =>
+      'Notifications are off for Kalan, so reminders won’t show.';
+
+  @override
+  String get openPhoneSettings => 'Open phone settings';
+
+  @override
+  String get remindersHelpLink => 'Not getting reminders?';
+
+  @override
+  String get remindersHelpIntro =>
+      'Your phone can hold reminders back. These are the usual reasons.';
+
+  @override
+  String get remindersHelpPermissionTitle => 'Notification permission';
+
+  @override
+  String get remindersHelpPermissionBody =>
+      'Open phone settings, find Kalan and turn notifications on.';
+
+  @override
+  String get remindersHelpIosTitle => 'iPhone: Focus';
+
+  @override
+  String get remindersHelpIosBody =>
+      'A Focus such as Do Not Disturb or Sleep can silence reminders. In Settings > Focus, choose the Focus and add Kalan under Allowed Apps.';
+
+  @override
+  String get remindersHelpAndroidTitle => 'Android: battery saving';
+
+  @override
+  String get remindersHelpAndroidBody =>
+      'Battery saving can delay reminders. In Settings > Apps > Kalan > Battery, choose Unrestricted. Reminders may still arrive a few minutes late.';
+
+  @override
+  String get remindersWebOnly => 'This works on your phone.';
+
+  @override
+  String get debugTestNotification => 'Send test notification (in 10 s)';
+
+  @override
+  String get testNotificationScheduled =>
+      'A test notification arrives in 10 seconds.';
+
+  @override
+  String get testNotificationText => 'Test: reminders work on this phone.';
+
+  @override
+  String get planReminderToggle => 'Reminders for this plan';
+
+  @override
+  String dayPaymentsTitle(String date) {
+    return 'Payments on $date';
+  }
+
+  @override
+  String get dayPaymentsEmpty => 'No payments on this day.';
 }

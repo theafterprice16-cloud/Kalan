@@ -1249,6 +1249,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeDark;
+
+  /// No description provided for @reminderWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'{offset, select, days7{In 7 days} days3{In 3 days} days1{Tomorrow} sameDay{Today} other{Soon}}'**
+  String reminderWhen(String offset);
+
+  /// No description provided for @reminderSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'{when}: {name} · {amount}'**
+  String reminderSingle(String when, String name, String amount);
+
+  /// No description provided for @reminderSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{when} you have {count} payments · {total} in total'**
+  String reminderSummary(String when, int count, String total);
+
+  /// No description provided for @reminderCountOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'{when} you have {count, plural, =1{1 payment} other{{count} payments}}'**
+  String reminderCountOnly(String when, int count);
+
+  /// No description provided for @reminderChannelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment reminders'**
+  String get reminderChannelName;
+
+  /// No description provided for @reminderChannelDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Short reminders before a payment is due.'**
+  String get reminderChannelDescription;
+
+  /// No description provided for @notificationPaidAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get notificationPaidAction;
+
+  /// No description provided for @reminderPromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminderPromptTitle;
+
+  /// No description provided for @reminderPromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Shall we let you know before a payment is due? Reminders are prepared only on this phone.'**
+  String get reminderPromptBody;
+
+  /// No description provided for @reminderPromptAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me'**
+  String get reminderPromptAccept;
+
+  /// No description provided for @reminderPromptLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get reminderPromptLater;
+
+  /// No description provided for @settingsReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get settingsReminders;
+
+  /// No description provided for @remindersEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment reminders'**
+  String get remindersEnabled;
+
+  /// No description provided for @reminderDays7.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days before'**
+  String get reminderDays7;
+
+  /// No description provided for @reminderDays3.
+  ///
+  /// In en, this message translates to:
+  /// **'3 days before'**
+  String get reminderDays3;
+
+  /// No description provided for @reminderDays1.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day before'**
+  String get reminderDays1;
+
+  /// No description provided for @reminderSameDay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the day'**
+  String get reminderSameDay;
+
+  /// No description provided for @reminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get reminderTime;
+
+  /// No description provided for @reminderHideAmounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide amounts in notifications'**
+  String get reminderHideAmounts;
+
+  /// No description provided for @remindersPermissionOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off for Kalan, so reminders won’t show.'**
+  String get remindersPermissionOff;
+
+  /// No description provided for @openPhoneSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings'**
+  String get openPhoneSettings;
+
+  /// No description provided for @remindersHelpLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Not getting reminders?'**
+  String get remindersHelpLink;
+
+  /// No description provided for @remindersHelpIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone can hold reminders back. These are the usual reasons.'**
+  String get remindersHelpIntro;
+
+  /// No description provided for @remindersHelpPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission'**
+  String get remindersHelpPermissionTitle;
+
+  /// No description provided for @remindersHelpPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings, find Kalan and turn notifications on.'**
+  String get remindersHelpPermissionBody;
+
+  /// No description provided for @remindersHelpIosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone: Focus'**
+  String get remindersHelpIosTitle;
+
+  /// No description provided for @remindersHelpIosBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A Focus such as Do Not Disturb or Sleep can silence reminders. In Settings > Focus, choose the Focus and add Kalan under Allowed Apps.'**
+  String get remindersHelpIosBody;
+
+  /// No description provided for @remindersHelpAndroidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Android: battery saving'**
+  String get remindersHelpAndroidTitle;
+
+  /// No description provided for @remindersHelpAndroidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery saving can delay reminders. In Settings > Apps > Kalan > Battery, choose Unrestricted. Reminders may still arrive a few minutes late.'**
+  String get remindersHelpAndroidBody;
+
+  /// No description provided for @remindersWebOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This works on your phone.'**
+  String get remindersWebOnly;
+
+  /// No description provided for @debugTestNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test notification (in 10 s)'**
+  String get debugTestNotification;
+
+  /// No description provided for @testNotificationScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'A test notification arrives in 10 seconds.'**
+  String get testNotificationScheduled;
+
+  /// No description provided for @testNotificationText.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: reminders work on this phone.'**
+  String get testNotificationText;
+
+  /// No description provided for @planReminderToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders for this plan'**
+  String get planReminderToggle;
+
+  /// No description provided for @dayPaymentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments on {date}'**
+  String dayPaymentsTitle(String date);
+
+  /// No description provided for @dayPaymentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payments on this day.'**
+  String get dayPaymentsEmpty;
 }
 
 class _AppLocalizationsDelegate

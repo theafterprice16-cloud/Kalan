@@ -26,15 +26,16 @@ void main() {
     }
   });
 
-  test('placeholders match between languages', () {
-    final pattern = RegExp(r'\{(\w+)[},]');
+  test('declared placeholders appear in both languages', () {
     for (final k in keys(en)) {
-      final a = pattern.allMatches(en[k] as String).map((m) => m[1]).toSet();
-      final b = pattern.allMatches(tr[k] as String).map((m) => m[1]).toSet();
-      // A plural selector may skip the count in its branches.
-      a.remove('count');
-      b.remove('count');
-      expect(b, a, reason: k);
+      final meta = en['@$k'] as Map<String, dynamic>?;
+      final names =
+          (meta?['placeholders'] as Map<String, dynamic>?)?.keys ??
+          const <String>[];
+      for (final name in names) {
+        expect(en[k] as String, contains('{$name'), reason: 'en.$k.$name');
+        expect(tr[k] as String, contains('{$name'), reason: 'tr.$k.$name');
+      }
     }
   });
 

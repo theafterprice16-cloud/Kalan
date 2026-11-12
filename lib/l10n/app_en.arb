@@ -400,5 +400,91 @@
   "settingsTheme": "Theme",
   "themeSystem": "System",
   "themeLight": "Light",
-  "themeDark": "Dark"
+  "themeDark": "Dark",
+  "reminderWhen": "{offset, select, days7{In 7 days} days3{In 3 days} days1{Tomorrow} sameDay{Today} other{Soon}}",
+  "@reminderWhen": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderSingle": "{when}: {name} · {amount}",
+  "@reminderSingle": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderSummary": "{when} you have {count} payments · {total} in total",
+  "@reminderSummary": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderCountOnly": "{when} you have {count, plural, =1{1 payment} other{{count} payments}}",
+  "@reminderCountOnly": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reminderChannelName": "Payment reminders",
+  "reminderChannelDescription": "Short reminders before a payment is due.",
+  "notificationPaidAction": "Paid",
+  "reminderPromptTitle": "Reminders",
+  "reminderPromptBody": "Shall we let you know before a payment is due? Reminders are prepared only on this phone.",
+  "reminderPromptAccept": "Remind me",
+  "reminderPromptLater": "Not now",
+  "settingsReminders": "Reminders",
+  "remindersEnabled": "Payment reminders",
+  "reminderDays7": "7 days before",
+  "reminderDays3": "3 days before",
+  "reminderDays1": "1 day before",
+  "reminderSameDay": "On the day",
+  "reminderTime": "Time",
+  "reminderHideAmounts": "Hide amounts in notifications",
+  "remindersPermissionOff": "Notifications are off for Kalan, so reminders won’t show.",
+  "openPhoneSettings": "Open phone settings",
+  "remindersHelpLink": "Not getting reminders?",
+  "remindersHelpIntro": "Your phone can hold reminders back. These are the usual reasons.",
+  "remindersHelpPermissionTitle": "Notification permission",
+  "remindersHelpPermissionBody": "Open phone settings, find Kalan and turn notifications on.",
+  "remindersHelpIosTitle": "iPhone: Focus",
+  "remindersHelpIosBody": "A Focus such as Do Not Disturb or Sleep can silence reminders. In Settings > Focus, choose the Focus and add Kalan under Allowed Apps.",
+  "remindersHelpAndroidTitle": "Android: battery saving",
+  "remindersHelpAndroidBody": "Battery saving can delay reminders. In Settings > Apps > Kalan > Battery, choose Unrestricted. Reminders may still arrive a few minutes late.",
+  "remindersWebOnly": "This works on your phone.",
+  "debugTestNotification": "Send test notification (in 10 s)",
+  "testNotificationScheduled": "A test notification arrives in 10 seconds.",
+  "testNotificationText": "Test: reminders work on this phone.",
+  "planReminderToggle": "Reminders for this plan",
+  "dayPaymentsTitle": "Payments on {date}",
+  "@dayPaymentsTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dayPaymentsEmpty": "No payments on this day."
 }
