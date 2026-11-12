@@ -84,45 +84,54 @@ class PaymentTile extends ConsumerWidget {
         ),
     ];
 
-    return InkWell(
-      onTap: entry.planId == null
-          ? () => context.push(Routes.recurring(entry.recurringId!))
-          : () => context.push(Routes.plan(entry.planId!)),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 4, 8),
-        child: Row(
-          children: [
-            LetterBadge(entry.name),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(entry.name, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Wrap(spacing: 12, runSpacing: 2, children: details),
-                ],
+    return Row(
+      children: [
+        Expanded(
+          child: MergeSemantics(
+            child: InkWell(
+              onTap: entry.planId == null
+                  ? () => context.push(Routes.recurring(entry.recurringId!))
+                  : () => context.push(Routes.plan(entry.planId!)),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
+                child: Row(
+                  children: [
+                    LetterBadge(entry.name),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(entry.name, style: theme.textTheme.titleMedium),
+                          const SizedBox(height: 2),
+                          Wrap(spacing: 12, runSpacing: 2, children: details),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AmountText(
+                      amount,
+                      size: AmountSize.small,
+                      color: entry.isPaid ? palette.secondaryText : null,
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            AmountText(
-              amount,
-              size: AmountSize.small,
-              color: entry.isPaid ? palette.secondaryText : null,
-            ),
-            IconButton(
-              tooltip: entry.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
-              onPressed: () => _toggle(context, ref),
-              icon: Icon(
-                entry.isPaid
-                    ? Icons.check_circle
-                    : Icons.radio_button_unchecked,
-                color: entry.isPaid ? theme.colorScheme.primary : null,
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        Padding(
+          padding: const EdgeInsetsDirectional.only(end: 4),
+          child: IconButton(
+            tooltip: entry.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
+            onPressed: () => _toggle(context, ref),
+            icon: Icon(
+              entry.isPaid ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: entry.isPaid ? theme.colorScheme.primary : null,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

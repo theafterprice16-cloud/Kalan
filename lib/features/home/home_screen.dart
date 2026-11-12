@@ -97,15 +97,24 @@ class _Header extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                left == null ? l10n.homeSpokenForLabel : l10n.homeLeftLabel,
-                style: theme.textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              AmountText(
-                key: const ValueKey('home-number'),
-                left == null ? spokenFor : ref.money(context, left),
-                color: numberColor,
+              MergeSemantics(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      left == null
+                          ? l10n.homeSpokenForLabel
+                          : l10n.homeLeftLabel,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    AmountText(
+                      key: const ValueKey('home-number'),
+                      left == null ? spokenFor : ref.money(context, left),
+                      color: numberColor,
+                    ),
+                  ],
+                ),
               ),
               if (left != null) ...[
                 const SizedBox(height: 12),
