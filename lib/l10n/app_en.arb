@@ -1,0 +1,404 @@
+{
+  "@@locale": "en",
+  "appTitle": "Kalan",
+  "actionSave": "Save",
+  "actionCancel": "Cancel",
+  "actionDelete": "Delete",
+  "actionEdit": "Edit",
+  "actionAddPlan": "Add plan",
+  "actionMoreDetails": "More details",
+  "navHome": "This period",
+  "navPlans": "Plans",
+  "navSettings": "Settings",
+  "frequencyMonthly": "Monthly",
+  "frequencyBiweekly": "Every two weeks",
+  "frequencyWeekly": "Weekly",
+  "onboardingTitle": "Let's set up in a minute.",
+  "onboardingIntro": "Tell Kalan when you get paid. Your data stays on this phone.",
+  "fieldCurrency": "Currency",
+  "fieldPayFrequency": "How often do you get paid?",
+  "fieldPayDay": "Payday",
+  "payDayHelp": "In shorter months, the last day counts.",
+  "fieldLastPayday": "Last payday",
+  "fieldPayWeekday": "Payday",
+  "fieldNetIncome": "Take-home pay per paycheck",
+  "netIncomeHelp": "Optional. Without it, I'll only show what's spoken for.",
+  "onboardingStart": "Start",
+  "errorRequired": "This field is required.",
+  "errorAmountInvalid": "Enter the amount in numbers, like {example}.",
+  "@errorAmountInvalid": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCountInvalid": "Enter a number from 1 to 120.",
+  "errorRemainingTooHigh": "This can't be more than the total.",
+  "errorTotalTooSmall": "This amount can't be split into that many payments.",
+  "errorDayInvalid": "Enter a day from 1 to 31.",
+  "errorNameRequired": "Enter a name.",
+  "errorEndBeforeStart": "The end date can't be before the first date.",
+  "errorDeferInvalid": "Enter a number from 0 to 12.",
+  "errorStepInvalid": "Enter a number from 1 to 365.",
+  "errorCardRequired": "Choose a card.",
+  "homeLeftLabel": "Left",
+  "homeSpokenForLabel": "Spoken for",
+  "homeIncomeLabel": "Income",
+  "periodRange": "{start} – {end}",
+  "@periodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "homeSummary": "{count, plural, =0{No payments this period.} =1{1 payment this period. Total {total}.} other{{count} payments this period. Total {total}.}}",
+  "@homeSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "homeTight": "Tight period. What's left is below your {threshold} threshold.",
+  "@homeTight": {
+    "placeholders": {
+      "threshold": {
+        "type": "String"
+      }
+    }
+  },
+  "homeNegative": "This period is {amount} short.",
+  "@homeNegative": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeNoIncomeHint": "Add your take-home pay in Settings to see what's left.",
+  "homeOverdueTitle": "Not paid yet",
+  "homeOverdueHelp": "The date has passed and these aren't marked as paid.",
+  "homePaymentsTitle": "This period's payments",
+  "homeBarLabel": "Spoken for {spokenFor} of {income}.",
+  "@homeBarLabel": {
+    "placeholders": {
+      "spokenFor": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLabel": "{seq}/{count}",
+  "@progressLabel": {
+    "placeholders": {
+      "seq": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressSemantics": "Payment {seq} of {count}",
+  "@progressSemantics": {
+    "placeholders": {
+      "seq": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paidLabel": "Paid",
+  "markAsPaid": "Mark as paid",
+  "markAsUnpaid": "Mark as not paid",
+  "markedPaid": "Marked as paid.",
+  "markedUnpaid": "Marked as not paid.",
+  "recurringTag": "Recurring",
+  "dueToday": "Today",
+  "dueTomorrow": "Tomorrow",
+  "plansTabOpen": "Open",
+  "plansTabRecurring": "Recurring",
+  "plansTabFinished": "Finished",
+  "plansEmptyOpen": "No open plans.",
+  "plansEmptyFinished": "No finished plans yet. A plan moves here when every payment is paid.",
+  "recurringEmpty": "No recurring payments. You can add rent, bills or subscriptions.",
+  "planPaidOf": "{paid}/{count} paid",
+  "@planPaidOf": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "planToPay": "To pay {amount}",
+  "@planToPay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "planNext": "Next payment {date}",
+  "@planNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planTotal": "Total {amount}",
+  "@planTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "planPurchaseDate": "Purchased {date}",
+  "@planPurchaseDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "planStartedMidway": "{count, plural, =1{1 payment was made before you added this plan.} other{{count} payments were made before you added this plan.}}",
+  "@planStartedMidway": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "freeLimitReached": "The free version holds up to {limit} open plans. You can add a new one when a plan finishes.",
+  "@freeLimitReached": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "addRecurring": "Add recurring payment",
+  "kindPayIn4": "Pay in 4",
+  "kindMonthly": "Monthly installments",
+  "kindCard": "Card installments",
+  "kindManual": "Custom",
+  "kindMidway": "Already started",
+  "kindCashAdvance": "Cash advance in installments",
+  "planPaymentsTitle": "Payments",
+  "planDelete": "Delete plan",
+  "planDeleteConfirm": "This plan and all its payments will be deleted.",
+  "planDeleted": "Plan deleted.",
+  "planNotFound": "This plan no longer exists.",
+  "editPaymentTitle": "Edit payment",
+  "editPaymentHelp": "The difference is spread over later payments. The plan total stays the same.",
+  "editRejectedPaid": "A paid payment can't be edited. Mark it as not paid first.",
+  "editRejectedNoAbsorbers": "There's no later payment to take the difference. You can still change the date.",
+  "editRejectedAbsorber": "This change would bring a later payment to zero. Try a smaller change.",
+  "editedTag": "Edited",
+  "paymentUpdated": "Payment updated.",
+  "paymentRowSemantics": "{name}, {amount}, {date}",
+  "@paymentRowSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "addPlanTitle": "Add plan",
+  "addPlanTypeLabel": "Plan type",
+  "fieldSource": "Source",
+  "fieldSourceHint": "e.g. Klarna or your bank",
+  "fieldCard": "Card",
+  "fieldTotal": "Total amount",
+  "fieldCount": "Number of payments",
+  "fieldFirstDate": "First payment date",
+  "fieldPurchaseDate": "Purchase date",
+  "fieldIntervalStep": "Every",
+  "fieldIntervalUnit": "Unit",
+  "unitDays": "days",
+  "unitWeeks": "weeks",
+  "unitMonths": "months",
+  "fieldTotalCount": "Total payments",
+  "fieldUnpaidCount": "Payments not yet paid",
+  "fieldInstallment": "Payment amount",
+  "fieldNextDate": "Next payment date",
+  "fieldTitle": "Plan name",
+  "fieldTitleHint": "e.g. Phone",
+  "fieldDefer": "Defer first payment (months)",
+  "fieldCashAdvance": "Cash advance in installments",
+  "noCards": "No cards yet.",
+  "addCard": "Add card",
+  "previewTitle": "Payments",
+  "previewSummary": "{count, plural, =1{1 payment, {total} in total.} other{{count} payments, {total} in total.}}",
+  "@previewSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "previewEmpty": "Fill in the fields to see the payments here.",
+  "planSaved": "Plan added.",
+  "fieldPaymentDate": "Payment date",
+  "sourcesTitle": "Sources and cards",
+  "sourcesEmpty": "No sources yet. Sources you type while adding a plan appear here.",
+  "addSource": "Add source",
+  "editSource": "Edit source",
+  "fieldName": "Name",
+  "fieldSourceKind": "Type",
+  "sourceKindProvider": "Pay later provider",
+  "sourceKindCard": "Credit card",
+  "fieldStatementDay": "Statement date",
+  "statementDayHelp": "The day of the month your statement is cut.",
+  "fieldDueDay": "Due date",
+  "dueDayHelp": "The day of the month the statement must be paid.",
+  "fieldShiftWeekend": "Move to the next business day if it falls on a weekend",
+  "cardDaysChangeNote": "Changing these days moves the dates of unpaid, unedited payments on this card.",
+  "sourceInUse": "Plans use this source. Delete those plans first.",
+  "sourceDeleted": "Source deleted.",
+  "sourceSaved": "Saved.",
+  "cardSummary": "Statement date {statement}, due date {due}",
+  "@cardSummary": {
+    "placeholders": {
+      "statement": {
+        "type": "int"
+      },
+      "due": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringNewTitle": "Add recurring payment",
+  "recurringEditTitle": "Edit recurring payment",
+  "fieldRecurringNameHint": "e.g. Rent",
+  "fieldAmount": "Amount",
+  "fieldRecurrence": "Repeats",
+  "recurrenceWeekly": "Weekly",
+  "recurrenceBiweekly": "Every two weeks",
+  "recurrenceMonthly": "Monthly",
+  "recurrenceYearly": "Yearly",
+  "fieldEndDate": "End date",
+  "noEndDate": "No end date",
+  "clearEndDate": "Remove end date",
+  "recurringDeleteConfirm": "This recurring payment will be deleted.",
+  "recurringDeleted": "Recurring payment deleted.",
+  "recurringSaved": "Saved.",
+  "recurringNext": "Next {date}",
+  "@recurringNext": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringEnded": "Ended",
+  "settingsLanguage": "Language",
+  "languageSystem": "System language",
+  "languageTurkish": "Türkçe",
+  "languageEnglish": "English",
+  "settingsCurrency": "Currency",
+  "settingsCurrencyNote": "Amounts aren't converted; only the currency label changes.",
+  "currencyName": "{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} other{{code}}}",
+  "@currencyName": {
+    "description": "Currency name by ISO code. Add a branch when adding a currency.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "currencySearch": "Search currency",
+  "currencyNoMatch": "No currency matches.",
+  "currencyChangeTitle": "Change currency",
+  "currencyChangePreview": "Example: {before} → {after}",
+  "@currencyChangePreview": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyChangeRounding": "This currency uses a different number of decimals, so amounts are rounded.",
+  "currencyChangeConfirm": "Change",
+  "settingsPay": "Pay",
+  "paySummaryMonthly": "Monthly, day {day}",
+  "@paySummaryMonthly": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "paySummaryBiweekly": "Every two weeks, last payday {date}",
+  "@paySummaryBiweekly": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "paySummaryWeekly": "Weekly, {weekday}",
+  "@paySummaryWeekly": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsNetIncome": "Take-home pay",
+  "notSet": "Not set",
+  "settingsTight": "Tight period threshold",
+  "settingsTightHelp": "A period counts as tight when what's left drops below this amount. Leave empty to turn it off.",
+  "off": "Off",
+  "settingsSources": "Sources and cards",
+  "settingsRoadmap": "Roadmap",
+  "settingsPrivacy": "Your data stays on this phone. No account, no bank connection, no ads.",
+  "settingsDebugPro": "Pro (debug builds only)",
+  "settingsSaved": "Saved.",
+  "roadmapEmpty": "Nothing to share here yet.",
+  "roadmapError": "Couldn't read the roadmap.",
+  "roadmapPlanned": "Planned",
+  "roadmapInProgress": "In progress",
+  "roadmapShipped": "Shipped",
+  "roadmapTarget": "Target version {version}",
+  "@roadmapTarget": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "overdueBadge": "Overdue",
+  "settingsTheme": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark"
+}

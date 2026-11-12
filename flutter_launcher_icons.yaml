@@ -1,0 +1,11 @@
+# App icons from assets/brand (drawn by tool/generate_icons.py).
+# Regenerate with: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/brand/icon_1024.png"
+  android: "ic_launcher"
+  ios: true
+  remove_alpha_ios: true
+  # Adaptive icon: Gece & Nane ground (bg) behind the mark.
+  adaptive_icon_background: "#0B0F14"
+  adaptive_icon_foreground: "assets/brand/icon_foreground.png"
+  min_sdk_android: 21

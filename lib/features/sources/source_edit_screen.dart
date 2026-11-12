@@ -1,0 +1,215 @@
+import 'dart:async';
+
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+
+import '../../app/format.dart';
+import '../../app/providers.dart';
+import '../../core/design/form_fields.dart';
+import '../../core/theme/kalan_theme.dart';
+import '../../data/db/app_database.dart';
+
+/// Create or edit a provider or card. Pops with the source id on save.
+class SourceEditScreen extends ConsumerStatefulWidget {
+  const SourceEditScreen({super.key, this.sourceId, this.startAsCard = false});
+
+  final int? sourceId;
+  final bool startAsCard;
+
+  @override
+  ConsumerState<SourceEditScreen> createState() => _SourceEditScreenState();
+}
+
+class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  SourceKind _kind = SourceKind.provider;
+  int? _statementDay;
+  int? _dueDay;
+  bool _shift = true;
+  SourceRow? _existing;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _kind = widget.startAsCard ? SourceKind.card : SourceKind.provider;
+    if (widget.sourceId == null) {
+      _loaded = true;
+    } else {
+      unawaited(_load());
+    }
+  }
+
+  Future<void> _load() async {
+    final s = await ref.read(sourceRepositoryProvider).byId(widget.sourceId!);
+    if (!mounted || s == null) return;
+    setState(() {
+      _existing = s;
+      _name.text = s.name;
+      _kind = s.kind;
+      _statementDay = s.statementDay;
+      _dueDay = s.dueDay;
+      _shift = s.shiftDueToBusinessDay;
+      _loaded = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    final repo = ref.read(sourceRepositoryProvider);
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final int id;
+    final existing = _existing;
+    if (existing == null) {
+      id = await repo.create(
+        name: _name.text,
+        kind: _kind,
+        statementDay: _statementDay,
+        dueDay: _dueDay,
+        shiftDueToBusinessDay: _shift,
+      );
+    } else {
+      id = existing.id;
+      await repo.update(
+        existing.copyWith(
+          name: _name.text.trim(),
+          kind: _kind,
+          statementDay: Value(_statementDay),
+          dueDay: Value(_dueDay),
+          shiftDueToBusinessDay: _shift,
+        ),
+      );
+    }
+    messenger.showSnackBar(SnackBar(content: Text(l10n.sourceSaved)));
+    router.pop(id);
+  }
+
+  Future<void> _delete() async {
+    final l10n = context.l10n;
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await ref.read(sourceRepositoryProvider).delete(_existing!.id);
+    messenger.showSnackBar(
+      SnackBar(content: Text(ok ? l10n.sourceDeleted : l10n.sourceInUse)),
+    );
+    if (ok) router.pop();
+  }
+
+  Widget _dayField(
+    String label,
+    String help,
+    int? value,
+    ValueChanged<int?> onChanged,
+    Key key,
+  ) => DropdownButtonFormField<int>(
+    key: key,
+    initialValue: value,
+    isExpanded: true,
+    decoration: InputDecoration(
+      labelText: label,
+      helperText: help,
+      helperMaxLines: 3,
+    ),
+    items: [
+      for (var d = 1; d <= 31; d++)
+        DropdownMenuItem(value: d, child: Text('$d')),
+    ],
+    onChanged: onChanged,
+    validator: (v) => v == null ? context.l10n.errorDayInvalid : null,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_existing == null ? l10n.addSource : l10n.editSource),
+        actions: [
+          if (_existing != null)
+            IconButton(
+              tooltip: l10n.actionDelete,
+              onPressed: _delete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+        ],
+      ),
+      body: !_loaded
+          ? const Center(child: CircularProgressIndicator())
+          : Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  TextFormField(
+                    key: const ValueKey('source-name'),
+                    controller: _name,
+                    maxLength: 60,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(labelText: l10n.fieldName),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.errorNameRequired
+                        : null,
+                  ),
+                  const SizedBox(height: 8),
+                  ChoiceField<SourceKind>(
+                    label: l10n.fieldSourceKind,
+                    selected: _kind,
+                    options: [
+                      (SourceKind.provider, l10n.sourceKindProvider),
+                      (SourceKind.card, l10n.sourceKindCard),
+                    ],
+                    onSelected: (k) => setState(() => _kind = k),
+                  ),
+                  if (_kind == SourceKind.card) ...[
+                    const SizedBox(height: 16),
+                    _dayField(
+                      l10n.fieldStatementDay,
+                      l10n.statementDayHelp,
+                      _statementDay,
+                      (d) => setState(() => _statementDay = d),
+                      const ValueKey('statement-day'),
+                    ),
+                    const SizedBox(height: 16),
+                    _dayField(
+                      l10n.fieldDueDay,
+                      l10n.dueDayHelp,
+                      _dueDay,
+                      (d) => setState(() => _dueDay = d),
+                      const ValueKey('due-day'),
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.fieldShiftWeekend),
+                      value: _shift,
+                      onChanged: (v) => setState(() => _shift = v),
+                    ),
+                    if (_existing != null)
+                      Text(
+                        l10n.cardDaysChangeNote,
+                        style: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: context.colors.textMuted),
+                      ),
+                  ],
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    key: const ValueKey('save-source'),
+                    onPressed: _save,
+                    child: Text(l10n.actionSave),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
