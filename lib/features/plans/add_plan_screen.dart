@@ -5,10 +5,10 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
@@ -703,7 +703,7 @@ class _Preview extends ConsumerWidget {
               Text(
                 l10n.previewEmpty,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: context.palette.secondaryText,
+                  color: context.colors.textMuted,
                 ),
               )
             else ...[
@@ -721,7 +721,7 @@ class _Preview extends ConsumerWidget {
                   child: Text(
                     l10n.planStartedMidway(d.firstTrackedSeq - 1),
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: context.palette.secondaryText,
+                      color: context.colors.textMuted,
                     ),
                   ),
                 ),
@@ -737,7 +737,7 @@ class _Preview extends ConsumerWidget {
                           l10n.progressLabel(p.seq, d.installmentCount),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontFeatures: AmountText.tabular,
-                            color: context.palette.secondaryText,
+                            color: context.colors.textMuted,
                           ),
                         ),
                       ),

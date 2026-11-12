@@ -5,9 +5,9 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../onboarding/pay_form.dart';
@@ -32,6 +32,7 @@ class PlanDetailScreen extends ConsumerWidget {
             child: Text(l10n.actionCancel),
           ),
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: context.colors.coral),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.actionDelete),
           ),
@@ -57,7 +58,7 @@ class PlanDetailScreen extends ConsumerWidget {
     }
     final theme = Theme.of(context);
     final secondary = theme.textTheme.bodyMedium?.copyWith(
-      color: context.palette.secondaryText,
+      color: context.colors.textMuted,
     );
     final midwayCount = plan.payments.first.seq - 1;
 
@@ -201,9 +202,9 @@ class _PaymentRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final palette = context.palette;
+    final colors = context.colors;
     final secondary = theme.textTheme.bodyMedium?.copyWith(
-      color: palette.secondaryText,
+      color: colors.textMuted,
     );
     return InkWell(
       onTap: () => _edit(context, ref),
@@ -232,6 +233,9 @@ class _PaymentRow extends ConsumerWidget {
                     children: [
                       if (payment.isPaid)
                         Text(l10n.paidLabel, style: secondary),
+                      if (!payment.isPaid &&
+                          payment.dueDay < ref.watch(todayProvider).epochDay)
+                        OverdueBadge(label: l10n.overdueBadge),
                       if (payment.isEdited)
                         Text(l10n.editedTag, style: secondary),
                     ],
@@ -242,7 +246,7 @@ class _PaymentRow extends ConsumerWidget {
             AmountText(
               ref.money(context, payment.amountMinor),
               size: AmountSize.small,
-              color: payment.isPaid ? palette.secondaryText : null,
+              color: payment.isPaid ? colors.textMuted : null,
             ),
             IconButton(
               tooltip: payment.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
@@ -253,7 +257,7 @@ class _PaymentRow extends ConsumerWidget {
                 payment.isPaid
                     ? Icons.check_circle
                     : Icons.radio_button_unchecked,
-                color: payment.isPaid ? theme.colorScheme.primary : null,
+                color: payment.isPaid ? colors.mintText : null,
               ),
             ),
           ],

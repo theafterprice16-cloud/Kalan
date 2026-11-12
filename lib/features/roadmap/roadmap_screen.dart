@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
+import '../../core/theme/kalan_theme.dart';
 import 'roadmap.dart';
 
 class RoadmapScreen extends ConsumerWidget {
@@ -51,7 +51,7 @@ class _RoadmapCard extends StatelessWidget {
       ),
     };
     final secondary = theme.textTheme.bodyMedium?.copyWith(
-      color: context.palette.secondaryText,
+      color: context.colors.textMuted,
     );
     return Card(
       child: Padding(
@@ -77,7 +77,7 @@ class _RoadmapCard extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 18, color: context.palette.secondaryText),
+                    Icon(icon, size: 18, color: context.colors.textMuted),
                     const SizedBox(width: 4),
                     Text(label, style: secondary),
                   ],

@@ -186,5 +186,10 @@
   "roadmapPlanned": "Planlandı",
   "roadmapInProgress": "Yapılıyor",
   "roadmapShipped": "Yayınlandı",
-  "roadmapTarget": "Hedef sürüm {version}"
+  "roadmapTarget": "Hedef sürüm {version}",
+  "overdueBadge": "Gecikti",
+  "settingsTheme": "Tema",
+  "themeSystem": "Sistem",
+  "themeLight": "Açık",
+  "themeDark": "Koyu"
 }

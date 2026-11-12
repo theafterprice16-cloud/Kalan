@@ -7,12 +7,13 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/date/local_date.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
 import '../../core/routing/routes.dart';
+import '../../core/theme/kalan_theme.dart';
+import '../../core/theme/theme_mode.dart';
 import '../../data/db/app_database.dart';
 import '../currency/currency_picker.dart';
 import '../onboarding/pay_form.dart';
@@ -56,6 +57,25 @@ class SettingsScreen extends ConsumerWidget {
     );
     if (picked != null) {
       await _update(ref, AppSettingsCompanion(localeCode: Value(picked.value)));
+    }
+  }
+
+  Future<void> _pickTheme(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
+    final picked = await showDialog<_Choice<ThemeMode>>(
+      context: context,
+      builder: (_) => _ChoiceDialog<ThemeMode>(
+        title: l10n.settingsTheme,
+        selected: ref.read(themeModeProvider),
+        options: [
+          (ThemeMode.system, l10n.themeSystem),
+          (ThemeMode.light, l10n.themeLight),
+          (ThemeMode.dark, l10n.themeDark),
+        ],
+      ),
+    );
+    if (picked != null) {
+      await ref.read(themeModeProvider.notifier).set(picked.value);
     }
   }
 
@@ -105,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final secondary = Theme.of(context).textTheme.bodyMedium
-        ?.copyWith(color: context.palette.secondaryText);
+        ?.copyWith(color: context.colors.textMuted);
     String amountOrNot(int? minor) =>
         minor == null ? l10n.notSet : ref.money(context, minor);
     final currency = Currency.fromCode(s.currencyCode);
@@ -170,6 +190,15 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.settingsLanguage),
             subtitle: Text(languageLabel, style: secondary),
             onTap: () => _pickLanguage(context, ref, s),
+          ),
+          ListTile(
+            title: Text(l10n.settingsTheme),
+            subtitle: Text(switch (ref.watch(themeModeProvider)) {
+              ThemeMode.system => l10n.themeSystem,
+              ThemeMode.light => l10n.themeLight,
+              ThemeMode.dark => l10n.themeDark,
+            }, style: secondary),
+            onTap: () => _pickTheme(context, ref),
           ),
           const Divider(),
           ListTile(

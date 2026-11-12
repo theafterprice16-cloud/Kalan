@@ -4,9 +4,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/models.dart';
 import 'plan_labels.dart';
 
@@ -92,7 +92,7 @@ class _PlanList extends ConsumerWidget {
     if (plans.isEmpty) return Center(child: EmptyState(empty));
     final l10n = context.l10n;
     final secondary = Theme.of(context).textTheme.bodyMedium
-        ?.copyWith(color: context.palette.secondaryText);
+        ?.copyWith(color: context.colors.textMuted);
     return ListView(
       padding: const EdgeInsets.only(bottom: 96, top: 8),
       children: [
@@ -170,7 +170,7 @@ class _RecurringList extends ConsumerWidget {
     if (items.isEmpty) return Center(child: EmptyState(l10n.recurringEmpty));
     final today = ref.watch(todayProvider);
     final secondary = Theme.of(context).textTheme.bodyMedium
-        ?.copyWith(color: context.palette.secondaryText);
+        ?.copyWith(color: context.colors.textMuted);
     return ListView(
       padding: const EdgeInsets.only(bottom: 96, top: 8),
       children: [

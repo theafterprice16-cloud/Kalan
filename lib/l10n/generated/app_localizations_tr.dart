@@ -673,4 +673,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String roadmapTarget(String version) {
     return 'Hedef sürüm $version';
   }
+
+  @override
+  String get overdueBadge => 'Gecikti';
+
+  @override
+  String get settingsTheme => 'Tema';
+
+  @override
+  String get themeSystem => 'Sistem';
+
+  @override
+  String get themeLight => 'Açık';
+
+  @override
+  String get themeDark => 'Koyu';
 }

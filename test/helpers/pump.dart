@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kalan/core/design/theme.dart';
+import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/l10n/generated/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 

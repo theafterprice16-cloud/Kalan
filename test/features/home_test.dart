@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kalan/core/design/colors.dart';
 import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -40,7 +40,7 @@ void main() {
         matching: find.byType(Text),
       ),
     );
-    expect(number.style!.color, KalanColors.darkGreen);
+    expect(number.style!.color, KalanColors.light.mintText);
   });
 
   testWidgets('one tap marks paid; paid still counts as spoken for', (
@@ -66,7 +66,7 @@ void main() {
     expect(paid.single.seq, 1);
   });
 
-  testWidgets('negative period uses coral and says how much is short', (
+  testWidgets('negative period uses amber and says how much is short', (
     tester,
   ) async {
     await pumpApp(
@@ -80,11 +80,11 @@ void main() {
     expect(find.text('-₺5.200'), findsOneWidget);
     expect(find.text('Bu dönem ₺5.200 eksik kalıyor.'), findsOneWidget);
     final number = tester.widget<Text>(find.text('-₺5.200'));
-    expect(number.style!.color, KalanColors.coral);
+    expect(number.style!.color, KalanColors.light.amberText);
     expect(find.byKey(const ValueKey('bar-excess')), findsOneWidget);
   });
 
-  testWidgets('tight period shows an amber note, never coral', (tester) async {
+  testWidgets('tight period shows an amber note', (tester) async {
     await pumpApp(
       tester,
       seed: (db) async {
@@ -184,5 +184,29 @@ void main() {
     );
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+  });
+
+  testWidgets('unpaid past payments carry a coral "Overdue" badge', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 5000000);
+        // 30 Oct and 13 Nov are past and unpaid.
+        await seedPayIn4(db, first: LocalDate(2026, 10, 30), source: 'Zip');
+      },
+    );
+    final badges = find.byKey(const ValueKey('overdue-badge'));
+    expect(badges, findsNWidgets(2));
+    expect(find.text('Gecikti'), findsNWidgets(2));
+    final label = tester.widget<Text>(
+      find.descendant(of: badges.first, matching: find.byType(Text)),
+    );
+    expect(label.style!.color, KalanColors.light.coral);
+    // Paying one removes its badge.
+    await tester.tap(find.byTooltip('Ödendi olarak işaretle').first);
+    await tester.pumpAndSettle();
+    expect(badges, findsOneWidget);
   });
 }

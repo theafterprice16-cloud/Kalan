@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'theme.dart';
+import '../theme/kalan_theme.dart';
 
 /// Large amount with tabular figures. Scales down instead of overflowing.
 class AmountText extends StatelessWidget {
@@ -70,7 +70,7 @@ class LetterBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
+    final colors = context.colors;
     final locale = Localizations.maybeLocaleOf(context)?.languageCode ?? 'en';
     return ExcludeSemantics(
       child: Container(
@@ -78,14 +78,14 @@ class LetterBadge extends StatelessWidget {
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: palette.badgeBackground,
+          color: colors.surfaceRaised,
           shape: BoxShape.circle,
         ),
         child: Text(
           letterOf(name, localeName: locale),
           textScaler: TextScaler.noScaling,
           style: TextStyle(
-            color: palette.badgeForeground,
+            color: colors.textMuted,
             fontWeight: FontWeight.w600,
             fontSize: size * 0.42,
           ),
@@ -95,8 +95,8 @@ class LetterBadge extends StatelessWidget {
   }
 }
 
-/// One bar per period: spoken for in ink, left in green. When spoken for
-/// exceeds income, the excess is coral.
+/// One bar per period: spoken for in chartCommitted, left in mint. When
+/// spoken for exceeds income, the excess is amber.
 class PeriodBar extends StatelessWidget {
   const PeriodBar({
     required this.spokenForMinor,
@@ -126,7 +126,7 @@ class PeriodBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
+    final colors = context.colors;
     final (spent, left, excess) = weights(spokenForMinor, incomeMinor);
     return Semantics(
       label: semanticsLabel,
@@ -145,7 +145,7 @@ class PeriodBar extends StatelessWidget {
                     flex: spent,
                     child: ColoredBox(
                       key: const ValueKey('bar-spoken-for'),
-                      color: palette.spokenForBar,
+                      color: colors.chartCommitted,
                     ),
                   ),
                 if (left > 0)
@@ -153,7 +153,7 @@ class PeriodBar extends StatelessWidget {
                     flex: left,
                     child: ColoredBox(
                       key: const ValueKey('bar-left'),
-                      color: palette.leftBar,
+                      color: colors.mint,
                     ),
                   ),
                 if (excess > 0)
@@ -161,7 +161,7 @@ class PeriodBar extends StatelessWidget {
                     flex: excess,
                     child: ColoredBox(
                       key: const ValueKey('bar-excess'),
-                      color: palette.negative,
+                      color: colors.amber,
                     ),
                   ),
                 if (spent + left + excess == 0)
@@ -186,11 +186,17 @@ class StatusNote extends StatelessWidget {
     required this.text,
     required this.color,
     super.key,
+    this.textColor,
   });
 
   final IconData icon;
   final String text;
+
+  /// Icon color.
   final Color color;
+
+  /// Defaults to the body text color.
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +206,11 @@ class StatusNote extends StatelessWidget {
         ExcludeSemantics(child: Icon(icon, color: color, size: 20)),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: textColor),
+          ),
         ),
       ],
     );
@@ -222,7 +232,7 @@ class SectionTitle extends StatelessWidget {
         child: Text(
           text,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: context.palette.secondaryText,
+            color: context.colors.textMuted,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -249,11 +259,36 @@ class EmptyState extends StatelessWidget {
             text,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge
-                ?.copyWith(color: context.palette.secondaryText),
+                ?.copyWith(color: context.colors.textMuted),
           ),
           if (action != null) ...[const SizedBox(height: 16), action!],
         ],
       ),
+    );
+  }
+}
+
+/// Coral "Overdue" badge: icon and text, never color alone.
+class OverdueBadge extends StatelessWidget {
+  const OverdueBadge({required this.label, super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final coral = context.colors.coral;
+    return Row(
+      key: const ValueKey('overdue-badge'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.schedule, size: 16, color: coral),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: coral, fontWeight: FontWeight.w600),
+        ),
+      ],
     );
   }
 }

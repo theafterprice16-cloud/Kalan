@@ -4,9 +4,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
+import '../../core/theme/kalan_theme.dart';
 import 'home_view.dart';
 
 /// A payment row with a one-tap "paid" toggle.
@@ -38,14 +38,14 @@ class PaymentTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final palette = context.palette;
+    final colors = context.colors;
     final theme = Theme.of(context);
     final amount = ref.money(context, entry.amountMinor);
     final date = context.shortDate(entry.date);
     final days = ref.watch(todayProvider).daysUntil(entry.date);
     final soon = !entry.isPaid && days >= 0 && days <= 1;
     final secondary = theme.textTheme.bodyMedium?.copyWith(
-      color: palette.secondaryText,
+      color: colors.textMuted,
     );
 
     final details = <Widget>[
@@ -61,11 +61,12 @@ class PaymentTile extends ConsumerWidget {
             entry.installmentCount!,
           ),
         ),
+      if (!entry.isPaid && days < 0) OverdueBadge(label: l10n.overdueBadge),
       if (soon)
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.circle, size: 10, color: palette.attention),
+            Icon(Icons.circle, size: 10, color: colors.amber),
             const SizedBox(width: 4),
             Text(
               days == 0 ? l10n.dueToday : l10n.dueTomorrow,
@@ -77,7 +78,7 @@ class PaymentTile extends ConsumerWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check, size: 16, color: palette.secondaryText),
+            Icon(Icons.check, size: 16, color: colors.textMuted),
             const SizedBox(width: 2),
             Text(l10n.paidLabel, style: secondary),
           ],
@@ -112,7 +113,7 @@ class PaymentTile extends ConsumerWidget {
                     AmountText(
                       amount,
                       size: AmountSize.small,
-                      color: entry.isPaid ? palette.secondaryText : null,
+                      color: entry.isPaid ? colors.textMuted : null,
                     ),
                   ],
                 ),
@@ -127,7 +128,7 @@ class PaymentTile extends ConsumerWidget {
             onPressed: () => _toggle(context, ref),
             icon: Icon(
               entry.isPaid ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: entry.isPaid ? theme.colorScheme.primary : null,
+              color: entry.isPaid ? colors.mintText : null,
             ),
           ),
         ),

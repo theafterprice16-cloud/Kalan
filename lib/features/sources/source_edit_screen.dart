@@ -8,7 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
-import '../../core/design/theme.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 
 /// Create or edit a provider or card. Pops with the source id on save.
@@ -198,7 +198,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                       Text(
                         l10n.cardDaysChangeNote,
                         style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: context.palette.secondaryText),
+                            ?.copyWith(color: context.colors.textMuted),
                       ),
                   ],
                   const SizedBox(height: 24),

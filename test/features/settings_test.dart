@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -163,5 +164,31 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('debug-pro')));
     await tester.pumpAndSettle();
     expect((await db.select(db.appSettings).getSingle()).debugPro, isTrue);
+  });
+
+  testWidgets('theme follows the system by default; Light and Dark stick', (
+    tester,
+  ) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    await pumpApp(tester, seed: seedSettings);
+    Color ground() =>
+        Theme.of(tester.element(find.byType(Scaffold).first))
+            .scaffoldBackgroundColor;
+    expect(ground(), KalanColors.dark.bg);
+
+    await openTab(tester, 'Ayarlar');
+    expect(find.text('Sistem'), findsOneWidget);
+    await tester.tap(find.text('Tema'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Açık').last);
+    await tester.pumpAndSettle();
+    expect(ground(), KalanColors.light.bg);
+
+    await tester.tap(find.text('Tema'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Koyu'));
+    await tester.pumpAndSettle();
+    expect(ground(), KalanColors.dark.bg);
   });
 }

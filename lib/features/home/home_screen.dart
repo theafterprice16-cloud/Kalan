@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/period_summary.dart';
 import '../../core/routing/routes.dart';
+import '../../core/theme/kalan_theme.dart';
 import 'home_view.dart';
 import 'payment_tile.dart';
 
@@ -48,7 +48,7 @@ class HomeScreen extends ConsumerWidget {
               child: Text(
                 l10n.homeOverdueHelp,
                 style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: context.palette.secondaryText),
+                    ?.copyWith(color: context.colors.textMuted),
               ),
             ),
             for (final e in view.overdue) PaymentTile(entry: e),
@@ -71,22 +71,22 @@ class _Header extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final palette = context.palette;
+    final colors = context.colors;
     final theme = Theme.of(context);
     final s = view.summary;
     final spokenFor = ref.money(context, s.spokenForMinor);
     final left = s.leftMinor;
     final secondary = theme.textTheme.bodyMedium?.copyWith(
-      color: palette.secondaryText,
+      color: colors.textMuted,
     );
 
     final Color numberColor;
     if (left == null) {
       numberColor = theme.colorScheme.onSurface;
     } else if (s.status == PeriodStatus.negative) {
-      numberColor = palette.negative;
+      numberColor = colors.amberText;
     } else {
-      numberColor = palette.leftAmount;
+      numberColor = colors.mintText;
     }
 
     return Padding(
@@ -152,7 +152,7 @@ class _Header extends ConsumerWidget {
                 StatusNote(
                   key: const ValueKey('status-tight'),
                   icon: Icons.hourglass_bottom,
-                  color: palette.attention,
+                  color: colors.amberText,
                   text: l10n.homeTight(
                     ref.money(context, view.tightThresholdMinor!),
                   ),
@@ -163,7 +163,8 @@ class _Header extends ConsumerWidget {
                 StatusNote(
                   key: const ValueKey('status-negative'),
                   icon: Icons.remove_circle_outline,
-                  color: palette.negative,
+                  color: colors.amberText,
+                  textColor: colors.textMuted,
                   text: l10n.homeNegative(ref.money(context, -left!)),
                 ),
               ],

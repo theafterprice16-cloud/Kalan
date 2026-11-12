@@ -4,9 +4,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
-import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 
 class SourcesScreen extends ConsumerWidget {
@@ -17,7 +17,7 @@ class SourcesScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final sources = ref.watch(sourcesProvider).value;
     final secondary = Theme.of(context).textTheme.bodyMedium
-        ?.copyWith(color: context.palette.secondaryText);
+        ?.copyWith(color: context.colors.textMuted);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.sourcesTitle)),
       floatingActionButton: FloatingActionButton.extended(

@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../core/design/theme.dart';
 import '../core/routing/router.dart';
+import '../core/theme/kalan_theme.dart';
+import '../core/theme/theme_mode.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'providers.dart';
 
@@ -24,6 +25,7 @@ class KalanApp extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: KalanTheme.light(),
       darkTheme: KalanTheme.dark(),
+      themeMode: ref.watch(themeModeProvider),
       locale: localeCode == null ? null : Locale(localeCode),
       localeResolutionCallback: resolveLocale,
       supportedLocales: AppLocalizations.supportedLocales,

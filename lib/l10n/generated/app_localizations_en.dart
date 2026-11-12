@@ -679,4 +679,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String roadmapTarget(String version) {
     return 'Target version $version';
   }
+
+  @override
+  String get overdueBadge => 'Overdue';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
 }

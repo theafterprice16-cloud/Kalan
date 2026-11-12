@@ -3,9 +3,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
-import '../../core/design/theme.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
+import '../../core/theme/kalan_theme.dart';
 
 /// The currency's name in the app language.
 String currencyName(BuildContext context, Currency currency) =>
@@ -80,7 +80,7 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
                     child: Text(
                       l10n.currencyNoMatch,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: context.palette.secondaryText),
+                      style: TextStyle(color: context.colors.textMuted),
                     ),
                   )
                 : ListView.builder(
@@ -97,9 +97,7 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
                           title: Text(currencyName(context, c)),
                           subtitle: Text(
                             c.code,
-                            style: TextStyle(
-                              color: context.palette.secondaryText,
-                            ),
+                            style: TextStyle(color: context.colors.textMuted),
                           ),
                           trailing: selected ? const Icon(Icons.check) : null,
                           onTap: () => Navigator.of(context).pop(c),
@@ -121,14 +119,14 @@ class _SymbolBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
+    final colors = context.colors;
     return ExcludeSemantics(
       child: Container(
         width: 56,
         height: 40,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: palette.badgeBackground,
+          color: colors.surfaceRaised,
           borderRadius: BorderRadius.circular(8),
         ),
         child: FittedBox(
@@ -137,7 +135,7 @@ class _SymbolBox extends StatelessWidget {
             child: Text(
               symbol,
               style: TextStyle(
-                color: palette.badgeForeground,
+                color: colors.textMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -9,6 +9,7 @@ import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/engine/engine.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
@@ -118,6 +119,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
             child: Text(l10n.actionCancel),
           ),
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: context.colors.coral),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.actionDelete),
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kalan/core/design/colors.dart';
+import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -106,7 +106,7 @@ void main() {
       scaffold.backgroundColor ??
           Theme.of(tester.element(find.byType(Scaffold).last))
               .scaffoldBackgroundColor,
-      KalanColors.ink,
+      KalanColors.dark.bg,
     );
     final number = tester.widget<Text>(
       find.descendant(
@@ -114,6 +114,6 @@ void main() {
         matching: find.byType(Text),
       ),
     );
-    expect(number.style!.color, KalanColors.green);
+    expect(number.style!.color, KalanColors.dark.mintText);
   });
 }
