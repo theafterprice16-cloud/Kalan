@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalan: Uygulama Fikri ve Kimlik Dosyası</title>
+<style>
+:root{
+  --ink:#14213D; --green:#23B58E; --green-d:#127A5F; --amber:#F2A541; --coral:#E4572E;
+  --paper:#F7F5F0; --card:#FFFFFF; --smoke:#5F6880; --line:#E3DFD6; --ev:#E9F6F1; --inf:#FDF4E3;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+a{color:var(--green-d)}
+header.top{background:var(--ink);color:#fff;padding:22px 18px 16px}
+header.top .wrap{max-width:980px;margin:0 auto}
+header.top h1{margin:0 0 4px;font-size:26px;line-height:1.2;letter-spacing:-.01em}
+header.top p{margin:0;color:#C9D0DE;font-size:15px}
+.brandmark{display:inline-flex;align-items:center;gap:10px}
+.ring{width:34px;height:34px;border-radius:50%;flex:none;background:conic-gradient(var(--green) 0 25%,#3A4A6B 0 100%);position:relative}
+.ring:after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--ink)}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--ink);border-top:1px solid #26365C;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+nav.tabs .wrap{max-width:980px;margin:0 auto;padding:0 10px;display:flex;gap:2px}
+nav.tabs button{appearance:none;border:0;background:none;color:#C9D0DE;font:inherit;font-size:15px;padding:12px 12px;cursor:pointer;border-bottom:3px solid transparent}
+nav.tabs button[aria-selected="true"]{color:#fff;border-bottom-color:var(--green)}
+nav.tabs button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+main{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+section.tab{margin-bottom:40px}
+body.js section.tab{display:none}
+body.js section.tab.on{display:block}
+h2{font-size:23px;line-height:1.25;margin:8px 0 6px;letter-spacing:-.01em}
+h3{font-size:19px;margin:30px 0 8px;padding-top:10px;border-top:1px solid var(--line)}
+h4{font-size:16.5px;margin:20px 0 6px}
+p{margin:8px 0}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:5px 0}
+.lead{font-size:18px;color:#26365C}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
+.big{font-size:20px;font-weight:650;line-height:1.35}
+.ev,.inf{border-radius:8px;padding:9px 12px 9px 14px;margin:8px 0;position:relative}
+.ev{background:var(--ev);border-left:5px solid var(--green)}
+.inf{background:var(--inf);border-left:5px dashed var(--amber)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.06em;border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.tag.k{background:var(--green-d);color:#fff}
+.tag.c{background:#B36B00;color:#fff}
+.tag.w{background:var(--coral);color:#fff}
+a.ref{display:inline-block;font-size:12.5px;font-weight:700;text-decoration:none;background:#fff;border:1px solid var(--green-d);color:var(--green-d);border-radius:10px;padding:0 6px;margin:0 1px;line-height:1.5}
+a.ref:hover{background:var(--green-d);color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14.5px;color:var(--smoke);margin:10px 0 4px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:#EEF0F4;font-size:13.5px;letter-spacing:.02em}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.win{background:#E9F6F1}
+.muted{color:var(--smoke)}
+.small{font-size:14.5px}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.grid2{grid-template-columns:1fr 1fr}}
+.sw{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.sw div{flex:1 1 130px;border-radius:10px;border:1px solid var(--line);overflow:hidden;background:#fff;font-size:13.5px}
+.sw i{display:block;height:54px}
+.sw b{display:block;padding:6px 8px 0}
+.sw span{display:block;padding:0 8px 8px;color:var(--smoke)}
+.prompt{background:#0F1930;color:#E8ECF5;border-radius:10px;padding:14px;margin:8px 0;white-space:pre-wrap;word-break:break-word;font:14.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.copybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 2px}
+button.copy{appearance:none;border:0;border-radius:8px;background:var(--green-d);color:#fff;font:inherit;font-size:15px;font-weight:600;padding:9px 14px;cursor:pointer}
+button.copy:focus-visible{outline:3px solid var(--amber)}
+button.copy.ok{background:#0B5E48}
+button.copy.fail{background:var(--coral)}
+.copymsg{font-size:14.5px;color:var(--smoke)}
+ol.src{padding-left:0;list-style:none;counter-reset:s}
+ol.src li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px 9px 50px;position:relative;margin:8px 0;font-size:15px;word-break:break-word}
+ol.src li:before{content:counter(s);position:absolute;left:10px;top:9px;width:30px;text-align:center;font-weight:700;color:var(--green-d)}
+ol.src li.hit{outline:3px solid var(--amber)}
+ol.src .d{color:var(--smoke);font-size:13.5px}
+.toc{font-size:15px;columns:2;column-gap:24px;padding-left:20px}
+@media(max-width:560px){.toc{columns:1} body{font-size:16.5px} header.top h1{font-size:22px}}
+footer{max-width:980px;margin:0 auto;padding:0 16px 40px;color:var(--smoke);font-size:14px}
+@media print{nav.tabs{display:none} body.js section.tab{display:block} .prompt{color:#000;background:#fff;border:1px solid #999}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brandmark"><span class="ring" aria-hidden="true"></span><h1>Kalan</h1></div>
+  <p>Uygulama fikri, kanıtları ve kimlik dosyası · Hazırlanma tarihi: 12 Kasım 2026</p>
+</div></header>
+
+<nav class="tabs" aria-label="Bölümler"><div class="wrap" role="tablist">
+  <button role="tab" data-tab="ozet" aria-selected="true">Özet</button>
+  <button role="tab" data-tab="fikir" aria-selected="false">A · Uygulama Fikri</button>
+  <button role="tab" data-tab="kimlik" aria-selected="false">B · Kimlik</button>
+  <button role="tab" data-tab="isim" aria-selected="false">İsim</button>
+  <button role="tab" data-tab="logo" aria-selected="false">Logo Promptları</button>
+  <button role="tab" data-tab="varsayim" aria-selected="false">Varsayımlar</button>
+  <button role="tab" data-tab="kaynak" aria-selected="false">Kaynaklar</button>
+</div></nav>
+
+<main>
+<section class="tab on" id="ozet">
+<h2>Özet</h2>
+<div class="card">
+  <p class="big">Kalan, bütün taksitlerini ve "şimdi al, sonra öde" planlarını tek takvimde toplar ve her maaş döneminde paranın ne kadarının şimdiden söz verilmiş olduğunu, geriye ne kaldığını gösterir.</p>
+  <p>Banka bağlantısı ve hesap açma istemez; veriler telefonda kalır. iOS ve Android'de, Türkçe ve İngilizce tek sürüm olarak çıkar.</p>
+</div>
+
+<h3>Bu dosya nasıl okunur?</h3>
+<div class="legend">
+  <span><span class="tag k">KANIT</span> Bir kaynağa dayanan bilgi. Yanındaki numaraya dokununca Kaynaklar bölümündeki ilgili satıra gider.</span>
+  <span><span class="tag c">ÇIKARIM</span> Kanıtlardan benim çıkardığım sonuç, tahmin ya da öneri. Yanlış olabilir.</span>
+</div>
+<div class="ev"><span class="tag k">KANIT</span> Örnek: ABD'de bir ankete göre kullanıcıların %19'u yaklaşan ödemelerinin izini kaybettiğini söylüyor <a class="ref" href="#kaynak" data-s="5">5</a>.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Örnek: Bu yüzden asıl eksik "liste" değil, "bu maaştan ne kalacak" sorusunun cevabı.</div>
+
+<h3>Karar tek cümleyle</h3>
+<p>Dokuz problem adayı arasından <strong>çoklu sağlayıcı taksit görünürlüğü</strong> seçildi; çünkü ölçülmüş kanıtı en güçlü olan, ilk sürümü tek kişinin 150-1.000 dolarla çıkarabileceği ve lisans gerektirmeyen aday bu. Fitness tarafındaki adaylar (antrenman takibi, kalori, adaptif TDEE, protein maliyeti) şikâyetleri gerçek olduğu hâlde elendi, çünkü hepsinde boşluk bağımsız uygulamalarla çoktan dolmuş.</p>
+
+<h3>Bilmen gereken üç zayıf nokta</h3>
+<ul>
+  <li><strong>Çekirdek özellik İngilizce pazarda ücretsiz veriliyor.</strong> En yakın rakip Frizzbee sınırsız plan takibini ve hatırlatmayı ücretsiz sunuyor <a class="ref" href="#kaynak" data-s="15">15</a>. Kalan'ın farkı takip listesi değil, "kalan" sayısı ve satın almadan önce deneme olmak zorunda.</li>
+  <li><strong>"İnsanlar buna para öder" kanıtı dolaylı.</strong> Önceki en büyük deneme (Cushion) 200 binden fazla ödeyen kullanıcıya ulaştı ama geliri yalnızca takipten gelmiyordu ve şirket kapandı <a class="ref" href="#kaynak" data-s="11">11</a>.</li>
+  <li><strong>Türkiye tarafında ölçülmüş anket bulamadım.</strong> Oradaki kanıt yapısal (borç büyüklüğü) ve niteliksel (yirmi yıldır tablo hazırlayan kullanıcılar); ABD'deki gibi yüzdeler yok.</li>
+</ul>
+<p>Ayrıntılar <a href="#fikir" data-go="fikir">A · Uygulama Fikri</a> bölümünde, bana sormadan verdiğim kararlar <a href="#varsayim" data-go="varsayim">Varsayımlar</a> bölümünde.</p>
+
+<h3>Cevaplarından izlenen kısıtlar</h3>
+<div class="tw"><table>
+<tr><th>Cevabın</th><th>Fikirdeki karşılığı</th></tr>
+<tr><td>Tek başına, kod biliyor, AI araçları kullanacak</td><td>Sunucusu neredeyse olmayan, cihaz içi çalışan dar kapsamlı uygulama</td></tr>
+<tr><td>Haftada 15-30 saat</td><td>Mağazaya çıkış için yaklaşık 12 haftalık plan</td></tr>
+<tr><td>150-1.000 dolar, Mac var, hesaplar açılacak</td><td>İlk 6 ay için tahmini 220-330 dolar sabit gider; kalan pay küçük reklam testine</td></tr>
+<tr><td>Şirket yok, bireysel başlangıç</td><td>Lisans, ödeme aracılığı ya da banka bağlantısı gerektirmeyen ürün</td></tr>
+<tr><td>iOS + Android</td><td>Tek kod tabanı; iki mağaza</td></tr>
+<tr><td>Türkiye + global, başlangıcı ben seçerim</td><td>Tek sürüm iki dil; ilk doğrulama Türkiye'de, gelir odağı İngilizce pazarlar</td></tr>
+<tr><td>Yan gelir; abonelik ya da tek seferlik</td><td>Ücretsiz çekirdek + Pro (aylık, yıllık ve ömür boyu seçenekleri); reklam yok</td></tr>
+<tr><td>En derin alanlar: fitness ve kişisel finans</td><td>Fikir finans cevabındaki "harcama ve bütçe takibi" (kredi kartı/taksit takibi) kaleminden çıkıyor</td></tr>
+<tr><td>Barista, kahve, kafe, hizmet çalışanı konuları yasak</td><td>Hiçbiri yok</td></tr>
+<tr><td>Orta karmaşıklık, ücretli AI olabilir</td><td>Hesapsız; AI yalnızca ekran görüntüsünden plan okumada</td></tr>
+<tr><td>Yüzsüz içerik, topluluk, mağaza araması</td><td>Ekran kaydı videoları, forum/Reddit paylaşımları, iki dilde mağaza metni</td></tr>
+</table></div>
+</section>
+<section class="tab" id="fikir">
+<h2>Bölüm A · Uygulama Fikri</h2>
+<p class="lead">Kalan: taksitlerini ve "sonra öde" planlarını tek takvimde toplayan, her maaş döneminde geriye ne kaldığını gösteren, banka bağlantısı istemeyen mobil uygulama.</p>
+<ol class="toc">
+  <li>Problem ve kanıtları</li><li>Hedef kullanıcı</li><li>Çözüm</li><li>Ana kullanıcı akışı</li><li>Temel özellikler</li><li>İlk sürüm ve sonraya kalanlar</li><li>Rakipler ve farkımız</li><li>Gelir modeli</li><li>Riskler ve zayıf noktalar</li><li>Yol haritası</li><li>Seçim gerekçesi ve elenen adaylar</li>
+</ol>
+
+<h3>1. Problem ve kanıtları</h3>
+<p><strong>Problem:</strong> Taksitli ödeme artık tek bir yerde durmuyor. Bir kişinin aynı anda birkaç sağlayıcıda ya da birkaç kartta, farklı günlerde çekilen onlarca küçük ödemesi oluyor ve hiçbir ekran bunların toplamını, hele ki "bu maaştan ne kadarı gitti bile" sorusunun cevabını göstermiyor. Sonuç: kaçan ödeme, gecikme ücreti, hesapta para kalmadığı için geri dönen çekim ve ay sonunda beklenmedik bir toplam.</p>
+
+<h4>İngilizce konuşulan pazarlar ("buy now, pay later", kısaca BNPL)</h4>
+<div class="ev"><span class="tag k">KANIT</span> LendingTree'nin Mart 2026 anketine göre BNPL kullanıcılarının %47'si son bir yılda en az bir ödemeyi geç yaptı; oran bir yıl öncesine göre 6, iki yıl öncesine göre 13 puan yükseldi. Aynı ankette kullanıcıların %54'ü bu krediler olmadan geçinemeyeceğini söylüyor <a class="ref" href="#kaynak" data-s="1">1</a> <a class="ref" href="#kaynak" data-s="2">2</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> PYMNTS Intelligence'ın ABD'yi temsil eden Aralık 2025 anketinde BNPL kullanıcılarının %23'ü bir sonraki ödeme tarihinden, %27'si kaç ödemesi kaldığından emin değil <a class="ref" href="#kaynak" data-s="3">3</a>. Kabaca yarısı bu bilgileri en azından ara sıra takip etmekte zorlanıyor <a class="ref" href="#kaynak" data-s="4">4</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Motley Fool Money'nin 2025 araştırmasında kullanıcıların %19'u yaklaşan ödemelerin izini kaybettiğini söylüyor; ödemelerini önceden planlayanlar yalnızca %47 <a class="ref" href="#kaynak" data-s="5">5</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> ABD tüketici kurumu CFPB'nin 2022 verisinde borçluların beşte üçünden fazlası yıl içinde aynı anda birden çok BNPL kredisi taşıdı, üçte biri birden çok sağlayıcıdan borçlandı. Fed'in 2025 hane anketinde geç ödeyenlerin %64'üne ek ücret yansıdı; tüm kullanıcıların %11'inde bir BNPL çekimi banka hesabında bakiye yetersizliği ücretine yol açtı <a class="ref" href="#kaynak" data-s="2">2</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> LegalShield'ın çalışmasında kullanıcıların %67'si aynı anda birden fazla BNPL kredisi ödüyor, %49'u en az bir ödeme kaçırmış <a class="ref" href="#kaynak" data-s="6">6</a>. Tek kaynak; yöntem ayrıntısını göremedim.</div>
+<div class="ev"><span class="tag k">KANIT</span> Sorunun yapısal nedeni: her sağlayıcının uygulaması yalnızca kendi planlarını gösteriyor. Money Crashers bunu "no app shows the other two" diye özetliyor <a class="ref" href="#kaynak" data-s="7">7</a>; iki rakip de aynı tespiti yapıyor <a class="ref" href="#kaynak" data-s="15">15</a> <a class="ref" href="#kaynak" data-s="16">16</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Büyük bütçe uygulamaları bu boşluğu kapatmıyor. Rocket Money'nin geri bildirim panosunda bir kullanıcı, banka bağlantısıyla eklenemeyen Affirm, Afterpay, Zip ve Klarna gibi hesapları elle girebilmeyi istiyor <a class="ref" href="#kaynak" data-s="9">9</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Sorun büyüyor: beş büyük sağlayıcının verdiği kredi adedi 2019'da 19,8 milyondan 2023'te 335,8 milyona çıktı; Fed bu borçların kredi raporlarında bir kör nokta oluşturduğunu söylüyor <a class="ref" href="#kaynak" data-s="10">10</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Sahadan bir ses: bir mali koç, danışanlarından birinin 22 ayrı BNPL hesabı olduğunu fark ettiğini anlatıyor ve ilk iş olarak her maaştan kaç ödemenin çıktığının netleştirilmesini öneriyor <a class="ref" href="#kaynak" data-s="8">8</a>.</div>
+
+<h4>Türkiye (kredi kartı taksitleri ve alışveriş kredileri)</h4>
+<div class="ev"><span class="tag k">KANIT</span> BDDK verilerine göre bireysel kredi kartı borcu Ekim 2026'da 3,53 trilyon TL ile rekor kırdı; bunun 1,32 trilyon TL'si taksitli harcamalardan oluşuyor <a class="ref" href="#kaynak" data-s="19">19</a>. Bireysel kredi borcu olan kişi sayısı 43,6 milyon <a class="ref" href="#kaynak" data-s="20">20</a>. Ocak 2026'da ödenemeyen kart borçlarına 48 aya kadar yapılandırma imkânı tanındı <a class="ref" href="#kaynak" data-s="21">21</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Bankalar gelecek dönem taksitlerini yalnızca kendi kartı için, kendi uygulamasında gösteriyor <a class="ref" href="#kaynak" data-s="28">28</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Kullanıcılar bu işi yirmi yıldır kendi tablolarıyla çözmeye çalışıyor. 2007 dolaylarında bir Excel forumunda kullanıcı, aradığı kart takip aracını bulamadığını ve çoğunun "taksitleri diğer aylara otomatik aktarmıyor" olduğunu yazıyor <a class="ref" href="#kaynak" data-s="22">22</a>. 2022'de başka bir forumda hesap kesim gününe göre taksit planı kuran formül tartışılıyor <a class="ref" href="#kaynak" data-s="23">23</a>. Bir kişinin hazırladığı kart takip tablosu 5.740 kez indirilmiş <a class="ref" href="#kaynak" data-s="24">24</a>. 2026'da hâlâ yeni şablonlar yayımlanıyor <a class="ref" href="#kaynak" data-s="25">25</a> <a class="ref" href="#kaynak" data-s="56">56</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Taksidin ekstreye ve limite nasıl yansıdığı forumlarda tekrar tekrar soruluyor: Ekim 2026'da bir kullanıcı ekstresinin neden beklediğinden düşük geldiğini çözemiyor <a class="ref" href="#kaynak" data-s="26">26</a>; daha eski başlıklarda aynı şaşkınlık var <a class="ref" href="#kaynak" data-s="55">55</a>. Taksitli alışverişin iadesi geciktiğinde ilk taksidi yine de ödemek zorunda kalanlar Ekşi Sözlük'te anlatıyor <a class="ref" href="#kaynak" data-s="27">27</a>.</div>
+<div class="ev"><span class="tag k">KANIT</span> Aynı zorluk kart taksitlerinde ABD'de de ölçülmüş: kredi kartı taksit planı kullananların %35'i vadeyi takip etmeyi zor buluyor; tek çekimde bu oran %20 <a class="ref" href="#kaynak" data-s="3">3</a>.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> İki pazarda sorun aynı biçimde: borç küçük parçalara bölünmüş, parçalar farklı yerlerde ve farklı günlerde. Türkiye'de sağlayıcı yerine kart, iki haftalık ödeme yerine ekstre döngüsü var. Bu yüzden tek bir çekirdek (plan, ödeme takvimi, dönem) iki pazara da hizmet edebilir.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Türkiye kanıtının zayıf yanı: "takip edemiyorum" diyenlerin oranını veren bir anket bulamadım. Elimdeki, borcun büyüklüğü ve insanların uzun süredir kendi çözümünü üretmesi. Bu, ihtiyacın var olduğunu gösterir, büyüklüğünü göstermez.</div>
+
+<h3>2. Hedef kullanıcı</h3>
+<div class="grid2">
+  <div class="card"><h4 style="margin-top:0">İngilizce pazarlar</h4><p>22-40 yaş, aynı anda üç ya da daha fazla "sonra öde" planı olan, maaşı iki haftada bir ya da ayda bir yatan, banka hesabını üçüncü bir uygulamaya bağlamak istemeyen kişi.</p><div class="ev small"><span class="tag k">KANIT</span> Geç ödeme genç kullanıcılarda daha yaygın: Z kuşağında %39, Y kuşağında %35 <a class="ref" href="#kaynak" data-s="5">5</a>.</div></div>
+  <div class="card"><h4 style="margin-top:0">Türkiye</h4><p>25-45 yaş, iki ya da daha fazla kredi kartı kullanan, sürekli beş ve üzeri açık taksidi olan, maaşlı çalışan; ay başında "bu ay kartlara toplam ne ödeyeceğim, elime ne kalacak" diye hesap yapan kişi.</p><div class="inf small"><span class="tag c">ÇIKARIM</span> Bu profil kendi çevrende kolayca bulunur; ilk görüşmeleri burada yapabilirsin.</div></div>
+</div>
+<p><strong>Kim ödeyecek, neden:</strong> Kullanıcının kendisi. Tek bir gecikme ücreti ya da bakiye yetersizliği ücreti yıllık abonelikten pahalıya gelebildiği için.</p>
+<div class="ev"><span class="tag k">KANIT</span> Klarna'nın ABD'de dört ödemeli planlarda ödeme başına 7 dolara kadar gecikme ücreti aldığı yazılıyor (ikincil kaynak) <a class="ref" href="#kaynak" data-s="51">51</a>.</div>
+
+<h3>3. Çözüm</h3>
+<p>Kalan tek bir soruya cevap verir: <strong>"Bu maaştan, söz verdiklerim çıktıktan sonra bana ne kalıyor?"</strong></p>
+<ul>
+  <li>Bütün planlar tek yerde: "sonra öde" planları, kredi kartı taksitleri, alışveriş kredileri.</li>
+  <li>Her maaş dönemi için iki sayı: <em>söz verilmiş</em> (o dönemde çekilecek toplam) ve <em>kalan</em> (maaş eksi söz verilmiş).</li>
+  <li>Satın almadan önce deneme: yeni bir planı eklemeden, önümüzdeki dönemlere etkisini gösterir.</li>
+  <li>Ekran görüntüsünden plan ekleme: sağlayıcının ya da bankanın ekranını paylaş, alanlar dolu gelsin, onayla.</li>
+  <li>Hesap yok, banka bağlantısı yok, reklam yok; veriler telefonda.</li>
+</ul>
+
+<h3>4. Ana kullanıcı akışı</h3>
+<ol>
+  <li><strong>Kurulum (1 dakika):</strong> Maaş sıklığı ve günü sorulur (aylık, iki haftada bir, haftalık). Net tutar isteğe bağlıdır; girilmezse yalnızca "söz verilmiş" gösterilir.</li>
+  <li><strong>İlk plan:</strong> Şablon seçilir (4 ödemeli plan, aylık taksit, kredi kartı taksidi) ya da ekran görüntüsü paylaşılır. Kredi kartı için hesap kesim ve son ödeme günü bir kez girilir.</li>
+  <li><strong>Ana ekran:</strong> İçinde bulunulan dönemin "kalan" sayısı; altında o dönemde çekilecek ödemeler tarih sırasıyla.</li>
+  <li><strong>İleri bakış:</strong> Önümüzdeki dönemler çubuk olarak; sıkışık dönemler işaretli.</li>
+  <li><strong>Dene:</strong> "Şu tutarı şu kadar taksitle alırsam?" sorusu; hangi dönemlerin sıkıştığı görünür. Kaydetmeden çıkılabilir.</li>
+  <li><strong>Hatırlatma:</strong> Çekimden iki gün önce ve çekim günü sabahı bildirim; "ödendi" diye işaretlenir.</li>
+  <li><strong>Kapanış:</strong> Biten plan arşive gider; uygulama bir sonraki dönemde ne kadarın serbest kaldığını söyler.</li>
+</ol>
+
+<h3>5. Temel özellikler</h3>
+<div class="tw"><table>
+<tr><th>Özellik</th><th>Ne yapar</th><th>Dayandığı bulgu</th></tr>
+<tr><td>Tek takvim</td><td>Bütün sağlayıcı ve kartlardaki ödemeleri tek zaman çizgisinde gösterir</td><td>Her uygulama yalnız kendi planını gösteriyor <a class="ref" href="#kaynak" data-s="7">7</a></td></tr>
+<tr><td>"Kalan" sayısı</td><td>Maaş dönemi başına söz verilmiş ve kalan tutar</td><td>Koçun "her maaştan kaç ödeme çıkıyor" önerisi <a class="ref" href="#kaynak" data-s="8">8</a>; çekimlerin %11 kullanıcıda bakiye yetersizliği ücretine yol açması <a class="ref" href="#kaynak" data-s="2">2</a></td></tr>
+<tr><td>Dene</td><td>Yeni planın etkisini kaydetmeden gösterir</td><td>Kullanıcıların yarıdan fazlasının aynı anda birden çok kredi taşıması <a class="ref" href="#kaynak" data-s="2">2</a></td></tr>
+<tr><td>Ekran görüntüsünden ekleme</td><td>Görüntüdeki plan bilgilerini okur, onaya sunar</td><td>Elle girişin bırakma nedeni olması (çıkarım); bir rakibin benzer özelliği <a class="ref" href="#kaynak" data-s="16">16</a></td></tr>
+<tr><td>Ekstre döngüsü</td><td>Kart taksidini hesap kesim gününe göre doğru aya yerleştirir</td><td>Forumlardaki hesap kesim tartışmaları <a class="ref" href="#kaynak" data-s="23">23</a> <a class="ref" href="#kaynak" data-s="26">26</a></td></tr>
+<tr><td>Hatırlatma</td><td>Çekimden önce bildirim</td><td>Kullanıcıların %23'ünün sonraki ödeme tarihinden emin olmaması <a class="ref" href="#kaynak" data-s="3">3</a></td></tr>
+<tr><td>İade bekliyor işareti</td><td>İade edilen ürünün planını ayrı tutar, iade gelene kadar uyarır</td><td>İade gecikince taksidi ödemek zorunda kalanlar <a class="ref" href="#kaynak" data-s="27">27</a></td></tr>
+</table></div>
+
+<h3>6. İlk sürümün kapsamı ve sonraya kalanlar</h3>
+<div class="grid2">
+  <div class="card"><h4 style="margin-top:0">İlk sürümde var</h4>
+    <ul><li>Plan ekleme: üç şablon ve elle giriş</li><li>Kart tanımı: hesap kesim ve son ödeme günü</li><li>Maaş dönemi ve "kalan" hesabı</li><li>Dönem takvimi ve ileri bakış</li><li>Dene (tek plan simülasyonu)</li><li>Yerel bildirimler</li><li>Ekran görüntüsünden ekleme (Pro)</li><li>Türkçe ve İngilizce; TL, dolar, sterlin, euro</li><li>Dosyaya dışa aktarma ve dosyadan geri yükleme</li></ul></div>
+  <div class="card"><h4 style="margin-top:0">Bilerek sonraya bırakıldı</h4>
+    <ul><li>Ana ekran bileşeni (widget) ve saat uygulaması</li><li>Bulut yedeği ve cihazlar arası eşitleme</li><li>Ortak hane görünümü</li><li>E-posta yönlendirerek otomatik içe aktarma</li><li>Faizli planlarda faiz hesabı (ilk sürümde tutarı kullanıcı girer)</li><li>Gider kategorileri, bütçe, raporlar</li><li>Başka diller ve ülkeye özel şablonlar</li></ul></div>
+</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Teknik öneri: tek kod tabanı (Flutter varsaydım), cihaz içi veritabanı, abonelik için hazır bir satın alma servisi, AI çağrıları için anahtarı saklayan küçük bir ara sunucu. Ekran görüntüleri sunucuda saklanmaz. Sunucu tarafı bu kadar küçük olduğu için aylık gider düşük kalır.</div>
+
+<h3>7. Rakipler ve farkımız</h3>
+<div class="tw"><table>
+<tr><th>Rakip</th><th>Ne sunuyor</th><th>Fiyat</th><th>Eksik kalan (okuyabildiğim sayfalara göre)</th></tr>
+<tr><td><strong>Frizzbee</strong> <a class="ref" href="#kaynak" data-s="15">15</a><br><span class="muted small">doğrudan, en güçlü</span></td><td>Yalnız BNPL. iOS, Android, web. E-posta yönlendirmeyle otomatik içe aktarma, hatırlatma, ücret itiraz şablonları, sağlık puanı</td><td>Çekirdek ücretsiz; Pro 3,99 $/ay ya da 29,99 $/yıl</td><td>Hesap açmak ve e-postaları sunucularına yönlendirmek gerekiyor. Maaş dönemi görünümü, satın almadan önce deneme ve kredi kartı taksidi yok</td></tr>
+<tr><td><strong>Finny</strong> <a class="ref" href="#kaynak" data-s="16">16</a><br><span class="muted small">dolaylı</span></td><td>Genel gider takipçisi; sağlayıcı ekranından ödemeyi okuyan özellik; banka bağlantısı yok</td><td>Ücretsiz indirilir; ayrıntı bulunamadı</td><td>Asıl işi gider takibi; taksit takvimi bir yan özellik</td></tr>
+<tr><td><strong>PayStreak</strong> <a class="ref" href="#kaynak" data-s="17">17</a><br><span class="muted small">doğrudan, küçük</span></td><td>Taksit, kredi, abonelik ve kişisel borçlar; takvim; iCloud eşitleme</td><td>Ücretsiz + uygulama içi satın alma; hatırlatma Pro'da</td><td>Yalnız iPhone. Mağazada tek puan var</td></tr>
+<tr><td><strong>Subio</strong> <a class="ref" href="#kaynak" data-s="18">18</a><br><span class="muted small">dolaylı</span></td><td>Abonelik takipçisi içinde BNPL bölümü</td><td>Bulunamadı</td><td>Odak abonelikler</td></tr>
+<tr><td><strong>Monarch, Copilot, Rocket Money</strong><br><span class="muted small">dolaylı, büyük</span></td><td>Banka akışına bağlı bütçe uygulamaları</td><td>Ücretli abonelik</td><td>BNPL sağlayıcıları banka gibi bağlanamıyor <a class="ref" href="#kaynak" data-s="9">9</a>; işlemleri ancak çekildikten sonra etiketliyorlar <a class="ref" href="#kaynak" data-s="63">63</a></td></tr>
+<tr><td><strong>Sağlayıcı ve banka uygulamaları</strong></td><td>Kendi planlarını ve hatırlatmalarını gösterir</td><td>Ücretsiz</td><td>Diğer sağlayıcıları ve kartları göstermez <a class="ref" href="#kaynak" data-s="7">7</a> <a class="ref" href="#kaynak" data-s="28">28</a></td></tr>
+<tr><td><strong>Kartly, Akrep AI, Benim Cüzdanım, ParaPlus</strong> <a class="ref" href="#kaynak" data-s="29">29</a> <a class="ref" href="#kaynak" data-s="30">30</a> <a class="ref" href="#kaynak" data-s="31">31</a> <a class="ref" href="#kaynak" data-s="32">32</a><br><span class="muted small">Türkiye</span></td><td>Kart borcu, son ödeme günü, kredi ve taksit takibi; bazıları genel bütçe uygulaması</td><td>Çoğu ücretsiz</td><td>Kartly'de henüz puan yok. Tanıtımlarında maaş dönemine göre "kalan" ve deneme özelliği geçmiyor. Bazıları yalnız iPhone</td></tr>
+<tr><td><strong>Tablo ve Notion şablonları</strong> <a class="ref" href="#kaynak" data-s="24">24</a> <a class="ref" href="#kaynak" data-s="25">25</a></td><td>Kendin kur</td><td>Ücretsiz</td><td>Bildirim yok, telefonda kullanımı zahmetli, bakım kullanıcıda</td></tr>
+</table></div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> <strong>Farkımız dört noktada:</strong> (1) liste yerine tek sayı: maaş döneminin "kalan"ı; (2) satın almadan önce deneme; (3) "sonra öde" planları ile kredi kartı taksitleri aynı takvimde, ekstre döngüsüyle; (4) hesapsız ve cihaz içi. Bu farklar rakip sayfalarında görmediklerimden çıkarılmıştır; rakiplerin içinde olup tanıtılmayan özellikler olabilir. İlk iş olarak Frizzbee ve PayStreak'i kendin kurup dene.</div>
+<div class="ev"><span class="tag k">KANIT</span> <strong>Daha önce denendi mi?</strong> Evet. Cushion 2020'de bu işe döndü, e-postaları tarayarak planları topladı ve 21,6 milyon dolar yatırım aldı. 1 milyondan fazla kullanıcıya, 200 binden fazla ödeyen müşteriye ve on ayda 3 milyon dolar yıllık gelire ulaştı; 2024 sonunda kapandı <a class="ref" href="#kaynak" data-s="11">11</a> <a class="ref" href="#kaynak" data-s="12">12</a> <a class="ref" href="#kaynak" data-s="58">58</a>. Kurucu gerekçeyi "didn't reach the scale needed to sustain the business" diye açıkladı <a class="ref" href="#kaynak" data-s="12">12</a>; büyük bir çıkışa giden yolda olmadıklarını da söyledi <a class="ref" href="#kaynak" data-s="13">13</a>. Kullanıcı hesapları 15 Aralık 2024'te silindi ve kullanıcılara genel bütçe uygulamaları önerildi <a class="ref" href="#kaynak" data-s="14">14</a>.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Cushion'ın hikâyesi iki şey söylüyor. Talep vardı, ama yatırımcı beklentisini karşılayacak kadar büyük değildi. Tek kişilik bir yan gelir için gereken ölçek bunun çok altında. Öte yandan Cushion'ın geliri ücret iadesi pazarlığı ve fatura ödeme gibi başka ürünlerden de geliyordu; "yalnızca takibe para ödenir" sonucunu buradan çıkaramazsın.</div>
+
+<h3>8. Gelir modeli</h3>
+<div class="tw"><table>
+<tr><th>Katman</th><th>İçerik</th><th>Başlangıç fiyatı (deneyerek ayarlanacak)</th></tr>
+<tr><td>Ücretsiz</td><td>4 açık plana kadar, içinde bulunulan dönemin "kalan" sayısı, hatırlatma, elle ekleme</td><td>0</td></tr>
+<tr><td>Pro · aylık</td><td rowspan="3">Sınırsız plan, ileri dönemler, Dene, ekran görüntüsünden ekleme, dışa aktarma; ileride widget ve yedek</td><td>2,99 $ · Türkiye 79,99 TL</td></tr>
+<tr><td>Pro · yıllık</td><td>19,99 $ · Türkiye 499,99 TL</td></tr>
+<tr><td>Pro · ömür boyu</td><td>39,99 $ · Türkiye 999,99 TL</td></tr>
+</table></div>
+<div class="ev"><span class="tag k">KANIT</span> Fiyat çıpaları: Frizzbee Pro 3,99 $/ay ve 29,99 $/yıl <a class="ref" href="#kaynak" data-s="15">15</a>. Türkiye App Store'da MyFitnessPal aylık 134,99 TL <a class="ref" href="#kaynak" data-s="49">49</a>, bir bütçe uygulamasının tek seferlik Pro sürümü 229,99 TL <a class="ref" href="#kaynak" data-s="54">54</a>.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Fiyatlar benim önerim; kanıtlanmış değil. Rakibin altında kalmasının nedeni hedef kitlenin nakit sıkıntısı. Ömür boyu seçeneği, aboneliğe mesafeli kullanıcılar için ve senin "tek seferlik de olur" cevabına dayanıyor.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Kaba hesap: yıllık planda 300 ödeyen kullanıcı yaklaşık 6.000 dolar brüt eder; mağaza komisyonundan sonra ayda 400 dolar civarı kalır. Ayda 1.000 doların üstü için yaklaşık 750-1.000 ödeyen kullanıcı gerekir. Ücretsizden ücretliye geçiş oranı bilinmiyor; yüzde 2-4 varsayarsan bu 20-50 bin kurulum demek. Bu, yan gelir hedefine ulaşılabilir ama garantisi olmayan bir yol.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Tahmini ilk 6 ay gideri: Apple geliştirici hesabı 99 $, Google Play 25 $, alan adı 12-15 $, AI ve ara sunucu ayda 5-25 $. Toplam 220-330 $. Bütçenin kalanı (yaklaşık 650-750 $) gerekirse ikon rötuşuna ya da küçük bir mağaza içi arama reklamı denemesine ayrılabilir. Reklam denemesi isteğe bağlıdır; pazarlama tercihlerin arasında yoktu, plan onsuz da işler.</div>
+
+<h3>9. Riskler ve zayıf noktalar</h3>
+<div class="tw"><table>
+<tr><th>Risk</th><th>Neden ciddi</th><th>Ne yapılabilir</th></tr>
+<tr><td><span class="tag w">YÜKSEK</span> Çekirdek özellik rakipte ücretsiz</td><td>Frizzbee sınırsız takibi ücretsiz veriyor <a class="ref" href="#kaynak" data-s="15">15</a>. "Bir takipçi daha" olursan ödeme duvarı tutmaz</td><td>Ücretli değeri "kalan" ve "dene" üstüne kur; görüşmelerde özellikle bunu sına</td></tr>
+<tr><td><span class="tag w">YÜKSEK</span> Ödeme isteği kanıtı dolaylı</td><td>Cushion'ın geliri karışık kaynaklıydı <a class="ref" href="#kaynak" data-s="11">11</a>; kullanıcıların yarısından fazlası zaten geçinmekte zorlanıyor <a class="ref" href="#kaynak" data-s="1">1</a></td><td>Kod yazmadan önce ön satış ya da bekleme listesiyle ölç; düşük fiyat ve ömür boyu seçeneği</td></tr>
+<tr><td><span class="tag w">ORTA</span> Türkiye kanıtı niteliksel</td><td>Ölçülmüş anket yok; Türkiye'de ödeme isteği düşük olabilir</td><td>İlk 10 görüşmeyi Türkiye'de yap; sonuç zayıfsa pazarlamayı İngilizceye kaydır</td></tr>
+<tr><td><span class="tag w">ORTA</span> İngilizce pazarı içeriden bilmiyorsun</td><td>Cevaplarında BNPL kullanımı yok; Türkiye'deki taksit deneyimin birebir aynı değil</td><td>Yayından önce en az 5 İngilizce konuşan kullanıcıyla görüş; sağlayıcı uygulamalarının ekranlarını incele</td></tr>
+<tr><td><span class="tag w">ORTA</span> Elle giriş yükü</td><td>Plan girmek zahmetliyse kullanıcı ikinci hafta bırakır</td><td>Şablonla 20 saniyede ekleme hedefi; ekran görüntüsünden ekleme</td></tr>
+<tr><td><span class="tag w">ORTA</span> Platformların boşluğu kapatması</td><td>Kredi büroları BNPL verisini toplamaya başladı; hangi sağlayıcının ne zaman raporladığı konusunda kaynaklar çelişiyor <a class="ref" href="#kaynak" data-s="52">52</a> <a class="ref" href="#kaynak" data-s="53">53</a>. Bir kredi notu uygulaması ileride bütün planları gösterebilir</td><td>Değeri listede değil, maaş dönemi hesabında ve gizlilikte tut</td></tr>
+<tr><td><span class="tag w">ORTA</span> Ekran görüntüsü okuma hatası</td><td>Yanlış tutar ya da tarih güveni bitirir</td><td>Her zaman onay ekranı; emin olunmayan alanı boş bırak</td></tr>
+<tr><td><span class="tag w">DÜŞÜK</span> Mağaza ve hukuk</td><td>Finans kategorisinde ek beyanlar istenebilir; marka adlarının kullanımı sınırlı</td><td>Ödeme aracılığı ve kredi teklifi yok; sağlayıcı adları yalnız düz metin, logo yok; başlıkta marka adı yok</td></tr>
+<tr><td><span class="tag w">DÜŞÜK</span> Kişisel motivasyon</td><td>Fitness kadar tutkun olduğun bir konu olmayabilir</td><td>Kendi kartlarınla kendin kullan; iki ay sonra hâlâ açıyor musun, bak</td></tr>
+</table></div>
+
+<h3>10. Yol haritası</h3>
+<div class="tw"><table>
+<tr><th>Zaman</th><th>İş</th><th>Çıktı ve eşik</th></tr>
+<tr><td>Hafta 0-1</td><td>Doğrulama: 10 görüşme (5 Türkiye, 5 İngilizce), rakipleri kurup deneme, tek sayfalık tanıtım ve bekleme listesi</td><td>En az 6 kişi bu işi şu an tablo, not ya da ezberle yapıyorsa devam. Değilse kısa listedeki ikinci adaya dön</td></tr>
+<tr><td>Hafta 1</td><td>İsim, alan adı ve marka kontrolü; mağaza hesapları</td><td>Hesaplar açık; isim kesinleşmiş</td></tr>
+<tr><td>Hafta 2-5</td><td>Çekirdek: plan, kart, dönem modeli; şablonlar; takvim; "kalan" hesabı; bildirimler</td><td>Kendi kartlarınla günlük kullanılabilir sürüm</td></tr>
+<tr><td>Hafta 6-7</td><td>Dene; ekran görüntüsünden ekleme; Pro satın alma; iki dil</td><td>Özellikleri tamamlanmış sürüm</td></tr>
+<tr><td>Hafta 8-10</td><td>Google Play kapalı testi ve iOS test dağıtımı; geri bildirim; mağaza görselleri; gizlilik metni</td><td>12 test kullanıcısı 14 gün boyunca kayıtlı</td></tr>
+<tr><td>Hafta 11-12</td><td>İki mağazada yayın</td><td>Yayında</td></tr>
+<tr><td>Ay 4-6</td><td>Yüzsüz kısa videolar (ekran kaydı), forum ve Reddit paylaşımları, mağaza metni denemeleri, fiyat denemesi, widget</td><td>Karar noktası: 8 hafta sonunda 30. gün tutunması %15'in altındaysa ya da 500 kurulumda 10'dan az ödeyen varsa yönü gözden geçir</td></tr>
+</table></div>
+<div class="ev"><span class="tag k">KANIT</span> Google Play'de 13 Kasım 2023'ten sonra açılan kişisel geliştirici hesapları, üretime çıkmadan önce en az 12 test kullanıcısıyla 14 gün kesintisiz kapalı test yapmak zorunda <a class="ref" href="#kaynak" data-s="33">33</a>. Kural Aralık 2024'te 20 kişiden 12'ye indirildi <a class="ref" href="#kaynak" data-s="57">57</a>. Bu yüzden plana üç hafta eklendi.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Eşikler (6 kişi, %15, 10 ödeyen) benim koyduğum başlangıç değerleridir; amaçları kararı duyguya değil sayıya bağlamak.</div>
+
+<h3>11. Seçim gerekçesi ve elenen adaylar</h3>
+<p>Aday listesi hafızadan değil, araştırmada rastlanan şikâyetlerden kuruldu. Kriterler ve ağırlıklar puanlamadan önce sabitlendi.</p>
+<div class="tw"><table>
+<tr><th>Kriter</th><th class="n">Ağırlık</th><th>1 puan</th><th>5 puan</th></tr>
+<tr><td>Acı ve sıklık</td><td class="n">20</td><td>Seyrek, küçük rahatsızlık</td><td>Sık yaşanan, parası ya da sağlığı etkileyen</td></tr>
+<tr><td>Kanıt gücü</td><td class="n">20</td><td>Tek anekdot</td><td>Birden çok bağımsız, ölçülmüş kaynak</td></tr>
+<tr><td>Kim, neden öder</td><td class="n">15</td><td>Belirsiz ya da reklam şart</td><td>Ödeyen belli, ödeme örneği var</td></tr>
+<tr><td>Mevcut çözümlerdeki boşluk</td><td class="n">15</td><td>Doymuş, ücretsiz iyi seçenekler var</td><td>Ciddi çözüm yok</td></tr>
+<tr><td>Cevaplarına uygunluk</td><td class="n">15</td><td>Alan dışı ya da kısıt ihlali</td><td>Derin bildiğin alan, bütün kısıtlara uygun</td></tr>
+<tr><td>İlk sürüm yapılabilirliği</td><td class="n">15</td><td>Ekip, veri ya da lisans ister</td><td>Tek kişi, 3 ay, 1.000 dolar altı</td></tr>
+</table></div>
+<p class="small muted">Ek kural (yine önceden kondu): herhangi bir kriterde 1 alan aday kısa listeye giremez. Amaç, sevilen ama doymuş bir pazarın yüksek toplam puanla öne geçmesini engellemek.</p>
+<div class="tw"><table>
+<tr><th>Aday</th><th class="n">Acı</th><th class="n">Kanıt</th><th class="n">Ödeme</th><th class="n">Boşluk</th><th class="n">Uygunluk</th><th class="n">Yapım</th><th class="n">Toplam /100</th><th>Sonuç</th></tr>
+<tr class="win"><td><strong>A. Taksit ve "sonra öde" takvimi</strong></td><td class="n">4</td><td class="n">5</td><td class="n">3</td><td class="n">3</td><td class="n">4</td><td class="n">5</td><td class="n"><strong>81</strong></td><td>Seçildi</td></tr>
+<tr><td>G. Antrenman takipçisi</td><td class="n">3</td><td class="n">4</td><td class="n">3</td><td class="n">1</td><td class="n">5</td><td class="n">4</td><td class="n">67</td><td>Elendi (boşluk 1)</td></tr>
+<tr><td>H. Genel bütçe uygulaması</td><td class="n">4</td><td class="n">4</td><td class="n">4</td><td class="n">1</td><td class="n">4</td><td class="n">2</td><td class="n">65</td><td>Elendi (boşluk 1)</td></tr>
+<tr><td>B. Protein maliyeti, bütçeli makro</td><td class="n">3</td><td class="n">3</td><td class="n">2</td><td class="n">2</td><td class="n">5</td><td class="n">4</td><td class="n">63</td><td>Kısa liste</td></tr>
+<tr><td>C. Adaptif kalori hedefi yardımcısı</td><td class="n">3</td><td class="n">3</td><td class="n">3</td><td class="n">1</td><td class="n">5</td><td class="n">4</td><td class="n">63</td><td>Elendi (boşluk 1)</td></tr>
+<tr><td>E. Türk mutfağına özel kalori sayacı</td><td class="n">4</td><td class="n">4</td><td class="n">3</td><td class="n">1</td><td class="n">4</td><td class="n">2</td><td class="n">62</td><td>Elendi (boşluk 1)</td></tr>
+<tr><td>F. Yurt dışı hisse vergi hesaplayıcı</td><td class="n">3</td><td class="n">4</td><td class="n">3</td><td class="n">2</td><td class="n">3</td><td class="n">3</td><td class="n">61</td><td>Kısa liste</td></tr>
+<tr><td>D. Çoklu varlık portföy takibi (TR)</td><td class="n">3</td><td class="n">3</td><td class="n">2</td><td class="n">1</td><td class="n">5</td><td class="n">3</td><td class="n">57</td><td>Elendi (boşluk 1)</td></tr>
+<tr><td>I. Takviye fiyat karşılaştırıcı (TR)</td><td class="n">3</td><td class="n">3</td><td class="n">1</td><td class="n">2</td><td class="n">4</td><td class="n">3</td><td class="n">54</td><td>Elendi (ödeme 1)</td></tr>
+</table></div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Puanlar benim yargımdır; kanıtlar aşağıda. A'nın "ödeme" ve "boşluk" puanlarını bilerek 3'te tuttum: rakip var ve ödeme kanıtı dolaylı.</div>
+
+<h4>Elenen güçlü adaylar ve nedenleri</h4>
+<ul>
+  <li><strong>G. Antrenman takipçisi.</strong> En iyi bildiğin alan, ama pazarın yerleşik bir sıralaması var (Hevy, Strong, Boostcamp) ve her hafta yeni bağımsız uygulamalar çıkıyor <a class="ref" href="#kaynak" data-s="38">38</a>. Bu, senin "herkesin ilk aklına gelen" dediğin türden.</li>
+  <li><strong>E. Türk mutfağına özel kalori sayacı.</strong> Şikâyet gerçek: Yazio'nun Türkiye yorumlarında Türk yemeklerinin kötü sınıflandığı yazılıyor <a class="ref" href="#kaynak" data-s="50">50</a>, MacroFactor için Ekşi'de Türkçe olmadığı ve yemekleri elle tanımlamak gerektiği söyleniyor <a class="ref" href="#kaynak" data-s="40">40</a>. Ama tam bu boşluk için yapılmış uygulamalar çıkmış <a class="ref" href="#kaynak" data-s="39">39</a> ve doğrulanmış bir yemek veritabanı kurmak tek kişi için ağır.</li>
+  <li><strong>C. Adaptif kalori hedefi yardımcısı.</strong> MacroFactor'ün algoritması çok isteniyor ama pahalı bulunuyor; başka uygulamaların kullanıcıları aynı özelliği talep ediyor <a class="ref" href="#kaynak" data-s="62">62</a>. Ancak yemek kaydı istemeden bunu ücretsiz yapan bir uygulama zaten var <a class="ref" href="#kaynak" data-s="41">41</a>, yanında yarım düzine benzeri.</li>
+  <li><strong>B. Protein maliyeti (kısa liste).</strong> İki derin alanının kesişimi olduğu için sana en özgü adaydı. İlgi var: gram protein başına maliyet grafiği Reddit'te 851 oy aldı <a class="ref" href="#kaynak" data-s="44">44</a>, Türkiye'de öğrenciler marketten ucuz protein soruyor <a class="ref" href="#kaynak" data-s="59">59</a>. Ama tam bunu yapan uygulamalar yayında <a class="ref" href="#kaynak" data-s="42">42</a> <a class="ref" href="#kaynak" data-s="43">43</a> ve insanların buna para ödediğine dair bir iz bulamadım.</li>
+  <li><strong>F. Yurt dışı hisse vergi hesaplayıcı (kısa liste).</strong> Hesap gerçekten karmaşık: TL'ye çevirme, endeksleme, zarar mahsubu <a class="ref" href="#kaynak" data-s="48">48</a>. Ama yılda bir kez yaşanıyor, en büyük aracı uygulama kendi kullanıcısına özet veriyor <a class="ref" href="#kaynak" data-s="47">47</a>, ücretsiz web hesaplayıcıları var <a class="ref" href="#kaynak" data-s="61">61</a> ve iş vergi danışmanlığı sınırına yakın.</li>
+  <li><strong>D. Çoklu varlık portföy takibi.</strong> Forumlarda hisse, fon, altın ve kriptoyu tek yerde görmek isteyenler var <a class="ref" href="#kaynak" data-s="45">45</a>; fakat bunu ücretsiz yapan uygulamalar dahil çok sayıda rakip çıkmış <a class="ref" href="#kaynak" data-s="46">46</a> ve canlı fiyat verisi sürekli maliyet demek.</li>
+  <li><strong>H. Genel bütçe uygulaması.</strong> Büyük ve ödeyen bir pazar, ama yerleşik oyuncularla dolu <a class="ref" href="#kaynak" data-s="64">64</a>; banka bağlantısı olmadan onlarla yarışmak zor.</li>
+  <li><strong>I. Takviye fiyat karşılaştırıcı.</strong> Fiyat karşılaştırma siteleri kategoriyi zaten kapsıyor <a class="ref" href="#kaynak" data-s="60">60</a>; doğal gelir modeli satış ortaklığı, sen ise abonelik ya da tek seferlik satış istedin.</li>
+</ul>
+
+<h4>Seçilen fikri çürütme denemesi</h4>
+<div class="tw"><table>
+<tr><th>Soru</th><th>Bulduğum</th><th>Hüküm</th></tr>
+<tr><td>Bu zaten var mı?</td><td>Kısmen var: Frizzbee, PayStreak, Finny, Subio; Türkiye'de Kartly, Akrep AI, Benim Cüzdanım. Hepsi 2025-2026'da çıkmış küçük ürünler</td><td>Geçti, ama farkı dar: "kalan" ve "dene" olmadan ayakta durmaz</td></tr>
+<tr><td>Daha önce denenip neden tutmadı?</td><td>Cushion: talep vardı, yatırımcı ölçeğine ulaşamadı; ağır ve pahalı altyapı kurmuştu</td><td>Geçti: hafif, cihaz içi bir ürün aynı tuzağa düşmez</td></tr>
+<tr><td>İnsanlar para öder mi?</td><td>Dolaylı evet (Cushion'ın ödeyen kullanıcıları, Frizzbee'nin ücretli katmanı). Doğrudan kanıt yok</td><td>Sınırda geçti: en zayıf halka bu</td></tr>
+</table></div>
+<p>Kısa listedeki diğer iki aday aynı sorulara A'dan daha kötü cevap verdi; bu yüzden karar değişmedi.</p>
+</section>
+<section class="tab" id="kimlik">
+<h2>Bölüm B · Uygulama Kimliği</h2>
+<p class="lead">Bu bölüm tek başına okunmak için yazıldı. Kalan'ı hiç bilmeyen bir tasarımcı, geliştirici ya da yapay zekâ yalnızca burayı okuyarak tutarlı kararlar verebilmeli.</p>
+
+<h3>Kimlik kartı</h3>
+<div class="tw"><table>
+<tr><th style="width:32%">Alan</th><th>Değer</th></tr>
+<tr><td>İsim</td><td><strong>Kalan</strong> (İngilizce okunuşu: "kah-LAHN")</td></tr>
+<tr><td>Tek cümlelik tanım</td><td>Kalan, bütün taksitlerini ve "şimdi al, sonra öde" planlarını tek takvimde toplayan ve her maaş döneminde geriye ne kaldığını gösteren, banka bağlantısı istemeyen mobil uygulamadır.</td></tr>
+<tr><td>Slogan</td><td>Türkçe: <strong>Geriye ne kaldığını gör.</strong> · İngilizce: <strong>See what's left.</strong></td></tr>
+<tr><td>Kategori</td><td>Kişisel finans · taksit ve ödeme takvimi</td></tr>
+<tr><td>Platform ve dil</td><td>iOS ve Android · Türkçe ve İngilizce</td></tr>
+<tr><td>Mağaza başlığı önerisi</td><td>Türkçe: "Kalan: Taksit Takvimi" · İngilizce: "Kalan: Pay Later Tracker"</td></tr>
+<tr><td>Gelir modeli</td><td>Ücretsiz çekirdek + Pro (aylık, yıllık, ömür boyu). Reklam yok.</td></tr>
+</table></div>
+
+<h3>İsim ve gerekçesi</h3>
+<p>"Kalan" Türkçede geriye duranı anlatır: kalan taksit, kalan borç, kalan para. Uygulamanın ekrana koyduğu ana sayı da budur. İngilizce konuşan biri için kısa, iki heceli, yazıldığı gibi okunan ve anlam yükü taşımayan bir marka adıdır; slogan anlamı tamamlar.</p>
+
+<h3>Misyon ve vizyon</h3>
+<p><strong>Misyon:</strong> Parçalara bölünmüş borcu tek bakışta anlaşılır kılmak; insanların ödeme gününü değil, ödeme gününden sonra elinde ne kalacağını bilmesini sağlamak.</p>
+<p><strong>Vizyon:</strong> Taksitle alışveriş yapan herkesin, yeni bir taksite girmeden önce açıp baktığı ilk ekran olmak.</p>
+
+<h3>Problem tanımı</h3>
+<p>Taksitli ödemeler küçük parçalar hâlinde, farklı sağlayıcılara ve kartlara dağılmış durumda ve farklı günlerde çekiliyor. Her sağlayıcı ve banka yalnızca kendi payını gösteriyor. Kişi toplamı göremediği için ödeme kaçırıyor, gecikme ücreti ödüyor ya da ay sonunda beklemediği bir toplamla karşılaşıyor.</p>
+<div class="ev"><span class="tag k">KANIT</span> ABD'de "sonra öde" kullanıcılarının %47'si son bir yılda en az bir ödemeyi geç yaptı <a class="ref" href="#kaynak" data-s="1">1</a>; %23'ü bir sonraki ödeme tarihinden, %27'si kaç ödemesi kaldığından emin değil <a class="ref" href="#kaynak" data-s="3">3</a>. Türkiye'de bireysel kredi kartı borcunun 1,32 trilyon TL'si taksitli harcamalardan oluşuyor <a class="ref" href="#kaynak" data-s="19">19</a>.</div>
+
+<h3>Kimin için, kimin için değil</h3>
+<div class="grid2">
+  <div class="card"><h4 style="margin-top:0">Kimin için</h4><ul>
+    <li>Aynı anda üç ya da daha fazla "sonra öde" planı olanlar (Klarna, Afterpay, Affirm, PayPal ve benzerleri)</li>
+    <li>İki ya da daha fazla kredi kartında sürekli açık taksidi olanlar</li>
+    <li>Maaştan maaşa plan yapan, "bu ay elime ne kalacak" diye hesaplayanlar</li>
+    <li>Banka hesabını üçüncü bir uygulamaya bağlamak istemeyenler</li>
+  </ul></div>
+  <div class="card"><h4 style="margin-top:0">Kimin için değil</h4><ul>
+    <li>Bütün harcamalarını kategorilere ayırıp bütçe tutmak isteyenler</li>
+    <li>Banka hareketlerinin otomatik akmasını bekleyenler</li>
+    <li>Yatırım, birikim ya da net varlık takibi arayanlar</li>
+    <li>Borç yapılandırma, kredi ya da danışmanlık arayanlar</li>
+    <li>İşletmeler ve ticari kart kullanıcıları</li>
+  </ul></div>
+</div>
+
+<h3>Değer önerisi</h3>
+<ul>
+  <li><strong>Tek sayı:</strong> Bu maaş döneminde söz verdiğin ödemeler çıktıktan sonra kalan tutar.</li>
+  <li><strong>Tek takvim:</strong> Bütün sağlayıcılar ve kartlar aynı zaman çizgisinde.</li>
+  <li><strong>Almadan önce dene:</strong> Yeni bir taksidin önündeki dönemlere etkisini kaydetmeden gör.</li>
+  <li><strong>Hızlı giriş:</strong> Şablonla ya da ekran görüntüsünden, yirmi saniyede.</li>
+  <li><strong>Sana ait veri:</strong> Hesap yok, banka bağlantısı yok, reklam yok.</li>
+</ul>
+
+<h3>Uygulama nedir, ne değildir</h3>
+<div class="tw"><table>
+<tr><th>Kalan şudur</th><th>Kalan şu değildir</th></tr>
+<tr><td>Bilinen, tarihi belli taksit ödemelerinin takvimi</td><td>Bütün gelir ve giderleri izleyen bir bütçe uygulaması</td></tr>
+<tr><td>Kullanıcının girdiği ya da onayladığı veriyle çalışan bir araç</td><td>Banka ya da sağlayıcı hesabına bağlanan bir toplayıcı</td></tr>
+<tr><td>Ödemeyi hatırlatan bir yardımcı</td><td>Ödemeyi yapan, para tutan ya da aktaran bir hizmet</td></tr>
+<tr><td>Karar öncesi "ne olur" hesabı</td><td>Kredi, kart ya da yatırım tavsiyesi</td></tr>
+<tr><td>Sağlayıcılardan bağımsız bir görünüm</td><td>Yeni kredi ya da "sonra öde" teklifi sunan bir pazar yeri</td></tr>
+<tr><td>Sayıları gösteren sakin bir ekran</td><td>Puan veren, rozet dağıtan ya da utandıran bir koç</td></tr>
+</table></div>
+
+<h3>Ürün ilkeleri</h3>
+<ol>
+  <li><strong>Önce sayı.</strong> Her ekran tek bir soruya cevap verir; ana ekranın sorusu "ne kaldı?"dır.</li>
+  <li><strong>Yargı yok.</strong> Kırmızı alarm, puan, ünlem ve suçlayıcı dil kullanılmaz. Durum olduğu gibi gösterilir.</li>
+  <li><strong>Veri kullanıcınındır.</strong> Hesap zorunlu değildir, veriler cihazda durur, dışa aktarma her zaman açıktır.</li>
+  <li><strong>Yirmi saniye kuralı.</strong> Yeni plan eklemek yirmi saniyeyi geçmemelidir. Geçiyorsa tasarım yanlıştır.</li>
+  <li><strong>Takvim, tahmin değil.</strong> Yalnızca bilinen ödemeler gösterilir. Bilinmeyen tutar uydurulmaz; kullanıcıya sorulur.</li>
+  <li><strong>Borç satmayız.</strong> Uygulamada kredi, kart ya da "sonra öde" reklamı ve yönlendirmesi bulunmaz.</li>
+  <li><strong>Onaysız kayıt olmaz.</strong> Ekran görüntüsünden okunan her alan kullanıcıya gösterilir ve onaylanmadan kaydedilmez.</li>
+</ol>
+
+<h3>Marka kişiliği ve ses tonu</h3>
+<p><strong>Kişilik:</strong> Hesap bilen, sakin bir arkadaş. Net, dürüst, kısa konuşur. Paniğe sürüklemez, övmez, azarlamaz.</p>
+<div class="tw"><table>
+<tr><th>Nitelik</th><th>Böyle yaz</th><th>Böyle yazma</th></tr>
+<tr><td>Net</td><td>"Bu dönem 4 ödeme var. Toplam 3.250 TL."</td><td>"Finansal yolculuğunda harika bir adım attın!"</td></tr>
+<tr><td>Sakin</td><td>"Cuma günü 62 dolar çekilecek."</td><td>"DİKKAT! Ödemeni kaçırmak üzeresin!"</td></tr>
+<tr><td>Yargısız</td><td>"Bu plan eklenirse 2. dönemde 400 TL eksik kalıyor."</td><td>"Bu alışverişi yapmamalısın."</td></tr>
+<tr><td>Dürüst</td><td>"Bu tutarı okuyamadım. Sen girer misin?"</td><td>Tahmini bir tutarı kesinmiş gibi göstermek</td></tr>
+<tr><td>Kısa</td><td>"Ödendi olarak işaretlendi."</td><td>Üç cümlelik tebrik ve açıklama</td></tr>
+</table></div>
+<p class="small">Hitap: Türkçede "sen". İngilizcede ikinci tekil, kısaltmalı gündelik dil. Emoji ve ünlem kullanılmaz. Para tutarları her zaman rakamla ve para birimiyle yazılır.</p>
+
+<h3>Görsel yön</h3>
+<div class="sw">
+  <div><i style="background:#14213D"></i><b>Mürekkep</b><span>#14213D · ana koyu, metin, ikon zemini</span></div>
+  <div><i style="background:#23B58E"></i><b>Kalan yeşili</b><span>#23B58E · "kalan" sayısı, vurgu dolguları</span></div>
+  <div><i style="background:#127A5F"></i><b>Koyu yeşil</b><span>#127A5F · açık zeminde yeşil metin ve düğme</span></div>
+  <div><i style="background:#F2A541"></i><b>Kehribar</b><span>#F2A541 · yaklaşan ödeme, dikkat</span></div>
+  <div><i style="background:#E4572E"></i><b>Mercan</b><span>#E4572E · yalnızca eksiye düşen dönem; az kullanılır</span></div>
+  <div><i style="background:#F7F5F0"></i><b>Kâğıt</b><span>#F7F5F0 · açık zemin</span></div>
+  <div><i style="background:#5F6880"></i><b>Duman</b><span>#5F6880 · ikincil metin</span></div>
+</div>
+<ul>
+  <li><strong>Tipografi hissi:</strong> Geometrik ama yumuşak, okunaklı bir sans serif. Uygulamada sistem yazı tipleri (iOS'ta San Francisco, Android'de Roboto). Tutarlar sabit genişlikli rakamlarla, büyük ve kalın; etiketler küçük ve sakin.</li>
+  <li><strong>Biçim dili:</strong> Düz renkler, ince çizgiler, bol boşluk. Gölge ve degrade yok denecek kadar az. Ana motif dört dilime bölünmüş halka: dilimler ödemeleri, parlak dilim kalanı anlatır.</li>
+  <li><strong>Grafikler:</strong> Dönem başına tek çubuk; söz verilmiş kısım mürekkep, kalan kısım yeşil. Pasta ve üç boyutlu grafik yok.</li>
+  <li><strong>Sağlayıcı ve banka gösterimi:</strong> Logo kullanılmaz; ad düz metinle ve nötr renkli bir harf rozetiyle gösterilir.</li>
+  <li><strong>Karanlık mod:</strong> Zemin mürekkep, kartlar bir ton açık; yeşil ve kehribar aynı kalır.</li>
+</ul>
+
+<h3>Terimler sözlüğü</h3>
+<div class="tw"><table>
+<tr><th>Terim (TR)</th><th>İngilizce karşılığı</th><th>Anlamı</th></tr>
+<tr><td>Plan</td><td>Plan</td><td>Tek bir alışverişin taksitlere bölünmüş ödeme düzeni</td></tr>
+<tr><td>Ödeme</td><td>Payment</td><td>Bir planın tek bir taksidi; tarihi ve tutarı vardır</td></tr>
+<tr><td>Kaynak</td><td>Source</td><td>Planın bağlı olduğu sağlayıcı ya da kart</td></tr>
+<tr><td>Dönem</td><td>Pay period</td><td>İki maaş günü arasındaki süre</td></tr>
+<tr><td>Söz verilmiş</td><td>Spoken for</td><td>Bir dönemde çekilecek bütün ödemelerin toplamı</td></tr>
+<tr><td>Kalan</td><td>Left</td><td>Dönem geliri eksi söz verilmiş tutar; uygulamanın ana sayısı</td></tr>
+<tr><td>Dene</td><td>Try it</td><td>Yeni bir planın etkisini kaydetmeden gösteren hesap</td></tr>
+<tr><td>Sıkışık dönem</td><td>Tight period</td><td>Kalanın, kullanıcının belirlediği eşiğin altına düştüğü dönem</td></tr>
+<tr><td>Ekstre günü</td><td>Statement date</td><td>Kredi kartının hesap kesim günü; taksidin hangi aya düşeceğini belirler</td></tr>
+<tr><td>Son ödeme günü</td><td>Due date</td><td>Kart ekstresinin ödenmesi gereken son gün</td></tr>
+<tr><td>Sonra öde</td><td>Buy now, pay later (BNPL)</td><td>Alışverişi kısa vadeli taksitlere bölen ödeme hizmetleri</td></tr>
+<tr><td>4 ödemeli plan</td><td>Pay in 4</td><td>İki haftada bir çekilen dört eşit ödemeli yaygın plan türü</td></tr>
+<tr><td>İade bekliyor</td><td>Refund pending</td><td>Ürünü iade edilmiş ama ödemeleri henüz durmamış plan</td></tr>
+<tr><td>Pro</td><td>Pro</td><td>Ücretli katman</td></tr>
+</table></div>
+</section>
+<section class="tab" id="isim">
+<h2>İsim</h2>
+<div class="card"><p class="big">Ana isim: Kalan</p>
+<p>Türkçede "geriye duran" demek: kalan taksit, kalan borç, kalan para. Uygulamanın ana sayısıyla aynı kelime. İngilizcede kısa, iki heceli ve yazıldığı gibi okunan bir marka adı; anlamı "See what's left." sloganı taşır.</p></div>
+
+<h3>Neden bu isim?</h3>
+<ul>
+  <li><strong>İşlevi söylüyor.</strong> Türk kullanıcı adı duyduğunda uygulamanın ne gösterdiğini anlar.</li>
+  <li><strong>İki pazarda tek ad.</strong> Beş harf, özel karakter yok, iki dilde de klavyede aynı yazılır.</li>
+  <li><strong>Ürün ilkesiyle uyumlu.</strong> Borcu değil, elde kalanı öne çıkarır; ton yargısız kalır.</li>
+  <li><strong>Mağaza başlığında anahtar kelimeye yer bırakıyor.</strong> "Kalan: Taksit Takvimi" ve "Kalan: Pay Later Tracker".</li>
+</ul>
+
+<h3>Yapılan kontroller ve sonuçları</h3>
+<div class="tw"><table>
+<tr><th>İsim</th><th>Mağaza ve web araması (12.11.2026)</th><th>Söyleniş ve yazım</th><th>Çağrışım</th><th>Değerlendirme</th></tr>
+<tr class="win"><td><strong>Kalan</strong><br><span class="small muted">ana isim</span></td><td>İngilizce ve Türkçe aramalarda finans kategorisinde birebir aynı adlı uygulama çıkmadı. Yakın adlar çıktı: Kala (İsviçreli bir finans uygulaması), Kial, Kalto.</td><td>Türkçe: sorunsuz. İngilizce: "kah-LAHN"; ilk okumada "KAY-lan" denebilir.</td><td>Türkçe: nötr, olumlu. İngilizce: bilinen bir anlamı yok.</td><td>Uygun. Risk: "Kala" ile tek harf fark; müzik sektöründe aynı adlı bir Türk şirketi olduğunu hatırlıyorum (doğrulamadım, farklı sektör).</td></tr>
+<tr><td><strong>Duecast</strong><br><span class="small muted">yedek 1</span></td><td>Aramada bu adda uygulama ya da marka çıkmadı; sonuçlar ilgisizdi.</td><td>İngilizce: kolay. Türkçe: söylenişi zor ("dyu-kast").</td><td>İngilizce: "due" (vadesi gelen) + "forecast" (tahmin); işlevi anlatıyor.</td><td>Yalnızca İngilizce pazara dönersen güçlü seçenek.</td></tr>
+<tr><td><strong>Vadem</strong><br><span class="small muted">yedek 2</span></td><td>Aramada birebir aynı adlı finans uygulaması çıkmadı.</td><td>Türkçe: sorunsuz. İngilizce: okunur ama anlamsız.</td><td>Türkçe: "benim vadem"; sıcak ve konuyla ilgili.</td><td>Yalnızca Türkiye'de kalırsan güçlü seçenek.</td></tr>
+</table></div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Değerlendirip bıraktıklarım: "Vade" (çok genel; aynı adı kullanan şirketler olduğunu hatırlıyorum), "Dilim" (kontrol etmedim), "Taksit" içeren adlar (jenerik ve yalnızca Türkiye'ye uygun).</div>
+
+<h3>Tescil ve alan adı uyarısı</h3>
+<div class="card" style="border-left:5px solid var(--coral)">
+<p><strong>Bu kontroller kesin değildir.</strong> Yalnızca genel web araması yapabildim; App Store ve Google Play'in kendi arama ekranlarını, marka sicillerini ve alan adı kayıtlarını sorgulayamadım. İsmi kullanmadan önce şunları kendin doğrulaman gerekiyor:</p>
+<ul>
+  <li>App Store ve Google Play'de "Kalan" araması (Türkiye ve ABD mağazaları ayrı ayrı).</li>
+  <li>App Store Connect'te uygulama adının alınabilir olup olmadığı.</li>
+  <li>Marka sicilleri: TÜRKPATENT, EUIPO, USPTO ve WIPO; özellikle yazılım ve finans hizmeti sınıfları.</li>
+  <li>Alan adları: kalan.app, getkalan.com, kalanapp.com gibi seçenekler.</li>
+  <li>Sosyal medya kullanıcı adları.</li>
+</ul>
+<p>İsim çakışırsa yedeklere geç; kimlik dosyasındaki her şey isimden bağımsız olarak geçerli kalır, yalnızca "kalan" terimi ürün içinde aynı kalır.</p>
+</div>
+</section>
+
+<section class="tab" id="logo">
+<h2>Logo Promptları</h2>
+<p>Promptlar Nano Banana Pro için ve İngilizce yazıldı; açıklamaları Türkçe. Her kutunun altındaki düğme metni panoya kopyalar.</p>
+
+<h3>Modelin yazım önerilerinden çıkan kurallar</h3>
+<div class="ev"><span class="tag k">KANIT</span> Nano Banana Pro karmaşık kompozisyon ve metin için konumlanan üst modeldir; anahtar kelime dizisi yerine yapılandırılmış ve ayrıntılı talimatla çalışması önerilir <a class="ref" href="#kaynak" data-s="34">34</a> <a class="ref" href="#kaynak" data-s="35">35</a>. "4k, masterpiece" türü kalite etiketlerine gerek yoktur; görüntüye yazı girecekse metin tırnak içinde aynen verilmeli ve yazı tipi tarif edilmelidir <a class="ref" href="#kaynak" data-s="36">36</a>. Şubat 2026'dan beri Gemini uygulamasında varsayılan model Nano Banana 2'dir; Pro ayrıca seçilir <a class="ref" href="#kaynak" data-s="37">37</a>.</div>
+<div class="inf"><span class="tag c">ÇIKARIM</span> Rehberlerdeki örnekler İngilizce olduğu için promptları İngilizce yazdım. Renkleri onaltılık kodla, yasakları ayrı bir "Constraints" paragrafında verdim; çünkü ikon için en sık hata fazladan öğe eklenmesidir. Üretimden sonra görseli 60 piksele küçültüp bak: tek bakışta okunmuyorsa yeniden üret. Mağazalar köşe yuvarlamayı kendisi uygular; bu yüzden promptlar tam kare, kenardan kenara dolu görsel istiyor.</div>
+
+<h3>Ana prompt · Kalan dilim</h3>
+<p><strong>Tasarım fikri:</strong> Dört dilime bölünmüş halka dört ödemeli planı ve taksitleri anlatır; tek parlak dilim "kalan"dır.</p>
+<div class="prompt" id="p1">Create a mobile app icon for a personal finance app named Kalan. The app shows people how much of their paycheck is left after their installment payments.
+
+Subject: one thick ring, like a donut chart, centered on the canvas. The ring is cut into exactly four equal arc segments with small, even gaps between them. Three of the segments are a muted slate blue (#3A4A6B). The fourth segment, in the upper-right position, is a bright mint-teal green (#23B58E). The green segment is the only bright element in the image.
+
+Background: a single solid deep navy (#14213D) that fills the entire square from edge to edge.
+
+Style: flat vector illustration, geometric and minimal, like a modern fintech brand mark. Each arc has rounded ends. Edges are perfectly clean.
+
+Composition: the ring is exactly centered and spans about 58 percent of the canvas width. The ring stroke is thick, about one fifth of the ring's diameter. Leave generous empty navy space around the ring.
+
+Constraints: no text, no letters, no numbers, no currency symbols, no coins, no arrows. No gradients, no shadows, no glow, no 3D, no texture, no reflections. Do not draw rounded corners, a device, a border, or a mockup. The output is the full-bleed square artwork only. Exactly four segments, exactly one of them green.
+
+Format: 1:1 square, 2K resolution. The design must stay clear when shrunk to 60 pixels.</div>
+<div class="copybar"><button class="copy" data-copy="p1">Kopyala</button><span class="copymsg" aria-live="polite"></span></div>
+
+<h3>Alternatif 1 · Azalan basamaklar</h3>
+<p><strong>Tasarım fikri:</strong> Soldan sağa kısalan çubuklar ödendikçe azalan borcu gösterir; son, yeşil çubuk geriye kalandır. Açık zeminle ana prompttan farklı bir yön dener.</p>
+<div class="prompt" id="p2">Create a mobile app icon for a personal finance app named Kalan. The app shows people how much money is left after their installment payments.
+
+Subject: five vertical bars with fully rounded tops, standing on the same invisible baseline, evenly spaced. Each bar is clearly shorter than the bar to its left, so together they form a staircase that steps down from left to right. The first four bars are deep navy (#14213D). The fifth and shortest bar, on the far right, is a bright mint-teal green (#23B58E).
+
+Background: a single solid warm off-white (#F7F5F0) that fills the entire square from edge to edge.
+
+Style: flat vector illustration, geometric and minimal. All bars have the same width. Edges are perfectly clean.
+
+Composition: the group of bars is centered both horizontally and vertically and spans about 60 percent of the canvas width. The tallest bar is about 55 percent of the canvas height. Leave generous empty space around the group.
+
+Constraints: no text, no letters, no numbers, no axis lines, no grid, no labels, no currency symbols, no arrows. No gradients, no shadows, no glow, no 3D, no texture. Do not draw rounded corners, a device, a border, or a mockup. The output is the full-bleed square artwork only. Exactly five bars, exactly one of them green.
+
+Format: 1:1 square, 2K resolution. The design must stay clear when shrunk to 60 pixels.</div>
+<div class="copybar"><button class="copy" data-copy="p2">Kopyala</button><span class="copymsg" aria-live="polite"></span></div>
+
+<h3>Alternatif 2 · K harfi</h3>
+<p><strong>Tasarım fikri:</strong> Marka adının baş harfi; K'nin alt bacağı üç kısa parçaya bölünerek taksitleri anlatır. İsim tanınırlığını öne alan yön.</p>
+<div class="prompt" id="p3">Create a mobile app icon for a personal finance app named Kalan. The app tracks installment payments.
+
+Subject: a single bold uppercase letter "K" in a geometric sans-serif style, centered on the canvas. The vertical stem and the upper diagonal arm of the "K" are solid warm off-white (#F7F5F0). The lower diagonal leg of the "K" is not solid: it is made of exactly three short, separate segments of equal length with rounded ends, placed in a straight diagonal line with small even gaps, in a bright mint-teal green (#23B58E). The three green segments read as the lower leg of the letter.
+
+Background: a single solid deep navy (#14213D) that fills the entire square from edge to edge.
+
+Style: flat vector logo, geometric and minimal. Stroke weight is heavy and consistent across the letter. Edges are perfectly clean.
+
+Composition: the letter is exactly centered and its height is about 55 percent of the canvas height. Leave generous empty navy space around it.
+
+Constraints: the only character in the image is the single letter "K". No other text, no words, no numbers, no currency symbols. No gradients, no shadows, no glow, no 3D, no texture. Do not draw rounded corners, a device, a border, or a mockup. The output is the full-bleed square artwork only.
+
+Format: 1:1 square, 2K resolution. The letter must stay readable when shrunk to 60 pixels.</div>
+<div class="copybar"><button class="copy" data-copy="p3">Kopyala</button><span class="copymsg" aria-live="polite"></span></div>
+
+<h3>Renk kodları</h3>
+<div class="sw">
+  <div><i style="background:#14213D"></i><b>Mürekkep</b><span>#14213D</span></div>
+  <div><i style="background:#23B58E"></i><b>Kalan yeşili</b><span>#23B58E</span></div>
+  <div><i style="background:#3A4A6B"></i><b>Soluk dilim</b><span>#3A4A6B</span></div>
+  <div><i style="background:#F7F5F0"></i><b>Kâğıt</b><span>#F7F5F0</span></div>
+</div>
+</section>
+<section class="tab" id="varsayim">
+<h2>Varsayımlar ve Açık Kararlar</h2>
+<p class="lead">Soru evresi bittikten sonra sana sormadan verdiğim her karar burada. Katılmadığın bir satır varsa, dosyanın geri kalanını o satıra göre düzeltmek gerekir.</p>
+
+<h3>Sana sormadan verdiğim kararlar</h3>
+<div class="tw"><table>
+<tr><th style="width:4%">#</th><th style="width:36%">Karar</th><th>Gerekçe</th></tr>
+<tr><td>1</td><td><strong>Başlangıç pazarı:</strong> tek sürüm, Türkçe ve İngilizce birlikte. İlk doğrulama Türkiye'de, gelir odağı İngilizce pazarlar (ABD, Birleşik Krallık, Avustralya, Kanada).</td><td>"Hem TR hem global, kanıta göre sen seç" dedin. Ölçülmüş kanıt ve ödeme örneği İngilizce pazarda; erişebileceğin kullanıcı ve içeriden bilgin Türkiye'de. İkinci dil senin için neredeyse maliyetsiz.</td></tr>
+<tr><td>2</td><td><strong>Alan seçimi:</strong> fikir fitnessten değil, finanstan çıktı.</td><td>İkisini de en derin alanın olarak işaretledin. Fitness adaylarının hepsinde boşluk dolu çıktı. Fitnessi tercih edersen kısa listedeki "protein maliyeti" adayı en yakın seçenek, ama daha zayıf.</td></tr>
+<tr><td>3</td><td><strong>İkincil ilgi alanları ayrıntılı taranmadı</strong> (araba ve motosiklet, seyahat ve yemek, oyun ve donanım, müzik ve koleksiyon).</td><td>"En derin" sorusuna yalnızca fitness ve finansı seçtin; araştırma süresinin tamamına yakını bu ikisine gitti. Bu alanlarda daha iyi bir aday olabilir; bakılmadı.</td></tr>
+<tr><td>4</td><td><strong>Yasak geniş yorumlandı:</strong> kahve, kafe, restoran ve hizmet çalışanı konularına hiç girilmedi.</td><td>Üç şıkkı da dışarıda bıraktın.</td></tr>
+<tr><td>5</td><td><strong>İlk sürüm süresi:</strong> mağazaya çıkış yaklaşık 12 hafta.</td><td>"Süre önemli değil, sen karar ver" dedin. Haftada 15-30 saat ve Google Play'in 14 günlük test zorunluluğu hesaba katıldı.</td></tr>
+<tr><td>6</td><td><strong>Teknoloji:</strong> tek kod tabanı; Flutter varsaydım.</td><td>Mobil deneyimin var ve iki platform istedin. React Native'i daha iyi biliyorsan onu kullan; fikir değişmez.</td></tr>
+<tr><td>7</td><td><strong>Mimari:</strong> hesapsız, cihaz içi veri; bulut eşitleme sonraya.</td><td>Orta karmaşıklık sınırın, bireysel hesapla başlaman ve düşük bütçe. Ayrıca rakipten ayrışma noktası.</td></tr>
+<tr><td>8</td><td><strong>Müşteri tipi:</strong> bireysel kullanıcı.</td><td>"Fark etmez" dedin; kanıt bireyleri gösteriyor. İşletmeye satış birebir görüşme gerektirir ve pazarlama tercihlerine uymaz.</td></tr>
+<tr><td>9</td><td><strong>Gelir modeli:</strong> ücretsiz çekirdek + Pro (aylık, yıllık, ömür boyu). Reklam yok.</td><td>Abonelik ve tek seferlik satışı seçtin, reklamı seçmedin.</td></tr>
+<tr><td>10</td><td><strong>Fiyatlar ve ücretsiz sınır</strong> (2,99 $ / 19,99 $ / 39,99 $; 79,99 TL / 499,99 TL / 999,99 TL; 4 plan).</td><td>Rakip fiyatının altında, hedef kitlenin nakit durumuna göre. Türk lirası fiyatları yuvarlak öneridir; güncel kuru kontrol etmedim. Hepsi denenerek değişmeli.</td></tr>
+<tr><td>11</td><td><strong>Yapay zekâ kullanımı:</strong> yalnızca ekran görüntüsünden plan okumada ve yalnızca Pro'da.</td><td>"Ücretli AI olabilir" dedin; ücretsiz kullanıcının sana maliyet çıkarmaması için sınırlandı.</td></tr>
+<tr><td>12</td><td><strong>Puanlamada eleme kuralı:</strong> herhangi bir kriterde 1 alan aday kısa listeye giremez.</td><td>"Jenerik ve kalabalık pazara razı olma" isteğin. Bu kural olmasaydı antrenman takipçisi ikinci sıraya yerleşirdi.</td></tr>
+<tr><td>13</td><td><strong>İsim:</strong> iki pazarda tek ad, Türkçe kökenli (Kalan).</td><td>İki dilde de kolay yazılıyor; Türkçede işlevi söylüyor. İngilizce pazara ağırlık verirsen "Duecast" daha açıklayıcı olabilir.</td></tr>
+<tr><td>14</td><td><strong>Ana ikon metinsiz;</strong> promptlar İngilizce.</td><td>Küçük boyutta okunabilirlik ve modelin rehberlerindeki örnek dili.</td></tr>
+<tr><td>15</td><td><strong>Gelir girişi isteğe bağlı;</strong> girilmezse yalnızca "söz verilmiş" gösterilir.</td><td>Maaşını yazmak istemeyen kullanıcıyı ilk ekranda kaybetmemek için.</td></tr>
+<tr><td>16</td><td><strong>Devam ve vazgeç eşikleri</strong> (10 görüşmede 6 kişi; 30. gün tutunması %15; 500 kurulumda 10 ödeyen).</td><td>Kararı sayıya bağlamak için koyduğum başlangıç değerleri; sektör ölçütü değil.</td></tr>
+<tr><td>17</td><td><strong>Bütçe kalemleri</strong> (Apple 99 $, Google 25 $, alan adı, AI ve sunucu).</td><td>Bilinen ve tahmini rakamlar; ödeme yapmadan önce güncel ücretleri kontrol et.</td></tr>
+</table></div>
+
+<h3>Senin doğrulaman gerekenler</h3>
+<ul>
+  <li><strong>İsim, marka ve alan adı.</strong> Ayrıntı İsim bölümünde.</li>
+  <li><strong>Rakiplerin içi.</strong> Farkımızı rakiplerin tanıtım sayfalarında görmediklerimden çıkardım. Frizzbee ve PayStreak'i kur; maaş dönemi görünümü ya da deneme özelliği var mı, bak.</li>
+  <li><strong>Mağaza kuralları.</strong> Finans kategorisindeki ek beyan formları ve bireysel hesapla yayın koşulları. Benzer uygulamaları tek geliştiriciler yayımlamış <a class="ref" href="#kaynak" data-s="17">17</a>, ama kendi başvurun için güncel kuralı oku.</li>
+  <li><strong>Kişisel veri.</strong> Ekran görüntüsü AI sağlayıcısına gidiyor. Aydınlatma metni, açık rıza ekranı ve sağlayıcının veriyi saklamama koşulu gerekli. Bir şablonla başlayıp bir hukukçuya okut.</li>
+  <li><strong>Vergi.</strong> Türkiye'de mobil uygulama gelirleri için özel bir kazanç istisnası olduğunu hatırlıyorum ama doğrulamadım. İlk gelirden önce bir mali müşavire sor.</li>
+  <li><strong>Sağlayıcı adlarının kullanımı.</strong> Klarna, Afterpay gibi adları yalnızca düz metin olarak, logosuz ve başlık dışında kullanmayı önerdim; bu hukuki görüş değildir.</li>
+</ul>
+
+<h3>Kanıtın ince kaldığı yerler</h3>
+<ul>
+  <li><strong>Birincil raporlar okunmadı.</strong> LendingTree, Motley Fool Money, Fed ve CFPB rakamlarını raporların kendisinden değil, onları aktaran haberlerden aldım <a class="ref" href="#kaynak" data-s="1">1</a> <a class="ref" href="#kaynak" data-s="2">2</a> <a class="ref" href="#kaynak" data-s="5">5</a>. Aynı rakamlar birden çok haberde geçiyor, ama aktarım hatası olabilir.</li>
+  <li><strong>LegalShield rakamları tek kaynağa dayanıyor</strong> <a class="ref" href="#kaynak" data-s="6">6</a>.</li>
+  <li><strong>Cushion'ın "200 binden fazla ödeyen müşteri" rakamı</strong> tek bir haber zincirinden geliyor <a class="ref" href="#kaynak" data-s="11">11</a>; yıllık gelir rakamı ikinci bir kaynakta da var <a class="ref" href="#kaynak" data-s="58">58</a>.</li>
+  <li><strong>Gecikme ücreti ve bütçe uygulamalarının BNPL'i sonradan etiketlemesi</strong> bir finans şirketinin blog yazılarına dayanıyor <a class="ref" href="#kaynak" data-s="51">51</a> <a class="ref" href="#kaynak" data-s="63">63</a>; tarafsız kaynak değil.</li>
+  <li><strong>Kredi raporlaması konusunda kaynaklar çelişiyor</strong> <a class="ref" href="#kaynak" data-s="52">52</a> <a class="ref" href="#kaynak" data-s="53">53</a>; bu yüzden ürün kararını buna dayandırmadım.</li>
+  <li><strong>Türkiye için ölçülmüş bir "takip edemiyorum" oranı yok.</strong></li>
+  <li><strong>Bazı kaynakların tarihi belirsiz:</strong> DonanımHaber portföy başlığı <a class="ref" href="#kaynak" data-s="45">45</a>, Yazio yorumu <a class="ref" href="#kaynak" data-s="50">50</a>, Rocket Money talebi <a class="ref" href="#kaynak" data-s="9">9</a>.</li>
+</ul>
+
+<h3>Okunamayan ya da bakılamayan kaynaklar</h3>
+<ul>
+  <li><strong>frizzbee.co</strong> yerleşik araçla açılmadı; Firecrawl ile tek sayfa olarak okundu. Firecrawl bütün çalışmada yalnızca bu bir kez kullanıldı (1 kredi).</li>
+  <li><strong>App Store ve Google Play'in arama ekranları ve yorum sayfaları</strong> doğrudan taranamadı. Rakiplerin düşük puanlı yorumlarını okuyamadım; PayStreak'te zaten tek puan var <a class="ref" href="#kaynak" data-s="17">17</a>.</li>
+  <li><strong>Reddit başlıkları</strong> doğrudan açılamadı; yalnızca arşiv özetleri ve arama sonuçlarındaki parçalar görüldü.</li>
+  <li><strong>Şikayetvar'da</strong> yalnızca protein tozu kategorisine bakıldı; kredi kartı ve taksit şikâyetleri taranmadı.</li>
+  <li><strong>X, Indie Hackers ve Google Trends'e bakılmadı.</strong> Product Hunt ve Ekşi Sözlük yalnızca arama sonuçlarına düşen sayfalar üzerinden görüldü.</li>
+  <li><strong>Türkiye'deki alışveriş kredisi ("şimdi al, sonra öde") pazarının büyüklüğü</strong> araştırılmadı; kapsamda yalnızca plan türü olarak yer alıyor.</li>
+</ul>
+</section>
+
+<section class="tab" id="kaynak">
+<h2>Kaynaklar</h2>
+<p class="small muted">Erişim tarihi hepsi için 12 Kasım 2026. Parantez içindeki tarih kaynağın kendi tarihidir; görülemediyse belirtilmiştir. "İkincil" notu, bilginin başka bir raporu aktaran sayfadan alındığını gösterir.</p>
+<ol class="src">
+<li id="s1">gcn.com · LendingTree 2026 BNPL raporunu aktaran haber <span class="d">(13.08.2026 · ikincil)</span><br><a href="https://gcn.com/?p=20749" target="_blank" rel="noopener">gcn.com/?p=20749</a></li>
+<li id="s2">WFTV · BNPL riskleri derlemesi: Fed 2025 hane anketi, CFPB verisi, LendingTree 2026, FCA düzenlemesi <span class="d">(2026 · ikincil)</span><br><a href="https://www.wftv.com/news/hidden-dangers-buy/DG6KCOOBUA6C5PYLRKLA55TWZ4/" target="_blank" rel="noopener">wftv.com/news/hidden-dangers-buy/…</a></li>
+<li id="s3">PYMNTS Intelligence · Pay Later Ecosystem Data Book <span class="d">(Şubat 2026; anket Aralık 2025)</span><br><a href="https://www.pymnts.com/study_posts/split-the-bill-run-the-budget-how-bnpl-is-rewriting-consumer-spending/" target="_blank" rel="noopener">pymnts.com/study_posts/split-the-bill-run-the-budget…</a></li>
+<li id="s4">PYMNTS · Aynı araştırmanın ödeme takibi ayrıntıları <span class="d">(Şubat 2026)</span><br><a href="https://www.pymnts.com/?p=3438810" target="_blank" rel="noopener">pymnts.com/?p=3438810</a></li>
+<li id="s5">ABC17 News · Motley Fool Money 2025 BNPL Trends Report aktarımı <span class="d">(2025-2026 · ikincil)</span><br><a href="https://abc17news.com/?p=1573760" target="_blank" rel="noopener">abc17news.com/?p=1573760</a></li>
+<li id="s6">Digital Transactions · LegalShield BNPL çalışması haberi <span class="d">(Temmuz 2026 · ikincil, tek kaynak)</span><br><a href="https://www.digitaltransactions.net/buy-now-pay-later/" target="_blank" rel="noopener">digitaltransactions.net/buy-now-pay-later/</a></li>
+<li id="s7">Money Crashers · Buy now, pay later debt <span class="d">(tarih görülmedi)</span><br><a href="https://www.moneycrashers.com/buy-now-pay-later-debt/" target="_blank" rel="noopener">moneycrashers.com/buy-now-pay-later-debt/</a></li>
+<li id="s8">Queer and Trans Wealth · Klarna ve Affirm'e sıkışanlar için dört öneri (mali koç yazısı) <span class="d">(yaklaşık Mayıs 2025)</span><br><a href="https://www.queerandtranswealth.org/p/4-tips-for-people-who-feel-trapped" target="_blank" rel="noopener">queerandtranswealth.org/p/4-tips-for-people-who-feel-trapped</a></li>
+<li id="s9">Rocket Money geri bildirim panosu · Bağlanamayan hesapları elle ekleme talebi <span class="d">(tarih görülmedi)</span><br><a href="https://rocketmoney.canny.io/feature-requests/p/manually-add-info-for-unlinkable-accounts" target="_blank" rel="noopener">rocketmoney.canny.io/feature-requests/p/manually-add-info-for-unlinkable-accounts</a></li>
+<li id="s10">SavingAdvice · Fed: BNPL kredi raporlarında kör nokta yaratıyor <span class="d">(08.09.2026 · ikincil)</span><br><a href="https://savingadvice.com/articles/2026/09/08/10746297_could-you-have-more-debt-than-your-credit-report-shows-the-fed-says-bnpl-creates-a-blind-spot.html" target="_blank" rel="noopener">savingadvice.com/articles/2026/09/08/…</a></li>
+<li id="s11">TechCrunch · Cushion sekiz yıl ve 20 milyon doların üstünde yatırımdan sonra kapandı <span class="d">(30.01.2025)</span><br><a href="https://techcrunch.com/2025/01/30/fintech-startup-cushion-shuts-down-after-8-years-and-over-20-million-in-funding/" target="_blank" rel="noopener">techcrunch.com/2025/01/30/fintech-startup-cushion-shuts-down…</a></li>
+<li id="s12">Banking Dive · Cushion kapanış haberi <span class="d">(2025)</span><br><a href="https://bankingdive.com/news/cushion-shutters-after-8-years-fintech-bnpl-loan-aggregator/739258" target="_blank" rel="noopener">bankingdive.com/news/cushion-shutters-after-8-years…</a></li>
+<li id="s13">American Banker · Cushion ölçek sorunlarını gerekçe gösterip kapandı <span class="d">(2025)</span><br><a href="https://www.americanbanker.com/news/citing-scaling-challenges-fintech-cushion-shuts-down" target="_blank" rel="noopener">americanbanker.com/news/citing-scaling-challenges-fintech-cushion-shuts-down</a></li>
+<li id="s14">Cushion · Uygulamanın kapanışı hakkında sık sorulan sorular <span class="d">(Aralık 2024)</span><br><a href="https://intercom.help/cushion-ai/en/articles/10250635-cushion-app-closure-faq" target="_blank" rel="noopener">intercom.help/cushion-ai/…/10250635-cushion-app-closure-faq</a></li>
+<li id="s15">Frizzbee · Ana sayfa: özellikler ve fiyat <span class="d">(okundu 12.11.2026; Firecrawl ile)</span><br><a href="https://www.frizzbee.co" target="_blank" rel="noopener">frizzbee.co</a></li>
+<li id="s16">Finny · Klarna, Afterpay ve Affirm ödemeleri nasıl takip edilir <span class="d">(yaklaşık Eylül 2026)</span><br><a href="https://getfinny.app/blog/track-klarna-afterpay-affirm-payments" target="_blank" rel="noopener">getfinny.app/blog/track-klarna-afterpay-affirm-payments</a></li>
+<li id="s17">App Store · PayStreak: Bill Tracker <span class="d">(okundu 12.11.2026)</span><br><a href="https://apps.apple.com/us/app/-/id6751249424" target="_blank" rel="noopener">apps.apple.com/us/app/-/id6751249424</a></li>
+<li id="s18">App Store · Subio: Track &amp; Save <span class="d">(2026)</span><br><a href="https://apps.apple.com/app/id6767253664" target="_blank" rel="noopener">apps.apple.com/app/id6767253664</a></li>
+<li id="s19">Yeni Ankara · BDDK kredi kartı verileri Ekim 2026 <span class="d">(Ekim 2026 · ikincil)</span><br><a href="https://www.yeniankara.com.tr/ekonomi/bddk-kredi-karti-verileri-ekim-2026-vatandas-borcla-yasiyor-186726" target="_blank" rel="noopener">yeniankara.com.tr/ekonomi/bddk-kredi-karti-verileri-ekim-2026…</a></li>
+<li id="s20">Karar · Bireysel kredi borçlusu sayısı 43,6 milyon <span class="d">(2026 · ikincil)</span><br><a href="https://www.karar.com/guncel-haberler/turkiyede-toplam-kredi-karti-borcu-ne-kadar-kredi-karti-borcunu-2041902" target="_blank" rel="noopener">karar.com/guncel-haberler/turkiyede-toplam-kredi-karti-borcu…</a></li>
+<li id="s21">Sözcü · Tüketici kredileri ve kart borçları; BDDK yapılandırma kararı <span class="d">(2026; Ocak 2026 verisi)</span><br><a href="https://www.sozcu.com.tr/vatandasin-borc-faizlerini-silin-p312657" target="_blank" rel="noopener">sozcu.com.tr/vatandasin-borc-faizlerini-silin-p312657</a></li>
+<li id="s22">excel.web.tr forumu · Kredi kartı ve özel harcama takip <span class="d">(yaklaşık 2007)</span><br><a href="https://www.excel.web.tr/threads/kredi-karti-ve-oezel-harcama-takip.28598/" target="_blank" rel="noopener">excel.web.tr/threads/kredi-karti-ve-oezel-harcama-takip.28598/</a></li>
+<li id="s23">excelcozum.com forumu · Kredi kartı takip, hesap kesimi <span class="d">(2022)</span><br><a href="https://excelcozum.com/konu/kredi-karti-takip-hesap-kesimi.3398/" target="_blank" rel="noopener">excelcozum.com/konu/kredi-karti-takip-hesap-kesimi.3398/</a></li>
+<li id="s24">balyemezler.com · Kredi kartı hesap takip çizelgesi <span class="d">(2010; sayfa sonradan güncellenmiş)</span><br><a href="https://balyemezler.com/kredi-karti-hesap-takip-cizelgesi/" target="_blank" rel="noopener">balyemezler.com/kredi-karti-hesap-takip-cizelgesi/</a></li>
+<li id="s25">borc.org.tr · Excel ile kişisel borç takip tablosu <span class="d">(yaklaşık Eylül 2026)</span><br><a href="https://borc.org.tr/kisisel-borc-takip-tablosu-excel-google-sheets/" target="_blank" rel="noopener">borc.org.tr/kisisel-borc-takip-tablosu-excel-google-sheets/</a></li>
+<li id="s26">Techolay forumu · TEB ekstre başlığı <span class="d">(Ekim 2026)</span><br><a href="https://techolay.net/sosyal/konu/teb-bankasinin-ekstre-sacmaligi.223353/" target="_blank" rel="noopener">techolay.net/sosyal/konu/teb-bankasinin-ekstre-sacmaligi.223353/</a></li>
+<li id="s27">Ekşi Sözlük · Kredi kartı ile yapılan taksitli işlemlerin iadesi <span class="d">(2018 girdileri)</span><br><a href="https://eksisozluk.com/kredi-karti-ile-yapilan-taksitli-islemlerin-iadesi--5571838" target="_blank" rel="noopener">eksisozluk.com/kredi-karti-ile-yapilan-taksitli-islemlerin-iadesi--5571838</a></li>
+<li id="s28">Hesapkurdu · Kredi kartı borcu öğrenme <span class="d">(tarih görülmedi)</span><br><a href="https://www.hesapkurdu.com/kredi-karti/rehber/kredi-karti-borcu-ogrenme" target="_blank" rel="noopener">hesapkurdu.com/kredi-karti/rehber/kredi-karti-borcu-ogrenme</a></li>
+<li id="s29">App Store · Kartly <span class="d">(2025-2026)</span><br><a href="https://apps.apple.com/ba/app/kartly/id6749616582" target="_blank" rel="noopener">apps.apple.com/ba/app/kartly/id6749616582</a></li>
+<li id="s30">App Store · Akrep AI <span class="d">(2025-2026)</span><br><a href="https://apps.apple.com/ee/app/akrep-ai/id6748313177" target="_blank" rel="noopener">apps.apple.com/ee/app/akrep-ai/id6748313177</a></li>
+<li id="s31">MWM uygulama dizini · Benim Cüzdanım <span class="d">(2026)</span><br><a href="https://mwm.ai/apps/benim-czdanm/6794840432" target="_blank" rel="noopener">mwm.ai/apps/benim-czdanm/6794840432</a></li>
+<li id="s32">App Store · ParaPlus <span class="d">(2026)</span><br><a href="https://apps.apple.com/tr/app/paraplus/id1571315970" target="_blank" rel="noopener">apps.apple.com/tr/app/paraplus/id1571315970</a></li>
+<li id="s33">Google Play Console Yardım · Yeni kişisel geliştirici hesapları için test koşulları <span class="d">(güncel sayfa)</span><br><a href="https://support.google.com/googleplay/android-developer/answer/14151465?hl=en-EN" target="_blank" rel="noopener">support.google.com/googleplay/android-developer/answer/14151465</a></li>
+<li id="s34">Google Cloud Blog · The ultimate Nano Banana prompting guide <span class="d">(05.03.2026)</span><br><a href="https://cloud.google.com/blog/products/ai-machine-learning/ultimate-prompting-guide-for-nano-banana" target="_blank" rel="noopener">cloud.google.com/blog/…/ultimate-prompting-guide-for-nano-banana</a></li>
+<li id="s35">Google AI (dev.to) · Nano-Banana Pro: Prompting Guide &amp; Strategies <span class="d">(2025-2026)</span><br><a href="https://dev.to/googleai/nano-banana-pro-prompting-guide-strategies-1h9n" target="_blank" rel="noopener">dev.to/googleai/nano-banana-pro-prompting-guide-strategies-1h9n</a></li>
+<li id="s36">Atlabs · Ultimate Nano Banana Pro Prompting Guide <span class="d">(2026)</span><br><a href="https://www.atlabs.ai/de/blog/the-ultimate-nano-banana-pro-prompting-guide-mastering-gemini-3-pro-image" target="_blank" rel="noopener">atlabs.ai/de/blog/the-ultimate-nano-banana-pro-prompting-guide…</a></li>
+<li id="s37">Pixelbin · Nano Banana Prompt Guide <span class="d">(2026)</span><br><a href="https://www.pixelbin.io/blog/nano-banana-prompt-guide" target="_blank" rel="noopener">pixelbin.io/blog/nano-banana-prompt-guide</a></li>
+<li id="s38">FitCraft · Reddit'in 2026 fitness uygulaması uzlaşısı <span class="d">(2026 · ikincil)</span><br><a href="https://getfitcraft.com/de/compare/best-fitness-apps-reddit" target="_blank" rel="noopener">getfitcraft.com/de/compare/best-fitness-apps-reddit</a></li>
+<li id="s39">Product Hunt · Kalorita (Türk mutfağına özel kalori uygulaması) <span class="d">(tarih görülmedi)</span><br><a href="https://www.producthunt.com/posts/1146506" target="_blank" rel="noopener">producthunt.com/posts/1146506</a></li>
+<li id="s40">Ekşi Sözlük · macrofactor başlığı <span class="d">(2026)</span><br><a href="https://eksisozluk.com/macrofactor--8116665" target="_blank" rel="noopener">eksisozluk.com/macrofactor--8116665</a></li>
+<li id="s41">Makerstack · MacroCodex incelemesi <span class="d">(2026)</span><br><a href="https://makerstack.co/reviews/macrocodex-review/" target="_blank" rel="noopener">makerstack.co/reviews/macrocodex-review/</a></li>
+<li id="s42">Product Hunt · Protein Pricer <span class="d">(tarih görülmedi)</span><br><a href="https://www.producthunt.com/p/protein-pricer/protein-pricer" target="_blank" rel="noopener">producthunt.com/p/protein-pricer/protein-pricer</a></li>
+<li id="s43">MWM uygulama dizini · CostBite: Budget Meals Tracker <span class="d">(2026)</span><br><a href="https://mwm.ai/apps/costbite-budget-meals-tracker/6683299660" target="_blank" rel="noopener">mwm.ai/apps/costbite-budget-meals-tracker/6683299660</a></li>
+<li id="s44">Reddit arşiv görüntüsü · Gram protein başına maliyet grafiği (r/dataisbeautiful) <span class="d">(Şubat 2026)</span><br><a href="https://reddit.sentinel-team.org/posts/1r0zyjm/snapshots/2026-02-11T18%3A40%3A08.261801Z" target="_blank" rel="noopener">reddit.sentinel-team.org/posts/1r0zyjm/…</a></li>
+<li id="s45">DonanımHaber forumu · Portföy takip programları <span class="d">(tarih doğrulanmadı)</span><br><a href="https://forum.donanimhaber.com/portfoy-takip-programlari--157375558" target="_blank" rel="noopener">forum.donanimhaber.com/portfoy-takip-programlari--157375558</a></li>
+<li id="s46">Richify · Türkçe ana sayfa <span class="d">(2026)</span><br><a href="https://www.richify.ai/tr" target="_blank" rel="noopener">richify.ai/tr</a></li>
+<li id="s47">Midas Destek · Amerikan borsası vergi durumu özeti <span class="d">(2026)</span><br><a href="https://www.getmidas.com/destek/amerikan-borsalari/vergilendirme/midastaki-amerikan-borsasi-vergi-durumu-ozetimi-nereden-gorebilirim" target="_blank" rel="noopener">getmidas.com/destek/amerikan-borsalari/vergilendirme/…</a></li>
+<li id="s48">Yapı Kredi · Yabancı hisse senedi gelirlerinde 2026 yılı vergi durumu <span class="d">(2026)</span><br><a href="https://www.yapikredi.com.tr/medium/file/yabanci-hisse-senedi-gelirlerinde-2026-yili-vergi-durumu_71999/view" target="_blank" rel="noopener">yapikredi.com.tr/medium/file/yabanci-hisse-senedi-gelirlerinde-2026…</a></li>
+<li id="s49">App Store Türkiye · MyFitnessPal fiyatları <span class="d">(2026)</span><br><a href="https://apps.apple.com/TR/app/id341232718" target="_blank" rel="noopener">apps.apple.com/TR/app/id341232718</a></li>
+<li id="s50">App Store Türkiye · Yazio kullanıcı yorumları <span class="d">(yorum tarihi görülmedi)</span><br><a href="https://apps.apple.com/TR/app/id946099227" target="_blank" rel="noopener">apps.apple.com/TR/app/id946099227</a></li>
+<li id="s51">Gerald blogu · BNPL ücret karşılaştırması <span class="d">(27.07.2026 · ikincil, şirket blogu)</span><br><a href="https://joingerald.com/learn/buy-now-pay-later/bills-tracker-bnpl-fees-comparison" target="_blank" rel="noopener">joingerald.com/learn/buy-now-pay-later/bills-tracker-bnpl-fees-comparison</a></li>
+<li id="s52">Work Club · 2026'nın BNPL uygulamaları ve kredi raporlaması <span class="d">(2026)</span><br><a href="https://work-club.com/?p=4459" target="_blank" rel="noopener">work-club.com/?p=4459</a></li>
+<li id="s53">SuperMoney · BNPL ve kredi notu <span class="d">(2025-2026)</span><br><a href="https://www.supermoney.com/bnpl-credit-score-holiday-shopping" target="_blank" rel="noopener">supermoney.com/bnpl-credit-score-holiday-shopping</a></li>
+<li id="s54">App Store Türkiye · Money-Wise fiyatı <span class="d">(2026)</span><br><a href="https://apps.apple.com/tr/app/money-wise/id1570010557?l=tr" target="_blank" rel="noopener">apps.apple.com/tr/app/money-wise/id1570010557</a></li>
+<li id="s55">Technopat forumu · Üç taksit yapılmasına rağmen tüm tutarın karttan çekilmesi <span class="d">(yaklaşık Haziran 2023)</span><br><a href="https://www.technopat.net/sosyal/konu/3-ay-taksit-yapilmasina-ragmen-tum-miktar-karttan-cekildi.2639248/" target="_blank" rel="noopener">technopat.net/sosyal/konu/3-ay-taksit-yapilmasina-ragmen-tum-miktar-karttan-cekildi.2639248/</a></li>
+<li id="s56">kisiselmuhasebe.com · Fatura takip tablosu ve 12 aylık ödeme takvimi <span class="d">(yaklaşık Ekim 2026)</span><br><a href="https://www.kisiselmuhasebe.com/blog/fatura-takip-tablosu-excel" target="_blank" rel="noopener">kisiselmuhasebe.com/blog/fatura-takip-tablosu-excel</a></li>
+<li id="s57">Testers Community · Google Play kapalı test koşulları 2026 ve kuralın geçmişi <span class="d">(2026)</span><br><a href="https://www.testerscommunity.com/blog/google-play-closed-testing-requirements-2026" target="_blank" rel="noopener">testerscommunity.com/blog/google-play-closed-testing-requirements-2026</a></li>
+<li id="s58">The Paypers · Cushion kapanış haberi (yıllık gelir rakamı) <span class="d">(2025)</span><br><a href="https://thepaypers.com/payments/news/cushion-shuts-down-after-eight-years-and-usd-20-million-in-funding" target="_blank" rel="noopener">thepaypers.com/payments/news/cushion-shuts-down-after-eight-years…</a></li>
+<li id="s59">Technopat forumu · "protein" etiketli konular <span class="d">(2026)</span><br><a href="https://www.technopat.net/sosyal/etiket/protein" target="_blank" rel="noopener">technopat.net/sosyal/etiket/protein</a></li>
+<li id="s60">Akakçe · Protein tozu kategorisi <span class="d">(Eylül 2026 verisi)</span><br><a href="https://www.akakce.com/protein-tozu,38.html" target="_blank" rel="noopener">akakce.com/protein-tozu,38.html</a></li>
+<li id="s61">Vergi Merkezi · Yurt dışı hisse vergilendirme rehberi ve hesaplama aracı <span class="d">(2025-2026)</span><br><a href="https://vergimerkezi.com.tr/?p=4442" target="_blank" rel="noopener">vergimerkezi.com.tr/?p=4442</a></li>
+<li id="s62">Cronometer forumu · Adaptif TDEE hesabı talebi <span class="d">(tarih görülmedi)</span><br><a href="https://forums.cronometer.com/discussion/comment/21763/" target="_blank" rel="noopener">forums.cronometer.com/discussion/comment/21763/</a></li>
+<li id="s63">Gerald blogu · BNPL takip seçenekleri karşılaştırması <span class="d">(01.08.2026 · ikincil, şirket blogu)</span><br><a href="https://joingerald.com/learn/cash-advance/buy-now-pay-later-tracker" target="_blank" rel="noopener">joingerald.com/learn/cash-advance/buy-now-pay-later-tracker</a></li>
+<li id="s64">Finny · Reddit'in 2026'da önerdiği bütçe uygulamaları <span class="d">(2026 · ikincil)</span><br><a href="https://getfinny.app/blog/best-budget-apps-reddit-recommends-2026" target="_blank" rel="noopener">getfinny.app/blog/best-budget-apps-reddit-recommends-2026</a></li>
+</ol>
+</section>
+</main>
+
+<footer>Bu dosya tek başına çalışır: CSS ve JavaScript içine gömülüdür, internet olmadan açılır. Yalnızca kaynak bağlantıları internet ister.</footer>
+
+<script>
+(function(){
+  'use strict';
+  document.body.className += ' js';
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('nav.tabs button'));
+  var secs = Array.prototype.slice.call(document.querySelectorAll('section.tab'));
+
+  function show(id, keepScroll){
+    var found = false;
+    secs.forEach(function(s){
+      var on = s.id === id;
+      if(on){ found = true; }
+      s.className = on ? 'tab on' : 'tab';
+    });
+    if(!found){ return false; }
+    tabs.forEach(function(b){
+      var on = b.getAttribute('data-tab') === id;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      if(on && b.scrollIntoView){ try{ b.scrollIntoView({block:'nearest', inline:'center'}); }catch(e){} }
+    });
+    try{ history.replaceState(null, '', '#' + id); }catch(e){}
+    if(!keepScroll){ window.scrollTo(0, 0); }
+    return true;
+  }
+
+  tabs.forEach(function(b){
+    b.addEventListener('click', function(){ show(b.getAttribute('data-tab')); });
+  });
+
+  // Metin içindeki [n] kaynak rozetleri ve bölümler arası bağlantılar
+  document.addEventListener('click', function(ev){
+    var t = ev.target;
+    while(t && t !== document && !(t.tagName === 'A' && (t.getAttribute('data-s') || t.getAttribute('data-go')))){ t = t.parentNode; }
+    if(!t || t === document){ return; }
+    ev.preventDefault();
+    var go = t.getAttribute('data-go');
+    if(go){ show(go); return; }
+    var n = t.getAttribute('data-s');
+    show('kaynak', true);
+    var li = document.getElementById('s' + n);
+    if(li){
+      Array.prototype.forEach.call(document.querySelectorAll('ol.src li.hit'), function(x){ x.className = ''; });
+      li.className = 'hit';
+      li.scrollIntoView({block:'center'});
+    }
+  });
+
+  // Kopyalama: önce pano API'si, olmazsa gizli metin alanı yöntemi
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '0';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try{ ta.setSelectionRange(0, text.length); }catch(e){}
+    var ok = false;
+    try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function selectNode(node){
+    try{
+      var r = document.createRange();
+      r.selectNodeContents(node);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }catch(e){}
+  }
+  function report(btn, ok, node){
+    var msg = btn.parentNode.querySelector('.copymsg');
+    var old = btn.getAttribute('data-label');
+    btn.className = ok ? 'copy ok' : 'copy fail';
+    btn.textContent = ok ? 'Kopyalandı ✓' : 'Kopyalanamadı';
+    if(msg){ msg.textContent = ok ? 'Prompt panoya alındı.' : 'Metin seçildi; Ctrl/Cmd + C ile kopyalayabilirsin.'; }
+    if(!ok){ selectNode(node); }
+    setTimeout(function(){
+      btn.className = 'copy';
+      btn.textContent = old;
+      if(msg && ok){ msg.textContent = ''; }
+    }, 2200);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('button.copy'), function(btn){
+    btn.setAttribute('data-label', btn.textContent);
+    btn.addEventListener('click', function(){
+      var node = document.getElementById(btn.getAttribute('data-copy'));
+      if(!node){ return; }
+      var text = node.textContent;
+      if(navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext){
+        navigator.clipboard.writeText(text).then(function(){ report(btn, true, node); }, function(){ report(btn, fallbackCopy(text), node); });
+      } else {
+        report(btn, fallbackCopy(text), node);
+      }
+    });
+  });
+
+  var start = (location.hash || '').replace('#', '');
+  if(!start || !show(start, true)){ show('ozet', true); }
+})();
+</script>
+</body>
+</html>
