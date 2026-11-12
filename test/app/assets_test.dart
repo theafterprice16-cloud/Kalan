@@ -23,12 +23,12 @@ void main() {
     expect(bytes[25], 2);
   });
 
-  test('launch background follows paper and ink', () {
+  test('launch background matches the logo ground in both modes', () {
     final day = File('android/app/src/main/res/values/colors.xml')
         .readAsStringSync();
     final night = File('android/app/src/main/res/values-night/colors.xml')
         .readAsStringSync();
-    expect(day, contains('#F7F5F0'));
-    expect(night, contains('#14213D'));
+    expect(day, contains('#172643'));
+    expect(night, contains('#172643'));
   });
 }

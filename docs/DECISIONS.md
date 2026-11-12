@@ -36,8 +36,8 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 24b | Yaklaşan ödeme | Ödenmemiş ve bugün ya da yarın olan ödemede kehribar nokta ve "Bugün"/"Yarın" metni. |
 | 25 | Ödenmiş ödemenin düzeltilmesi | Ödenmiş ödeme düzeltilemez; önce "ödenmedi" yapılır. |
 
-| 26 | Uygulama ikonu | Kimlik dosyasındaki ana tasarım (dört dilimli halka, sağ üst dilim kalan yeşili, mürekkep zemin) `tool/generate_icons.py` ile kodla çizilir. Nano Banana Pro ile üretilecek nihai ikon gelince aynı dosya adlarıyla değiştirilir. |
-| 27 | Açılış ekranı | Android: kâğıt zemin (karanlık modda mürekkep) ve ortada halka. iOS: kâğıt zemin ve halka; storyboard eski araç sürümünde olduğu için karanlık mod varyantı Xcode'da eklenecek. |
+| 26 | Uygulama ikonu | Kullanıcının verdiği nihai logo: K harfi, alt bacak üç yeşil parça (kimlikteki "Alternatif 2"). Ana dosya `docs/kimlik/logo.png`; bütün boyutlar `tool/generate_icons.py` ile üretilir. Logonun zemini #172643 ve yeşili #47D5A3, kimlik paletine (#14213D, #23B58E) yakın ama aynı değil; uygulama içi renkler kimlik paletinde kalır. |
+| 27 | Açılış ekranı | Android ve iOS: logonun kendi zemin rengi (#172643), açık ve karanlık modda aynı; ortada logo. Zemin aynı olduğu için logo kenar izi bırakmadan kaynaşır. |
 
 ## Teknik
 
