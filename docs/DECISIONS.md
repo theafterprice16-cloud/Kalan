@@ -32,6 +32,8 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 22 | 4 ödemeli plan | İlk ödeme alışveriş günü; sonra 14 günde bir, toplam 4 ödeme. |
 | 23 | Kart taksidi tarihi | Ödeme tarihi, taksidin düştüğü ekstre tarihinden sonraki ilk son ödeme günüdür (aynı gün sayılmaz). Hafta sonu kaydırması kart başına ayar, varsayılan açık; cumartesi ve pazar pazartesiye kayar. Resmi tatiller BACKLOG'da. |
 | 24 | Yarıda başlayan plan | Toplam taksit sayısı, kalan taksit sayısı, taksit tutarı ve sonraki ödeme tarihi girilir. Yalnızca kalan ödemeler kaydedilir; plan toplamı bunların toplamıdır. İlerleme etiketi baştan sayar ("4/12"). Kart kaynağında sonraki tarihler kartın son ödeme gününe göre üretilir. |
+| 24a | Sabit ödemelerin geçmiş tekrarları | "Ödenmemiş" bölümünde gösterilmez (yalnızca plan ödemeleri). Aksi hâlde başlangıçtan bu yana işaretlenmemiş her kira satırı listeyi doldururdu. |
+| 24b | Yaklaşan ödeme | Ödenmemiş ve bugün ya da yarın olan ödemede kehribar nokta ve "Bugün"/"Yarın" metni. |
 | 25 | Ödenmiş ödemenin düzeltilmesi | Ödenmiş ödeme düzeltilemez; önce "ödenmedi" yapılır. |
 
 ## Teknik

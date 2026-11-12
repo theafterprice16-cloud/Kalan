@@ -1,0 +1,116 @@
+import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
+import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/app/app.dart';
+import 'package:kalan/app/providers.dart';
+import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/data/repositories/plan_repository.dart';
+import 'package:kalan/data/repositories/recurring_repository.dart';
+import 'package:kalan/data/repositories/source_repository.dart';
+import 'package:material_ui/material_ui.dart';
+
+/// Default "today" in widget tests: Friday 20 November 2026.
+final testToday = LocalDate(2026, 11, 20);
+
+/// Starts the full app on an in-memory database.
+///
+/// The database is closed after the test. Call [seed] to insert data
+/// before the first frame.
+Future<AppDatabase> pumpApp(
+  WidgetTester tester, {
+  Locale locale = const Locale('tr'),
+  LocalDate? today,
+  Future<void> Function(AppDatabase db)? seed,
+}) async {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  tester.platformDispatcher.localeTestValue = locale;
+  tester.platformDispatcher.localesTestValue = [locale];
+  addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+  addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+
+  final db = AppDatabase(NativeDatabase.memory());
+  if (seed != null) await seed(db);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        todayProvider.overrideWithValue(today ?? testToday),
+      ],
+      child: const KalanApp(),
+    ),
+  );
+  await tester.pumpAndSettle();
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 1));
+    await tester.runAsync(db.close);
+  });
+  return db;
+}
+
+/// Monthly payday on the 15th.
+Future<void> seedSettings(
+  AppDatabase db, {
+  String currency = 'TRY',
+  int? incomeMinor,
+  int? thresholdMinor,
+  String? localeCode,
+  int payDay = 15,
+}) => db
+    .into(db.appSettings)
+    .insert(
+      AppSettingsCompanion.insert(
+        currencyCode: currency,
+        payFrequency: PayFrequency.monthly,
+        payDay: Value(payDay),
+        netIncomeMinor: Value(incomeMinor),
+        tightThresholdMinor: Value(thresholdMinor),
+        localeCode: Value(localeCode),
+      ),
+    );
+
+/// Pay in 4 at Klarna, 400.00 starting on [first].
+Future<int> seedPayIn4(
+  AppDatabase db, {
+  LocalDate? first,
+  int totalMinor = 40000,
+  String source = 'Klarna',
+  String? title,
+}) async {
+  final plans = PlanRepository(db);
+  final sourceId = await SourceRepository(
+    db,
+    plans,
+  ).findOrCreateProvider(source);
+  return plans.saveDraft(
+    PlanCalculator.payIn4(
+      firstDate: first ?? testToday,
+      totalMinor: totalMinor,
+    ),
+    sourceId: sourceId,
+    origin: PlanOrigin.template,
+    title: title,
+  );
+}
+
+/// Monthly rent of 15,000.00 since January.
+Future<int> seedRent(AppDatabase db) => RecurringRepository(db).create(
+  RecurringPaymentsCompanion.insert(
+    name: 'Kira',
+    amountMinor: 1500000,
+    recurrence: Recurrence.monthly,
+    startDay: LocalDate(2026, 1, 1).epochDay,
+  ),
+);
+
+/// Scrolls the first scrollable until [finder] is built and visible.
+Future<void> scrollTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    200,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pumpAndSettle();
+}
