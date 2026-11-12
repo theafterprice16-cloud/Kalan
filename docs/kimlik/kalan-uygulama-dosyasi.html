@@ -413,21 +413,32 @@ footer{max-width:980px;margin:0 auto;padding:0 16px 40px;color:var(--smoke);font
 <p class="small">Hitap: Türkçede "sen". İngilizcede ikinci tekil, kısaltmalı gündelik dil. Emoji ve ünlem kullanılmaz. Para tutarları her zaman rakamla ve para birimiyle yazılır.</p>
 
 <h3>Görsel yön</h3>
-<div class="sw">
-  <div><i style="background:#14213D"></i><b>Mürekkep</b><span>#14213D · ana koyu, metin, ikon zemini</span></div>
-  <div><i style="background:#23B58E"></i><b>Kalan yeşili</b><span>#23B58E · "kalan" sayısı, vurgu dolguları</span></div>
-  <div><i style="background:#127A5F"></i><b>Koyu yeşil</b><span>#127A5F · açık zeminde yeşil metin ve düğme</span></div>
-  <div><i style="background:#F2A541"></i><b>Kehribar</b><span>#F2A541 · yaklaşan ödeme, dikkat</span></div>
-  <div><i style="background:#E4572E"></i><b>Mercan</b><span>#E4572E · yalnızca eksiye düşen dönem; az kullanılır</span></div>
-  <div><i style="background:#F7F5F0"></i><b>Kâğıt</b><span>#F7F5F0 · açık zemin</span></div>
-  <div><i style="background:#5F6880"></i><b>Duman</b><span>#5F6880 · ikincil metin</span></div>
-</div>
+<div class="card"><p><strong>Palet güncellemesi: Gece &amp; Nane (12 Kasım 2026).</strong> Eski palet (mürekkep #14213D, kâğıt #F7F5F0, kalan yeşili #23B58E, koyu yeşil #127A5F, kehribar #F2A541, mercan #E4572E, duman #5F6880) kaldırıldı. Uygulamadaki tek renk kaynağı aşağıdaki Gece &amp; Nane paletidir; ayrıntılar ve ölçülmüş kontrastlar <code>docs/DESIGN_TOKENS.md</code> dosyasında. Bu dosyanın başka bölümlerinde ve logo promptlarında geçen eski renk kodları tarihçe olarak bırakılmıştır.</p></div>
+<div class="tw"><table>
+<tr><th>Token</th><th>Koyu tema</th><th>Açık tema</th><th>Kullanım</th></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#0B0F14"></i> bg</td><td>#0B0F14</td><td>#F7F8FA</td><td>Ekran zemini</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#151B23"></i> surface</td><td>#151B23</td><td>#FFFFFF</td><td>Kartlar, listeler, alt sayfalar</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#1E2630"></i> surfaceRaised</td><td>#1E2630</td><td>#EEF1F4</td><td>Seçili satır, giriş alanı zemini, harf rozeti</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#2A3441"></i> border</td><td>#2A3441</td><td>#DDE2E8</td><td>İnce ayraç ve kart çizgileri (yalnızca dekor)</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#F2F5F7;border:1px solid #DDE2E8"></i> text</td><td>#F2F5F7</td><td>#0B0F14</td><td>Ana metin</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#9AA5B1"></i> textMuted</td><td>#9AA5B1</td><td>#5B6673</td><td>İkincil metin, tarih, açıklama</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#3DDC97"></i> mint</td><td>#3DDC97</td><td>#3DDC97</td><td>Kalan vurgusu, dolgu, ana düğme zemini</td></tr>
+<tr><td>onMint</td><td>#0B0F14</td><td>#0B0F14</td><td>Nane dolgu üstündeki metin ve ikon</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#0E7A53"></i> mintText</td><td>#3DDC97</td><td>#0E7A53</td><td>Metin olarak nane: büyük "kalan" sayısı, bağlantılar</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#FFB547"></i> amber</td><td>#FFB547</td><td>#FFB547</td><td>Kalan eksiye düşünce dolgu, uyarı</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#A15C00"></i> amberText</td><td>#FFB547</td><td>#A15C00</td><td>Metin olarak kehribar: eksi kalan, uyarı metni</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#FF5C5C"></i> coral</td><td>#FF5C5C</td><td>#C62F2F</td><td>Yalnızca gecikme, hata ve geri alınamaz silme</td></tr>
+<tr><td><i style="display:inline-block;width:12px;height:12px;background:#6B7684"></i> chartCommitted</td><td>#6B7684</td><td>#5B6673</td><td>Grafikte "söz verilmiş" kısım</td></tr>
+</table></div>
 <ul>
+  <li><strong>Tema:</strong> Varsayılan sisteme uyar; Ayarlar'da Sistem / Açık / Koyu seçilebilir.</li>
+  <li><strong>Durum renkleri:</strong> Kalan sıfır ya da artıdaysa büyük sayı mintText. Kalan eksiye düşünce sayı amberText olur ve altında sakin bir açıklama çıkar; kırmızı kullanılmaz. Coral yalnızca gecikmiş ödeme, hata ve geri alınamaz silmede görünür. Renk asla tek başına anlam taşımaz; her durum metin ya da ikonla da belli olur ("Ödendi", "Gecikti").</li>
+  <li><strong>Açık temada nane:</strong> #3DDC97 açık zeminde metin olarak kullanılmaz (kontrast 1,77); yalnızca koyu yazılı dolgu olarak kullanılır. Metin için mintText (#0E7A53).</li>
   <li><strong>Tipografi hissi:</strong> Geometrik ama yumuşak, okunaklı bir sans serif. Uygulamada sistem yazı tipleri (iOS'ta San Francisco, Android'de Roboto). Tutarlar sabit genişlikli rakamlarla, büyük ve kalın; etiketler küçük ve sakin.</li>
-  <li><strong>Biçim dili:</strong> Düz renkler, ince çizgiler, bol boşluk. Gölge ve degrade yok denecek kadar az. Ana motif dört dilime bölünmüş halka: dilimler ödemeleri, parlak dilim kalanı anlatır.</li>
-  <li><strong>Grafikler:</strong> Dönem başına tek çubuk; söz verilmiş kısım mürekkep, kalan kısım yeşil. Pasta ve üç boyutlu grafik yok.</li>
-  <li><strong>Sağlayıcı ve banka gösterimi:</strong> Logo kullanılmaz; ad düz metinle ve nötr renkli bir harf rozetiyle gösterilir.</li>
-  <li><strong>Karanlık mod:</strong> Zemin mürekkep, kartlar bir ton açık; yeşil ve kehribar aynı kalır.</li>
+  <li><strong>Biçim dili:</strong> Düz renkler, bol boşluk, ince çizgiler. Degrade ve ağır gölge yok. Koyu temada derinlik gölgeyle değil, bg → surface → surfaceRaised ton farkıyla verilir.</li>
+  <li><strong>Grafikler:</strong> Dönem başına tek çubuk; söz verilmiş kısım chartCommitted, kalan kısım mint, eksi dönemde aşan kısım amber. Pasta ve üç boyutlu grafik yok.</li>
+  <li><strong>Sağlayıcı ve banka gösterimi:</strong> Logo kullanılmaz; ad düz metinle ve nötr harf rozetiyle (surfaceRaised zemin, textMuted harf) gösterilir.</li>
+  <li><strong>Uygulama ikonu:</strong> K harfi; alt bacak üç nane parçaya bölünür. Zemin #0B0F14, gövde #F2F5F7, parçalar #3DDC97. Kaynak <code>assets/brand/kalan_icon.svg</code>. Açılış ekranı zemini #0B0F14.</li>
 </ul>
 
 <h3>Terimler sözlüğü</h3>

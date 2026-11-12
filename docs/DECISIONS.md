@@ -21,10 +21,10 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 13 | Ücretsiz sınır | 4 açık plan. 5. plan eklenmek istenince sakin bir bilgi gösterilir, ekleme yapılmaz. Satış dili yok. Debug derlemede Ayarlar'da Pro anahtarı var. |
 | 14 | Dışa aktarma | Ücretsiz (kimlik B bölümü bağlayıcı: "dışa aktarma her zaman açıktır"). A bölümündeki gelir modeli tablosu bununla çelişiyordu. |
 | 15 | İleri bakış | Pro (kimlik A · Gelir modeli). |
-| 16 | Kalan sayısının rengi | Açık temada koyu yeşil #127A5F (kâğıt üzerinde #23B58E kontrastı 2,4:1, yetersiz). Karanlık temada kalan yeşili #23B58E. Kimlikteki "açık zeminde yeşil metin koyu yeşil" kuralına dayanır. |
-| 17 | Karanlık temada ikincil metin | Duman #5F6880 mürekkep zeminde okunmadığı için karanlık temada #A3ABBF kullanılır. |
-| 17a | Karanlık temada dönem çubuğu | Söz verilmiş kısım mürekkep zeminde görünmediği için karanlık temada açık duman (#A3ABBF); kalan kısım yeşil. Gider geliri aşarsa aşan kısım mercan. |
-| 17b | Form hataları | Mercan kullanılmaz (yalnızca eksiye düşen dönem). Hata, mürekkep renkli çerçeve ve açıklayıcı metinle gösterilir. |
+| 16 | Kalan sayısının rengi | Gece & Nane: artıda mintText (açık #0E7A53, koyu #3DDC97), eksi dönemde amberText. Bkz. docs/DESIGN_TOKENS.md. |
+| 17 | İkincil metin | textMuted (açık #5B6673, koyu #9AA5B1). |
+| 17a | Dönem çubuğu | Söz verilmiş chartCommitted, kalan mint, eksi dönemde aşan kısım amber. |
+| 17b | Form hataları ve silme | coral (yalnızca gecikme, hata ve geri alınamaz silme). |
 | 18 | Dil | Varsayılan sistem dili; TR değilse EN. Ayarlar'dan değiştirilebilir. iOS `Info.plist` içindeki `CFBundleLocalizations` yalnızca `tr` ve `en` listeler; iOS dili uygulamaya bu listeyle iletir. Diğer 8 dilin çevirileri `docs/ceviriler-beklemede/` altında bekliyor. |
 | 19 | Para birimi değişimi | Ayarlar'dan; önce "Tutarlar çevrilmez, yalnızca para birimi etiketi değişir" uyarısı ve örnek önizleme (₺1.234,56 → Rp1.235) gösteren onay penceresi. Kur çevirisi yok. Ondalık sayısı farklıysa saklanan bütün tutarlar (ödemeler, sabit ödemeler, gelir, eşik) tek işlemde yeni üsse ölçeklenir; azalan ondalıkta yarım yukarı yuvarlanır. Ödeme ve sabit ödeme tutarı en az 1 birim kalır (şema 0'a izin vermez). |
 | 20 | Tutar biçimi | Tek biçimlendirici `formatMoney` (lib/core/money). Sembolün yeri, ayraçlar ve boşluk uygulama dilinden (intl), sembol ve ondalık sayısı para biriminden gelir: tr ₺1.234,56 · de 1.234,56 € · pt R$ 1.234,56 · id Rp1.234.567. Kuruşsuz tutarlarda ondalık gösterilmez (₺3.250). intl sembolü bölünmez boşlukla bağlar; tutar satır sonunda bölünmez. Kimlik dosyasındaki "3.250 TL" örneği bu kararla eskidi (kullanıcı onayı, 12 Kasım 2026). Tutar tam sayı kalır: intl yalnızca tam kısmı biçimler, kuruş tam sayıdan eklenir. Diğer dillerdeki örnekler biçimlendiricinin yeteneğini gösterir; uygulama şimdilik yalnızca tr ve en ile açılır (Almanca telefonda €1,234.56). |
@@ -36,8 +36,8 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 24b | Yaklaşan ödeme | Ödenmemiş ve bugün ya da yarın olan ödemede kehribar nokta ve "Bugün"/"Yarın" metni. |
 | 25 | Ödenmiş ödemenin düzeltilmesi | Ödenmiş ödeme düzeltilemez; önce "ödenmedi" yapılır. |
 
-| 26 | Uygulama ikonu | Kullanıcının verdiği nihai logo: K harfi, alt bacak üç yeşil parça (kimlikteki "Alternatif 2"). Ana dosya `docs/kimlik/logo.png`; bütün boyutlar `tool/generate_icons.py` ile üretilir. Logonun zemini #172643 ve yeşili #47D5A3, kimlik paletine (#14213D, #23B58E) yakın ama aynı değil; uygulama içi renkler kimlik paletinde kalır. |
-| 27 | Açılış ekranı | Android ve iOS: logonun kendi zemin rengi (#172643), açık ve karanlık modda aynı; ortada logo. Zemin aynı olduğu için logo kenar izi bırakmadan kaynaşır. |
+| 26 | Uygulama ikonu | Kullanıcının K logosu, Gece & Nane renkleriyle yeniden çizildi: zemin #0B0F14, gövde #F2F5F7, üç parça #3DDC97. Geometri orijinal çizimden ölçüldü; kaynak `assets/brand/kalan_icon.svg`, üretici `tool/generate_icons.py`, platform ikonları `flutter_launcher_icons`. Orijinal çizim `docs/kimlik/logo-ilk-renkler.png` olarak tarihçede. |
+| 27 | Açılış ekranı | Android ve iOS: #0B0F14 zemin (açık ve koyu modda aynı), ortada işaret. |
 | 28 | Para birimleri | 17 birim: TRY, USD, EUR, GBP, BRL, MXN, COP, CLP, RUB, KZT, CNY, SGD, MYR, IDR, CAD, AUD, CHF. Tek kaynak `lib/core/money/currency.dart`. Veritabanında ISO kodu (metin) saklanır; şema değişmedi. |
 | 29 | IDR ve COP ondalığı | ISO 4217 iki hane der, ama günlük hayatta kuruş (sen, centavo) kullanılmıyor ve fiyatlar tam sayı. Uygulamada 0 ondalık: gösterimde ondalık yok, girişte ondalık tuşu çıkmaz ve ondalık reddedilir. CLP de 0. |
 | 30 | Paylaşılan $ işareti | MXN, COP, CLP, CAD, AUD, SGD: cihaz bölgesi para biriminin ülkesiyse yalın $, değilse MX$, COL$, CLP$, CA$, A$, S$. USD her yerde $. Bölge uygulama dilinden bağımsızdır (cihaz bölgesi). |
@@ -57,3 +57,17 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | İkon üretimi | `tool/generate_icons.py` yalnızca geliştirmede çalışır ve Pillow ister; uygulamanın bağımlılığı değildir. |
 | SQLite derlemesi | `sqlite3` 3.x paketi (drift_flutter üzerinden) derleme sırasında hazır SQLite ikilisini GitHub'dan indirir ve SHA-256 ile doğrular. Bu yalnızca derleme anıdır; uygulama çalışırken ağ kullanılmaz. |
 | Şema | Drift `schemaVersion` 1. Şema anlık görüntüsü `drift_schemas/`, göç testleri `test/drift/`. Yabancı anahtarlar açık; plan silinince ödemeleri silinir, planı olan kaynak silinemez. |
+
+
+## Palet: Gece & Nane (12 Kasım 2026)
+
+| Konu | Karar |
+|---|---|
+| Eski palet neden bırakıldı | Lacivert-krem palet (mürekkep #14213D, kâğıt #F7F5F0, yeşil #23B58E, mercan #E4572E, kehribar #F2A541) yalnızca açık tema için düşünülmüştü: koyu temada duman ve mürekkep yetersiz kontrast verdi, ek tonlar (inkRaised, smokeLight vb.) gerekti. Yeşil açık zeminde metin olarak okunmadı (2,4:1). Eksi dönemin mercanla gösterilmesi "kırmızı alarm" hissi veriyordu. Gece & Nane koyu tema öncelikli, ölçülmüş kontrastlı tek bir token setidir; eksi dönemi sakin amber ile, gerçek sorunları (gecikme, hata, silme) coral ile ayırır. |
+| Tek kaynak | `KalanColors` ThemeExtension (`lib/core/theme`). Başka yerde renk yazılmaz; bekçi test yakalar. |
+| Eksi dönem metni | "Bu dönem ₺X eksik kalıyor." korunur (çeviri değişmez), rengi textMuted, ikonu amberText. |
+| "Gecikti" rozeti | Ödenmemiş ve tarihi bugünden önce olan her ödemede coral ikon + "Gecikti/Overdue" metni (ana ekran ve plan ayrıntısı). "Ödenmemiş" bölümünün tanımı (DECISIONS 2) değişmedi. |
+| Tema seçimi saklama | `shared_preferences` (Flutter ekibinin paketi; cihazda saklar, ağ kullanmaz). Veritabanına sütun eklenmedi; görüntü tercihi kullanıcı verisi değildir. |
+| flutter_launcher_icons | Yalnızca geliştirme bağımlılığı; uygulamaya girmez, ağ kullanmaz. Ürettiği hatalı Xcode ayarı geri alınır ve testle korunur. |
+| Karartma | `bg` %60 opaklık; yeni ton sayılmaz. |
+| Golden testleri | Flutter SDK'daki Roboto ile çizilir; CI aynı SDK sürümünü kullanır. Test yazı tipinde "→" karakteri olmadığı için önizleme penceresinde kutu görünür; cihazda sistem yazı tipi çizer. |

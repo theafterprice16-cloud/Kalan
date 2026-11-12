@@ -8,7 +8,7 @@ Taksitleri ve "şimdi al, sonra öde" planlarını tek takvimde toplayan, her ma
 
 1. Hesap, giriş, banka/sağlayıcı bağlantısı, reklam yok. Veri yalnızca cihazda. Analitik, çökme raporu ya da ağ isteği yapan paket eklenmez (sormadan asla).
 2. Takvim, tahmin değil: yalnızca bilinen ödemeler. Bilinmeyen tutar uydurulmaz, kullanıcıya sorulur.
-3. Yargı yok: puan, rozet, seri, kırmızı alarm, ünlem, emoji yok. Mercan (#E4572E) yalnızca eksiye düşen dönemde.
+3. Yargı yok: puan, rozet, seri, kırmızı alarm, ünlem, emoji yok. Eksi dönem amber; coral yalnızca gecikme, hata ve silme.
 4. Ödeme yapılmaz, para tutulmaz, kredi/kart önerilmez, tavsiye verilmez.
 5. Sağlayıcı/banka logosu yok; ad düz metin + nötr harf rozeti (`LetterBadge`).
 6. Yirmi saniye kuralı: şablonla plan ekleme tek ekranda, en çok dört alan.
@@ -19,6 +19,13 @@ Taksitleri ve "şimdi al, sonra öde" planlarını tek takvimde toplayan, her ma
 Ek: Arayüz metni kodda sabit yazılmaz (`lib/l10n/*.arb`, Türkçe ve İngilizce). Durum yalnızca renkle anlatılmaz. Dokunma hedefi en az 48x48.
 
 Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedikçe yeni dil ekleme, mevcut çevirileri değiştirme.
+
+## Renk
+
+Renk paleti Gece & Nane'dir (docs/DESIGN_TOKENS.md). Yalnızca KalanColors tokenları kullanılır. Yeni renk, ton ya da degrade eklemek için önce kullanıcıdan onay alınır. Her yeni ekran açık ve koyu temada golden testle doğrulanır.
+
+- Tokenlar: `lib/core/theme/kalan_colors.dart`; tema: `kalan_theme.dart`; ekranlarda `context.colors.<token>`.
+- Bekçi: `test/app/color_guard_test.dart`; kontrast: `test/core/theme/contrast_test.dart`; golden: `test/golden/` → `screenshots/`.
 
 ## Para
 
@@ -37,7 +44,9 @@ dart format lib test
 flutter analyze
 flutter test
 dart run drift_dev make-migrations       # şema sürümü artırınca (önce schemaVersion++)
-python3 tool/generate_icons.py           # ikon ve açılış görsellerini yeniden üretir
+python3 tool/generate_icons.py           # marka SVG/PNG kaynakları (assets/brand)
+dart run flutter_launcher_icons          # platform ikonları (sonra project.pbxproj değişikliğini geri al)
+flutter test test/golden --update-goldens  # golden görüntüleri yenile
 ```
 
 ## Klasör haritası
@@ -48,7 +57,8 @@ lib/
     date/       LocalDate (saat dilimsiz gün)
     money/      Currency, para biçimlendirme ve ayrıştırma
     engine/     Saf Dart hesap motoru (Flutter import'u yasak, testle denetlenir)
-    design/     Renkler, tema, AmountText, LetterBadge, PeriodBar
+    design/     AmountText, LetterBadge, PeriodBar, form alanları
+    theme/      KalanColors (Gece & Nane), tema, tema seçimi
     routing/    go_router
   data/
     db/         Drift tabloları ve AppDatabase
@@ -57,6 +67,8 @@ lib/
   features/     onboarding, home, plans, sources, recurring, settings, roadmap
   l10n/         app_en.arb, app_tr.arb, generated/
 assets/roadmap.json   Yol Haritası içeriği (docs/ROADMAP_CONTENT.md)
+assets/brand/         İkon kaynakları (SVG + PNG)
+screenshots/          Golden görüntüleri
 drift_schemas/        Şema anlık görüntüleri (göç testi için)
 test/                 lib/ yapısını izler
 ```
