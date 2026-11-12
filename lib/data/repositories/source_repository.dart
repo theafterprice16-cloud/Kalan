@@ -1,0 +1,91 @@
+import 'package:drift/drift.dart';
+
+import '../db/app_database.dart';
+import '../models.dart';
+import 'plan_repository.dart';
+
+class SourceRepository {
+  SourceRepository(this._db, this._plans);
+
+  final AppDatabase _db;
+  final PlanRepository _plans;
+
+  Stream<List<SourceRow>> watchAll() =>
+      (_db.select(
+            _db.sources,
+          )..orderBy([(s) => OrderingTerm.asc(s.name.collate(Collate.noCase))]))
+          .watch();
+
+  Future<SourceRow?> byId(int id) => (_db.select(
+    _db.sources,
+  )..where((s) => s.id.equals(id))).getSingleOrNull();
+
+  Future<int> create({
+    required String name,
+    required SourceKind kind,
+    int? statementDay,
+    int? dueDay,
+    bool shiftDueToBusinessDay = true,
+  }) => _db
+      .into(_db.sources)
+      .insert(
+        SourcesCompanion.insert(
+          name: name.trim(),
+          kind: kind,
+          statementDay: Value(kind == SourceKind.card ? statementDay : null),
+          dueDay: Value(kind == SourceKind.card ? dueDay : null),
+          shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
+        ),
+      );
+
+  /// Finds a provider by name (case-insensitive) or creates it.
+  Future<int> findOrCreateProvider(String name) async {
+    final trimmed = name.trim();
+    final existing =
+        await (_db.select(_db.sources)
+              ..where((s) => s.name.lower().equals(trimmed.toLowerCase()))
+              ..limit(1))
+            .getSingleOrNull();
+    if (existing != null) return existing.id;
+    return create(name: trimmed, kind: SourceKind.provider);
+  }
+
+  /// Saves changes. When a card's days change, unpaid and unedited
+  /// payments of its card plans are moved to the new dates.
+  Future<void> update(SourceRow updated) => _db.transaction(() async {
+    final old = await byId(updated.id);
+    final normalized = updated.kind == SourceKind.card
+        ? updated
+        : updated.copyWith(
+            statementDay: const Value(null),
+            dueDay: const Value(null),
+          );
+    await _db.update(_db.sources).replace(normalized);
+    final oldTerms = old?.cardTerms;
+    final newTerms = normalized.cardTerms;
+    if (oldTerms != null &&
+        newTerms != null &&
+        (oldTerms.statementDay != newTerms.statementDay ||
+            oldTerms.dueDay != newTerms.dueDay ||
+            oldTerms.shiftDueToBusinessDay != newTerms.shiftDueToBusinessDay)) {
+      await _plans.recomputeCardPlans(
+        sourceId: updated.id,
+        oldTerms: oldTerms,
+        newTerms: newTerms,
+      );
+    }
+  });
+
+  /// Deletes a source with no plans. Returns false when plans use it.
+  Future<bool> delete(int id) => _db.transaction(() async {
+    final used =
+        await (_db.selectOnly(_db.plans)
+              ..addColumns([_db.plans.id.count()])
+              ..where(_db.plans.sourceId.equals(id)))
+            .map((r) => r.read(_db.plans.id.count()) ?? 0)
+            .getSingle();
+    if (used > 0) return false;
+    await (_db.delete(_db.sources)..where((s) => s.id.equals(id))).go();
+    return true;
+  });
+}
