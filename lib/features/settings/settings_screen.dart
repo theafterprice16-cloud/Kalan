@@ -1,12 +1,311 @@
+import 'package:drift/drift.dart' show Value;
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
+import '../../app/providers.dart';
+import '../../core/date/local_date.dart';
+import '../../core/design/theme.dart';
+import '../../core/design/widgets.dart';
+import '../../core/engine/pay_period.dart';
+import '../../core/money/currency.dart';
+import '../../core/money/money_format.dart';
+import '../../core/routing/routes.dart';
+import '../../data/db/app_database.dart';
+import '../onboarding/onboarding_screen.dart';
+import '../onboarding/pay_form.dart';
 
-/// Placeholder until this screen lands.
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
+  Future<void> _update(WidgetRef ref, AppSettingsCompanion changes) =>
+      ref.read(settingsRepositoryProvider).update(changes);
+
+  String _paySummary(BuildContext context, SettingsRow s) {
+    final l10n = context.l10n;
+    return switch (s.payFrequency) {
+      PayFrequency.monthly => l10n.paySummaryMonthly(s.payDay ?? 1),
+      PayFrequency.biweekly => l10n.paySummaryBiweekly(
+        context.longDate(LocalDate.fromEpochDay(s.payAnchorDay ?? 0)),
+      ),
+      PayFrequency.weekly => l10n.paySummaryWeekly(
+        context.weekdayName(LocalDate.fromEpochDay(s.payAnchorDay ?? 0)),
+      ),
+    };
+  }
+
+  Future<void> _pickLanguage(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsRow s,
+  ) async {
+    final l10n = context.l10n;
+    final picked = await showDialog<_Choice<String?>>(
+      context: context,
+      builder: (_) => _ChoiceDialog<String?>(
+        title: l10n.settingsLanguage,
+        selected: s.localeCode,
+        options: [
+          (null, l10n.languageSystem),
+          ('tr', l10n.languageTurkish),
+          ('en', l10n.languageEnglish),
+        ],
+      ),
+    );
+    if (picked != null) {
+      await _update(ref, AppSettingsCompanion(localeCode: Value(picked.value)));
+    }
+  }
+
+  Future<void> _pickCurrency(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsRow s,
+  ) async {
+    final l10n = context.l10n;
+    final picked = await showDialog<_Choice<Currency>>(
+      context: context,
+      builder: (_) => _ChoiceDialog<Currency>(
+        title: l10n.settingsCurrency,
+        note: l10n.settingsCurrencyNote,
+        selected: Currency.fromCode(s.currencyCode),
+        options: currencyOptions(context),
+      ),
+    );
+    if (picked != null) {
+      await _update(
+        ref,
+        AppSettingsCompanion(currencyCode: Value(picked.value.code)),
+      );
+    }
+  }
+
+  Future<void> _editAmount(
+    BuildContext context,
+    WidgetRef ref, {
+    required String title,
+    required String help,
+    required int? current,
+    required AppSettingsCompanion Function(int?) toChanges,
+  }) async {
+    final result = await showDialog<_Choice<int?>>(
+      context: context,
+      builder: (_) =>
+          _AmountDialog(title: title, help: help, initialMinor: current),
+    );
+    if (result != null) await _update(ref, toChanges(result.value));
+  }
+
   @override
-  Widget build(BuildContext context) =>
-      Scaffold(appBar: AppBar(title: Text(context.l10n.navSettings)));
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final s = ref.watch(settingsProvider).value;
+    if (s == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final secondary = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: context.palette.secondaryText);
+    String amountOrNot(int? minor) =>
+        minor == null ? l10n.notSet : ref.money(context, minor);
+    final currencyLabel = currencyOptions(context)
+        .firstWhere((o) => o.$1 == Currency.fromCode(s.currencyCode))
+        .$2;
+    final languageLabel = switch (s.localeCode) {
+      'tr' => l10n.languageTurkish,
+      'en' => l10n.languageEnglish,
+      _ => l10n.languageSystem,
+    };
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.navSettings)),
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 32),
+        children: [
+          SectionTitle(l10n.settingsPay),
+          ListTile(
+            title: Text(l10n.settingsPay),
+            subtitle: Text(_paySummary(context, s), style: secondary),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.pay),
+          ),
+          ListTile(
+            title: Text(l10n.settingsNetIncome),
+            subtitle: Text(amountOrNot(s.netIncomeMinor), style: secondary),
+            onTap: () => _editAmount(
+              context,
+              ref,
+              title: l10n.settingsNetIncome,
+              help: l10n.netIncomeHelp,
+              current: s.netIncomeMinor,
+              toChanges: (v) => AppSettingsCompanion(netIncomeMinor: Value(v)),
+            ),
+          ),
+          ListTile(
+            title: Text(l10n.settingsTight),
+            subtitle: Text(
+              s.tightThresholdMinor == null
+                  ? l10n.off
+                  : ref.money(context, s.tightThresholdMinor!),
+              style: secondary,
+            ),
+            onTap: () => _editAmount(
+              context,
+              ref,
+              title: l10n.settingsTight,
+              help: l10n.settingsTightHelp,
+              current: s.tightThresholdMinor,
+              toChanges: (v) =>
+                  AppSettingsCompanion(tightThresholdMinor: Value(v)),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            title: Text(l10n.settingsCurrency),
+            subtitle: Text(currencyLabel, style: secondary),
+            onTap: () => _pickCurrency(context, ref, s),
+          ),
+          ListTile(
+            title: Text(l10n.settingsLanguage),
+            subtitle: Text(languageLabel, style: secondary),
+            onTap: () => _pickLanguage(context, ref, s),
+          ),
+          const Divider(),
+          ListTile(
+            title: Text(l10n.settingsSources),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.sources),
+          ),
+          ListTile(
+            title: Text(l10n.settingsRoadmap),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.roadmap),
+          ),
+          if (kDebugMode)
+            SwitchListTile(
+              key: const ValueKey('debug-pro'),
+              title: Text(l10n.settingsDebugPro),
+              value: s.debugPro,
+              onChanged: (v) =>
+                  _update(ref, AppSettingsCompanion(debugPro: Value(v))),
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            child: Text(l10n.settingsPrivacy, style: secondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Wraps a dialog result so "cleared" (null value) differs from "cancelled".
+class _Choice<T> {
+  const _Choice(this.value);
+  final T value;
+}
+
+class _ChoiceDialog<T> extends StatelessWidget {
+  const _ChoiceDialog({
+    required this.title,
+    required this.selected,
+    required this.options,
+    this.note,
+  });
+
+  final String title;
+  final T selected;
+  final List<(T, String)> options;
+  final String? note;
+
+  @override
+  Widget build(BuildContext context) {
+    return SimpleDialog(
+      title: Text(title),
+      children: [
+        if (note != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            child: Text(note!),
+          ),
+        for (final (value, label) in options)
+          Semantics(
+            selected: value == selected,
+            child: ListTile(
+              title: Text(label),
+              trailing: value == selected ? const Icon(Icons.check) : null,
+              onTap: () => Navigator.pop(context, _Choice<T>(value)),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _AmountDialog extends StatefulWidget {
+  const _AmountDialog({
+    required this.title,
+    required this.help,
+    required this.initialMinor,
+  });
+
+  final String title;
+  final String help;
+  final int? initialMinor;
+
+  @override
+  State<_AmountDialog> createState() => _AmountDialogState();
+}
+
+class _AmountDialogState extends State<_AmountDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _controller = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_controller.text.isEmpty && widget.initialMinor != null) {
+      _controller.text = formatMinorForInput(
+        widget.initialMinor!,
+        context.localeName,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Form(
+        key: _formKey,
+        child: OptionalAmountField(
+          fieldKey: const ValueKey('settings-amount'),
+          controller: _controller,
+          label: widget.title,
+          helperText: widget.help,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.actionCancel),
+        ),
+        TextButton(
+          onPressed: () {
+            if (!_formKey.currentState!.validate()) return;
+            Navigator.pop(context, _Choice(optionalMinor(_controller.text)));
+          },
+          child: Text(l10n.actionSave),
+        ),
+      ],
+    );
+  }
 }

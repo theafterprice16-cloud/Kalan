@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/app.dart';
 import 'package:kalan/app/providers.dart';
@@ -23,6 +24,7 @@ Future<AppDatabase> pumpApp(
   Locale locale = const Locale('tr'),
   LocalDate? today,
   Future<void> Function(AppDatabase db)? seed,
+  List<Override> overrides = const [],
 }) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   tester.platformDispatcher.localeTestValue = locale;
@@ -37,6 +39,7 @@ Future<AppDatabase> pumpApp(
       overrides: [
         databaseProvider.overrideWithValue(db),
         todayProvider.overrideWithValue(today ?? testToday),
+        ...overrides,
       ],
       child: const KalanApp(),
     ),
@@ -124,14 +127,19 @@ Future<void> openTab(WidgetTester tester, String label) async {
 }
 
 /// Picks [item] from the dropdown with [key].
-Future<void> pickDropdown(WidgetTester tester, Key key, String item) async {
+Future<void> pickDropdown(
+  WidgetTester tester,
+  Key key,
+  String item, {
+  double delta = 48,
+}) async {
   await scrollTo(tester, find.byKey(key));
   await tester.tap(find.byKey(key));
   await tester.pumpAndSettle();
   // The open menu is the last scrollable; long menus build items lazily.
   await tester.scrollUntilVisible(
     find.text(item),
-    48,
+    delta,
     scrollable: find.byType(Scrollable).last,
   );
   await tester.pumpAndSettle();
