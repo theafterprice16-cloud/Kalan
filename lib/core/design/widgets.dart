@@ -137,6 +137,8 @@ class PeriodBar extends StatelessWidget {
           child: SizedBox(
             height: height,
             child: Row(
+              // Stretch so the colored segments take the bar's height.
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (spent > 0)
                   Expanded(

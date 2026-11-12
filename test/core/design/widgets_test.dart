@@ -36,6 +36,12 @@ void main() {
     expect(find.byKey(const ValueKey('bar-left')), findsOneWidget);
     expect(find.byKey(const ValueKey('bar-excess')), findsNothing);
     expect(find.bySemanticsLabel('bar'), findsOneWidget);
+    // Segments must actually be drawn at the bar's height.
+    expect(
+      tester.getSize(find.byKey(const ValueKey('bar-spoken-for'))).height,
+      12,
+    );
+    expect(tester.getSize(find.byKey(const ValueKey('bar-left'))).height, 12);
 
     await pumpLocalized(
       tester,
