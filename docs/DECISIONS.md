@@ -25,9 +25,9 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 17 | Karanlık temada ikincil metin | Duman #5F6880 mürekkep zeminde okunmadığı için karanlık temada #A3ABBF kullanılır. |
 | 17a | Karanlık temada dönem çubuğu | Söz verilmiş kısım mürekkep zeminde görünmediği için karanlık temada açık duman (#A3ABBF); kalan kısım yeşil. Gider geliri aşarsa aşan kısım mercan. |
 | 17b | Form hataları | Mercan kullanılmaz (yalnızca eksiye düşen dönem). Hata, mürekkep renkli çerçeve ve açıklayıcı metinle gösterilir. |
-| 18 | Dil | Varsayılan sistem dili; TR değilse EN. Ayarlar'dan değiştirilebilir. |
-| 19 | Para birimi değişimi | Ayarlar'dan değiştirilebilir; tutarlar çevrilmez, yalnızca sembol değişir. Ekranda bu yazılır. |
-| 20 | Tutar biçimi | Kuruşsuz tutarlarda ondalık gösterilmez ("3.250 TL"), kuruşlu tutarlarda iki hane ("3.250,50 TL"). TR: tutar + boşluk + sembol (TL, $, £, €). EN: sembol + tutar ($, £, €, ₺). |
+| 18 | Dil | 10 dil: Türkçe, İngilizce, İspanyolca, Fransızca, Almanca, Portekizce (Brezilya; dosya `app_pt.arb`), Rusça, Çince (Basitleştirilmiş; dosya `app_zh.arb`), İtalyanca, Endonezce. Varsayılan cihaz dili; listede yoksa İngilizce. Ayarlar'dan değiştirilebilir. 8 yeni dilin çevirisi Kalan ses tonu sözlüğüne göre yapıldı; yayından önce anadili konuşan biri okumalı. |
+| 19 | Para birimi değişimi | Ayarlar'dan; önce "Tutarlar çevrilmez, yalnızca para birimi etiketi değişir" uyarısı ve örnek önizleme (₺1.234,56 → Rp1.235) gösteren onay penceresi. Kur çevirisi yok. Ondalık sayısı farklıysa saklanan bütün tutarlar (ödemeler, sabit ödemeler, gelir, eşik) tek işlemde yeni üsse ölçeklenir; azalan ondalıkta yarım yukarı yuvarlanır. Ödeme ve sabit ödeme tutarı en az 1 birim kalır (şema 0'a izin vermez). |
+| 20 | Tutar biçimi | Tek biçimlendirici `formatMoney` (lib/core/money). Sembolün yeri, ayraçlar ve boşluk uygulama dilinden (intl), sembol ve ondalık sayısı para biriminden gelir: tr ₺1.234,56 · de 1.234,56 € · pt R$ 1.234,56 · id Rp1.234.567. Kuruşsuz tutarlarda ondalık gösterilmez (₺3.250). intl sembolü bölünmez boşlukla bağlar; tutar satır sonunda bölünmez. Kimlik dosyasındaki "3.250 TL" örneği bu kararla eskidi (kullanıcı onayı, 12 Kasım 2026). Tutar tam sayı kalır: intl yalnızca tam kısmı biçimler, kuruş tam sayıdan eklenir. |
 | 21 | Maaş günü girişi | Aylık: ayın günü (1-31; ay kısaysa son güne sıkışır). İki haftada bir: son maaş tarihi. Haftalık: haftanın günü. Net tutar bir maaşın tutarıdır. |
 | 22 | 4 ödemeli plan | İlk ödeme alışveriş günü; sonra 14 günde bir, toplam 4 ödeme. |
 | 23 | Kart taksidi tarihi | Ödeme tarihi, taksidin düştüğü ekstre tarihinden sonraki ilk son ödeme günüdür (aynı gün sayılmaz). Hafta sonu kaydırması kart başına ayar, varsayılan açık; cumartesi ve pazar pazartesiye kayar. Resmi tatiller BACKLOG'da. |
@@ -38,6 +38,11 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 
 | 26 | Uygulama ikonu | Kullanıcının verdiği nihai logo: K harfi, alt bacak üç yeşil parça (kimlikteki "Alternatif 2"). Ana dosya `docs/kimlik/logo.png`; bütün boyutlar `tool/generate_icons.py` ile üretilir. Logonun zemini #172643 ve yeşili #47D5A3, kimlik paletine (#14213D, #23B58E) yakın ama aynı değil; uygulama içi renkler kimlik paletinde kalır. |
 | 27 | Açılış ekranı | Android ve iOS: logonun kendi zemin rengi (#172643), açık ve karanlık modda aynı; ortada logo. Zemin aynı olduğu için logo kenar izi bırakmadan kaynaşır. |
+| 28 | Para birimleri | 17 birim: TRY, USD, EUR, GBP, BRL, MXN, COP, CLP, RUB, KZT, CNY, SGD, MYR, IDR, CAD, AUD, CHF. Tek kaynak `lib/core/money/currency.dart`. Veritabanında ISO kodu (metin) saklanır; şema değişmedi. |
+| 29 | IDR ve COP ondalığı | ISO 4217 iki hane der, ama günlük hayatta kuruş (sen, centavo) kullanılmıyor ve fiyatlar tam sayı. Uygulamada 0 ondalık: gösterimde ondalık yok, girişte ondalık tuşu çıkmaz ve ondalık reddedilir. CLP de 0. |
+| 30 | Paylaşılan $ işareti | MXN, COP, CLP, CAD, AUD, SGD: cihaz bölgesi para biriminin ülkesiyse yalın $, değilse MX$, COL$, CLP$, CA$, A$, S$. USD her yerde $. Bölge uygulama dilinden bağımsızdır (cihaz bölgesi). |
+| 31 | Varsayılan para birimi | Kurulumda cihaz bölgesine göre önerilir (euro bölgesi dahil); eşleşme yoksa USD. Liste aranabilir: kod, sembol ve uygulama dilindeki ad ile. |
+| 32 | Tutar girişi | Ayraçlar uygulama diline göre. Gruplama ayracı yalnızca üçlü gruplarda kabul edilir; Türkçede "62.5" 625 diye okunmaz, reddedilir. fr ve ru'da boşluk gruplaması serbest. |
 
 ## Teknik
 

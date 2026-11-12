@@ -1,6 +1,6 @@
 # Kalan
 
-Taksitleri ve "şimdi al, sonra öde" planlarını tek takvimde toplayan, her maaş döneminde geriye ne kaldığını gösteren Flutter uygulaması (iOS + Android, TR + EN).
+Taksitleri ve "şimdi al, sonra öde" planlarını tek takvimde toplayan, her maaş döneminde geriye ne kaldığını gösteren Flutter uygulaması (iOS + Android, 10 dil: tr, en, es, fr, de, pt (Brezilya), ru, zh (Basitleştirilmiş), it, id).
 
 Ürünün tek doğruluk kaynağı: `docs/kimlik/kalan-uygulama-dosyasi.html`. "B · Kimlik" bölümü bağlayıcıdır. Verilmiş kararlar `docs/DECISIONS.md`, sıradaki işler `docs/BACKLOG.md`.
 
@@ -16,7 +16,14 @@ Taksitleri ve "şimdi al, sonra öde" planlarını tek takvimde toplayan, her ma
 8. Ses tonu: "sen", kısa ve sakin cümleler, tutarlar rakam + para birimi. Örnek: "Bu dönem 4 ödeme var. Toplam 3.250 TL."
 9. Para tutarları `int` küçük birimle (kuruş, cent). `double` kullanılmaz.
 
-Ek: Arayüz metni kodda sabit yazılmaz (`lib/l10n/*.arb`). Durum yalnızca renkle anlatılmaz. Dokunma hedefi en az 48x48.
+Ek: Arayüz metni kodda sabit yazılmaz (`lib/l10n/*.arb`, 10 dilin hepsinde). Durum yalnızca renkle anlatılmaz. Dokunma hedefi en az 48x48.
+
+## Para
+
+- Tek para birimi, kur çevirisi yok, kur çekilmez. Tutarlar `int` küçük birim.
+- Kayıt: `lib/core/money/currency.dart` (kod, sembol, ayırt edici sembol, ondalık, ülkeler). Ekranlarda sembol ya da ondalık sayısı yazılmaz.
+- Biçimlendirme ve ayrıştırma yalnızca `lib/core/money/money_format.dart`; ekranlar `ref.money`, `ref.parseMoney`, `ref.moneyInput`, `ref.amountKeyboard` kullanır (`lib/app/format.dart`). Bildirim, widget ve dışa aktarma da aynı yolu kullanır. `test/app/money_path_test.dart` başka yolu yakalar.
+- **Para birimi eklemek:** `Currency.all` listesine bir satır ekle ve 10 ARB dosyasındaki `currencyName` select mesajına `KOD{Ad}` dalını ekle. Başka adım yok; testler yeni satırı otomatik kapsar.
 
 ## Komutlar
 

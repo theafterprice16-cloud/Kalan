@@ -13,6 +13,10 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 9. **Ana ekran widget'ı**, iOS ve Android (Subby).
 10. **Türkiye resmi tatil kaydırması**; mağaza hazırlığı.
 
+## Notlar
+
+- Tutar gösteren her yeni yer (bildirim, widget, dışa aktarma) `formatMoney` kullanır; dışa aktarma ham tam sayı tutarı ve para birimi kodunu yazar.
+
 ## Yapılmayacaklar
 
 Rakiplerde var, Kalan'da yok; eklenmez ve önerilmez:
