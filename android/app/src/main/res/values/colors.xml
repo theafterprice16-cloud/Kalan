@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The logo's ground color, so the centered logo blends in. -->
-    <color name="launch_background">#172643</color>
+    <!-- Splash ground: Gece & Nane bg (dark) in both modes. -->
+    <color name="launch_background">#0B0F14</color>
+    <color name="ic_launcher_background">#0B0F14</color>
 </resources>

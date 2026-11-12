@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Launch screen: the logo centered on its own ground color. -->
+<!-- Launch screen: Gece &amp; Nane ground (#0B0F14) with the mark centered. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/launch_background" />
     <item>
