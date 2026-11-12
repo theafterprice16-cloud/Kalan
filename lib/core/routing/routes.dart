@@ -14,4 +14,6 @@ abstract final class Routes {
   static String recurring(int id) => '/recurring/$id';
   static const pay = '/pay';
   static const roadmap = '/roadmap';
+  static const remindersHelp = '/reminders-help';
+  static String day(String isoDate) => '/day/$isoDate';
 }

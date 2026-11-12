@@ -46,6 +46,10 @@ class Plans extends Table {
       boolean().withDefault(const Constant(false))();
   TextColumn get origin => textEnum<PlanOrigin>()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  /// "Reminders for this plan" (schema v2).
+  BoolColumn get remindersEnabled =>
+      boolean().withDefault(const Constant(true))();
 }
 
 @DataClassName('PaymentRow')
@@ -78,6 +82,10 @@ class RecurringPayments extends Table {
   IntColumn get startDay => integer()();
   IntColumn get endDay => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  /// "Reminders for this payment" (schema v2).
+  BoolColumn get remindersEnabled =>
+      boolean().withDefault(const Constant(true))();
 }
 
 /// "Paid" marks for individual occurrences of a recurring payment.
@@ -115,6 +123,27 @@ class AppSettings extends Table {
 
   /// Honoured only in debug builds.
   BoolColumn get debugPro => boolean().withDefault(const Constant(false))();
+
+  // Reminders (schema v2). Defaults: on, 3 days before and on the day, 09:00.
+  BoolColumn get remindersEnabled =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get remindDays7 => boolean().withDefault(const Constant(false))();
+  BoolColumn get remindDays3 => boolean().withDefault(const Constant(true))();
+  BoolColumn get remindDays1 => boolean().withDefault(const Constant(false))();
+  BoolColumn get remindSameDay => boolean().withDefault(const Constant(true))();
+
+  /// Local time, minutes after midnight.
+  IntColumn get reminderMinute => integer()
+      .withDefault(const Constant(540))
+      .check(reminderMinute.isBetweenValues(0, 1439))();
+
+  /// Privacy: hide amounts in notifications.
+  BoolColumn get hideAmountsInNotifications =>
+      boolean().withDefault(const Constant(false))();
+
+  /// The in-app reminder prompt was answered (never asked again).
+  BoolColumn get reminderPromptShown =>
+      boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -4,7 +4,7 @@
 //
 import 'package:drift/drift.dart';
 
-class Sources extends Table with TableInfo {
+class Sources extends Table with TableInfo<Sources, SourcesData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -91,8 +91,38 @@ class Sources extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  SourcesData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SourcesData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      statementDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}statement_day'],
+      ),
+      dueDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_day'],
+      ),
+      shiftDueToBusinessDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}shift_due_to_business_day'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
   }
 
   @override
@@ -104,7 +134,271 @@ class Sources extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class Plans extends Table with TableInfo {
+class SourcesData extends DataClass implements Insertable<SourcesData> {
+  final int id;
+  final String name;
+  final String kind;
+  final int? statementDay;
+  final int? dueDay;
+  final int shiftDueToBusinessDay;
+  final int createdAt;
+  const SourcesData({
+    required this.id,
+    required this.name,
+    required this.kind,
+    this.statementDay,
+    this.dueDay,
+    required this.shiftDueToBusinessDay,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || statementDay != null) {
+      map['statement_day'] = Variable<int>(statementDay);
+    }
+    if (!nullToAbsent || dueDay != null) {
+      map['due_day'] = Variable<int>(dueDay);
+    }
+    map['shift_due_to_business_day'] = Variable<int>(shiftDueToBusinessDay);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  SourcesCompanion toCompanion(bool nullToAbsent) {
+    return SourcesCompanion(
+      id: Value(id),
+      name: Value(name),
+      kind: Value(kind),
+      statementDay: statementDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(statementDay),
+      dueDay: dueDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDay),
+      shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SourcesData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SourcesData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      kind: serializer.fromJson<String>(json['kind']),
+      statementDay: serializer.fromJson<int?>(json['statementDay']),
+      dueDay: serializer.fromJson<int?>(json['dueDay']),
+      shiftDueToBusinessDay: serializer.fromJson<int>(
+        json['shiftDueToBusinessDay'],
+      ),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'kind': serializer.toJson<String>(kind),
+      'statementDay': serializer.toJson<int?>(statementDay),
+      'dueDay': serializer.toJson<int?>(dueDay),
+      'shiftDueToBusinessDay': serializer.toJson<int>(shiftDueToBusinessDay),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  SourcesData copyWith({
+    int? id,
+    String? name,
+    String? kind,
+    Value<int?> statementDay = const Value.absent(),
+    Value<int?> dueDay = const Value.absent(),
+    int? shiftDueToBusinessDay,
+    int? createdAt,
+  }) => SourcesData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    kind: kind ?? this.kind,
+    statementDay: statementDay.present ? statementDay.value : this.statementDay,
+    dueDay: dueDay.present ? dueDay.value : this.dueDay,
+    shiftDueToBusinessDay: shiftDueToBusinessDay ?? this.shiftDueToBusinessDay,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SourcesData copyWithCompanion(SourcesCompanion data) {
+    return SourcesData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      statementDay: data.statementDay.present
+          ? data.statementDay.value
+          : this.statementDay,
+      dueDay: data.dueDay.present ? data.dueDay.value : this.dueDay,
+      shiftDueToBusinessDay: data.shiftDueToBusinessDay.present
+          ? data.shiftDueToBusinessDay.value
+          : this.shiftDueToBusinessDay,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SourcesData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('statementDay: $statementDay, ')
+          ..write('dueDay: $dueDay, ')
+          ..write('shiftDueToBusinessDay: $shiftDueToBusinessDay, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    kind,
+    statementDay,
+    dueDay,
+    shiftDueToBusinessDay,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SourcesData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.kind == this.kind &&
+          other.statementDay == this.statementDay &&
+          other.dueDay == this.dueDay &&
+          other.shiftDueToBusinessDay == this.shiftDueToBusinessDay &&
+          other.createdAt == this.createdAt);
+}
+
+class SourcesCompanion extends UpdateCompanion<SourcesData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> kind;
+  final Value<int?> statementDay;
+  final Value<int?> dueDay;
+  final Value<int> shiftDueToBusinessDay;
+  final Value<int> createdAt;
+  const SourcesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.statementDay = const Value.absent(),
+    this.dueDay = const Value.absent(),
+    this.shiftDueToBusinessDay = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SourcesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String kind,
+    this.statementDay = const Value.absent(),
+    this.dueDay = const Value.absent(),
+    this.shiftDueToBusinessDay = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name),
+       kind = Value(kind);
+  static Insertable<SourcesData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? kind,
+    Expression<int>? statementDay,
+    Expression<int>? dueDay,
+    Expression<int>? shiftDueToBusinessDay,
+    Expression<int>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (kind != null) 'kind': kind,
+      if (statementDay != null) 'statement_day': statementDay,
+      if (dueDay != null) 'due_day': dueDay,
+      if (shiftDueToBusinessDay != null)
+        'shift_due_to_business_day': shiftDueToBusinessDay,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SourcesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? kind,
+    Value<int?>? statementDay,
+    Value<int?>? dueDay,
+    Value<int>? shiftDueToBusinessDay,
+    Value<int>? createdAt,
+  }) {
+    return SourcesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      kind: kind ?? this.kind,
+      statementDay: statementDay ?? this.statementDay,
+      dueDay: dueDay ?? this.dueDay,
+      shiftDueToBusinessDay:
+          shiftDueToBusinessDay ?? this.shiftDueToBusinessDay,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (statementDay.present) {
+      map['statement_day'] = Variable<int>(statementDay.value);
+    }
+    if (dueDay.present) {
+      map['due_day'] = Variable<int>(dueDay.value);
+    }
+    if (shiftDueToBusinessDay.present) {
+      map['shift_due_to_business_day'] = Variable<int>(
+        shiftDueToBusinessDay.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SourcesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('statementDay: $statementDay, ')
+          ..write('dueDay: $dueDay, ')
+          ..write('shiftDueToBusinessDay: $shiftDueToBusinessDay, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Plans extends Table with TableInfo<Plans, PlansData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -216,8 +510,50 @@ class Plans extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  PlansData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlansData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      sourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}source_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      installmentCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}installment_count'],
+      )!,
+      purchaseDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}purchase_day'],
+      ),
+      deferMonths: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}defer_months'],
+      )!,
+      isCashAdvance: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_cash_advance'],
+      )!,
+      origin: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}origin'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
   }
 
   @override
@@ -229,7 +565,340 @@ class Plans extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class Payments extends Table with TableInfo {
+class PlansData extends DataClass implements Insertable<PlansData> {
+  final int id;
+  final int sourceId;
+  final String? title;
+  final String kind;
+  final int installmentCount;
+  final int? purchaseDay;
+  final int deferMonths;
+  final int isCashAdvance;
+  final String origin;
+  final int createdAt;
+  const PlansData({
+    required this.id,
+    required this.sourceId,
+    this.title,
+    required this.kind,
+    required this.installmentCount,
+    this.purchaseDay,
+    required this.deferMonths,
+    required this.isCashAdvance,
+    required this.origin,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['source_id'] = Variable<int>(sourceId);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
+    map['kind'] = Variable<String>(kind);
+    map['installment_count'] = Variable<int>(installmentCount);
+    if (!nullToAbsent || purchaseDay != null) {
+      map['purchase_day'] = Variable<int>(purchaseDay);
+    }
+    map['defer_months'] = Variable<int>(deferMonths);
+    map['is_cash_advance'] = Variable<int>(isCashAdvance);
+    map['origin'] = Variable<String>(origin);
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  PlansCompanion toCompanion(bool nullToAbsent) {
+    return PlansCompanion(
+      id: Value(id),
+      sourceId: Value(sourceId),
+      title: title == null && nullToAbsent
+          ? const Value.absent()
+          : Value(title),
+      kind: Value(kind),
+      installmentCount: Value(installmentCount),
+      purchaseDay: purchaseDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchaseDay),
+      deferMonths: Value(deferMonths),
+      isCashAdvance: Value(isCashAdvance),
+      origin: Value(origin),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PlansData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlansData(
+      id: serializer.fromJson<int>(json['id']),
+      sourceId: serializer.fromJson<int>(json['sourceId']),
+      title: serializer.fromJson<String?>(json['title']),
+      kind: serializer.fromJson<String>(json['kind']),
+      installmentCount: serializer.fromJson<int>(json['installmentCount']),
+      purchaseDay: serializer.fromJson<int?>(json['purchaseDay']),
+      deferMonths: serializer.fromJson<int>(json['deferMonths']),
+      isCashAdvance: serializer.fromJson<int>(json['isCashAdvance']),
+      origin: serializer.fromJson<String>(json['origin']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'sourceId': serializer.toJson<int>(sourceId),
+      'title': serializer.toJson<String?>(title),
+      'kind': serializer.toJson<String>(kind),
+      'installmentCount': serializer.toJson<int>(installmentCount),
+      'purchaseDay': serializer.toJson<int?>(purchaseDay),
+      'deferMonths': serializer.toJson<int>(deferMonths),
+      'isCashAdvance': serializer.toJson<int>(isCashAdvance),
+      'origin': serializer.toJson<String>(origin),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  PlansData copyWith({
+    int? id,
+    int? sourceId,
+    Value<String?> title = const Value.absent(),
+    String? kind,
+    int? installmentCount,
+    Value<int?> purchaseDay = const Value.absent(),
+    int? deferMonths,
+    int? isCashAdvance,
+    String? origin,
+    int? createdAt,
+  }) => PlansData(
+    id: id ?? this.id,
+    sourceId: sourceId ?? this.sourceId,
+    title: title.present ? title.value : this.title,
+    kind: kind ?? this.kind,
+    installmentCount: installmentCount ?? this.installmentCount,
+    purchaseDay: purchaseDay.present ? purchaseDay.value : this.purchaseDay,
+    deferMonths: deferMonths ?? this.deferMonths,
+    isCashAdvance: isCashAdvance ?? this.isCashAdvance,
+    origin: origin ?? this.origin,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  PlansData copyWithCompanion(PlansCompanion data) {
+    return PlansData(
+      id: data.id.present ? data.id.value : this.id,
+      sourceId: data.sourceId.present ? data.sourceId.value : this.sourceId,
+      title: data.title.present ? data.title.value : this.title,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      installmentCount: data.installmentCount.present
+          ? data.installmentCount.value
+          : this.installmentCount,
+      purchaseDay: data.purchaseDay.present
+          ? data.purchaseDay.value
+          : this.purchaseDay,
+      deferMonths: data.deferMonths.present
+          ? data.deferMonths.value
+          : this.deferMonths,
+      isCashAdvance: data.isCashAdvance.present
+          ? data.isCashAdvance.value
+          : this.isCashAdvance,
+      origin: data.origin.present ? data.origin.value : this.origin,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlansData(')
+          ..write('id: $id, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('title: $title, ')
+          ..write('kind: $kind, ')
+          ..write('installmentCount: $installmentCount, ')
+          ..write('purchaseDay: $purchaseDay, ')
+          ..write('deferMonths: $deferMonths, ')
+          ..write('isCashAdvance: $isCashAdvance, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    sourceId,
+    title,
+    kind,
+    installmentCount,
+    purchaseDay,
+    deferMonths,
+    isCashAdvance,
+    origin,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlansData &&
+          other.id == this.id &&
+          other.sourceId == this.sourceId &&
+          other.title == this.title &&
+          other.kind == this.kind &&
+          other.installmentCount == this.installmentCount &&
+          other.purchaseDay == this.purchaseDay &&
+          other.deferMonths == this.deferMonths &&
+          other.isCashAdvance == this.isCashAdvance &&
+          other.origin == this.origin &&
+          other.createdAt == this.createdAt);
+}
+
+class PlansCompanion extends UpdateCompanion<PlansData> {
+  final Value<int> id;
+  final Value<int> sourceId;
+  final Value<String?> title;
+  final Value<String> kind;
+  final Value<int> installmentCount;
+  final Value<int?> purchaseDay;
+  final Value<int> deferMonths;
+  final Value<int> isCashAdvance;
+  final Value<String> origin;
+  final Value<int> createdAt;
+  const PlansCompanion({
+    this.id = const Value.absent(),
+    this.sourceId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.installmentCount = const Value.absent(),
+    this.purchaseDay = const Value.absent(),
+    this.deferMonths = const Value.absent(),
+    this.isCashAdvance = const Value.absent(),
+    this.origin = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  PlansCompanion.insert({
+    this.id = const Value.absent(),
+    required int sourceId,
+    this.title = const Value.absent(),
+    required String kind,
+    required int installmentCount,
+    this.purchaseDay = const Value.absent(),
+    this.deferMonths = const Value.absent(),
+    this.isCashAdvance = const Value.absent(),
+    required String origin,
+    this.createdAt = const Value.absent(),
+  }) : sourceId = Value(sourceId),
+       kind = Value(kind),
+       installmentCount = Value(installmentCount),
+       origin = Value(origin);
+  static Insertable<PlansData> custom({
+    Expression<int>? id,
+    Expression<int>? sourceId,
+    Expression<String>? title,
+    Expression<String>? kind,
+    Expression<int>? installmentCount,
+    Expression<int>? purchaseDay,
+    Expression<int>? deferMonths,
+    Expression<int>? isCashAdvance,
+    Expression<String>? origin,
+    Expression<int>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sourceId != null) 'source_id': sourceId,
+      if (title != null) 'title': title,
+      if (kind != null) 'kind': kind,
+      if (installmentCount != null) 'installment_count': installmentCount,
+      if (purchaseDay != null) 'purchase_day': purchaseDay,
+      if (deferMonths != null) 'defer_months': deferMonths,
+      if (isCashAdvance != null) 'is_cash_advance': isCashAdvance,
+      if (origin != null) 'origin': origin,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  PlansCompanion copyWith({
+    Value<int>? id,
+    Value<int>? sourceId,
+    Value<String?>? title,
+    Value<String>? kind,
+    Value<int>? installmentCount,
+    Value<int?>? purchaseDay,
+    Value<int>? deferMonths,
+    Value<int>? isCashAdvance,
+    Value<String>? origin,
+    Value<int>? createdAt,
+  }) {
+    return PlansCompanion(
+      id: id ?? this.id,
+      sourceId: sourceId ?? this.sourceId,
+      title: title ?? this.title,
+      kind: kind ?? this.kind,
+      installmentCount: installmentCount ?? this.installmentCount,
+      purchaseDay: purchaseDay ?? this.purchaseDay,
+      deferMonths: deferMonths ?? this.deferMonths,
+      isCashAdvance: isCashAdvance ?? this.isCashAdvance,
+      origin: origin ?? this.origin,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (sourceId.present) {
+      map['source_id'] = Variable<int>(sourceId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (installmentCount.present) {
+      map['installment_count'] = Variable<int>(installmentCount.value);
+    }
+    if (purchaseDay.present) {
+      map['purchase_day'] = Variable<int>(purchaseDay.value);
+    }
+    if (deferMonths.present) {
+      map['defer_months'] = Variable<int>(deferMonths.value);
+    }
+    if (isCashAdvance.present) {
+      map['is_cash_advance'] = Variable<int>(isCashAdvance.value);
+    }
+    if (origin.present) {
+      map['origin'] = Variable<String>(origin.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlansCompanion(')
+          ..write('id: $id, ')
+          ..write('sourceId: $sourceId, ')
+          ..write('title: $title, ')
+          ..write('kind: $kind, ')
+          ..write('installmentCount: $installmentCount, ')
+          ..write('purchaseDay: $purchaseDay, ')
+          ..write('deferMonths: $deferMonths, ')
+          ..write('isCashAdvance: $isCashAdvance, ')
+          ..write('origin: $origin, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Payments extends Table with TableInfo<Payments, PaymentsData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -314,8 +983,38 @@ class Payments extends Table with TableInfo {
     {planId, seq},
   ];
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  PaymentsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PaymentsData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      planId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}plan_id'],
+      )!,
+      seq: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}seq'],
+      )!,
+      dueDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}due_day'],
+      )!,
+      amountMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_minor'],
+      )!,
+      paidAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}paid_at'],
+      ),
+      isEdited: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_edited'],
+      )!,
+    );
   }
 
   @override
@@ -329,7 +1028,255 @@ class Payments extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class RecurringPayments extends Table with TableInfo {
+class PaymentsData extends DataClass implements Insertable<PaymentsData> {
+  final int id;
+  final int planId;
+  final int seq;
+  final int dueDay;
+  final int amountMinor;
+  final int? paidAt;
+  final int isEdited;
+  const PaymentsData({
+    required this.id,
+    required this.planId,
+    required this.seq,
+    required this.dueDay,
+    required this.amountMinor,
+    this.paidAt,
+    required this.isEdited,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['plan_id'] = Variable<int>(planId);
+    map['seq'] = Variable<int>(seq);
+    map['due_day'] = Variable<int>(dueDay);
+    map['amount_minor'] = Variable<int>(amountMinor);
+    if (!nullToAbsent || paidAt != null) {
+      map['paid_at'] = Variable<int>(paidAt);
+    }
+    map['is_edited'] = Variable<int>(isEdited);
+    return map;
+  }
+
+  PaymentsCompanion toCompanion(bool nullToAbsent) {
+    return PaymentsCompanion(
+      id: Value(id),
+      planId: Value(planId),
+      seq: Value(seq),
+      dueDay: Value(dueDay),
+      amountMinor: Value(amountMinor),
+      paidAt: paidAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paidAt),
+      isEdited: Value(isEdited),
+    );
+  }
+
+  factory PaymentsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PaymentsData(
+      id: serializer.fromJson<int>(json['id']),
+      planId: serializer.fromJson<int>(json['planId']),
+      seq: serializer.fromJson<int>(json['seq']),
+      dueDay: serializer.fromJson<int>(json['dueDay']),
+      amountMinor: serializer.fromJson<int>(json['amountMinor']),
+      paidAt: serializer.fromJson<int?>(json['paidAt']),
+      isEdited: serializer.fromJson<int>(json['isEdited']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'planId': serializer.toJson<int>(planId),
+      'seq': serializer.toJson<int>(seq),
+      'dueDay': serializer.toJson<int>(dueDay),
+      'amountMinor': serializer.toJson<int>(amountMinor),
+      'paidAt': serializer.toJson<int?>(paidAt),
+      'isEdited': serializer.toJson<int>(isEdited),
+    };
+  }
+
+  PaymentsData copyWith({
+    int? id,
+    int? planId,
+    int? seq,
+    int? dueDay,
+    int? amountMinor,
+    Value<int?> paidAt = const Value.absent(),
+    int? isEdited,
+  }) => PaymentsData(
+    id: id ?? this.id,
+    planId: planId ?? this.planId,
+    seq: seq ?? this.seq,
+    dueDay: dueDay ?? this.dueDay,
+    amountMinor: amountMinor ?? this.amountMinor,
+    paidAt: paidAt.present ? paidAt.value : this.paidAt,
+    isEdited: isEdited ?? this.isEdited,
+  );
+  PaymentsData copyWithCompanion(PaymentsCompanion data) {
+    return PaymentsData(
+      id: data.id.present ? data.id.value : this.id,
+      planId: data.planId.present ? data.planId.value : this.planId,
+      seq: data.seq.present ? data.seq.value : this.seq,
+      dueDay: data.dueDay.present ? data.dueDay.value : this.dueDay,
+      amountMinor: data.amountMinor.present
+          ? data.amountMinor.value
+          : this.amountMinor,
+      paidAt: data.paidAt.present ? data.paidAt.value : this.paidAt,
+      isEdited: data.isEdited.present ? data.isEdited.value : this.isEdited,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentsData(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('seq: $seq, ')
+          ..write('dueDay: $dueDay, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('isEdited: $isEdited')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, planId, seq, dueDay, amountMinor, paidAt, isEdited);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PaymentsData &&
+          other.id == this.id &&
+          other.planId == this.planId &&
+          other.seq == this.seq &&
+          other.dueDay == this.dueDay &&
+          other.amountMinor == this.amountMinor &&
+          other.paidAt == this.paidAt &&
+          other.isEdited == this.isEdited);
+}
+
+class PaymentsCompanion extends UpdateCompanion<PaymentsData> {
+  final Value<int> id;
+  final Value<int> planId;
+  final Value<int> seq;
+  final Value<int> dueDay;
+  final Value<int> amountMinor;
+  final Value<int?> paidAt;
+  final Value<int> isEdited;
+  const PaymentsCompanion({
+    this.id = const Value.absent(),
+    this.planId = const Value.absent(),
+    this.seq = const Value.absent(),
+    this.dueDay = const Value.absent(),
+    this.amountMinor = const Value.absent(),
+    this.paidAt = const Value.absent(),
+    this.isEdited = const Value.absent(),
+  });
+  PaymentsCompanion.insert({
+    this.id = const Value.absent(),
+    required int planId,
+    required int seq,
+    required int dueDay,
+    required int amountMinor,
+    this.paidAt = const Value.absent(),
+    this.isEdited = const Value.absent(),
+  }) : planId = Value(planId),
+       seq = Value(seq),
+       dueDay = Value(dueDay),
+       amountMinor = Value(amountMinor);
+  static Insertable<PaymentsData> custom({
+    Expression<int>? id,
+    Expression<int>? planId,
+    Expression<int>? seq,
+    Expression<int>? dueDay,
+    Expression<int>? amountMinor,
+    Expression<int>? paidAt,
+    Expression<int>? isEdited,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (planId != null) 'plan_id': planId,
+      if (seq != null) 'seq': seq,
+      if (dueDay != null) 'due_day': dueDay,
+      if (amountMinor != null) 'amount_minor': amountMinor,
+      if (paidAt != null) 'paid_at': paidAt,
+      if (isEdited != null) 'is_edited': isEdited,
+    });
+  }
+
+  PaymentsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? planId,
+    Value<int>? seq,
+    Value<int>? dueDay,
+    Value<int>? amountMinor,
+    Value<int?>? paidAt,
+    Value<int>? isEdited,
+  }) {
+    return PaymentsCompanion(
+      id: id ?? this.id,
+      planId: planId ?? this.planId,
+      seq: seq ?? this.seq,
+      dueDay: dueDay ?? this.dueDay,
+      amountMinor: amountMinor ?? this.amountMinor,
+      paidAt: paidAt ?? this.paidAt,
+      isEdited: isEdited ?? this.isEdited,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (planId.present) {
+      map['plan_id'] = Variable<int>(planId.value);
+    }
+    if (seq.present) {
+      map['seq'] = Variable<int>(seq.value);
+    }
+    if (dueDay.present) {
+      map['due_day'] = Variable<int>(dueDay.value);
+    }
+    if (amountMinor.present) {
+      map['amount_minor'] = Variable<int>(amountMinor.value);
+    }
+    if (paidAt.present) {
+      map['paid_at'] = Variable<int>(paidAt.value);
+    }
+    if (isEdited.present) {
+      map['is_edited'] = Variable<int>(isEdited.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PaymentsCompanion(')
+          ..write('id: $id, ')
+          ..write('planId: $planId, ')
+          ..write('seq: $seq, ')
+          ..write('dueDay: $dueDay, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('isEdited: $isEdited')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class RecurringPayments extends Table
+    with TableInfo<RecurringPayments, RecurringPaymentsData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -412,8 +1359,38 @@ class RecurringPayments extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  RecurringPaymentsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecurringPaymentsData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      amountMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_minor'],
+      )!,
+      recurrence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recurrence'],
+      )!,
+      startDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_day'],
+      )!,
+      endDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_day'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
   }
 
   @override
@@ -425,7 +1402,266 @@ class RecurringPayments extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class RecurringMarks extends Table with TableInfo {
+class RecurringPaymentsData extends DataClass
+    implements Insertable<RecurringPaymentsData> {
+  final int id;
+  final String name;
+  final int amountMinor;
+  final String recurrence;
+  final int startDay;
+  final int? endDay;
+  final int createdAt;
+  const RecurringPaymentsData({
+    required this.id,
+    required this.name,
+    required this.amountMinor,
+    required this.recurrence,
+    required this.startDay,
+    this.endDay,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['amount_minor'] = Variable<int>(amountMinor);
+    map['recurrence'] = Variable<String>(recurrence);
+    map['start_day'] = Variable<int>(startDay);
+    if (!nullToAbsent || endDay != null) {
+      map['end_day'] = Variable<int>(endDay);
+    }
+    map['created_at'] = Variable<int>(createdAt);
+    return map;
+  }
+
+  RecurringPaymentsCompanion toCompanion(bool nullToAbsent) {
+    return RecurringPaymentsCompanion(
+      id: Value(id),
+      name: Value(name),
+      amountMinor: Value(amountMinor),
+      recurrence: Value(recurrence),
+      startDay: Value(startDay),
+      endDay: endDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endDay),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory RecurringPaymentsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecurringPaymentsData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      amountMinor: serializer.fromJson<int>(json['amountMinor']),
+      recurrence: serializer.fromJson<String>(json['recurrence']),
+      startDay: serializer.fromJson<int>(json['startDay']),
+      endDay: serializer.fromJson<int?>(json['endDay']),
+      createdAt: serializer.fromJson<int>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'amountMinor': serializer.toJson<int>(amountMinor),
+      'recurrence': serializer.toJson<String>(recurrence),
+      'startDay': serializer.toJson<int>(startDay),
+      'endDay': serializer.toJson<int?>(endDay),
+      'createdAt': serializer.toJson<int>(createdAt),
+    };
+  }
+
+  RecurringPaymentsData copyWith({
+    int? id,
+    String? name,
+    int? amountMinor,
+    String? recurrence,
+    int? startDay,
+    Value<int?> endDay = const Value.absent(),
+    int? createdAt,
+  }) => RecurringPaymentsData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    amountMinor: amountMinor ?? this.amountMinor,
+    recurrence: recurrence ?? this.recurrence,
+    startDay: startDay ?? this.startDay,
+    endDay: endDay.present ? endDay.value : this.endDay,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  RecurringPaymentsData copyWithCompanion(RecurringPaymentsCompanion data) {
+    return RecurringPaymentsData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      amountMinor: data.amountMinor.present
+          ? data.amountMinor.value
+          : this.amountMinor,
+      recurrence: data.recurrence.present
+          ? data.recurrence.value
+          : this.recurrence,
+      startDay: data.startDay.present ? data.startDay.value : this.startDay,
+      endDay: data.endDay.present ? data.endDay.value : this.endDay,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringPaymentsData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('recurrence: $recurrence, ')
+          ..write('startDay: $startDay, ')
+          ..write('endDay: $endDay, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    amountMinor,
+    recurrence,
+    startDay,
+    endDay,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecurringPaymentsData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.amountMinor == this.amountMinor &&
+          other.recurrence == this.recurrence &&
+          other.startDay == this.startDay &&
+          other.endDay == this.endDay &&
+          other.createdAt == this.createdAt);
+}
+
+class RecurringPaymentsCompanion
+    extends UpdateCompanion<RecurringPaymentsData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> amountMinor;
+  final Value<String> recurrence;
+  final Value<int> startDay;
+  final Value<int?> endDay;
+  final Value<int> createdAt;
+  const RecurringPaymentsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.amountMinor = const Value.absent(),
+    this.recurrence = const Value.absent(),
+    this.startDay = const Value.absent(),
+    this.endDay = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  RecurringPaymentsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required int amountMinor,
+    required String recurrence,
+    required int startDay,
+    this.endDay = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : name = Value(name),
+       amountMinor = Value(amountMinor),
+       recurrence = Value(recurrence),
+       startDay = Value(startDay);
+  static Insertable<RecurringPaymentsData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? amountMinor,
+    Expression<String>? recurrence,
+    Expression<int>? startDay,
+    Expression<int>? endDay,
+    Expression<int>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (amountMinor != null) 'amount_minor': amountMinor,
+      if (recurrence != null) 'recurrence': recurrence,
+      if (startDay != null) 'start_day': startDay,
+      if (endDay != null) 'end_day': endDay,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  RecurringPaymentsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? amountMinor,
+    Value<String>? recurrence,
+    Value<int>? startDay,
+    Value<int?>? endDay,
+    Value<int>? createdAt,
+  }) {
+    return RecurringPaymentsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      amountMinor: amountMinor ?? this.amountMinor,
+      recurrence: recurrence ?? this.recurrence,
+      startDay: startDay ?? this.startDay,
+      endDay: endDay ?? this.endDay,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (amountMinor.present) {
+      map['amount_minor'] = Variable<int>(amountMinor.value);
+    }
+    if (recurrence.present) {
+      map['recurrence'] = Variable<String>(recurrence.value);
+    }
+    if (startDay.present) {
+      map['start_day'] = Variable<int>(startDay.value);
+    }
+    if (endDay.present) {
+      map['end_day'] = Variable<int>(endDay.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<int>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringPaymentsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('amountMinor: $amountMinor, ')
+          ..write('recurrence: $recurrence, ')
+          ..write('startDay: $startDay, ')
+          ..write('endDay: $endDay, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class RecurringMarks extends Table
+    with TableInfo<RecurringMarks, RecurringMarksData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -465,8 +1701,22 @@ class RecurringMarks extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {recurringId, occurrenceDay};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  RecurringMarksData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RecurringMarksData(
+      recurringId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recurring_id'],
+      )!,
+      occurrenceDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}occurrence_day'],
+      )!,
+      paidAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}paid_at'],
+      )!,
+    );
   }
 
   @override
@@ -482,7 +1732,174 @@ class RecurringMarks extends Table with TableInfo {
   bool get dontWriteConstraints => true;
 }
 
-class AppSettings extends Table with TableInfo {
+class RecurringMarksData extends DataClass
+    implements Insertable<RecurringMarksData> {
+  final int recurringId;
+  final int occurrenceDay;
+  final int paidAt;
+  const RecurringMarksData({
+    required this.recurringId,
+    required this.occurrenceDay,
+    required this.paidAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['recurring_id'] = Variable<int>(recurringId);
+    map['occurrence_day'] = Variable<int>(occurrenceDay);
+    map['paid_at'] = Variable<int>(paidAt);
+    return map;
+  }
+
+  RecurringMarksCompanion toCompanion(bool nullToAbsent) {
+    return RecurringMarksCompanion(
+      recurringId: Value(recurringId),
+      occurrenceDay: Value(occurrenceDay),
+      paidAt: Value(paidAt),
+    );
+  }
+
+  factory RecurringMarksData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RecurringMarksData(
+      recurringId: serializer.fromJson<int>(json['recurringId']),
+      occurrenceDay: serializer.fromJson<int>(json['occurrenceDay']),
+      paidAt: serializer.fromJson<int>(json['paidAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'recurringId': serializer.toJson<int>(recurringId),
+      'occurrenceDay': serializer.toJson<int>(occurrenceDay),
+      'paidAt': serializer.toJson<int>(paidAt),
+    };
+  }
+
+  RecurringMarksData copyWith({
+    int? recurringId,
+    int? occurrenceDay,
+    int? paidAt,
+  }) => RecurringMarksData(
+    recurringId: recurringId ?? this.recurringId,
+    occurrenceDay: occurrenceDay ?? this.occurrenceDay,
+    paidAt: paidAt ?? this.paidAt,
+  );
+  RecurringMarksData copyWithCompanion(RecurringMarksCompanion data) {
+    return RecurringMarksData(
+      recurringId: data.recurringId.present
+          ? data.recurringId.value
+          : this.recurringId,
+      occurrenceDay: data.occurrenceDay.present
+          ? data.occurrenceDay.value
+          : this.occurrenceDay,
+      paidAt: data.paidAt.present ? data.paidAt.value : this.paidAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringMarksData(')
+          ..write('recurringId: $recurringId, ')
+          ..write('occurrenceDay: $occurrenceDay, ')
+          ..write('paidAt: $paidAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(recurringId, occurrenceDay, paidAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RecurringMarksData &&
+          other.recurringId == this.recurringId &&
+          other.occurrenceDay == this.occurrenceDay &&
+          other.paidAt == this.paidAt);
+}
+
+class RecurringMarksCompanion extends UpdateCompanion<RecurringMarksData> {
+  final Value<int> recurringId;
+  final Value<int> occurrenceDay;
+  final Value<int> paidAt;
+  final Value<int> rowid;
+  const RecurringMarksCompanion({
+    this.recurringId = const Value.absent(),
+    this.occurrenceDay = const Value.absent(),
+    this.paidAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RecurringMarksCompanion.insert({
+    required int recurringId,
+    required int occurrenceDay,
+    required int paidAt,
+    this.rowid = const Value.absent(),
+  }) : recurringId = Value(recurringId),
+       occurrenceDay = Value(occurrenceDay),
+       paidAt = Value(paidAt);
+  static Insertable<RecurringMarksData> custom({
+    Expression<int>? recurringId,
+    Expression<int>? occurrenceDay,
+    Expression<int>? paidAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (recurringId != null) 'recurring_id': recurringId,
+      if (occurrenceDay != null) 'occurrence_day': occurrenceDay,
+      if (paidAt != null) 'paid_at': paidAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RecurringMarksCompanion copyWith({
+    Value<int>? recurringId,
+    Value<int>? occurrenceDay,
+    Value<int>? paidAt,
+    Value<int>? rowid,
+  }) {
+    return RecurringMarksCompanion(
+      recurringId: recurringId ?? this.recurringId,
+      occurrenceDay: occurrenceDay ?? this.occurrenceDay,
+      paidAt: paidAt ?? this.paidAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (recurringId.present) {
+      map['recurring_id'] = Variable<int>(recurringId.value);
+    }
+    if (occurrenceDay.present) {
+      map['occurrence_day'] = Variable<int>(occurrenceDay.value);
+    }
+    if (paidAt.present) {
+      map['paid_at'] = Variable<int>(paidAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RecurringMarksCompanion(')
+          ..write('recurringId: $recurringId, ')
+          ..write('occurrenceDay: $occurrenceDay, ')
+          ..write('paidAt: $paidAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class AppSettings extends Table with TableInfo<AppSettings, AppSettingsData> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -581,8 +1998,46 @@ class AppSettings extends Table with TableInfo {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Never map(Map<String, dynamic> data, {String? tablePrefix}) {
-    throw UnsupportedError('TableInfo.map in schema verification code');
+  AppSettingsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AppSettingsData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      localeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locale_code'],
+      ),
+      payFrequency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pay_frequency'],
+      )!,
+      payDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pay_day'],
+      ),
+      payAnchorDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pay_anchor_day'],
+      ),
+      netIncomeMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}net_income_minor'],
+      ),
+      tightThresholdMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tight_threshold_minor'],
+      ),
+      debugPro: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}debug_pro'],
+      )!,
+    );
   }
 
   @override
@@ -594,6 +2049,337 @@ class AppSettings extends Table with TableInfo {
   List<String> get customConstraints => const ['PRIMARY KEY(id)'];
   @override
   bool get dontWriteConstraints => true;
+}
+
+class AppSettingsData extends DataClass implements Insertable<AppSettingsData> {
+  final int id;
+  final String currencyCode;
+  final String? localeCode;
+  final String payFrequency;
+  final int? payDay;
+  final int? payAnchorDay;
+  final int? netIncomeMinor;
+  final int? tightThresholdMinor;
+  final int debugPro;
+  const AppSettingsData({
+    required this.id,
+    required this.currencyCode,
+    this.localeCode,
+    required this.payFrequency,
+    this.payDay,
+    this.payAnchorDay,
+    this.netIncomeMinor,
+    this.tightThresholdMinor,
+    required this.debugPro,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['currency_code'] = Variable<String>(currencyCode);
+    if (!nullToAbsent || localeCode != null) {
+      map['locale_code'] = Variable<String>(localeCode);
+    }
+    map['pay_frequency'] = Variable<String>(payFrequency);
+    if (!nullToAbsent || payDay != null) {
+      map['pay_day'] = Variable<int>(payDay);
+    }
+    if (!nullToAbsent || payAnchorDay != null) {
+      map['pay_anchor_day'] = Variable<int>(payAnchorDay);
+    }
+    if (!nullToAbsent || netIncomeMinor != null) {
+      map['net_income_minor'] = Variable<int>(netIncomeMinor);
+    }
+    if (!nullToAbsent || tightThresholdMinor != null) {
+      map['tight_threshold_minor'] = Variable<int>(tightThresholdMinor);
+    }
+    map['debug_pro'] = Variable<int>(debugPro);
+    return map;
+  }
+
+  AppSettingsCompanion toCompanion(bool nullToAbsent) {
+    return AppSettingsCompanion(
+      id: Value(id),
+      currencyCode: Value(currencyCode),
+      localeCode: localeCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localeCode),
+      payFrequency: Value(payFrequency),
+      payDay: payDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payDay),
+      payAnchorDay: payAnchorDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payAnchorDay),
+      netIncomeMinor: netIncomeMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(netIncomeMinor),
+      tightThresholdMinor: tightThresholdMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tightThresholdMinor),
+      debugPro: Value(debugPro),
+    );
+  }
+
+  factory AppSettingsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AppSettingsData(
+      id: serializer.fromJson<int>(json['id']),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      localeCode: serializer.fromJson<String?>(json['localeCode']),
+      payFrequency: serializer.fromJson<String>(json['payFrequency']),
+      payDay: serializer.fromJson<int?>(json['payDay']),
+      payAnchorDay: serializer.fromJson<int?>(json['payAnchorDay']),
+      netIncomeMinor: serializer.fromJson<int?>(json['netIncomeMinor']),
+      tightThresholdMinor: serializer.fromJson<int?>(
+        json['tightThresholdMinor'],
+      ),
+      debugPro: serializer.fromJson<int>(json['debugPro']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'localeCode': serializer.toJson<String?>(localeCode),
+      'payFrequency': serializer.toJson<String>(payFrequency),
+      'payDay': serializer.toJson<int?>(payDay),
+      'payAnchorDay': serializer.toJson<int?>(payAnchorDay),
+      'netIncomeMinor': serializer.toJson<int?>(netIncomeMinor),
+      'tightThresholdMinor': serializer.toJson<int?>(tightThresholdMinor),
+      'debugPro': serializer.toJson<int>(debugPro),
+    };
+  }
+
+  AppSettingsData copyWith({
+    int? id,
+    String? currencyCode,
+    Value<String?> localeCode = const Value.absent(),
+    String? payFrequency,
+    Value<int?> payDay = const Value.absent(),
+    Value<int?> payAnchorDay = const Value.absent(),
+    Value<int?> netIncomeMinor = const Value.absent(),
+    Value<int?> tightThresholdMinor = const Value.absent(),
+    int? debugPro,
+  }) => AppSettingsData(
+    id: id ?? this.id,
+    currencyCode: currencyCode ?? this.currencyCode,
+    localeCode: localeCode.present ? localeCode.value : this.localeCode,
+    payFrequency: payFrequency ?? this.payFrequency,
+    payDay: payDay.present ? payDay.value : this.payDay,
+    payAnchorDay: payAnchorDay.present ? payAnchorDay.value : this.payAnchorDay,
+    netIncomeMinor: netIncomeMinor.present
+        ? netIncomeMinor.value
+        : this.netIncomeMinor,
+    tightThresholdMinor: tightThresholdMinor.present
+        ? tightThresholdMinor.value
+        : this.tightThresholdMinor,
+    debugPro: debugPro ?? this.debugPro,
+  );
+  AppSettingsData copyWithCompanion(AppSettingsCompanion data) {
+    return AppSettingsData(
+      id: data.id.present ? data.id.value : this.id,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      localeCode: data.localeCode.present
+          ? data.localeCode.value
+          : this.localeCode,
+      payFrequency: data.payFrequency.present
+          ? data.payFrequency.value
+          : this.payFrequency,
+      payDay: data.payDay.present ? data.payDay.value : this.payDay,
+      payAnchorDay: data.payAnchorDay.present
+          ? data.payAnchorDay.value
+          : this.payAnchorDay,
+      netIncomeMinor: data.netIncomeMinor.present
+          ? data.netIncomeMinor.value
+          : this.netIncomeMinor,
+      tightThresholdMinor: data.tightThresholdMinor.present
+          ? data.tightThresholdMinor.value
+          : this.tightThresholdMinor,
+      debugPro: data.debugPro.present ? data.debugPro.value : this.debugPro,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppSettingsData(')
+          ..write('id: $id, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('localeCode: $localeCode, ')
+          ..write('payFrequency: $payFrequency, ')
+          ..write('payDay: $payDay, ')
+          ..write('payAnchorDay: $payAnchorDay, ')
+          ..write('netIncomeMinor: $netIncomeMinor, ')
+          ..write('tightThresholdMinor: $tightThresholdMinor, ')
+          ..write('debugPro: $debugPro')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    currencyCode,
+    localeCode,
+    payFrequency,
+    payDay,
+    payAnchorDay,
+    netIncomeMinor,
+    tightThresholdMinor,
+    debugPro,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AppSettingsData &&
+          other.id == this.id &&
+          other.currencyCode == this.currencyCode &&
+          other.localeCode == this.localeCode &&
+          other.payFrequency == this.payFrequency &&
+          other.payDay == this.payDay &&
+          other.payAnchorDay == this.payAnchorDay &&
+          other.netIncomeMinor == this.netIncomeMinor &&
+          other.tightThresholdMinor == this.tightThresholdMinor &&
+          other.debugPro == this.debugPro);
+}
+
+class AppSettingsCompanion extends UpdateCompanion<AppSettingsData> {
+  final Value<int> id;
+  final Value<String> currencyCode;
+  final Value<String?> localeCode;
+  final Value<String> payFrequency;
+  final Value<int?> payDay;
+  final Value<int?> payAnchorDay;
+  final Value<int?> netIncomeMinor;
+  final Value<int?> tightThresholdMinor;
+  final Value<int> debugPro;
+  const AppSettingsCompanion({
+    this.id = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.localeCode = const Value.absent(),
+    this.payFrequency = const Value.absent(),
+    this.payDay = const Value.absent(),
+    this.payAnchorDay = const Value.absent(),
+    this.netIncomeMinor = const Value.absent(),
+    this.tightThresholdMinor = const Value.absent(),
+    this.debugPro = const Value.absent(),
+  });
+  AppSettingsCompanion.insert({
+    this.id = const Value.absent(),
+    required String currencyCode,
+    this.localeCode = const Value.absent(),
+    required String payFrequency,
+    this.payDay = const Value.absent(),
+    this.payAnchorDay = const Value.absent(),
+    this.netIncomeMinor = const Value.absent(),
+    this.tightThresholdMinor = const Value.absent(),
+    this.debugPro = const Value.absent(),
+  }) : currencyCode = Value(currencyCode),
+       payFrequency = Value(payFrequency);
+  static Insertable<AppSettingsData> custom({
+    Expression<int>? id,
+    Expression<String>? currencyCode,
+    Expression<String>? localeCode,
+    Expression<String>? payFrequency,
+    Expression<int>? payDay,
+    Expression<int>? payAnchorDay,
+    Expression<int>? netIncomeMinor,
+    Expression<int>? tightThresholdMinor,
+    Expression<int>? debugPro,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (localeCode != null) 'locale_code': localeCode,
+      if (payFrequency != null) 'pay_frequency': payFrequency,
+      if (payDay != null) 'pay_day': payDay,
+      if (payAnchorDay != null) 'pay_anchor_day': payAnchorDay,
+      if (netIncomeMinor != null) 'net_income_minor': netIncomeMinor,
+      if (tightThresholdMinor != null)
+        'tight_threshold_minor': tightThresholdMinor,
+      if (debugPro != null) 'debug_pro': debugPro,
+    });
+  }
+
+  AppSettingsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? currencyCode,
+    Value<String?>? localeCode,
+    Value<String>? payFrequency,
+    Value<int?>? payDay,
+    Value<int?>? payAnchorDay,
+    Value<int?>? netIncomeMinor,
+    Value<int?>? tightThresholdMinor,
+    Value<int>? debugPro,
+  }) {
+    return AppSettingsCompanion(
+      id: id ?? this.id,
+      currencyCode: currencyCode ?? this.currencyCode,
+      localeCode: localeCode ?? this.localeCode,
+      payFrequency: payFrequency ?? this.payFrequency,
+      payDay: payDay ?? this.payDay,
+      payAnchorDay: payAnchorDay ?? this.payAnchorDay,
+      netIncomeMinor: netIncomeMinor ?? this.netIncomeMinor,
+      tightThresholdMinor: tightThresholdMinor ?? this.tightThresholdMinor,
+      debugPro: debugPro ?? this.debugPro,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (localeCode.present) {
+      map['locale_code'] = Variable<String>(localeCode.value);
+    }
+    if (payFrequency.present) {
+      map['pay_frequency'] = Variable<String>(payFrequency.value);
+    }
+    if (payDay.present) {
+      map['pay_day'] = Variable<int>(payDay.value);
+    }
+    if (payAnchorDay.present) {
+      map['pay_anchor_day'] = Variable<int>(payAnchorDay.value);
+    }
+    if (netIncomeMinor.present) {
+      map['net_income_minor'] = Variable<int>(netIncomeMinor.value);
+    }
+    if (tightThresholdMinor.present) {
+      map['tight_threshold_minor'] = Variable<int>(tightThresholdMinor.value);
+    }
+    if (debugPro.present) {
+      map['debug_pro'] = Variable<int>(debugPro.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('localeCode: $localeCode, ')
+          ..write('payFrequency: $payFrequency, ')
+          ..write('payDay: $payDay, ')
+          ..write('payAnchorDay: $payAnchorDay, ')
+          ..write('netIncomeMinor: $netIncomeMinor, ')
+          ..write('tightThresholdMinor: $tightThresholdMinor, ')
+          ..write('debugPro: $debugPro')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class DatabaseAtV1 extends GeneratedDatabase {

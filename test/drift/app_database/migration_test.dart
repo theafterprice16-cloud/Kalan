@@ -60,6 +60,50 @@ void main() {
     });
   }
 
+  test('v1 -> v2 keeps data and switches reminders on by default', () async {
+    final schema = await verifier.schemaAt(1);
+    final raw = schema.rawDatabase;
+    raw.execute(
+      'INSERT INTO app_settings (id, currency_code, pay_frequency, pay_day) '
+      "VALUES (1, 'TRY', 'monthly', 15)",
+    );
+    raw.execute(
+      "INSERT INTO sources (id, name, kind) VALUES (1, 'Klarna', 'provider')",
+    );
+    raw.execute(
+      'INSERT INTO plans (id, source_id, kind, installment_count, origin) '
+      "VALUES (1, 1, 'payIn4', 4, 'template')",
+    );
+    raw.execute(
+      'INSERT INTO payments (plan_id, seq, due_day, amount_minor) '
+      'VALUES (1, 1, 20405, 2500)',
+    );
+    raw.execute(
+      'INSERT INTO recurring_payments (id, name, amount_minor, recurrence, '
+      "start_day) VALUES (1, 'Kira', 100, 'monthly', 20400)",
+    );
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 2);
+    final s = await db.select(db.appSettings).getSingle();
+    expect(s.currencyCode, 'TRY');
+    expect(s.remindersEnabled, isTrue);
+    expect(
+      [s.remindDays7, s.remindDays3, s.remindDays1, s.remindSameDay],
+      [false, true, false, true],
+    );
+    expect(s.reminderMinute, 540);
+    expect(s.hideAmountsInNotifications, isFalse);
+    expect(s.reminderPromptShown, isFalse);
+    expect((await db.select(db.plans).getSingle()).remindersEnabled, isTrue);
+    expect(
+      (await db.select(db.recurringPayments).getSingle()).remindersEnabled,
+      isTrue,
+    );
+    expect((await db.select(db.payments).getSingle()).amountMinor, 2500);
+    await db.close();
+  });
+
   test('foreign keys are enforced and payments cascade', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final sourceId = await db

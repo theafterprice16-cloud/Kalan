@@ -117,3 +117,39 @@ final homeViewProvider = Provider<HomeView?>((ref) {
     tightThresholdMinor: settings.tightThresholdMinor,
   );
 });
+
+/// Every payment due on [date]: plan payments and recurring occurrences.
+/// Opened from a reminder ("payments of the day").
+final dayEntriesProvider = Provider.family<List<HomeEntry>?, LocalDate>((
+  ref,
+  date,
+) {
+  final plans = ref.watch(plansProvider).value;
+  final recurring = ref.watch(recurringProvider).value;
+  if (plans == null || recurring == null) return null;
+  final entries = <HomeEntry>[
+    for (final p in plans)
+      for (final pay in p.payments)
+        if (pay.dueDay == date.epochDay)
+          HomeEntry(
+            name: p.displayName,
+            date: date,
+            amountMinor: pay.amountMinor,
+            isPaid: pay.paidAt != null,
+            paymentId: pay.id,
+            planId: p.plan.id,
+            seq: pay.seq,
+            installmentCount: p.plan.installmentCount,
+          ),
+    for (final r in recurring)
+      for (final d in r.occurrences(date, date.addDays(1)))
+        HomeEntry(
+          name: r.item.name,
+          date: d,
+          amountMinor: r.item.amountMinor,
+          isPaid: r.paidDays.contains(d.epochDay),
+          recurringId: r.item.id,
+        ),
+  ]..sort(_byDateThenName);
+  return entries;
+});
