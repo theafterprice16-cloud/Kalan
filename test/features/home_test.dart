@@ -7,7 +7,7 @@ import '../helpers/app_harness.dart';
 
 void main() {
   // Period: 15 Nov - 14 Dec 2026. Klarna payments on 20 Nov and 4 Dec fall
-  // inside (100 TL each), rent on 1 Dec (15.000 TL).
+  // inside (₺100 each), rent on 1 Dec (₺15.000).
 
   testWidgets('shows left, the summary sentence and dated rows', (
     tester,
@@ -22,11 +22,8 @@ void main() {
       },
     );
     expect(find.text('15 Kas – 14 Ara'), findsOneWidget);
-    expect(find.text('34.800 TL'), findsOneWidget);
-    expect(
-      find.text('Bu dönem 3 ödeme var. Toplam 15.200 TL.'),
-      findsOneWidget,
-    );
+    expect(find.text('₺34.800'), findsOneWidget);
+    expect(find.text('Bu dönem 3 ödeme var. Toplam ₺15.200.'), findsOneWidget);
     expect(find.text('1/4'), findsOneWidget);
     expect(find.text('2/4'), findsOneWidget);
     expect(find.text('3/4'), findsNothing);
@@ -62,7 +59,7 @@ void main() {
     expect(find.text('Ödendi olarak işaretlendi.'), findsOneWidget);
     expect(find.text('Ödendi'), findsOneWidget);
     expect(find.byTooltip('Ödenmedi olarak işaretle'), findsOneWidget);
-    expect(find.text('49.800 TL'), findsOneWidget);
+    expect(find.text('₺49.800'), findsOneWidget);
     final paid = await (db.select(
       db.payments,
     )..where((p) => p.paidAt.isNotNull())).get();
@@ -80,9 +77,9 @@ void main() {
         await seedRent(db);
       },
     );
-    expect(find.text('−5.200 TL'), findsOneWidget);
-    expect(find.text('Bu dönem 5.200 TL eksik kalıyor.'), findsOneWidget);
-    final number = tester.widget<Text>(find.text('−5.200 TL'));
+    expect(find.text('-₺5.200'), findsOneWidget);
+    expect(find.text('Bu dönem ₺5.200 eksik kalıyor.'), findsOneWidget);
+    final number = tester.widget<Text>(find.text('-₺5.200'));
     expect(number.style!.color, KalanColors.coral);
     expect(find.byKey(const ValueKey('bar-excess')), findsOneWidget);
   });
@@ -96,12 +93,10 @@ void main() {
         await seedRent(db);
       },
     );
-    expect(find.text('4.800 TL'), findsOneWidget);
+    expect(find.text('₺4.800'), findsOneWidget);
     expect(find.byKey(const ValueKey('status-tight')), findsOneWidget);
     expect(
-      find.text(
-        'Sıkışık dönem. Kalan, belirlediğin 5.000 TL eşiğinin altında.',
-      ),
+      find.text('Sıkışık dönem. Kalan, belirlediğin ₺5.000 eşiğinin altında.'),
       findsOneWidget,
     );
     expect(find.byKey(const ValueKey('status-negative')), findsNothing);
@@ -118,7 +113,7 @@ void main() {
       },
     );
     expect(find.text('Söz verilmiş'), findsOneWidget);
-    expect(find.text('15.200 TL'), findsWidgets);
+    expect(find.text('₺15.200'), findsWidgets);
     expect(
       find.text("Net tutarı Ayarlar'da girersen kalanı da gösteririm."),
       findsOneWidget,
@@ -141,13 +136,13 @@ void main() {
     expect(find.text('1/4'), findsOneWidget);
     expect(find.text('2/4'), findsOneWidget);
     // Only 27 Nov and 11 Dec count toward this period.
-    expect(find.text('Bu dönem 2 ödeme var. Toplam 200 TL.'), findsOneWidget);
+    expect(find.text('Bu dönem 2 ödeme var. Toplam ₺200.'), findsOneWidget);
   });
 
   testWidgets('English and dollars', (tester) async {
     await pumpApp(
       tester,
-      locale: const Locale('en'),
+      locale: const Locale('en', 'US'),
       seed: (db) async {
         await seedSettings(db, currency: 'USD', incomeMinor: 250000);
         await seedPayIn4(db, totalMinor: 25000, source: 'Afterpay');

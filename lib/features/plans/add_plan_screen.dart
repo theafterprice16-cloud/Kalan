@@ -8,7 +8,6 @@ import '../../core/design/form_fields.dart';
 import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
-import '../../core/money/money_format.dart';
 import '../../core/routing/routes.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
@@ -111,7 +110,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   }
 
   int? _int(TextEditingController c) => int.tryParse(c.text.trim());
-  int? _amount(TextEditingController c) => parseMinorUnits(c.text);
+  int? _amount(TextEditingController c) => ref.parseMoney(context, c.text);
 
   List<SourceRow> get _sources => ref.read(sourcesProvider).value ?? const [];
 
@@ -256,8 +255,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   String? _totalValidator(String? v) {
     if (v == null || v.trim().isEmpty) return context.l10n.errorRequired;
-    final total = parseMinorUnits(v);
-    if (total == null || total < 1) return context.l10n.errorAmountInvalid;
+    final total = ref.parseMoney(context, v);
+    if (total == null || total < 1) return ref.amountError(context);
     final count = _mode == AddMode.payIn4 ? 4 : _int(_count);
     if (count != null && count > 0 && total < count) {
       return context.l10n.errorTotalTooSmall;
@@ -325,14 +324,14 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
         TextFormField(
           key: key,
           controller: c,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: ref.amountKeyboard,
           decoration: InputDecoration(labelText: label),
           validator: c == _total
               ? _totalValidator
               : (v) =>
                     _required(v) ??
-                    ((parseMinorUnits(v!) ?? 0) < 1
-                        ? l10n.errorAmountInvalid
+                    ((ref.parseMoney(context, v!) ?? 0) < 1
+                        ? ref.amountError(context)
                         : null),
         );
     Widget count(TextEditingController c, String label, Key key) =>

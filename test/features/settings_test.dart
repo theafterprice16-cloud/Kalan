@@ -36,7 +36,7 @@ void main() {
     );
     await tester.tap(find.text('Kaydet'));
     await tester.pumpAndSettle();
-    expect(find.text('20.000 TL'), findsOneWidget);
+    expect(find.text('₺20.000'), findsOneWidget);
 
     await tester.tap(find.text('Sıkışık dönem eşiği'));
     await tester.pumpAndSettle();
@@ -46,10 +46,10 @@ void main() {
     );
     await tester.tap(find.text('Kaydet'));
     await tester.pumpAndSettle();
-    expect(find.text('6.000 TL'), findsOneWidget);
+    expect(find.text('₺6.000'), findsOneWidget);
 
     await openTab(tester, 'Bu dönem');
-    expect(find.text('5.000 TL'), findsOneWidget);
+    expect(find.text('₺5.000'), findsOneWidget);
     expect(find.byKey(const ValueKey('status-tight')), findsOneWidget);
 
     // Clearing the threshold turns tight periods off.
@@ -62,18 +62,84 @@ void main() {
     expect(find.text('Kapalı'), findsOneWidget);
   });
 
-  testWidgets('currency changes the symbol, not the amounts', (tester) async {
+  testWidgets('currency changes the label after a preview, not the amounts', (
+    tester,
+  ) async {
     await pumpApp(tester, seed: (db) => seedSettings(db, incomeMinor: 5000000));
+    await openTab(tester, 'Ayarlar');
+    expect(find.text('₺ · TRY · Türk lirası'), findsOneWidget);
+    await tester.tap(find.text('Para birimi'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('currency-search')),
+      'abd',
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('currency-EUR')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('currency-USD')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Tutarlar çevrilmez, yalnızca para birimi etiketi değişir.'),
+      findsOneWidget,
+    );
+    expect(find.text(r'Örnek: ₺1.234,56 → $1.234,56'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('currency-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.text(r'$ · USD · ABD doları'), findsOneWidget);
+    await openTab(tester, 'Bu dönem');
+    expect(find.text(r'$50.000'), findsOneWidget);
+  });
+
+  testWidgets('switching to rupiah rounds amounts to whole rupiah', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 123456);
+        await seedPayIn4(db, totalMinor: 40002);
+      },
+    );
     await openTab(tester, 'Ayarlar');
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('currency-search')),
+      'IDR',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('currency-IDR')));
+    await tester.pumpAndSettle();
+    expect(find.text('Örnek: ₺1.234,56 → Rp1.235'), findsOneWidget);
     expect(
-      find.text('Tutarlar çevrilmez. Yalnızca para birimi değişir.'),
+      find.text(
+        'Bu para biriminin ondalık sayısı farklı, tutarlar yuvarlanır.',
+      ),
       findsOneWidget,
     );
-    await tester.tap(find.text('ABD doları (USD)'));
+    await tester.tap(find.byKey(const ValueKey('currency-confirm')));
     await tester.pumpAndSettle();
-    expect(find.text(r'50.000 $'), findsOneWidget);
+    final s = await db.select(db.appSettings).getSingle();
+    expect(s.currencyCode, 'IDR');
+    expect(s.netIncomeMinor, 1235);
+    final amounts = (await db.select(db.payments).get()).map(
+      (p) => p.amountMinor,
+    );
+    expect(amounts, [100, 100, 100, 100]);
+    await openTab(tester, 'Bu dönem');
+    expect(find.text('Rp1.035'), findsOneWidget);
+  });
+
+  testWidgets('cancelling the change keeps the currency', (tester) async {
+    final db = await pumpApp(tester, seed: seedSettings);
+    await openTab(tester, 'Ayarlar');
+    await tester.tap(find.text('Para birimi'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('currency-EUR')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vazgeç'));
+    await tester.pumpAndSettle();
+    expect((await db.select(db.appSettings).getSingle()).currencyCode, 'TRY');
   });
 
   testWidgets('changing the payday moves the period', (tester) async {

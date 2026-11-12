@@ -8,7 +8,6 @@ import '../../core/design/form_fields.dart';
 import '../../core/design/theme.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
-import '../../core/money/money_format.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../onboarding/pay_form.dart';
@@ -171,9 +170,10 @@ class _PaymentRow extends ConsumerWidget {
       messenger.showSnackBar(SnackBar(content: Text(l10n.editRejectedPaid)));
       return;
     }
+    final amountError = ref.amountError(context);
     final result = await showDialog<(LocalDate, int)>(
       context: context,
-      builder: (_) => _EditPaymentDialog(payment: payment),
+      builder: (_) => _EditPaymentDialog(payment: payment, ref: ref),
     );
     if (result == null) return;
     final rejection = await ref
@@ -189,7 +189,7 @@ class _PaymentRow extends ConsumerWidget {
       EditRejection.alreadyPaid => l10n.editRejectedPaid,
       EditRejection.noAbsorbers => l10n.editRejectedNoAbsorbers,
       EditRejection.absorberWouldBeNonPositive => l10n.editRejectedAbsorber,
-      EditRejection.nonPositiveAmount => l10n.errorAmountInvalid,
+      EditRejection.nonPositiveAmount => amountError,
       EditRejection.notFound => l10n.planNotFound,
     };
     messenger
@@ -264,9 +264,10 @@ class _PaymentRow extends ConsumerWidget {
 }
 
 class _EditPaymentDialog extends StatefulWidget {
-  const _EditPaymentDialog({required this.payment});
+  const _EditPaymentDialog({required this.payment, required this.ref});
 
   final PaymentRow payment;
+  final WidgetRef ref;
 
   @override
   State<_EditPaymentDialog> createState() => _EditPaymentDialogState();
@@ -288,10 +289,7 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_amount.text.isEmpty) {
-      _amount.text = formatMinorForInput(
-        widget.payment.amountMinor,
-        context.localeName,
-      );
+      _amount.text = widget.ref.moneyInput(context, widget.payment.amountMinor);
     }
   }
 
@@ -339,7 +337,10 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
         TextButton(
           onPressed: () {
             if (!_formKey.currentState!.validate()) return;
-            Navigator.pop(context, (_date, parseMinorUnits(_amount.text)!));
+            Navigator.pop(context, (
+              _date,
+              widget.ref.parseMoney(context, _amount.text)!,
+            ));
           },
           child: Text(l10n.actionSave),
         ),

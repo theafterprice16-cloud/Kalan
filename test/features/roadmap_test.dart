@@ -96,7 +96,7 @@ void main() {
   testWidgets('English roadmap', (tester) async {
     await pumpApp(
       tester,
-      locale: const Locale('en'),
+      locale: const Locale('en', 'US'),
       seed: seedSettings,
       overrides: [
         roadmapSourceProvider.overrideWith((ref) async => docExample()),

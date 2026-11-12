@@ -1,6 +1,10 @@
 {
   "@@locale": "en",
   "appTitle": "Kalan",
+  "languageNativeName": "English",
+  "@languageNativeName": {
+    "description": "This language's name, written in this language."
+  },
   "actionSave": "Save",
   "actionCancel": "Cancel",
   "actionDelete": "Delete",
@@ -10,10 +14,6 @@
   "navHome": "This period",
   "navPlans": "Plans",
   "navSettings": "Settings",
-  "currencyLira": "Turkish lira (TRY)",
-  "currencyDollar": "US dollar (USD)",
-  "currencyPound": "British pound (GBP)",
-  "currencyEuro": "Euro (EUR)",
   "frequencyMonthly": "Monthly",
   "frequencyBiweekly": "Every two weeks",
   "frequencyWeekly": "Weekly",
@@ -29,7 +29,14 @@
   "netIncomeHelp": "Optional. Without it, I'll only show what's spoken for.",
   "onboardingStart": "Start",
   "errorRequired": "This field is required.",
-  "errorAmountInvalid": "Enter the amount in numbers, like 1250.50.",
+  "errorAmountInvalid": "Enter the amount in numbers, like {example}.",
+  "@errorAmountInvalid": {
+    "placeholders": {
+      "example": {
+        "type": "String"
+      }
+    }
+  },
   "errorCountInvalid": "Enter a number from 1 to 120.",
   "errorRemainingTooHigh": "This can't be more than the total.",
   "errorTotalTooSmall": "This amount can't be split into that many payments.",
@@ -316,10 +323,33 @@
   "recurringEnded": "Ended",
   "settingsLanguage": "Language",
   "languageSystem": "System language",
-  "languageTurkish": "Türkçe",
-  "languageEnglish": "English",
   "settingsCurrency": "Currency",
-  "settingsCurrencyNote": "Amounts aren't converted. Only the currency changes.",
+  "settingsCurrencyNote": "Amounts aren't converted; only the currency label changes.",
+  "currencyName": "{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} other{{code}}}",
+  "@currencyName": {
+    "description": "Currency name by ISO code. Add a branch when adding a currency.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "currencySearch": "Search currency",
+  "currencyNoMatch": "No currency matches.",
+  "currencyChangeTitle": "Change currency",
+  "currencyChangePreview": "Example: {before} → {after}",
+  "@currencyChangePreview": {
+    "placeholders": {
+      "before": {
+        "type": "String"
+      },
+      "after": {
+        "type": "String"
+      }
+    }
+  },
+  "currencyChangeRounding": "This currency uses a different number of decimals, so amounts are rounded.",
+  "currencyChangeConfirm": "Change",
   "settingsPay": "Pay",
   "paySummaryMonthly": "Monthly, day {day}",
   "@paySummaryMonthly": {

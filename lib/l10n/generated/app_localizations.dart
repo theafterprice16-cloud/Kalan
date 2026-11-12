@@ -5,8 +5,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
 import 'app_localizations_tr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,8 +102,16 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('de'),
     Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('id'),
+    Locale('it'),
+    Locale('pt'),
+    Locale('ru'),
     Locale('tr'),
+    Locale('zh'),
   ];
 
   /// No description provided for @appTitle.
@@ -103,6 +119,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Kalan'**
   String get appTitle;
+
+  /// This language's name, written in this language.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageNativeName;
 
   /// No description provided for @actionSave.
   ///
@@ -157,30 +179,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get navSettings;
-
-  /// No description provided for @currencyLira.
-  ///
-  /// In en, this message translates to:
-  /// **'Turkish lira (TRY)'**
-  String get currencyLira;
-
-  /// No description provided for @currencyDollar.
-  ///
-  /// In en, this message translates to:
-  /// **'US dollar (USD)'**
-  String get currencyDollar;
-
-  /// No description provided for @currencyPound.
-  ///
-  /// In en, this message translates to:
-  /// **'British pound (GBP)'**
-  String get currencyPound;
-
-  /// No description provided for @currencyEuro.
-  ///
-  /// In en, this message translates to:
-  /// **'Euro (EUR)'**
-  String get currencyEuro;
 
   /// No description provided for @frequencyMonthly.
   ///
@@ -275,8 +273,8 @@ abstract class AppLocalizations {
   /// No description provided for @errorAmountInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter the amount in numbers, like 1250.50.'**
-  String get errorAmountInvalid;
+  /// **'Enter the amount in numbers, like {example}.'**
+  String errorAmountInvalid(String example);
 
   /// No description provided for @errorCountInvalid.
   ///
@@ -1058,18 +1056,6 @@ abstract class AppLocalizations {
   /// **'System language'**
   String get languageSystem;
 
-  /// No description provided for @languageTurkish.
-  ///
-  /// In en, this message translates to:
-  /// **'Türkçe'**
-  String get languageTurkish;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
-
   /// No description provided for @settingsCurrency.
   ///
   /// In en, this message translates to:
@@ -1079,8 +1065,50 @@ abstract class AppLocalizations {
   /// No description provided for @settingsCurrencyNote.
   ///
   /// In en, this message translates to:
-  /// **'Amounts aren\'t converted. Only the currency changes.'**
+  /// **'Amounts aren\'t converted; only the currency label changes.'**
   String get settingsCurrencyNote;
+
+  /// Currency name by ISO code. Add a branch when adding a currency.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} other{{code}}}'**
+  String currencyName(String code);
+
+  /// No description provided for @currencySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search currency'**
+  String get currencySearch;
+
+  /// No description provided for @currencyNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No currency matches.'**
+  String get currencyNoMatch;
+
+  /// No description provided for @currencyChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change currency'**
+  String get currencyChangeTitle;
+
+  /// No description provided for @currencyChangePreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: {before} → {after}'**
+  String currencyChangePreview(String before, String after);
+
+  /// No description provided for @currencyChangeRounding.
+  ///
+  /// In en, this message translates to:
+  /// **'This currency uses a different number of decimals, so amounts are rounded.'**
+  String get currencyChangeRounding;
+
+  /// No description provided for @currencyChangeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get currencyChangeConfirm;
 
   /// No description provided for @settingsPay.
   ///
@@ -1213,8 +1241,18 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'tr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'de',
+    'en',
+    'es',
+    'fr',
+    'id',
+    'it',
+    'pt',
+    'ru',
+    'tr',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -1223,10 +1261,26 @@ class _AppLocalizationsDelegate
 AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'id':
+      return AppLocalizationsId();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
     case 'tr':
       return AppLocalizationsTr();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

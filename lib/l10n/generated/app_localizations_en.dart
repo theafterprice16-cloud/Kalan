@@ -13,6 +13,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Kalan';
 
   @override
+  String get languageNativeName => 'English';
+
+  @override
   String get actionSave => 'Save';
 
   @override
@@ -38,18 +41,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navSettings => 'Settings';
-
-  @override
-  String get currencyLira => 'Turkish lira (TRY)';
-
-  @override
-  String get currencyDollar => 'US dollar (USD)';
-
-  @override
-  String get currencyPound => 'British pound (GBP)';
-
-  @override
-  String get currencyEuro => 'Euro (EUR)';
 
   @override
   String get frequencyMonthly => 'Monthly';
@@ -99,7 +90,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorRequired => 'This field is required.';
 
   @override
-  String get errorAmountInvalid => 'Enter the amount in numbers, like 1250.50.';
+  String errorAmountInvalid(String example) {
+    return 'Enter the amount in numbers, like $example.';
+  }
 
   @override
   String get errorCountInvalid => 'Enter a number from 1 to 120.';
@@ -562,17 +555,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageSystem => 'System language';
 
   @override
-  String get languageTurkish => 'Türkçe';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
   String get settingsCurrency => 'Currency';
 
   @override
   String get settingsCurrencyNote =>
-      'Amounts aren\'t converted. Only the currency changes.';
+      'Amounts aren\'t converted; only the currency label changes.';
+
+  @override
+  String currencyName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'TRY': 'Turkish lira',
+      'USD': 'US dollar',
+      'EUR': 'Euro',
+      'GBP': 'British pound',
+      'BRL': 'Brazilian real',
+      'MXN': 'Mexican peso',
+      'COP': 'Colombian peso',
+      'CLP': 'Chilean peso',
+      'RUB': 'Russian ruble',
+      'KZT': 'Kazakhstani tenge',
+      'CNY': 'Chinese yuan',
+      'SGD': 'Singapore dollar',
+      'MYR': 'Malaysian ringgit',
+      'IDR': 'Indonesian rupiah',
+      'CAD': 'Canadian dollar',
+      'AUD': 'Australian dollar',
+      'CHF': 'Swiss franc',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get currencySearch => 'Search currency';
+
+  @override
+  String get currencyNoMatch => 'No currency matches.';
+
+  @override
+  String get currencyChangeTitle => 'Change currency';
+
+  @override
+  String currencyChangePreview(String before, String after) {
+    return 'Example: $before → $after';
+  }
+
+  @override
+  String get currencyChangeRounding =>
+      'This currency uses a different number of decimals, so amounts are rounded.';
+
+  @override
+  String get currencyChangeConfirm => 'Change';
 
   @override
   String get settingsPay => 'Pay';

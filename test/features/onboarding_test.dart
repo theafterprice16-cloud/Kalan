@@ -10,11 +10,8 @@ void main() {
   testWidgets('first launch shows setup; saving lands on home', (tester) async {
     final db = await pumpApp(tester);
     expect(find.text('Bir dakikada kuralım.'), findsOneWidget);
-    // Currency defaults to lira on a Turkish device.
-    final lira = tester.widget<ChoiceChip>(
-      find.widgetWithText(ChoiceChip, 'Türk lirası (TL)'),
-    );
-    expect(lira.selected, isTrue);
+    // The currency is suggested from the device region (Turkey).
+    expect(find.text('₺ · TRY · Türk lirası'), findsOneWidget);
 
     await scrollTo(tester, find.byKey(_income));
     await tester.enterText(find.byKey(_income), '50.000');
@@ -23,7 +20,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kalan'), findsWidgets);
-    expect(find.text('50.000 TL'), findsWidgets);
+    expect(find.text('₺50.000'), findsWidgets);
     expect(find.text('Bu dönem ödeme yok.'), findsOneWidget);
 
     final settings = await db.select(db.appSettings).getSingle();
@@ -50,7 +47,7 @@ void main() {
   });
 
   testWidgets('weekly pay stores the most recent payday', (tester) async {
-    final db = await pumpApp(tester, locale: const Locale('en'));
+    final db = await pumpApp(tester, locale: const Locale('en', 'US'));
     expect(find.text("Let's set up in a minute."), findsOneWidget);
     await tester.tap(find.text('Weekly'));
     await tester.pumpAndSettle();

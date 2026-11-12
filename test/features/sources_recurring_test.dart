@@ -93,7 +93,7 @@ void main() {
     expect(row.startDay, testToday.epochDay);
 
     await openTab(tester, 'Bu dönem');
-    expect(find.text('35.000 TL'), findsOneWidget);
+    expect(find.text('₺35.000'), findsOneWidget);
     expect(find.text('Sabit'), findsWidgets);
   });
 }

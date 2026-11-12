@@ -13,6 +13,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'Kalan';
 
   @override
+  String get languageNativeName => 'Türkçe';
+
+  @override
   String get actionSave => 'Kaydet';
 
   @override
@@ -38,18 +41,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get navSettings => 'Ayarlar';
-
-  @override
-  String get currencyLira => 'Türk lirası (TL)';
-
-  @override
-  String get currencyDollar => 'ABD doları (USD)';
-
-  @override
-  String get currencyPound => 'İngiliz sterlini (GBP)';
-
-  @override
-  String get currencyEuro => 'Euro (EUR)';
 
   @override
   String get frequencyMonthly => 'Ayda bir';
@@ -99,7 +90,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errorRequired => 'Bu alan gerekli.';
 
   @override
-  String get errorAmountInvalid => 'Tutarı rakamla yaz, örneğin 1250,50.';
+  String errorAmountInvalid(String example) {
+    return 'Tutarı rakamla yaz, örneğin $example.';
+  }
 
   @override
   String get errorCountInvalid => '1 ile 120 arasında bir sayı yaz.';
@@ -556,17 +549,57 @@ class AppLocalizationsTr extends AppLocalizations {
   String get languageSystem => 'Sistem dili';
 
   @override
-  String get languageTurkish => 'Türkçe';
-
-  @override
-  String get languageEnglish => 'English';
-
-  @override
   String get settingsCurrency => 'Para birimi';
 
   @override
   String get settingsCurrencyNote =>
-      'Tutarlar çevrilmez. Yalnızca para birimi değişir.';
+      'Tutarlar çevrilmez, yalnızca para birimi etiketi değişir.';
+
+  @override
+  String currencyName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'TRY': 'Türk lirası',
+      'USD': 'ABD doları',
+      'EUR': 'Euro',
+      'GBP': 'İngiliz sterlini',
+      'BRL': 'Brezilya reali',
+      'MXN': 'Meksika pesosu',
+      'COP': 'Kolombiya pesosu',
+      'CLP': 'Şili pesosu',
+      'RUB': 'Rus rublesi',
+      'KZT': 'Kazak tengesi',
+      'CNY': 'Çin yuanı',
+      'SGD': 'Singapur doları',
+      'MYR': 'Malezya ringgiti',
+      'IDR': 'Endonezya rupisi',
+      'CAD': 'Kanada doları',
+      'AUD': 'Avustralya doları',
+      'CHF': 'İsviçre frangı',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get currencySearch => 'Para birimi ara';
+
+  @override
+  String get currencyNoMatch => 'Eşleşen para birimi yok.';
+
+  @override
+  String get currencyChangeTitle => 'Para birimini değiştir';
+
+  @override
+  String currencyChangePreview(String before, String after) {
+    return 'Örnek: $before → $after';
+  }
+
+  @override
+  String get currencyChangeRounding =>
+      'Bu para biriminin ondalık sayısı farklı, tutarlar yuvarlanır.';
+
+  @override
+  String get currencyChangeConfirm => 'Değiştir';
 
   @override
   String get settingsPay => 'Maaş';

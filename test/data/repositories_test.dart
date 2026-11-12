@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/models.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
@@ -204,5 +205,74 @@ void main() {
     expect(all.single.paidDays, isEmpty);
     await repo.delete(id);
     expect(await repo.watchAll().first, isEmpty);
+  });
+
+  group('changeCurrency', () {
+    Future<void> seed() async {
+      await SettingsRepository(db).save(
+        AppSettingsCompanion.insert(
+          currencyCode: 'TRY',
+          payFrequency: PayFrequency.monthly,
+          payDay: const Value(15),
+          netIncomeMinor: const Value(5000050),
+          tightThresholdMinor: const Value(49),
+        ),
+      );
+      await savePayIn4(total: 123402); // 30852, 30850, 30850, 30850
+      await RecurringRepository(db).create(
+        RecurringPaymentsCompanion.insert(
+          name: 'Kira',
+          amountMinor: 40,
+          recurrence: Recurrence.monthly,
+          startDay: d('2026-01-01').epochDay,
+        ),
+      );
+    }
+
+    Future<List<int>> payments() async => [
+      for (final p in (await plans.watchAll().first).single.payments)
+        p.amountMinor,
+    ];
+
+    test('2 -> 0 decimals rounds half up, keeps at least 1', () async {
+      await seed();
+      await SettingsRepository(db).changeCurrency(
+        from: Currency.fromCode('TRY'),
+        to: Currency.fromCode('IDR'),
+      );
+      expect(await payments(), [309, 309, 309, 309]);
+      final recurring = await RecurringRepository(db).watchAll().first;
+      expect(recurring.single.item.amountMinor, 1); // 0,40 -> 0 -> min 1
+      final s = (await SettingsRepository(db).get())!;
+      expect(s.currencyCode, 'IDR');
+      expect(s.netIncomeMinor, 50001);
+      expect(s.tightThresholdMinor, 0);
+    });
+
+    test('0 -> 2 decimals multiplies exactly', () async {
+      await seed();
+      final repo = SettingsRepository(db);
+      await repo.changeCurrency(
+        from: Currency.fromCode('TRY'),
+        to: Currency.fromCode('IDR'),
+      );
+      await repo.changeCurrency(
+        from: Currency.fromCode('IDR'),
+        to: Currency.fromCode('EUR'),
+      );
+      expect(await payments(), [30900, 30900, 30900, 30900]);
+      expect((await repo.get())!.netIncomeMinor, 5000100);
+      expect((await repo.get())!.currencyCode, 'EUR');
+    });
+
+    test('same decimals only change the label', () async {
+      await seed();
+      await SettingsRepository(db).changeCurrency(
+        from: Currency.fromCode('TRY'),
+        to: Currency.fromCode('USD'),
+      );
+      expect(await payments(), [30852, 30850, 30850, 30850]);
+      expect((await SettingsRepository(db).get())!.netIncomeMinor, 5000050);
+    });
   });
 }

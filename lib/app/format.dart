@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/date/local_date.dart';
+import '../core/money/currency.dart';
 import '../core/money/money_format.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'providers.dart';
@@ -24,8 +25,33 @@ extension L10nX on BuildContext {
       DateFormat.EEEE(localeName).format(date.toDateTime());
 }
 
+/// Every screen formats, parses and edits amounts through these helpers,
+/// which all go through lib/core/money with the current currency.
 extension MoneyRefX on WidgetRef {
-  /// Formats minor units in the user's currency and the app's locale.
-  String money(BuildContext context, int minor) =>
-      formatMoney(minor, watch(currencyProvider), context.localeName);
+  Currency get currency => watch(currencyProvider);
+
+  /// Formats minor units in the user's currency and the app's language.
+  String money(BuildContext context, int minor) => formatMoney(
+    minor,
+    currency,
+    localeName: context.localeName,
+    region: watch(deviceRegionProvider),
+  );
+
+  /// Parses typed text; null when invalid.
+  int? parseMoney(BuildContext context, String text) =>
+      parseAmount(text, currency, localeName: context.localeName);
+
+  /// Text to prefill an amount field with.
+  String moneyInput(BuildContext context, int minor) =>
+      formatMinorForInput(minor, currency, localeName: context.localeName);
+
+  /// Validation message with an example in the current currency.
+  String amountError(BuildContext context) => context.l10n.errorAmountInvalid(
+    amountInputExample(currency, localeName: context.localeName),
+  );
+
+  /// No decimal key for currencies without minor digits.
+  TextInputType get amountKeyboard =>
+      TextInputType.numberWithOptions(decimal: currency.decimals > 0);
 }

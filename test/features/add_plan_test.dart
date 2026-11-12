@@ -57,8 +57,8 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('source')), 'Klarna');
     await tester.enterText(find.byKey(const ValueKey('total')), '400,01');
     await tester.pumpAndSettle();
-    expect(find.text('4 ödeme, toplam 400,01 TL.'), findsOneWidget);
-    expect(find.text('100,01 TL'), findsOneWidget);
+    expect(find.text('4 ödeme, toplam ₺400,01.'), findsOneWidget);
+    expect(find.text('₺100,01'), findsOneWidget);
     expect(find.text('1 Oca 2027'), findsOneWidget);
 
     await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
@@ -123,7 +123,7 @@ void main() {
     await tester.enterText(find.byKey(const ValueKey('installment')), '250');
     await tester.pumpAndSettle();
     await scrollTo(tester, find.byKey(const ValueKey('preview-summary')));
-    expect(find.text('9 ödeme, toplam 2.250 TL.'), findsOneWidget);
+    expect(find.text('9 ödeme, toplam ₺2.250.'), findsOneWidget);
     expect(
       find.text('Bu plan eklenmeden önce 3 ödeme yapılmış.'),
       findsOneWidget,

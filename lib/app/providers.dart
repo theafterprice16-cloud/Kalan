@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/engine/engine.dart';
@@ -49,9 +50,19 @@ final recurringProvider = StreamProvider<List<RecurringWithMarks>>(
   (ref) => ref.watch(recurringRepositoryProvider).watchAll(),
 );
 
+/// The device's region (ISO 3166-1), independent of the app language.
+/// Decides the default currency and whether "$" needs a prefix.
+/// Overridden in tests.
+final deviceRegionProvider = Provider<String?>(
+  (ref) => WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+);
+
+/// The chosen currency; before onboarding, the one suggested for the region.
 final currencyProvider = Provider<Currency>((ref) {
   final code = ref.watch(settingsProvider).value?.currencyCode;
-  return code == null ? Currency.lira : Currency.fromCode(code);
+  return code == null
+      ? Currency.forRegion(ref.watch(deviceRegionProvider))
+      : Currency.fromCode(code);
 });
 
 final entitlementProvider = Provider<Entitlement>(

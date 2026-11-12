@@ -11,6 +11,7 @@ import 'package:drift/native.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/plan_draft.dart';
+import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/data/db/app_database.dart';
 
 import 'generated/schema.dart';
@@ -38,6 +39,23 @@ void main() {
       final schema = await verifier.schemaAt(from);
       final db = AppDatabase(schema.newConnection());
       await verifier.migrateAndValidate(db, db.schemaVersion);
+      await db.close();
+    });
+  }
+
+  for (final code in ['TRY', 'USD', 'GBP', 'EUR']) {
+    test('v1 settings with $code read back unchanged', () async {
+      final schema = await verifier.schemaAt(1);
+      schema.rawDatabase.execute(
+        'INSERT INTO app_settings (id, currency_code, pay_frequency, pay_day, '
+        'net_income_minor) VALUES (1, ?, ?, 15, 123456)',
+        [code, 'monthly'],
+      );
+      final db = AppDatabase(schema.newConnection());
+      final row = await db.select(db.appSettings).getSingle();
+      expect(row.currencyCode, code);
+      expect(Currency.fromCode(row.currencyCode).code, code);
+      expect(row.netIncomeMinor, 123456);
       await db.close();
     });
   }

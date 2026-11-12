@@ -4,9 +4,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
-import '../../core/design/form_fields.dart';
 import '../../core/money/currency.dart';
+import '../../core/money/money_format.dart';
 import '../../data/db/app_database.dart';
+import '../currency/currency_picker.dart';
 import 'pay_form.dart';
 
 /// One-minute setup: currency, pay schedule, optional take-home pay.
@@ -48,15 +49,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             payFrequency: pay.payFrequency.value,
             payDay: pay.payDay,
             payAnchorDay: pay.payAnchorDay,
-            netIncomeMinor: Value(optionalMinor(_income.text)),
+            netIncomeMinor: Value(_parsedIncome),
           ),
         );
     // The router redirects to home once settings exist.
   }
 
+  /// Suggested from the device region until the user picks one.
   Currency get _currencyOrDefault =>
-      _currency ??
-      (context.localeName.startsWith('tr') ? Currency.lira : Currency.dollar);
+      _currency ?? Currency.forRegion(ref.read(deviceRegionProvider));
+
+  int? get _parsedIncome => _income.text.trim().isEmpty
+      ? null
+      : parseAmount(
+          _income.text,
+          _currencyOrDefault,
+          localeName: context.localeName,
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +90,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               const SizedBox(height: 8),
               Text(l10n.onboardingIntro, style: theme.textTheme.bodyLarge),
               const SizedBox(height: 32),
-              ChoiceField<Currency>(
-                label: l10n.fieldCurrency,
-                selected: _currencyOrDefault,
-                options: currencyOptions(context),
-                onSelected: (c) => setState(() => _currency = c),
+              CurrencyField(
+                value: _currencyOrDefault,
+                onChanged: (c) => setState(() => _currency = c),
               ),
               const SizedBox(height: 24),
               PayFields(value: _pay, onChanged: () => setState(() {})),
@@ -93,6 +100,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               OptionalAmountField(
                 fieldKey: const ValueKey('net-income'),
                 controller: _income,
+                currency: _currencyOrDefault,
                 label: l10n.fieldNetIncome,
                 helperText: l10n.netIncomeHelp,
               ),
@@ -107,14 +115,4 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       ),
     );
   }
-}
-
-List<(Currency, String)> currencyOptions(BuildContext context) {
-  final l10n = context.l10n;
-  return [
-    (Currency.lira, l10n.currencyLira),
-    (Currency.dollar, l10n.currencyDollar),
-    (Currency.pound, l10n.currencyPound),
-    (Currency.euro, l10n.currencyEuro),
-  ];
 }

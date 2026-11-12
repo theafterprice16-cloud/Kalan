@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../core/date/local_date.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/engine/pay_period.dart';
+import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
 import '../../data/db/app_database.dart';
 
@@ -144,13 +146,14 @@ class PayFields extends StatelessWidget {
 }
 
 /// Optional amount field: empty is allowed, otherwise must parse.
-class OptionalAmountField extends StatelessWidget {
+class OptionalAmountField extends ConsumerWidget {
   const OptionalAmountField({
     required this.controller,
     required this.label,
     super.key,
     this.helperText,
     this.fieldKey,
+    this.currency,
   });
 
   final TextEditingController controller;
@@ -158,12 +161,16 @@ class OptionalAmountField extends StatelessWidget {
   final String? helperText;
   final Key? fieldKey;
 
+  /// Overrides the saved currency (onboarding, before it is saved).
+  final Currency? currency;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = currency ?? ref.currency;
     return TextFormField(
       key: fieldKey,
       controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: TextInputType.numberWithOptions(decimal: c.decimals > 0),
       decoration: InputDecoration(
         labelText: label,
         helperText: helperText,
@@ -171,15 +178,18 @@ class OptionalAmountField extends StatelessWidget {
       ),
       validator: (text) {
         if (text == null || text.trim().isEmpty) return null;
-        final v = parseMinorUnits(text);
-        return v == null ? context.l10n.errorAmountInvalid : null;
+        return parseAmount(text, c, localeName: context.localeName) == null
+            ? context.l10n.errorAmountInvalid(
+                amountInputExample(c, localeName: context.localeName),
+              )
+            : null;
       },
     );
   }
 }
 
 /// Required amount field (at least one minor unit).
-class AmountField extends StatelessWidget {
+class AmountField extends ConsumerWidget {
   const AmountField({
     required this.controller,
     required this.label,
@@ -194,23 +204,20 @@ class AmountField extends StatelessWidget {
   final Key? fieldKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TextFormField(
       key: fieldKey,
       controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: ref.amountKeyboard,
       decoration: InputDecoration(labelText: label),
       onChanged: onChanged,
       validator: (text) {
         if (text == null || text.trim().isEmpty) {
           return context.l10n.errorRequired;
         }
-        final v = parseMinorUnits(text);
-        return v == null || v < 1 ? context.l10n.errorAmountInvalid : null;
+        final v = ref.parseMoney(context, text);
+        return v == null || v < 1 ? ref.amountError(context) : null;
       },
     );
   }
 }
-
-int? optionalMinor(String text) =>
-    text.trim().isEmpty ? null : parseMinorUnits(text);

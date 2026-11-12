@@ -9,7 +9,6 @@ import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/engine/engine.dart';
-import '../../core/money/money_format.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
@@ -55,7 +54,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
     setState(() {
       _existing = r;
       _name.text = r.name;
-      _amount.text = formatMinorForInput(r.amountMinor, context.localeName);
+      _amount.text = ref.moneyInput(context, r.amountMinor);
       _recurrence = r.recurrence;
       _start = LocalDate.fromEpochDay(r.startDay);
       _end = r.endDay == null ? null : LocalDate.fromEpochDay(r.endDay!);
@@ -78,7 +77,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
-    final amount = parseMinorUnits(_amount.text)!;
+    final amount = ref.parseMoney(context, _amount.text)!;
     final existing = _existing;
     if (existing == null) {
       await repo.create(

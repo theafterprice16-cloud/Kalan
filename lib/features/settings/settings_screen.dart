@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../app/app.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/date/local_date.dart';
@@ -14,7 +15,7 @@ import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
 import '../../core/routing/routes.dart';
 import '../../data/db/app_database.dart';
-import '../onboarding/onboarding_screen.dart';
+import '../currency/currency_picker.dart';
 import '../onboarding/pay_form.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -49,8 +50,7 @@ class SettingsScreen extends ConsumerWidget {
         selected: s.localeCode,
         options: [
           (null, l10n.languageSystem),
-          ('tr', l10n.languageTurkish),
-          ('en', l10n.languageEnglish),
+          for (final code in appLanguageCodes) (code, nativeLanguageName(code)),
         ],
       ),
     );
@@ -64,22 +64,17 @@ class SettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     SettingsRow s,
   ) async {
-    final l10n = context.l10n;
-    final picked = await showDialog<_Choice<Currency>>(
+    final from = Currency.fromCode(s.currencyCode);
+    final to = await showCurrencyPicker(context, selected: from);
+    if (to == null || to == from || !context.mounted) return;
+    final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => _ChoiceDialog<Currency>(
-        title: l10n.settingsCurrency,
-        note: l10n.settingsCurrencyNote,
-        selected: Currency.fromCode(s.currencyCode),
-        options: currencyOptions(context),
-      ),
+      builder: (_) => CurrencyChangeDialog(from: from, to: to),
     );
-    if (picked != null) {
-      await _update(
-        ref,
-        AppSettingsCompanion(currencyCode: Value(picked.value.code)),
-      );
-    }
+    if (ok != true) return;
+    await ref
+        .read(settingsRepositoryProvider)
+        .changeCurrency(from: from, to: to);
   }
 
   Future<void> _editAmount(
@@ -92,8 +87,12 @@ class SettingsScreen extends ConsumerWidget {
   }) async {
     final result = await showDialog<_Choice<int?>>(
       context: context,
-      builder: (_) =>
-          _AmountDialog(title: title, help: help, initialMinor: current),
+      builder: (_) => _AmountDialog(
+        title: title,
+        help: help,
+        initialMinor: current,
+        currency: ref.read(currencyProvider),
+      ),
     );
     if (result != null) await _update(ref, toChanges(result.value));
   }
@@ -109,13 +108,13 @@ class SettingsScreen extends ConsumerWidget {
         ?.copyWith(color: context.palette.secondaryText);
     String amountOrNot(int? minor) =>
         minor == null ? l10n.notSet : ref.money(context, minor);
-    final currencyLabel = currencyOptions(context)
-        .firstWhere((o) => o.$1 == Currency.fromCode(s.currencyCode))
-        .$2;
+    final currency = Currency.fromCode(s.currencyCode);
+    final currencyLabel =
+        '${currency.symbolFor(ref.watch(deviceRegionProvider))} · '
+        '${currency.code} · ${currencyName(context, currency)}';
     final languageLabel = switch (s.localeCode) {
-      'tr' => l10n.languageTurkish,
-      'en' => l10n.languageEnglish,
-      _ => l10n.languageSystem,
+      null => l10n.languageSystem,
+      final code => nativeLanguageName(code),
     };
 
     return Scaffold(
@@ -248,11 +247,13 @@ class _AmountDialog extends StatefulWidget {
     required this.title,
     required this.help,
     required this.initialMinor,
+    required this.currency,
   });
 
   final String title;
   final String help;
   final int? initialMinor;
+  final Currency currency;
 
   @override
   State<_AmountDialog> createState() => _AmountDialogState();
@@ -268,7 +269,8 @@ class _AmountDialogState extends State<_AmountDialog> {
     if (_controller.text.isEmpty && widget.initialMinor != null) {
       _controller.text = formatMinorForInput(
         widget.initialMinor!,
-        context.localeName,
+        widget.currency,
+        localeName: context.localeName,
       );
     }
   }
@@ -301,7 +303,19 @@ class _AmountDialogState extends State<_AmountDialog> {
         TextButton(
           onPressed: () {
             if (!_formKey.currentState!.validate()) return;
-            Navigator.pop(context, _Choice(optionalMinor(_controller.text)));
+            final text = _controller.text;
+            Navigator.pop(
+              context,
+              _Choice(
+                text.trim().isEmpty
+                    ? null
+                    : parseAmount(
+                        text,
+                        widget.currency,
+                        localeName: context.localeName,
+                      ),
+              ),
+            );
           },
           child: Text(l10n.actionSave),
         ),

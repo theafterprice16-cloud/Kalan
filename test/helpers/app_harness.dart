@@ -21,7 +21,7 @@ final testToday = LocalDate(2026, 11, 20);
 /// before the first frame.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
-  Locale locale = const Locale('tr'),
+  Locale locale = const Locale('tr', 'TR'),
   LocalDate? today,
   Future<void> Function(AppDatabase db)? seed,
   List<Override> overrides = const [],

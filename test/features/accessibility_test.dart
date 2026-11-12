@@ -34,7 +34,7 @@ void main() {
     );
     expect(
       find.bySemanticsLabel(
-        RegExp(r'Klarna.*20 Kas.*4 ödemenin 1\..*100 TL', dotAll: true),
+        RegExp(r'Klarna.*20 Kas.*4 ödemenin 1\..*₺100', dotAll: true),
       ),
       findsOneWidget,
     );
