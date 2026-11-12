@@ -36,6 +36,9 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 24b | Yaklaşan ödeme | Ödenmemiş ve bugün ya da yarın olan ödemede kehribar nokta ve "Bugün"/"Yarın" metni. |
 | 25 | Ödenmiş ödemenin düzeltilmesi | Ödenmiş ödeme düzeltilemez; önce "ödenmedi" yapılır. |
 
+| 26 | Uygulama ikonu | Kimlik dosyasındaki ana tasarım (dört dilimli halka, sağ üst dilim kalan yeşili, mürekkep zemin) `tool/generate_icons.py` ile kodla çizilir. Nano Banana Pro ile üretilecek nihai ikon gelince aynı dosya adlarıyla değiştirilir. |
+| 27 | Açılış ekranı | Android: kâğıt zemin (karanlık modda mürekkep) ve ortada halka. iOS: kâğıt zemin ve halka; storyboard eski araç sürümünde olduğu için karanlık mod varyantı Xcode'da eklenecek. |
+
 ## Teknik
 
 | Konu | Karar |
@@ -46,5 +49,6 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | Tarih | `LocalDate` (yıl, ay, gün), veritabanında epoch günü (`int`). Saat dilimi ve yaz saati sorunları yok. |
 | Ödemeler | Plan kaydedilirken üretilip saklanır (her seferinde yeniden hesaplanmaz), böylece elle düzeltmeler kalıcıdır. |
 | Ağ izni | Ana `AndroidManifest.xml`'de INTERNET izni yok (testle denetlenir). `debug` ve `profile` manifest'lerindeki izin Flutter'ın geliştirme araçları (hot reload) için zorunlu ve yayın derlemesine girmez. |
+| İkon üretimi | `tool/generate_icons.py` yalnızca geliştirmede çalışır ve Pillow ister; uygulamanın bağımlılığı değildir. |
 | SQLite derlemesi | `sqlite3` 3.x paketi (drift_flutter üzerinden) derleme sırasında hazır SQLite ikilisini GitHub'dan indirir ve SHA-256 ile doğrular. Bu yalnızca derleme anıdır; uygulama çalışırken ağ kullanılmaz. |
 | Şema | Drift `schemaVersion` 1. Şema anlık görüntüsü `drift_schemas/`, göç testleri `test/drift/`. Yabancı anahtarlar açık; plan silinince ödemeleri silinir, planı olan kaynak silinemez. |

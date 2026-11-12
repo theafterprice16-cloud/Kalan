@@ -440,7 +440,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get planSaved => 'Plan added.';
 
   @override
-  String get pickDate => 'Choose date';
+  String get fieldPaymentDate => 'Payment date';
 
   @override
   String get sourcesTitle => 'Sources and cards';

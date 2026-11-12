@@ -830,11 +830,11 @@ abstract class AppLocalizations {
   /// **'Plan added.'**
   String get planSaved;
 
-  /// No description provided for @pickDate.
+  /// No description provided for @fieldPaymentDate.
   ///
   /// In en, this message translates to:
-  /// **'Choose date'**
-  String get pickDate;
+  /// **'Payment date'**
+  String get fieldPaymentDate;
 
   /// No description provided for @sourcesTitle.
   ///

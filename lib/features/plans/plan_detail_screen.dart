@@ -314,7 +314,7 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DateField(
-                label: l10n.pickDate,
+                label: l10n.fieldPaymentDate,
                 value: _date,
                 format: context.longDate,
                 onChanged: (d) => setState(() => _date = d),

@@ -28,6 +28,7 @@ dart format lib test
 flutter analyze
 flutter test
 dart run drift_dev make-migrations       # şema sürümü artırınca (önce schemaVersion++)
+python3 tool/generate_icons.py           # ikon ve açılış görsellerini yeniden üretir
 ```
 
 ## Klasör haritası

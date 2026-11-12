@@ -434,7 +434,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get planSaved => 'Plan eklendi.';
 
   @override
-  String get pickDate => 'Tarih seç';
+  String get fieldPaymentDate => 'Ödeme tarihi';
 
   @override
   String get sourcesTitle => 'Kaynaklar ve kartlar';

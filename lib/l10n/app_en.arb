@@ -261,7 +261,7 @@
   },
   "previewEmpty": "Fill in the fields to see the payments here.",
   "planSaved": "Plan added.",
-  "pickDate": "Choose date",
+  "fieldPaymentDate": "Payment date",
   "sourcesTitle": "Sources and cards",
   "sourcesEmpty": "No sources yet. Sources you type while adding a plan appear here.",
   "addSource": "Add source",

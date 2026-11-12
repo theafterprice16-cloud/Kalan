@@ -21,6 +21,7 @@ void main() {
     await tester.tap(find.text('20 Kas 2026'));
     await tester.pumpAndSettle();
     expect(find.text('Ödemeyi düzelt'), findsOneWidget);
+    expect(find.text('Ödeme tarihi'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('edit-amount')), '160');
     await tester.tap(find.text('Kaydet'));
     await tester.pumpAndSettle();

@@ -122,7 +122,7 @@
   "previewSummary": "{count, plural, other{{count} ödeme, toplam {total}.}}",
   "previewEmpty": "Alanları doldurunca ödemeleri burada görürsün.",
   "planSaved": "Plan eklendi.",
-  "pickDate": "Tarih seç",
+  "fieldPaymentDate": "Ödeme tarihi",
   "sourcesTitle": "Kaynaklar ve kartlar",
   "sourcesEmpty": "Henüz kaynak yok. Plan eklerken yazdığın kaynaklar burada görünür.",
   "addSource": "Kaynak ekle",
