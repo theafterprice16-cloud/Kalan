@@ -23,6 +23,8 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 15 | İleri bakış | Pro (kimlik A · Gelir modeli). |
 | 16 | Kalan sayısının rengi | Açık temada koyu yeşil #127A5F (kâğıt üzerinde #23B58E kontrastı 2,4:1, yetersiz). Karanlık temada kalan yeşili #23B58E. Kimlikteki "açık zeminde yeşil metin koyu yeşil" kuralına dayanır. |
 | 17 | Karanlık temada ikincil metin | Duman #5F6880 mürekkep zeminde okunmadığı için karanlık temada #A3ABBF kullanılır. |
+| 17a | Karanlık temada dönem çubuğu | Söz verilmiş kısım mürekkep zeminde görünmediği için karanlık temada açık duman (#A3ABBF); kalan kısım yeşil. Gider geliri aşarsa aşan kısım mercan. |
+| 17b | Form hataları | Mercan kullanılmaz (yalnızca eksiye düşen dönem). Hata, mürekkep renkli çerçeve ve açıklayıcı metinle gösterilir. |
 | 18 | Dil | Varsayılan sistem dili; TR değilse EN. Ayarlar'dan değiştirilebilir. |
 | 19 | Para birimi değişimi | Ayarlar'dan değiştirilebilir; tutarlar çevrilmez, yalnızca sembol değişir. Ekranda bu yazılır. |
 | 20 | Tutar biçimi | Kuruşsuz tutarlarda ondalık gösterilmez ("3.250 TL"), kuruşlu tutarlarda iki hane ("3.250,50 TL"). TR: tutar + boşluk + sembol (TL, $, £, €). EN: sembol + tutar ($, £, €, ₺). |
