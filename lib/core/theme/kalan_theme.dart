@@ -67,7 +67,9 @@ abstract final class KalanTheme {
       extensions: [c],
     );
     final outline = BorderSide(color: c.border);
-    final mintTextStyle = TextStyle(color: c.mintText);
+    // Derive from the theme's text styles so font, size and weight stay.
+    final text = base.textTheme;
+    final mintTextStyle = text.bodyLarge?.copyWith(color: c.mintText);
     return base.copyWith(
       appBarTheme: AppBarTheme(
         backgroundColor: c.bg,
@@ -147,7 +149,7 @@ abstract final class KalanTheme {
         selectedColor: c.surfaceRaised,
         checkmarkColor: c.mintText,
         side: outline,
-        labelStyle: TextStyle(color: c.text),
+        labelStyle: text.labelLarge?.copyWith(color: c.text),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
@@ -166,7 +168,7 @@ abstract final class KalanTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: c.text,
-        contentTextStyle: TextStyle(color: c.bg),
+        contentTextStyle: text.bodyMedium?.copyWith(color: c.bg),
         actionTextColor: brightness == Brightness.light ? c.mint : c.mintText,
         elevation: 0,
         behavior: SnackBarBehavior.floating,
@@ -190,7 +192,7 @@ abstract final class KalanTheme {
           borderSide: BorderSide(color: c.coral, width: 2),
         ),
         floatingLabelStyle: mintTextStyle,
-        errorStyle: TextStyle(color: c.coral),
+        errorStyle: text.bodySmall?.copyWith(color: c.coral),
         filled: true,
         fillColor: c.surfaceRaised,
       ),
