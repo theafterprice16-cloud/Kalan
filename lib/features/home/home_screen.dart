@@ -32,6 +32,7 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: null,
         onPressed: () => context.push(Routes.addPlan),
         icon: const Icon(Icons.add),
         label: Text(l10n.actionAddPlan),

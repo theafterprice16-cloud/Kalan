@@ -114,3 +114,34 @@ Future<void> scrollTo(WidgetTester tester, Finder finder) async {
   );
   await tester.pumpAndSettle();
 }
+
+/// Opens a tab from the bottom navigation bar.
+Future<void> openTab(WidgetTester tester, String label) async {
+  await tester.tap(
+    find.descendant(of: find.byType(NavigationBar), matching: find.text(label)),
+  );
+  await tester.pumpAndSettle();
+}
+
+/// Picks [item] from the dropdown with [key].
+Future<void> pickDropdown(WidgetTester tester, Key key, String item) async {
+  await scrollTo(tester, find.byKey(key));
+  await tester.tap(find.byKey(key));
+  await tester.pumpAndSettle();
+  // The open menu is the last scrollable; long menus build items lazily.
+  await tester.scrollUntilVisible(
+    find.text(item),
+    48,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(item).last);
+  await tester.pumpAndSettle();
+}
+
+/// A credit card with statement day 25 and due day 5.
+Future<int> seedCard(AppDatabase db, {String name = 'Bonus'}) =>
+    SourceRepository(
+      db,
+      PlanRepository(db),
+    ).create(name: name, kind: SourceKind.card, statementDay: 25, dueDay: 5);
