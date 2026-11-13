@@ -350,18 +350,6 @@ abstract class AppLocalizations {
   /// **'Add your take-home pay in Settings to see what\'s left.'**
   String get homeNoIncomeHint;
 
-  /// No description provided for @homeOverdueTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Not paid yet'**
-  String get homeOverdueTitle;
-
-  /// No description provided for @homeOverdueHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'The date has passed and these aren\'t marked as paid.'**
-  String get homeOverdueHelp;
-
   /// No description provided for @homePaymentsTitle.
   ///
   /// In en, this message translates to:
@@ -1190,12 +1178,6 @@ abstract class AppLocalizations {
   /// **'Target version {version}'**
   String roadmapTarget(String version);
 
-  /// No description provided for @overdueBadge.
-  ///
-  /// In en, this message translates to:
-  /// **'Overdue'**
-  String get overdueBadge;
-
   /// No description provided for @settingsTheme.
   ///
   /// In en, this message translates to:
@@ -1573,6 +1555,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{min, plural, =1{This can\'t be less than 1 here.} other{This can\'t be less than {min} here: paid installments stay.}}'**
   String errorCountMin(int min);
+
+  /// Home, section title above unpaid payments whose due date has passed. Calm and non-judgmental: a fact, not a warning. No exclamation marks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 past-due payment} other{{count} past-due payments}}'**
+  String pastDueTitle(int count);
+
+  /// Note next to a clock icon: how many days ago the due date passed. Calm and non-judgmental: a fact, not a warning. No exclamation marks.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day ago} other{{days} days ago}}'**
+  String pastDueDaysAgo(int days);
+
+  /// Muted line under the past-due title when a payment comes from an earlier pay period. Calm and non-judgmental: a fact, not a warning. No exclamation marks.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid ones are deducted from this period\'s remaining amount.'**
+  String get pastDueDeducted;
+
+  /// Text button on a past-due row; opens 'When did you pay?'.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get pastDueMarkPaid;
+
+  /// Expands the past-due section when it has more than 3 payments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{Show all ({count})}}'**
+  String pastDueShowAll(int count);
+
+  /// Screen reader label of a past-due row. Calm and non-judgmental: a fact, not a warning. No exclamation marks.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{{plan}, {amount}, due 1 day ago} other{{plan}, {amount}, due {days} days ago}}'**
+  String pastDueRowSemantics(String plan, String amount, int days);
+
+  /// Title of the sheet shown when a past-due payment is marked paid.
+  ///
+  /// In en, this message translates to:
+  /// **'When did you pay?'**
+  String get paidWhenTitle;
+
+  /// Option: the payment was made today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get paidWhenToday;
+
+  /// Muted line under 'Today': the amount stays in the current pay period.
+  ///
+  /// In en, this message translates to:
+  /// **'Stays in this period.'**
+  String get paidWhenTodayHint;
+
+  /// Option: it was paid on its due date.
+  ///
+  /// In en, this message translates to:
+  /// **'On the due date, {date}'**
+  String paidWhenOnDue(String date);
+
+  /// Muted line under 'On the due date': the amount moves back to its own pay period.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted in that period.'**
+  String get paidWhenOnDueHint;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import '../../core/engine/period_summary.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import 'home_view.dart';
+import 'past_due.dart';
 import 'payment_tile.dart';
 
 /// "What's left?" for the current pay period.
@@ -41,18 +42,7 @@ class HomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(bottom: 96),
         children: [
           _Header(view: view),
-          if (view.overdue.isNotEmpty) ...[
-            SectionTitle(l10n.homeOverdueTitle),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-              child: Text(
-                l10n.homeOverdueHelp,
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: context.colors.textMuted),
-              ),
-            ),
-            for (final e in view.overdue) PaymentTile(entry: e),
-          ],
+          PastDueSection(view: view),
           if (view.entries.isNotEmpty) ...[
             SectionTitle(l10n.homePaymentsTitle),
             for (final e in view.entries) PaymentTile(entry: e),

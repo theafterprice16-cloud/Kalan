@@ -8,6 +8,7 @@ import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import 'home_view.dart';
+import 'past_due.dart';
 
 /// A payment row with a one-tap "paid" toggle.
 class PaymentTile extends ConsumerWidget {
@@ -61,7 +62,7 @@ class PaymentTile extends ConsumerWidget {
             entry.installmentCount!,
           ),
         ),
-      if (!entry.isPaid && days < 0) OverdueBadge(label: l10n.overdueBadge),
+      if (!entry.isPaid && days < 0) DaysAgoNote(days: -days),
       if (soon)
         Row(
           mainAxisSize: MainAxisSize.min,

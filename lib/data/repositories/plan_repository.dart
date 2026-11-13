@@ -103,7 +103,21 @@ class PlanRepository {
 
   Future<void> setPaid(int paymentId, {required bool paid, DateTime? now}) =>
       (_db.update(_db.payments)..where((p) => p.id.equals(paymentId))).write(
-        PaymentsCompanion(paidAt: Value(paid ? (now ?? DateTime.now()) : null)),
+        PaymentsCompanion(
+          paidAt: Value(paid ? (now ?? DateTime.now()) : null),
+          // Unmarking forgets the past-due choice too.
+          paidOnDay: paid ? const Value.absent() : const Value(null),
+        ),
+      );
+
+  /// "Paid" from the past-due list: [paidOn] is today (counts in this
+  /// period) or the due date (counts in its own period).
+  Future<void> setPaidOn(int paymentId, LocalDate paidOn, {DateTime? now}) =>
+      (_db.update(_db.payments)..where((p) => p.id.equals(paymentId))).write(
+        PaymentsCompanion(
+          paidAt: Value(now ?? DateTime.now()),
+          paidOnDay: Value(paidOn.epochDay),
+        ),
       );
 
   /// Changes one payment; returns the reason when the edit is not allowed.

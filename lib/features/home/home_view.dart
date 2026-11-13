@@ -36,7 +36,7 @@ class HomeView {
   const HomeView({
     required this.summary,
     required this.entries,
-    required this.overdue,
+    required this.pastDue,
     required this.today,
     this.tightThresholdMinor,
   });
@@ -46,8 +46,14 @@ class HomeView {
   /// Everything dated in the current period, by date.
   final List<HomeEntry> entries;
 
-  /// Unpaid plan payments dated before the current period.
-  final List<HomeEntry> overdue;
+  /// Unpaid plan payments whose due date is before today, oldest first.
+  /// All of them count in this period. Recurring payments are not
+  /// included (their past occurrences are never marked one by one).
+  final List<HomeEntry> pastDue;
+
+  /// Whether any past-due payment comes from an earlier period.
+  bool get pastDueFromEarlier =>
+      pastDue.any((e) => !summary.period.contains(e.date));
   final LocalDate today;
   final int? tightThresholdMinor;
 }
@@ -67,62 +73,69 @@ final homeViewProvider = Provider<HomeView?>((ref) {
   final period = payScheduleOf(settings).periodContaining(today);
 
   final entries = <HomeEntry>[];
-  final overdue = <HomeEntry>[];
-  // Paid before Kalan: in the period's spoken-for total like any paid
-  // payment, but never listed (and, being paid, never overdue).
-  final paidBefore = <DatedAmount>[];
+  final pastDue = <HomeEntry>[];
+  // Every plan payment counts on [countingDate]: past-due ones in this
+  // period, payments paid "today" from the past-due list on that day,
+  // everything else on its due date. Paid before Kalan: counted like any
+  // paid payment, never listed (and, being paid, never past due).
+  final counted = <DatedAmount>[];
   for (final p in plans) {
     for (final pay in p.payments) {
-      final date = LocalDate.fromEpochDay(pay.dueDay);
+      final due = LocalDate.fromEpochDay(pay.dueDay);
+      final isPaid = pay.paidAt != null;
+      final countsOn = countingDate(
+        dueDate: due,
+        isPaid: isPaid,
+        paidOn: pay.paidOnDay == null
+            ? null
+            : LocalDate.fromEpochDay(pay.paidOnDay!),
+        today: today,
+      );
+      counted.add(DatedAmount(countsOn, pay.amountMinor));
+      if (pay.paidBeforeKalan) continue;
       final entry = HomeEntry(
         name: p.displayName,
-        date: date,
+        date: due,
         amountMinor: pay.amountMinor,
-        isPaid: pay.paidAt != null,
+        isPaid: isPaid,
         paymentId: pay.id,
         planId: p.plan.id,
         seq: pay.seq,
         installmentCount: p.plan.installmentCount,
       );
-      if (pay.paidBeforeKalan) {
-        if (period.contains(date)) {
-          paidBefore.add(DatedAmount(date, pay.amountMinor));
-        }
-      } else if (period.contains(date)) {
+      // Past due: only in its own section, never twice.
+      if (isPastDue(dueDate: due, isPaid: isPaid, today: today)) {
+        pastDue.add(entry);
+      } else if (period.contains(countsOn)) {
         entries.add(entry);
-      } else if (isOverdue(date: date, isPaid: entry.isPaid, current: period)) {
-        overdue.add(entry);
       }
     }
   }
   for (final r in recurring) {
     for (final date in r.occurrences(period.start, period.end)) {
-      entries.add(
-        HomeEntry(
-          name: r.item.name,
-          date: date,
-          amountMinor: r.item.amountMinor,
-          isPaid: r.paidDays.contains(date.epochDay),
-          recurringId: r.item.id,
-        ),
+      final entry = HomeEntry(
+        name: r.item.name,
+        date: date,
+        amountMinor: r.item.amountMinor,
+        isPaid: r.paidDays.contains(date.epochDay),
+        recurringId: r.item.id,
       );
+      entries.add(entry);
+      counted.add(DatedAmount(date, entry.amountMinor));
     }
   }
   entries.sort(_byDateThenName);
-  overdue.sort(_byDateThenName);
+  pastDue.sort(_byDateThenName);
 
   return HomeView(
     summary: summarizePeriod(
       period: period,
-      items: [
-        for (final e in entries) DatedAmount(e.date, e.amountMinor),
-        ...paidBefore,
-      ],
+      items: counted,
       incomeMinor: settings.netIncomeMinor,
       tightThresholdMinor: settings.tightThresholdMinor,
     ),
     entries: entries,
-    overdue: overdue,
+    pastDue: pastDue,
     today: today,
     tightThresholdMinor: settings.tightThresholdMinor,
   );

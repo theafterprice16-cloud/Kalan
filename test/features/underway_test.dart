@@ -400,7 +400,7 @@ void main() {
       await tester.tap(find.byType(BackButtonIcon));
       await tester.pumpAndSettle();
       await openTab(tester, 'Bu dönem');
-      expect(find.text('Gecikti'), findsWidgets);
+      expect(find.text('Günü geçen 2 ödeme'), findsOneWidget);
     });
 
     testWidgets('switching it off brings all of them back', (tester) async {

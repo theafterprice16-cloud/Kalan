@@ -13,6 +13,7 @@ import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
+import '../home/past_due.dart';
 import '../onboarding/pay_form.dart';
 import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
@@ -252,6 +253,12 @@ class _PaymentRow extends ConsumerWidget {
     final secondary = theme.textTheme.bodyMedium?.copyWith(
       color: colors.textMuted,
     );
+    final today = ref.watch(todayProvider);
+    final pastDue = isPastDue(
+      dueDate: payment.date,
+      isPaid: payment.isPaid,
+      today: today,
+    );
     return InkWell(
       onTap: () => _edit(context, ref),
       child: Padding(
@@ -279,9 +286,13 @@ class _PaymentRow extends ConsumerWidget {
                     children: [
                       if (payment.isPaid)
                         Text(l10n.paidLabel, style: secondary),
-                      if (!payment.isPaid &&
-                          payment.dueDay < ref.watch(todayProvider).epochDay)
-                        OverdueBadge(label: l10n.overdueBadge),
+                      if (pastDue)
+                        DaysAgoNote(
+                          days: daysPastDue(
+                            dueDate: payment.date,
+                            today: today,
+                          ),
+                        ),
                       if (payment.isEdited)
                         Text(l10n.editedTag, style: secondary),
                     ],
@@ -296,9 +307,17 @@ class _PaymentRow extends ConsumerWidget {
             ),
             IconButton(
               tooltip: payment.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
-              onPressed: () => ref
-                  .read(planRepositoryProvider)
-                  .setPaid(payment.id, paid: !payment.isPaid),
+              // A past-due payment asks when it was paid, as on home.
+              onPressed: pastDue
+                  ? () => markPastDuePaid(
+                      context,
+                      ref,
+                      paymentId: payment.id,
+                      dueDate: payment.date,
+                    )
+                  : () => ref
+                        .read(planRepositoryProvider)
+                        .setPaid(payment.id, paid: !payment.isPaid),
               icon: Icon(
                 payment.isPaid
                     ? Icons.check_circle
