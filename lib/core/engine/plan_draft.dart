@@ -41,6 +41,7 @@ class PlanDraft {
     this.purchaseDate,
     this.deferMonths = 0,
     this.isCashAdvance = false,
+    this.paidBeforeCount = 0,
   });
 
   final PlanKind kind;
@@ -56,6 +57,22 @@ class PlanDraft {
   final LocalDate? purchaseDate;
   final int deferMonths;
   final bool isCashAdvance;
+
+  /// The first [paidBeforeCount] payments were paid before the plan was
+  /// added to Kalan ("this plan is already underway"). They are stored as
+  /// paid and marked so; they are never overdue and never reminded.
+  final int paidBeforeCount;
+
+  /// The same draft with its first [count] payments paid before Kalan.
+  PlanDraft withPaidBefore(int count) => PlanDraft(
+    kind: kind,
+    installmentCount: installmentCount,
+    payments: payments,
+    purchaseDate: purchaseDate,
+    deferMonths: deferMonths,
+    isCashAdvance: isCashAdvance,
+    paidBeforeCount: count,
+  );
 
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
 

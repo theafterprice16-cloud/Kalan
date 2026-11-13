@@ -9,6 +9,7 @@ import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
+import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
@@ -64,12 +65,20 @@ class PlanDetailScreen extends ConsumerWidget {
     final secondary = theme.textTheme.bodyMedium?.copyWith(
       color: context.colors.textMuted,
     );
+    // Plans added with only their remaining payments (before v4).
     final midwayCount = plan.payments.first.seq - 1;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(plan.displayName),
         actions: [
+          if (plan.startsAtFirstPayment)
+            IconButton(
+              key: const ValueKey('plan-edit'),
+              tooltip: l10n.planEdit,
+              onPressed: () => context.push(Routes.planEdit(plan.plan.id)),
+              icon: const Icon(Icons.edit_outlined),
+            ),
           IconButton(
             tooltip: l10n.planDelete,
             onPressed: () => _delete(context, ref),
@@ -123,11 +132,9 @@ class PlanDetailScreen extends ConsumerWidget {
                       spacing: 16,
                       runSpacing: 4,
                       children: [
-                        Text(
-                          l10n.planPaidOf(
-                            plan.paidCount,
-                            plan.plan.installmentCount,
-                          ),
+                        PlanProgress(
+                          paid: plan.paidCount,
+                          total: plan.plan.installmentCount,
                         ),
                         Text(
                           l10n.planTotal(ref.money(context, plan.totalMinor)),
@@ -176,7 +183,21 @@ class PlanDetailScreen extends ConsumerWidget {
             ),
           ),
           SectionTitle(l10n.planPaymentsTitle),
-          for (final p in plan.payments) _PaymentRow(plan: plan, payment: p),
+          // Paid before Kalan: one line, no dates, nothing to open.
+          if (plan.paidBefore.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                l10n.paidBeforeSummary(
+                  plan.paidBefore.length,
+                  ref.money(context, plan.paidBeforeMinor),
+                ),
+                key: const ValueKey('paid-before-summary'),
+                style: secondary,
+              ),
+            ),
+          for (final p in plan.listedPayments)
+            _PaymentRow(plan: plan, payment: p),
         ],
       ),
     );

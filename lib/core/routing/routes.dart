@@ -6,6 +6,7 @@ abstract final class Routes {
   static const settings = '/settings';
   static const addPlan = '/add-plan';
   static String plan(int id) => '/plan/$id';
+  static String planEdit(int id) => '/plan/$id/edit';
   static const sources = '/sources';
   static String newSource({bool card = false}) =>
       card ? '/source/new?kind=card' : '/source/new';

@@ -173,6 +173,40 @@ void main() {
     await db.close();
   });
 
+  test('v3 -> current: payments unchanged, none paid before Kalan', () async {
+    final schema = await verifier.schemaAt(3);
+    seedCommon(schema);
+    schema.rawDatabase.execute(
+      'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at) '
+      'VALUES (1, 2, 20435, 2500, 1700000000)',
+    );
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, db.schemaVersion);
+    final rows = await db
+        .customSelect(
+          'SELECT seq, due_day, amount_minor, paid_at, paid_before_kalan '
+          'FROM payments ORDER BY seq',
+        )
+        .get();
+    expect(rows.map((r) => r.data), [
+      {
+        'seq': 1,
+        'due_day': 20405,
+        'amount_minor': 2500,
+        'paid_at': null,
+        'paid_before_kalan': 0,
+      },
+      {
+        'seq': 2,
+        'due_day': 20435,
+        'amount_minor': 2500,
+        'paid_at': 1700000000,
+        'paid_before_kalan': 0,
+      },
+    ]);
+    await db.close();
+  });
+
   test('per-plan days outside 1, 2, 3, 5, 7 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final sourceId = await db

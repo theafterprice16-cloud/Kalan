@@ -95,9 +95,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errorCountInvalid => '1 ile 120 arasında bir sayı yaz.';
 
   @override
-  String get errorRemainingTooHigh => 'Bu sayı toplamdan büyük olamaz.';
-
-  @override
   String get errorTotalTooSmall => 'Bu tutar bu kadar ödemeye bölünemiyor.';
 
   @override
@@ -227,11 +224,6 @@ class AppLocalizationsTr extends AppLocalizations {
       'Sabit ödeme yok. Kira, fatura ya da abonelik ekleyebilirsin.';
 
   @override
-  String planPaidOf(int paid, int count) {
-    return '$paid/$count ödendi';
-  }
-
-  @override
   String planToPay(String amount) {
     return 'Ödenecek $amount';
   }
@@ -280,9 +272,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get kindManual => 'Elle giriş';
-
-  @override
-  String get kindMidway => 'Yarıda başlayan';
 
   @override
   String get kindCashAdvance => 'Taksitli nakit avans';
@@ -373,18 +362,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get unitMonths => 'ay';
-
-  @override
-  String get fieldTotalCount => 'Toplam ödeme sayısı';
-
-  @override
-  String get fieldUnpaidCount => 'Ödenmemiş ödeme sayısı';
-
-  @override
-  String get fieldInstallment => 'Ödeme tutarı';
-
-  @override
-  String get fieldNextDate => 'Sonraki ödeme tarihi';
 
   @override
   String get fieldTitle => 'Plan adı';
@@ -954,4 +931,122 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get planReminderCustom => 'Farklı gün';
+
+  @override
+  String get underwayToggle => 'Bu plan zaten sürüyor';
+
+  @override
+  String get underwayHint =>
+      'Daha önce ödediğin taksitleri tek tek girmen gerekmez.';
+
+  @override
+  String get fieldTotalInstallments => 'Toplam taksit';
+
+  @override
+  String get fieldPaidInstallments => 'Ödenmiş taksit';
+
+  @override
+  String get fieldNextPaymentDate => 'Sıradaki ödeme tarihi';
+
+  @override
+  String get underwayCardSuggested => 'Kartının kesim gününe göre önerildi.';
+
+  @override
+  String get errorPaidAll =>
+      'Bütün taksitler ödendiyse bu planı eklemene gerek yok.';
+
+  @override
+  String get errorPaidMin => 'Kaç taksit ödediğini yaz, en az 1.';
+
+  @override
+  String errorPaidMax(int max) {
+    final intl.NumberFormat maxNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String maxString = maxNumberFormat.format(max);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: 'Burada en fazla $maxString olabilir.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paidBeforeSummary(int count, String amount) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit Kalan\'dan önce ödendi',
+    );
+    return '$_temp0 · $amount';
+  }
+
+  @override
+  String progressPaidOfSemantics(int paid, int total) {
+    final intl.NumberFormat paidNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String paidString = paidNumberFormat.format(paid);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString taksitten $paidString tanesi ödendi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String planPaidOf(int paid, int count) {
+    final intl.NumberFormat paidNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String paidString = paidNumberFormat.format(paid);
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$paidString/$countString ödendi';
+  }
+
+  @override
+  String numberValue(int value) {
+    final intl.NumberFormat valueNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String valueString = valueNumberFormat.format(value);
+
+    return '$valueString';
+  }
+
+  @override
+  String get planEdit => 'Planı düzenle';
+
+  @override
+  String get planUpdated => 'Plan güncellendi.';
+
+  @override
+  String underwayRevert(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit ödenmemiş olarak geri gelecek.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get underwayRevertConfirm => 'Devam et';
 }

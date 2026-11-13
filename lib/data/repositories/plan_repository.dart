@@ -60,13 +60,16 @@ class PlanRepository {
     return (await query.get()).length;
   }
 
-  /// Stores a confirmed draft. Returns the new plan id.
+  /// Stores a confirmed draft. Returns the new plan id. The draft's first
+  /// [PlanDraft.paidBeforeCount] payments are stored as paid before Kalan.
   Future<int> saveDraft(
     PlanDraft draft, {
     required int sourceId,
     required PlanOrigin origin,
     String? title,
+    DateTime? now,
   }) => _db.transaction(() async {
+    final paidAt = now ?? DateTime.now();
     final trimmed = title?.trim();
     final planId = await _db
         .into(_db.plans)
@@ -84,12 +87,14 @@ class PlanRepository {
         );
     await _db.batch((b) {
       b.insertAll(_db.payments, [
-        for (final p in draft.payments)
+        for (final (i, p) in draft.payments.indexed)
           PaymentsCompanion.insert(
             planId: planId,
             seq: p.seq,
             dueDay: p.date.epochDay,
             amountMinor: p.amountMinor,
+            paidAt: Value(i < draft.paidBeforeCount ? paidAt : null),
+            paidBeforeKalan: Value(i < draft.paidBeforeCount),
           ),
       ]);
     });
@@ -153,6 +158,56 @@ class PlanRepository {
       reminderLeadDays: Value(leadDays),
     ),
   );
+
+  /// "This plan is already underway", changed later. The first [count]
+  /// payments of the plan's leading run (payments not marked paid in Kalan)
+  /// become paid before Kalan; the rest of that run becomes unpaid again.
+  /// Payments marked paid in Kalan are never touched.
+  ///
+  /// With [nextDate] and [pattern], payment number `count + 1` moves to
+  /// [nextDate] and the other payments that are not paid in Kalan and not
+  /// edited by hand follow the plan's own pattern ([underwayDates]).
+  Future<void> setPaidBefore(
+    int planId, {
+    required int count,
+    LocalDate? nextDate,
+    UnderwayPattern? pattern,
+    DateTime? now,
+  }) => _db.transaction(() async {
+    final rows =
+        await (_db.select(_db.payments)
+              ..where((p) => p.planId.equals(planId))
+              ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
+            .get();
+    if (count < 0 || count > maxPaidBeforeOf(rows)) {
+      throw ArgumentError.value(count, 'count', 'outside 0..max');
+    }
+    final paidAt = now ?? DateTime.now();
+    final run = leadingRunOf(rows);
+    final dates = nextDate == null || pattern == null
+        ? null
+        : underwayDates(
+            nextDate: nextDate,
+            paidCount: count,
+            totalCount: rows.length,
+            pattern: pattern,
+          );
+    for (final (i, r) in rows.indexed) {
+      final markedInKalan = r.isPaid && !r.paidBeforeKalan;
+      if (markedInKalan) continue;
+      final before = i < run && i < count;
+      final date = dates != null && !r.isEdited ? dates[i] : r.date;
+      final change = PaymentsCompanion(
+        paidAt: Value(before ? (r.paidBeforeKalan ? r.paidAt : paidAt) : null),
+        paidBeforeKalan: Value(before),
+        dueDay: Value(date.epochDay),
+      );
+      if (r.paidBeforeKalan == before && r.dueDay == date.epochDay) continue;
+      await (_db.update(
+        _db.payments,
+      )..where((p) => p.id.equals(r.id))).write(change);
+    }
+  });
 
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();

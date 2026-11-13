@@ -34,7 +34,6 @@
     }
   },
   "errorCountInvalid": "Enter a number from 1 to 120.",
-  "errorRemainingTooHigh": "This can't be more than the total.",
   "errorTotalTooSmall": "This amount can't be split into that many payments.",
   "errorDayInvalid": "Enter a day from 1 to 31.",
   "errorNameRequired": "Enter a name.",
@@ -134,17 +133,6 @@
   "plansEmptyOpen": "No open plans.",
   "plansEmptyFinished": "No finished plans yet. A plan moves here when every payment is paid.",
   "recurringEmpty": "No recurring payments. You can add rent, bills or subscriptions.",
-  "planPaidOf": "{paid}/{count} paid",
-  "@planPaidOf": {
-    "placeholders": {
-      "paid": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "planToPay": "To pay {amount}",
   "@planToPay": {
     "placeholders": {
@@ -198,7 +186,6 @@
   "kindMonthly": "Monthly installments",
   "kindCard": "Card installments",
   "kindManual": "Custom",
-  "kindMidway": "Already started",
   "kindCashAdvance": "Cash advance in installments",
   "planPaymentsTitle": "Payments",
   "planDelete": "Delete plan",
@@ -240,10 +227,6 @@
   "unitDays": "days",
   "unitWeeks": "weeks",
   "unitMonths": "months",
-  "fieldTotalCount": "Total payments",
-  "fieldUnpaidCount": "Payments not yet paid",
-  "fieldInstallment": "Payment amount",
-  "fieldNextDate": "Next payment date",
   "fieldTitle": "Plan name",
   "fieldTitleHint": "e.g. Phone",
   "fieldDefer": "Defer first payment (months)",
@@ -689,5 +672,129 @@
   "planReminderCustom": "Different day",
   "@planReminderCustom": {
     "description": "Reminder choice: this plan uses its own days before (picked next)."
+  },
+  "underwayToggle": "This plan is already underway",
+  "@underwayToggle": {
+    "description": "Add/edit plan switch: the plan started before it was added to the app; earlier installments are counted as paid."
+  },
+  "underwayHint": "No need to enter the installments you've already paid.",
+  "@underwayHint": {
+    "description": "Muted help text under the 'already underway' switch."
+  },
+  "fieldTotalInstallments": "Total installments",
+  "@fieldTotalInstallments": {
+    "description": "Field label: all installments of the plan, including paid ones."
+  },
+  "fieldPaidInstallments": "Installments paid",
+  "@fieldPaidInstallments": {
+    "description": "Field label: installments already paid before adding the plan."
+  },
+  "fieldNextPaymentDate": "Next payment date",
+  "@fieldNextPaymentDate": {
+    "description": "Field label: the date of the next unpaid installment."
+  },
+  "underwayCardSuggested": "Suggested from your card's statement date.",
+  "@underwayCardSuggested": {
+    "description": "Muted note under the next payment date of a card plan: the date was filled in from the card's statement and due days."
+  },
+  "errorPaidAll": "If every installment is paid, there's no need to add this plan.",
+  "@errorPaidAll": {
+    "description": "Validation under 'Installments paid' when it equals or exceeds the total."
+  },
+  "errorPaidMin": "Enter how many installments you've paid, at least 1.",
+  "@errorPaidMin": {
+    "description": "Validation under 'Installments paid' when empty or below 1."
+  },
+  "errorPaidMax": "{max, plural, =1{This can be at most 1 here.} other{This can be at most {max} here.}}",
+  "@errorPaidMax": {
+    "description": "Validation under 'Installments paid' when editing a plan: payments marked paid in the app cannot be counted.",
+    "placeholders": {
+      "max": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Highest allowed number of installments paid"
+      }
+    }
+  },
+  "paidBeforeSummary": "{count, plural, =1{1 installment paid before Kalan} other{{count} installments paid before Kalan}} · {amount}",
+  "@paidBeforeSummary": {
+    "description": "Plan detail, one line above the payments: installments paid before the plan was added. 'Kalan' is the app name; do not translate it.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Number of installments paid before the plan was added"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺2,550",
+        "description": "Their total, formatted"
+      }
+    }
+  },
+  "progressPaidOfSemantics": "{paid} of {total, plural, =1{1 installment} other{{total} installments}} paid",
+  "@progressPaidOfSemantics": {
+    "description": "Screen reader label of the plan progress (e.g. 3/10).",
+    "placeholders": {
+      "paid": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Installments paid"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "All installments"
+      }
+    }
+  },
+  "planPaidOf": "{paid}/{count} paid",
+  "@planPaidOf": {
+    "description": "Plan progress as on card statements (installments paid / all installments, e.g. 3/10), in the plan list and plan detail.",
+    "placeholders": {
+      "paid": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Installments paid, including those paid before the plan was added"
+      },
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "All installments"
+      }
+    }
+  },
+  "numberValue": "{value}",
+  "@numberValue": {
+    "description": "A plain number for choice chips (e.g. installments paid: 1, 2, 3), formatted for the language.",
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "planEdit": "Edit plan",
+  "@planEdit": {
+    "description": "Plan detail action and the title of the plan edit screen."
+  },
+  "planUpdated": "Plan updated.",
+  "@planUpdated": {
+    "description": "Snackbar after saving the plan edit screen."
+  },
+  "underwayRevert": "{count, plural, =1{1 installment will come back as unpaid.} other{{count} installments will come back as unpaid.}}",
+  "@underwayRevert": {
+    "description": "Confirmation when lowering 'Installments paid' or switching 'already underway' off.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Installments that become unpaid"
+      }
+    }
+  },
+  "underwayRevertConfirm": "Continue",
+  "@underwayRevertConfirm": {
+    "description": "Button in the confirmation that brings installments back as unpaid."
   }
 }

@@ -14,6 +14,24 @@ extension SourceRowX on SourceRow {
       : null;
 }
 
+/// Payments from the start of a plan that are not marked paid in Kalan:
+/// the ones "already underway" may cover.
+int leadingRunOf(List<PaymentRow> payments) {
+  var run = 0;
+  for (final p in payments) {
+    if (p.isPaid && !p.paidBeforeKalan) break;
+    run++;
+  }
+  return run;
+}
+
+/// The highest "installments paid" a plan can take: its leading run, and
+/// always at least one payment left.
+int maxPaidBeforeOf(List<PaymentRow> payments) {
+  final run = leadingRunOf(payments);
+  return run < payments.length ? run : payments.length - 1;
+}
+
 extension PaymentRowX on PaymentRow {
   LocalDate get date => LocalDate.fromEpochDay(dueDay);
   bool get isPaid => paidAt != null;
@@ -56,6 +74,26 @@ class PlanWithPayments {
   int get paidCount =>
       (payments.isEmpty ? 0 : payments.first.seq - 1) +
       payments.where((p) => p.isPaid).length;
+
+  /// Payments paid before the plan was added to Kalan: shown only as one
+  /// summary line, never one by one.
+  List<PaymentRow> get paidBefore => [
+    for (final p in payments)
+      if (p.paidBeforeKalan) p,
+  ];
+
+  int get paidBeforeMinor =>
+      paidBefore.fold(0, (sum, p) => sum + p.amountMinor);
+
+  /// The payments to list: everything except those paid before Kalan.
+  List<PaymentRow> get listedPayments => [
+    for (final p in payments)
+      if (!p.paidBeforeKalan) p,
+  ];
+
+  /// Plans added with only their remaining payments (before schema v4) do
+  /// not have the earlier ones; they cannot be edited as "underway".
+  bool get startsAtFirstPayment => payments.isEmpty || payments.first.seq == 1;
 
   PaymentRow? get nextUnpaid {
     for (final p in payments) {

@@ -1308,6 +1308,21 @@ class $PaymentsTable extends Payments
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _paidBeforeKalanMeta = const VerificationMeta(
+    'paidBeforeKalan',
+  );
+  @override
+  late final GeneratedColumn<bool> paidBeforeKalan = GeneratedColumn<bool>(
+    'paid_before_kalan',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("paid_before_kalan" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1317,6 +1332,7 @@ class $PaymentsTable extends Payments
     amountMinor,
     paidAt,
     isEdited,
+    paidBeforeKalan,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1380,6 +1396,15 @@ class $PaymentsTable extends Payments
         isEdited.isAcceptableOrUnknown(data['is_edited']!, _isEditedMeta),
       );
     }
+    if (data.containsKey('paid_before_kalan')) {
+      context.handle(
+        _paidBeforeKalanMeta,
+        paidBeforeKalan.isAcceptableOrUnknown(
+          data['paid_before_kalan']!,
+          _paidBeforeKalanMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1421,6 +1446,10 @@ class $PaymentsTable extends Payments
         DriftSqlType.bool,
         data['${effectivePrefix}is_edited'],
       )!,
+      paidBeforeKalan: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}paid_before_kalan'],
+      )!,
     );
   }
 
@@ -1438,6 +1467,10 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
   final int amountMinor;
   final DateTime? paidAt;
   final bool isEdited;
+
+  /// Paid before the plan was added to Kalan (schema v4): stored as paid,
+  /// never overdue, never listed one by one or reminded.
+  final bool paidBeforeKalan;
   const PaymentRow({
     required this.id,
     required this.planId,
@@ -1446,6 +1479,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     required this.amountMinor,
     this.paidAt,
     required this.isEdited,
+    required this.paidBeforeKalan,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1459,6 +1493,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       map['paid_at'] = Variable<DateTime>(paidAt);
     }
     map['is_edited'] = Variable<bool>(isEdited);
+    map['paid_before_kalan'] = Variable<bool>(paidBeforeKalan);
     return map;
   }
 
@@ -1473,6 +1508,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           ? const Value.absent()
           : Value(paidAt),
       isEdited: Value(isEdited),
+      paidBeforeKalan: Value(paidBeforeKalan),
     );
   }
 
@@ -1489,6 +1525,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       amountMinor: serializer.fromJson<int>(json['amountMinor']),
       paidAt: serializer.fromJson<DateTime?>(json['paidAt']),
       isEdited: serializer.fromJson<bool>(json['isEdited']),
+      paidBeforeKalan: serializer.fromJson<bool>(json['paidBeforeKalan']),
     );
   }
   @override
@@ -1502,6 +1539,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       'amountMinor': serializer.toJson<int>(amountMinor),
       'paidAt': serializer.toJson<DateTime?>(paidAt),
       'isEdited': serializer.toJson<bool>(isEdited),
+      'paidBeforeKalan': serializer.toJson<bool>(paidBeforeKalan),
     };
   }
 
@@ -1513,6 +1551,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     int? amountMinor,
     Value<DateTime?> paidAt = const Value.absent(),
     bool? isEdited,
+    bool? paidBeforeKalan,
   }) => PaymentRow(
     id: id ?? this.id,
     planId: planId ?? this.planId,
@@ -1521,6 +1560,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     amountMinor: amountMinor ?? this.amountMinor,
     paidAt: paidAt.present ? paidAt.value : this.paidAt,
     isEdited: isEdited ?? this.isEdited,
+    paidBeforeKalan: paidBeforeKalan ?? this.paidBeforeKalan,
   );
   PaymentRow copyWithCompanion(PaymentsCompanion data) {
     return PaymentRow(
@@ -1533,6 +1573,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           : this.amountMinor,
       paidAt: data.paidAt.present ? data.paidAt.value : this.paidAt,
       isEdited: data.isEdited.present ? data.isEdited.value : this.isEdited,
+      paidBeforeKalan: data.paidBeforeKalan.present
+          ? data.paidBeforeKalan.value
+          : this.paidBeforeKalan,
     );
   }
 
@@ -1545,14 +1588,23 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           ..write('dueDay: $dueDay, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('paidAt: $paidAt, ')
-          ..write('isEdited: $isEdited')
+          ..write('isEdited: $isEdited, ')
+          ..write('paidBeforeKalan: $paidBeforeKalan')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, planId, seq, dueDay, amountMinor, paidAt, isEdited);
+  int get hashCode => Object.hash(
+    id,
+    planId,
+    seq,
+    dueDay,
+    amountMinor,
+    paidAt,
+    isEdited,
+    paidBeforeKalan,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1563,7 +1615,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           other.dueDay == this.dueDay &&
           other.amountMinor == this.amountMinor &&
           other.paidAt == this.paidAt &&
-          other.isEdited == this.isEdited);
+          other.isEdited == this.isEdited &&
+          other.paidBeforeKalan == this.paidBeforeKalan);
 }
 
 class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
@@ -1574,6 +1627,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
   final Value<int> amountMinor;
   final Value<DateTime?> paidAt;
   final Value<bool> isEdited;
+  final Value<bool> paidBeforeKalan;
   const PaymentsCompanion({
     this.id = const Value.absent(),
     this.planId = const Value.absent(),
@@ -1582,6 +1636,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     this.amountMinor = const Value.absent(),
     this.paidAt = const Value.absent(),
     this.isEdited = const Value.absent(),
+    this.paidBeforeKalan = const Value.absent(),
   });
   PaymentsCompanion.insert({
     this.id = const Value.absent(),
@@ -1591,6 +1646,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     required int amountMinor,
     this.paidAt = const Value.absent(),
     this.isEdited = const Value.absent(),
+    this.paidBeforeKalan = const Value.absent(),
   }) : planId = Value(planId),
        seq = Value(seq),
        dueDay = Value(dueDay),
@@ -1603,6 +1659,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     Expression<int>? amountMinor,
     Expression<DateTime>? paidAt,
     Expression<bool>? isEdited,
+    Expression<bool>? paidBeforeKalan,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1612,6 +1669,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (paidAt != null) 'paid_at': paidAt,
       if (isEdited != null) 'is_edited': isEdited,
+      if (paidBeforeKalan != null) 'paid_before_kalan': paidBeforeKalan,
     });
   }
 
@@ -1623,6 +1681,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     Value<int>? amountMinor,
     Value<DateTime?>? paidAt,
     Value<bool>? isEdited,
+    Value<bool>? paidBeforeKalan,
   }) {
     return PaymentsCompanion(
       id: id ?? this.id,
@@ -1632,6 +1691,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
       amountMinor: amountMinor ?? this.amountMinor,
       paidAt: paidAt ?? this.paidAt,
       isEdited: isEdited ?? this.isEdited,
+      paidBeforeKalan: paidBeforeKalan ?? this.paidBeforeKalan,
     );
   }
 
@@ -1659,6 +1719,9 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     if (isEdited.present) {
       map['is_edited'] = Variable<bool>(isEdited.value);
     }
+    if (paidBeforeKalan.present) {
+      map['paid_before_kalan'] = Variable<bool>(paidBeforeKalan.value);
+    }
     return map;
   }
 
@@ -1671,7 +1734,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
           ..write('dueDay: $dueDay, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('paidAt: $paidAt, ')
-          ..write('isEdited: $isEdited')
+          ..write('isEdited: $isEdited, ')
+          ..write('paidBeforeKalan: $paidBeforeKalan')
           ..write(')'))
         .toString();
   }
@@ -4355,6 +4419,7 @@ typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
   required int amountMinor,
   Value<DateTime?> paidAt,
   Value<bool> isEdited,
+  Value<bool> paidBeforeKalan,
 });
 typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<int> id,
@@ -4364,6 +4429,7 @@ typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<int> amountMinor,
   Value<DateTime?> paidAt,
   Value<bool> isEdited,
+  Value<bool> paidBeforeKalan,
 });
 
 final class $$PaymentsTableReferences
@@ -4424,6 +4490,11 @@ class $$PaymentsTableFilterComposer
 
   ColumnFilters<bool> get isEdited => $composableBuilder(
     column: $table.isEdited,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get paidBeforeKalan => $composableBuilder(
+    column: $table.paidBeforeKalan,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4490,6 +4561,11 @@ class $$PaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get paidBeforeKalan => $composableBuilder(
+    column: $table.paidBeforeKalan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PlansTableOrderingComposer get planId {
     final $$PlansTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4542,6 +4618,11 @@ class $$PaymentsTableAnnotationComposer
 
   GeneratedColumn<bool> get isEdited =>
       $composableBuilder(column: $table.isEdited, builder: (column) => column);
+
+  GeneratedColumn<bool> get paidBeforeKalan => $composableBuilder(
+    column: $table.paidBeforeKalan,
+    builder: (column) => column,
+  );
 
   $$PlansTableAnnotationComposer get planId {
     final $$PlansTableAnnotationComposer composer = $composerBuilder(
@@ -4602,6 +4683,7 @@ class $$PaymentsTableTableManager
                 Value<int> amountMinor = const Value.absent(),
                 Value<DateTime?> paidAt = const Value.absent(),
                 Value<bool> isEdited = const Value.absent(),
+                Value<bool> paidBeforeKalan = const Value.absent(),
               }) => PaymentsCompanion(
                 id: id,
                 planId: planId,
@@ -4610,6 +4692,7 @@ class $$PaymentsTableTableManager
                 amountMinor: amountMinor,
                 paidAt: paidAt,
                 isEdited: isEdited,
+                paidBeforeKalan: paidBeforeKalan,
               ),
           createCompanionCallback:
               ({
@@ -4620,6 +4703,7 @@ class $$PaymentsTableTableManager
                 required int amountMinor,
                 Value<DateTime?> paidAt = const Value.absent(),
                 Value<bool> isEdited = const Value.absent(),
+                Value<bool> paidBeforeKalan = const Value.absent(),
               }) => PaymentsCompanion.insert(
                 id: id,
                 planId: planId,
@@ -4628,6 +4712,7 @@ class $$PaymentsTableTableManager
                 amountMinor: amountMinor,
                 paidAt: paidAt,
                 isEdited: isEdited,
+                paidBeforeKalan: paidBeforeKalan,
               ),
           withReferenceMapper: (p0) => p0
               .map(
