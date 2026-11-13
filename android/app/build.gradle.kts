@@ -6,7 +6,9 @@ plugins {
 
 android {
     namespace = "app.kalan.mobile"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications 23 and androidx.core 1.19 need SDK 37 to
+    // compile against; targetSdk below stays Flutter's default.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

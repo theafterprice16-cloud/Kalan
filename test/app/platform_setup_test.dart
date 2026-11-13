@@ -40,6 +40,16 @@ void main() {
     expect(gradle, contains('desugar_jdk_libs'));
   });
 
+  test('Android compiles against SDK 37 or later', () {
+    // flutter_local_notifications 23 and androidx.core 1.19 require it
+    // (AAR metadata check); targetSdk stays Flutter's default.
+    final gradle = File('android/app/build.gradle.kts').readAsStringSync();
+    final sdk = RegExp(r'compileSdk = (\d+)').firstMatch(gradle);
+    expect(sdk, isNotNull, reason: 'compileSdk is pinned');
+    expect(int.parse(sdk!.group(1)!), greaterThanOrEqualTo(37));
+    expect(gradle, contains('targetSdk = flutter.targetSdkVersion'));
+  });
+
   test('the Dart entry point the receiver starts exists', () {
     final receiver = File(
       'android/app/src/main/kotlin/app/kalan/mobile/'
