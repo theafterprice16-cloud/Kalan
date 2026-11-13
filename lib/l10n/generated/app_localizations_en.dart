@@ -19,6 +19,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionCancel => 'Cancel';
 
   @override
+  String get actionUndo => 'Undo';
+
+  @override
   String get actionDelete => 'Delete';
 
   @override

@@ -8,6 +8,7 @@ import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
+import '../../l10n/generated/app_localizations.dart';
 import 'home_view.dart';
 
 /// Rows shown before "Show all".
@@ -16,9 +17,32 @@ const pastDueVisibleRows = 3;
 /// When a past-due payment was paid.
 enum PaidWhen { today, onDueDate }
 
+/// How long "Marked as paid." with "Undo" stays on screen.
+const markedPaidDuration = Duration(seconds: 6);
+
+/// "Marked as paid." with a calm "Undo". It leaves on its own: an action
+/// would otherwise keep it on screen.
+void showMarkedPaid(
+  ScaffoldMessengerState messenger,
+  AppLocalizations l10n, {
+  required VoidCallback onUndo,
+}) {
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(l10n.markedPaid),
+        duration: markedPaidDuration,
+        persist: false,
+        action: SnackBarAction(label: l10n.actionUndo, onPressed: onUndo),
+      ),
+    );
+}
+
 /// "When did you pay?" for a past-due payment. "Today" keeps it in this
 /// period; "on the due date" moves it back to its own. Returns null when
-/// cancelled; otherwise the payment is already marked.
+/// cancelled; otherwise the payment is already marked, and "Undo" puts it
+/// back in the list as it was.
 Future<PaidWhen?> markPastDuePaid(
   BuildContext context,
   WidgetRef ref, {
@@ -27,6 +51,9 @@ Future<PaidWhen?> markPastDuePaid(
 }) async {
   final l10n = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
+  // Read now: the row leaves the tree once the payment is paid.
+  final repo = ref.read(planRepositoryProvider);
+  final today = ref.read(todayProvider);
   final choice = await showModalBottomSheet<PaidWhen>(
     context: context,
     showDragHandle: true,
@@ -34,13 +61,12 @@ Future<PaidWhen?> markPastDuePaid(
     builder: (_) => PaidWhenSheet(dueDate: dueDate),
   );
   if (choice == null) return null;
-  final today = ref.read(todayProvider);
-  await ref
-      .read(planRepositoryProvider)
-      .setPaidOn(paymentId, choice == PaidWhen.today ? today : dueDate);
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(l10n.markedPaid)));
+  await repo.setPaidOn(paymentId, choice == PaidWhen.today ? today : dueDate);
+  showMarkedPaid(
+    messenger,
+    l10n,
+    onUndo: () => repo.setPaid(paymentId, paid: false),
+  );
   return choice;
 }
 

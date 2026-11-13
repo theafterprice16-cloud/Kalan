@@ -48,14 +48,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             routes: [
-              GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
+              GoRoute(
+                path: Routes.home,
+                builder: (_, _) => const _Tab(HomeScreen()),
+              ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: Routes.plans,
-                builder: (_, _) => const PlansScreen(),
+                builder: (_, _) => const _Tab(PlansScreen()),
               ),
             ],
           ),
@@ -63,7 +66,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.settings,
-                builder: (_, _) => const SettingsScreen(),
+                builder: (_, _) => const _Tab(SettingsScreen()),
               ),
             ],
           ),
@@ -116,3 +119,15 @@ final routerProvider = Provider<GoRouter>((ref) {
   });
   return router;
 });
+
+/// Each tab has its own messenger: its snackbars ("Undo" included) sit
+/// above the tab's "Add" button instead of covering it, and only the tab
+/// that showed one draws it.
+class _Tab extends StatelessWidget {
+  const _Tab(this.child);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ScaffoldMessenger(child: child);
+}

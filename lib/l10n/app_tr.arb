@@ -3,6 +3,7 @@
   "appTitle": "Kalan",
   "actionSave": "Kaydet",
   "actionCancel": "Vazgeç",
+  "actionUndo": "Geri al",
   "actionDelete": "Sil",
   "actionEdit": "Düzenle",
   "actionAddPlan": "Plan ekle",

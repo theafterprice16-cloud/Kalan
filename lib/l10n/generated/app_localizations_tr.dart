@@ -19,6 +19,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get actionCancel => 'Vazgeç';
 
   @override
+  String get actionUndo => 'Geri al';
+
+  @override
   String get actionDelete => 'Sil';
 
   @override

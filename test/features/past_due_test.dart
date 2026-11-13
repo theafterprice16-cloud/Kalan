@@ -126,6 +126,44 @@ void main() {
     expect(klarna.paidOnDay, d(10, 28).epochDay);
   });
 
+  for (final (choice, name) in [
+    ('paid-when-today', 'Today'),
+    ('paid-when-due', 'On the due date'),
+  ]) {
+    testWidgets('"$name", then "Undo": back in the list as it was', (
+      tester,
+    ) async {
+      final db = await pumpZeynep(tester);
+      await openSheet(tester);
+      await tester.tap(find.byKey(ValueKey(choice)));
+      await tester.pumpAndSettle();
+      expect(section, findsNothing);
+      final undo = find.widgetWithText(SnackBarAction, 'Geri al');
+      expect(undo, findsOneWidget);
+      await tester.tap(undo);
+      await tester.pumpAndSettle();
+      expect(find.text('Günü geçen 1 ödeme'), findsOneWidget);
+      expect(find.text('₺17.150'), findsOneWidget);
+      final klarna = (await db.select(db.payments).get()).firstWhere(
+        (p) => p.dueDay == d(10, 28).epochDay,
+      );
+      expect(klarna.paidAt, isNull);
+      expect(klarna.paidOnDay, isNull);
+    });
+  }
+
+  testWidgets('"Marked as paid." leaves on its own', (tester) async {
+    await pumpZeynep(tester);
+    await openSheet(tester);
+    await tester.tap(find.byKey(const ValueKey('paid-when-today')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ödendi olarak işaretlendi.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 7));
+    await tester.pumpAndSettle();
+    expect(find.text('Ödendi olarak işaretlendi.'), findsNothing);
+    expect(section, findsNothing);
+  });
+
   testWidgets('cancel leaves everything as it was', (tester) async {
     await pumpZeynep(tester);
     await openSheet(tester);

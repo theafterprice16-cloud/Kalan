@@ -354,6 +354,14 @@ void main() {
           await tester.tap(find.text(paid).first);
           await shoot(tester, '25-paid-when-$lang-$theme');
         });
+
+        testWidgets('marked paid with undo, $lang', (tester) async {
+          await start(tester, locale: locale, today: nov1, seed: seedPastDue);
+          await tester.tap(find.text(paid).first);
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('paid-when-today')));
+          await shoot(tester, '26-marked-paid-undo-$lang-$theme');
+        });
       }
 
       // "Already underway" in both languages.

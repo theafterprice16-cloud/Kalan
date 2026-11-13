@@ -66,6 +66,47 @@ void main() {
     expect(paid.single.seq, 1);
   });
 
+  testWidgets('"Undo" takes back a one-tap "paid"', (tester) async {
+    final db = await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 5000000);
+        await seedPayIn4(db);
+      },
+    );
+    await tester.tap(find.byTooltip('Ödendi olarak işaretle').first);
+    await tester.pumpAndSettle();
+    // Above "Add plan", not over it.
+    expect(
+      tester.getRect(find.byType(SnackBar)).bottom,
+      lessThanOrEqualTo(tester.getRect(find.byType(FloatingActionButton)).top),
+    );
+    await tester.tap(find.widgetWithText(SnackBarAction, 'Geri al'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Ödendi olarak işaretle'), findsNWidgets(2));
+    expect(find.byTooltip('Ödenmedi olarak işaretle'), findsNothing);
+    final paid = await (db.select(
+      db.payments,
+    )..where((p) => p.paidAt.isNotNull())).get();
+    expect(paid, isEmpty);
+  });
+
+  testWidgets('"not paid" has no "Undo"', (tester) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 5000000);
+        await seedPayIn4(db);
+      },
+    );
+    await tester.tap(find.byTooltip('Ödendi olarak işaretle').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Ödenmedi olarak işaretle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ödenmedi olarak işaretlendi.'), findsOneWidget);
+    expect(find.byType(SnackBarAction), findsNothing);
+  });
+
   testWidgets(
     'negative period uses the negative tone and says how much is short',
     (tester) async {

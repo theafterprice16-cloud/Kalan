@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get actionCancel;
 
+  /// Snackbar action that takes back "paid". Calm, no judgement.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get actionUndo;
+
   /// No description provided for @actionDelete.
   ///
   /// In en, this message translates to:

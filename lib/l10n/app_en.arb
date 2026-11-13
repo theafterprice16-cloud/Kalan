@@ -3,6 +3,10 @@
   "appTitle": "Kalan",
   "actionSave": "Save",
   "actionCancel": "Cancel",
+  "actionUndo": "Undo",
+  "@actionUndo": {
+    "description": "Snackbar action that takes back \"paid\". Calm, no judgement."
+  },
   "actionDelete": "Delete",
   "actionEdit": "Edit",
   "actionAddPlan": "Add plan",
