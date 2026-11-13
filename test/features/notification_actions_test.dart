@@ -273,6 +273,25 @@ void main() {
       expect(await db.select(db.recurringMarks).get(), isEmpty);
     });
 
+    test('the change can come before the reschedule', () async {
+      final tabby = await seedOne(db, 'Tabby', d(11, 14));
+      await scheduler.rescheduleAll();
+      final onDay = pending(d(11, 14), ReminderKind.onDay);
+      final calls = gateway.replaceCalls;
+      clock = at(d(11, 14), 9, 1);
+      final result = await handler.handle(
+        actionId: ReminderActionIds.of(ReminderAction.paid),
+        payload: onDay.data!.encode(),
+        reschedule: false,
+      );
+      expect(result.marked, 1);
+      expect((await paymentOf(db, tabby)).paidAt, isNotNull);
+      expect(gateway.replaceCalls, calls);
+      // The next reschedule leaves Tabby out.
+      await scheduler.rescheduleAll();
+      expect(mentions('Tabby'), isFalse);
+    });
+
     test('unreadable payloads and foreign buttons do nothing', () async {
       final tabby = await seedOne(db, 'Tabby', d(11, 14));
       await scheduler.rescheduleAll();

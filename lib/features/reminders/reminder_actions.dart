@@ -73,9 +73,13 @@ class ReminderActionHandler {
 
   final ReminderScheduler _scheduler;
 
+  /// With [reschedule] false only the change is made; the caller then
+  /// reschedules (the background isolate does, once the notification
+  /// service is up).
   Future<({ReminderActionOutcome outcome, int marked})> handle({
     required String? actionId,
     required String? payload,
+    bool reschedule = true,
   }) async {
     final action = ReminderActionIds.parse(actionId);
     final data = ReminderPayload.decode(payload);
@@ -91,7 +95,7 @@ class ReminderActionHandler {
     } else {
       outcome = await _snooze(data, action, now);
     }
-    await _scheduler.rescheduleAll();
+    if (reschedule) await _scheduler.rescheduleAll();
     return (outcome: outcome, marked: marked);
   }
 
