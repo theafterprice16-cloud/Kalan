@@ -17,6 +17,7 @@ import '../../core/theme/theme_mode.dart';
 import '../../data/db/app_database.dart';
 import '../currency/currency_picker.dart';
 import '../onboarding/pay_form.dart';
+import '../reminders/reminders_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -180,6 +181,7 @@ class SettingsScreen extends ConsumerWidget {
                   AppSettingsCompanion(tightThresholdMinor: Value(v)),
             ),
           ),
+          RemindersSection(settings: s),
           const Divider(),
           ListTile(
             title: Text(l10n.settingsCurrency),

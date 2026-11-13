@@ -126,6 +126,7 @@ void main() {
   ) async {
     final db = await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Dil'));
     await tester.tap(find.text('Dil'));
     await tester.pumpAndSettle();
     final options = find.descendant(

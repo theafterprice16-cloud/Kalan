@@ -11,33 +11,39 @@ class PlanRepository {
 
   /// Every plan with its source and payments. Re-emits on any change to
   /// plans, payments or sources.
-  Stream<List<PlanWithPayments>> watchAll() {
-    final query =
-        _db.select(_db.payments).join([
-          innerJoin(_db.plans, _db.plans.id.equalsExp(_db.payments.planId)),
-          innerJoin(_db.sources, _db.sources.id.equalsExp(_db.plans.sourceId)),
-        ])..orderBy([
-          OrderingTerm.asc(_db.plans.id),
-          OrderingTerm.asc(_db.payments.seq),
-        ]);
-    return query.watch().map((rows) {
-      final byPlan = <int, PlanWithPayments>{};
-      final payments = <int, List<PaymentRow>>{};
-      for (final row in rows) {
-        final plan = row.readTable(_db.plans);
-        byPlan.putIfAbsent(
-          plan.id,
-          () => PlanWithPayments(
-            plan: plan,
-            source: row.readTable(_db.sources),
-            payments: payments.putIfAbsent(plan.id, () => []),
-          ),
-        );
-        payments[plan.id]!.add(row.readTable(_db.payments));
-      }
-      return byPlan.values.toList();
-    });
+  JoinedSelectStatement<HasResultSet, dynamic> _allQuery() =>
+      _db.select(_db.payments).join([
+        innerJoin(_db.plans, _db.plans.id.equalsExp(_db.payments.planId)),
+        innerJoin(_db.sources, _db.sources.id.equalsExp(_db.plans.sourceId)),
+      ])..orderBy([
+        OrderingTerm.asc(_db.plans.id),
+        OrderingTerm.asc(_db.payments.seq),
+      ]);
+
+  List<PlanWithPayments> _group(List<TypedResult> rows) {
+    final byPlan = <int, PlanWithPayments>{};
+    final payments = <int, List<PaymentRow>>{};
+    for (final row in rows) {
+      final plan = row.readTable(_db.plans);
+      byPlan.putIfAbsent(
+        plan.id,
+        () => PlanWithPayments(
+          plan: plan,
+          source: row.readTable(_db.sources),
+          payments: payments.putIfAbsent(plan.id, () => []),
+        ),
+      );
+      payments[plan.id]!.add(row.readTable(_db.payments));
+    }
+    return byPlan.values.toList();
   }
+
+  /// Every plan with its source and payments. Re-emits on any change to
+  /// plans, payments or sources.
+  Stream<List<PlanWithPayments>> watchAll() => _allQuery().watch().map(_group);
+
+  /// One-off read (reminders, background isolates).
+  Future<List<PlanWithPayments>> all() async => _group(await _allQuery().get());
 
   Stream<PlanWithPayments?> watchPlan(int planId) => watchAll().map((plans) {
     for (final p in plans) {
@@ -134,6 +140,12 @@ class PlanRepository {
         return null;
     }
   });
+
+  /// "Reminders for this plan".
+  Future<void> setRemindersEnabled(int planId, {required bool enabled}) =>
+      (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+        PlansCompanion(remindersEnabled: Value(enabled)),
+      );
 
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();

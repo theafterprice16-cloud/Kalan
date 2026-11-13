@@ -52,7 +52,7 @@ class ReminderScheduler {
     final today = LocalDate(local.year, local.month, local.day);
 
     final payments = <ReminderPayment>[];
-    for (final p in await PlanRepository(db).watchAll().first) {
+    for (final p in await PlanRepository(db).all()) {
       for (final pay in p.payments) {
         payments.add(
           ReminderPayment(
@@ -68,7 +68,7 @@ class ReminderScheduler {
         );
       }
     }
-    for (final r in await RecurringRepository(db).watchAll().first) {
+    for (final r in await RecurringRepository(db).all()) {
       for (final date in r.occurrences(
         today,
         today.addDays(_recurringHorizonDays),

@@ -4,18 +4,23 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
-
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/app.dart';
 import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/core/routing/router.dart';
+import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:timezone/data/latest_all.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../helpers/app_harness.dart';
+import '../helpers/fake_notifications.dart';
 
 /// Real fonts from the Flutter SDK so screenshots are readable.
 Future<void> loadFonts() async {
@@ -105,7 +110,11 @@ Future<void> shoot(WidgetTester tester, String name) async {
 }
 
 void main() {
-  setUpAll(loadFonts);
+  setUpAll(() async {
+    await loadFonts();
+    tzdata.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Europe/Istanbul'));
+  });
 
   for (final mode in [ThemeMode.light, ThemeMode.dark]) {
     final theme = mode.name;
@@ -115,6 +124,7 @@ void main() {
       int income = 4500000,
       bool onboarded = true,
       List<Override> extra = const [],
+      String? route,
     }) async {
       tester.view.physicalSize = const Size(780, 1688);
       tester.view.devicePixelRatio = 2;
@@ -124,6 +134,11 @@ void main() {
         seed: onboarded ? (db) => seedRich(db, incomeMinor: income) : null,
         overrides: [
           themeModeStoreProvider.overrideWithValue(MemoryThemeModeStore(mode)),
+          notificationGatewayProvider.overrideWithValue(
+            FakeNotificationGateway(),
+          ),
+          clockProvider.overrideWithValue(() => DateTime.utc(2026, 11, 20, 5)),
+          if (route != null) initialRouteProvider.overrideWithValue(route),
           ...extra,
         ],
       );
@@ -206,6 +221,7 @@ void main() {
       testWidgets('currency change', (tester) async {
         await start(tester);
         await openTab(tester, 'Ayarlar');
+        await scrollTo(tester, find.text('Para birimi'));
         await tester.tap(find.text('Para birimi'));
         await tester.pumpAndSettle();
         await tester.enterText(
@@ -215,6 +231,38 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('currency-IDR')));
         await shoot(tester, '10-currency-change-$theme');
+      });
+
+      testWidgets('settings, reminders section', (tester) async {
+        await start(tester);
+        await openTab(tester, 'Ayarlar');
+        // Put the section title near the top of the screen.
+        await scrollTo(tester, find.text('Hatırlatmalar'));
+        final top = tester.getTopLeft(find.text('Hatırlatmalar')).dy;
+        await tester.drag(find.byType(Scrollable).first, Offset(0, 80 - top));
+        await shoot(tester, '11-settings-reminders-$theme');
+      });
+
+      testWidgets('payments of the day', (tester) async {
+        await start(tester, route: '/day/2026-11-20');
+        await shoot(tester, '12-day-payments-$theme');
+      });
+
+      testWidgets('reminders help', (tester) async {
+        await start(tester, route: Routes.remindersHelp);
+        await shoot(tester, '13-reminders-help-$theme');
+      });
+
+      testWidgets('reminder prompt', (tester) async {
+        await start(tester);
+        await tester.tap(find.text('Plan ekle'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+        await tester.enterText(find.byKey(const ValueKey('total')), '400');
+        await tester.pumpAndSettle();
+        await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+        await tester.tap(find.byKey(const ValueKey('save-plan')));
+        await shoot(tester, '14-reminder-prompt-$theme');
       });
     });
   }

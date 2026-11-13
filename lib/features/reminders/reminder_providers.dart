@@ -23,16 +23,18 @@ final privacySettingsProvider = Provider(
   (ref) => PrivacySettings(ref.watch(settingsRepositoryProvider)),
 );
 
-final reminderSchedulerProvider = Provider(
-  (ref) => ReminderScheduler(
+final reminderSchedulerProvider = Provider((ref) {
+  // Read now, not inside the closures: the scheduler outlives this build.
+  final region = ref.watch(deviceRegionProvider);
+  return ReminderScheduler(
     db: ref.watch(databaseProvider),
     gateway: ref.watch(notificationGatewayProvider),
     location: () => tz.local,
     now: ref.watch(clockProvider),
     localeFor: (s) => appLocale(s.localeCode),
-    region: () => ref.read(deviceRegionProvider),
-  ),
-);
+    region: () => region,
+  );
+});
 
 /// Whether the system allows notifications; refreshed on resume.
 final notificationPermissionProvider = FutureProvider<bool>(

@@ -8,6 +8,7 @@ void main() {
   testWidgets('switching the language to English', (tester) async {
     final db = await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Dil'));
     await tester.tap(find.text('Dil'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('English'));
@@ -178,6 +179,7 @@ void main() {
     expect(ground(), KalanColors.dark.bg);
 
     await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Tema'));
     expect(find.text('Sistem'), findsOneWidget);
     await tester.tap(find.text('Tema'));
     await tester.pumpAndSettle();

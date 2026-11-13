@@ -13,6 +13,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
+import '../reminders/reminder_prompt.dart';
 
 /// Rent, bills, subscriptions. No categories.
 class RecurringEditScreen extends ConsumerStatefulWidget {
@@ -30,6 +31,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
   final _name = TextEditingController();
   final _amount = TextEditingController();
   Recurrence _recurrence = Recurrence.monthly;
+  bool _reminders = true;
   late LocalDate _start;
   LocalDate? _end;
   RecurringPaymentRow? _existing;
@@ -59,6 +61,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
       _recurrence = r.recurrence;
       _start = LocalDate.fromEpochDay(r.startDay);
       _end = r.endDay == null ? null : LocalDate.fromEpochDay(r.endDay!);
+      _reminders = r.remindersEnabled;
       _loaded = true;
     });
   }
@@ -88,6 +91,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           recurrence: _recurrence,
           startDay: _start.epochDay,
           endDay: Value(_end?.epochDay),
+          remindersEnabled: Value(_reminders),
         ),
       );
     } else {
@@ -98,10 +102,14 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           recurrence: _recurrence,
           startDay: _start.epochDay,
           endDay: Value(_end?.epochDay),
+          remindersEnabled: _reminders,
         ),
       );
     }
     messenger.showSnackBar(SnackBar(content: Text(l10n.recurringSaved)));
+    if (existing == null && mounted) {
+      await askForRemindersIfNeeded(context, ref);
+    }
     router.pop();
   }
 
@@ -208,7 +216,15 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                             icon: const Icon(Icons.close),
                           ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    key: const ValueKey('item-reminders'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.planReminderToggle),
+                    value: _reminders,
+                    onChanged: (v) => setState(() => _reminders = v),
+                  ),
+                  const SizedBox(height: 16),
                   FilledButton(
                     key: const ValueKey('save-recurring'),
                     onPressed: _save,

@@ -1,4 +1,4 @@
-import 'dart:ui' show DartPluginRegistrant, PlatformDispatcher;
+import 'dart:ui' show DartPluginRegistrant;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -49,7 +49,8 @@ Future<void> runReminderTask(
         location: () => tz.local,
         now: DateTime.now,
         localeFor: (s) => appLocale(s.localeCode),
-        region: () => PlatformDispatcher.instance.locale.countryCode,
+        region: () =>
+            WidgetsBinding.instance.platformDispatcher.locale.countryCode,
       ),
     );
   } finally {

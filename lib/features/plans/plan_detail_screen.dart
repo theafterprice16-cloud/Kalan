@@ -150,6 +150,17 @@ class PlanDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+            child: SwitchListTile(
+              key: const ValueKey('item-reminders'),
+              title: Text(l10n.planReminderToggle),
+              value: plan.plan.remindersEnabled,
+              onChanged: (v) => ref
+                  .read(planRepositoryProvider)
+                  .setRemindersEnabled(plan.plan.id, enabled: v),
+            ),
+          ),
           SectionTitle(l10n.planPaymentsTitle),
           for (final p in plan.payments) _PaymentRow(plan: plan, payment: p),
         ],
