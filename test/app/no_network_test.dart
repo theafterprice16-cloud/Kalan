@@ -44,7 +44,33 @@ void main() {
       'datadog_flutter_plugin',
     ];
     final found = banned.where(shipped.contains).toList();
-    expect(found, isEmpty);
+    // `timezone` (required by flutter_local_notifications) lists `http`
+    // only for its web loader, timezone/browser.dart. Kalan uses the
+    // bundled database instead, so `http` is allowed only while timezone is
+    // its sole dependent and no app code imports either (checked below).
+    final output = result.stdout as String;
+    final dependents = RegExp(r'^- (\S+) \S+ \[([^\]]*)\]', multiLine: true)
+        .allMatches(output)
+        .where((m) => m[2]!.split(' ').contains('http'))
+        .map((m) => m[1])
+        .toSet();
+    if (dependents.length == 1 && dependents.single == 'timezone') {
+      found.remove('http');
+    }
+    expect(found, isEmpty, reason: 'http dependents: $dependents');
+  });
+
+  test('app code never loads anything over the network', () {
+    final offenders = <String>[];
+    for (final entity in Directory('lib').listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final source = entity.readAsStringSync();
+      if (source.contains('package:http/') ||
+          source.contains('package:timezone/browser.dart')) {
+        offenders.add(entity.path);
+      }
+    }
+    expect(offenders, isEmpty);
   });
 
   test('app code does not open sockets or HTTP clients', () {

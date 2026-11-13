@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,6 +13,8 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../onboarding/pay_form.dart';
+import '../reminders/reminder_choice_tile.dart';
+import '../reminders/reminder_settings_store.dart';
 import 'plan_labels.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -32,7 +36,7 @@ class PlanDetailScreen extends ConsumerWidget {
             child: Text(l10n.actionCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.coral),
+            style: TextButton.styleFrom(foregroundColor: context.colors.late),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.actionDelete),
           ),
@@ -150,6 +154,27 @@ class PlanDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+            child: ReminderChoiceTile(
+              value: reminderChoiceOf(
+                enabled: plan.plan.remindersEnabled,
+                leadDays: plan.plan.reminderLeadDays,
+              ),
+              onChanged: (choice) {
+                final (enabled, leadDays) = reminderColumnsOf(choice);
+                return unawaited(
+                  ref
+                      .read(planRepositoryProvider)
+                      .setReminderChoice(
+                        plan.plan.id,
+                        enabled: enabled,
+                        leadDays: leadDays,
+                      ),
+                );
+              },
+            ),
+          ),
           SectionTitle(l10n.planPaymentsTitle),
           for (final p in plan.payments) _PaymentRow(plan: plan, payment: p),
         ],
@@ -257,7 +282,7 @@ class _PaymentRow extends ConsumerWidget {
                 payment.isPaid
                     ? Icons.check_circle
                     : Icons.radio_button_unchecked,
-                color: payment.isPaid ? colors.mintText : null,
+                color: payment.isPaid ? colors.accentText : null,
               ),
             ),
           ],

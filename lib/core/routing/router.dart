@@ -10,6 +10,7 @@ import '../../features/plans/add_plan_screen.dart';
 import '../../features/plans/plan_detail_screen.dart';
 import '../../features/plans/plans_screen.dart';
 import '../../features/recurring/recurring_edit_screen.dart';
+import '../../features/reminders/reminders_help_screen.dart';
 import '../../features/roadmap/roadmap_screen.dart';
 import '../../features/settings/pay_settings_screen.dart';
 import '../../features/settings/settings_screen.dart';
@@ -17,12 +18,15 @@ import '../../features/sources/source_edit_screen.dart';
 import '../../features/sources/sources_screen.dart';
 import 'routes.dart';
 
+/// Where the app starts (home); tests start elsewhere.
+final initialRouteProvider = Provider<String>((ref) => Routes.home);
+
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = ValueNotifier<int>(0);
   ref.listen(settingsProvider, (_, _) => refresh.value++);
 
   final router = GoRouter(
-    initialLocation: Routes.home,
+    initialLocation: ref.read(initialRouteProvider),
     refreshListenable: refresh,
     redirect: (context, state) {
       final settings = ref.read(settingsProvider);
@@ -94,6 +98,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.pay, builder: (_, _) => const PaySettingsScreen()),
       GoRoute(path: Routes.roadmap, builder: (_, _) => const RoadmapScreen()),
+      GoRoute(
+        path: Routes.remindersHelp,
+        builder: (_, _) => const RemindersHelpScreen(),
+      ),
     ],
   );
   ref.onDispose(() {

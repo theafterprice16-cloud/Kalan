@@ -12,6 +12,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
+import '../reminders/reminder_prompt.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
 /// four fields.
@@ -225,6 +226,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           title: _title.text,
         );
     messenger.showSnackBar(SnackBar(content: Text(l10n.planSaved)));
+    if (mounted) await askForRemindersIfNeeded(context, ref);
     router.pop();
   }
 
@@ -325,6 +327,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           key: key,
           controller: c,
           keyboardType: ref.amountKeyboard,
+          inputFormatters: ref.amountFormatters(context),
           decoration: InputDecoration(labelText: label),
           validator: c == _total
               ? _totalValidator

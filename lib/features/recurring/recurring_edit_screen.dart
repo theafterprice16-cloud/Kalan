@@ -9,10 +9,13 @@ import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/engine/engine.dart';
+import '../../core/reminders/reminder_models.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
+import '../reminders/reminder_choice_tile.dart';
+import '../reminders/reminder_settings_store.dart';
 
 /// Rent, bills, subscriptions. No categories.
 class RecurringEditScreen extends ConsumerStatefulWidget {
@@ -30,6 +33,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
   final _name = TextEditingController();
   final _amount = TextEditingController();
   Recurrence _recurrence = Recurrence.monthly;
+  ReminderChoice _reminders = ReminderChoice.general;
   late LocalDate _start;
   LocalDate? _end;
   RecurringPaymentRow? _existing;
@@ -59,6 +63,10 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
       _recurrence = r.recurrence;
       _start = LocalDate.fromEpochDay(r.startDay);
       _end = r.endDay == null ? null : LocalDate.fromEpochDay(r.endDay!);
+      _reminders = reminderChoiceOf(
+        enabled: r.remindersEnabled,
+        leadDays: r.reminderLeadDays,
+      );
       _loaded = true;
     });
   }
@@ -80,6 +88,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
     final l10n = context.l10n;
     final amount = ref.parseMoney(context, _amount.text)!;
     final existing = _existing;
+    final (reminders, leadDays) = reminderColumnsOf(_reminders);
     if (existing == null) {
       await repo.create(
         RecurringPaymentsCompanion.insert(
@@ -88,6 +97,8 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           recurrence: _recurrence,
           startDay: _start.epochDay,
           endDay: Value(_end?.epochDay),
+          remindersEnabled: Value(reminders),
+          reminderLeadDays: Value(leadDays),
         ),
       );
     } else {
@@ -98,6 +109,8 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           recurrence: _recurrence,
           startDay: _start.epochDay,
           endDay: Value(_end?.epochDay),
+          remindersEnabled: reminders,
+          reminderLeadDays: Value(leadDays),
         ),
       );
     }
@@ -119,7 +132,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
             child: Text(l10n.actionCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.coral),
+            style: TextButton.styleFrom(foregroundColor: context.colors.late),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.actionDelete),
           ),
@@ -208,7 +221,12 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                             icon: const Icon(Icons.close),
                           ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  ReminderChoiceTile(
+                    value: _reminders,
+                    onChanged: (v) => setState(() => _reminders = v),
+                  ),
+                  const SizedBox(height: 16),
                   FilledButton(
                     key: const ValueKey('save-recurring'),
                     onPressed: _save,

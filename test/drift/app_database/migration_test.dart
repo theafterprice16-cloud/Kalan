@@ -60,6 +60,142 @@ void main() {
     });
   }
 
+  /// Plan, payment, recurring payment and settings rows any version has.
+  void seedCommon(
+    InitializedSchema schema, {
+    String settingsExtra = '',
+    String values = '',
+  }) {
+    schema.rawDatabase.execute(
+      'INSERT INTO app_settings (id, currency_code, pay_frequency, pay_day'
+      '$settingsExtra) VALUES (1, \'TRY\', \'monthly\', 15$values)',
+    );
+    schema.rawDatabase.execute(
+      "INSERT INTO sources (id, name, kind) VALUES (1, 'Klarna', 'provider')",
+    );
+    schema.rawDatabase.execute(
+      'INSERT INTO plans (id, source_id, kind, installment_count, origin) '
+      "VALUES (1, 1, 'payIn4', 4, 'template')",
+    );
+    schema.rawDatabase.execute(
+      'INSERT INTO payments (plan_id, seq, due_day, amount_minor) '
+      'VALUES (1, 1, 20405, 2500)',
+    );
+    schema.rawDatabase.execute(
+      'INSERT INTO recurring_payments (id, name, amount_minor, recurrence, '
+      "start_day) VALUES (1, 'Kira', 100, 'monthly', 20400)",
+    );
+  }
+
+  Future<Map<String, Object?>> row(AppDatabase db, String sql) async =>
+      (await db.customSelect(sql).getSingle()).data;
+
+  test(
+    'v1 -> current: data kept, reminder defaults, plans "General"',
+    () async {
+      final schema = await verifier.schemaAt(1);
+      seedCommon(schema);
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+
+      final s = await row(
+        db,
+        'SELECT currency_code, reminders_enabled, reminder_lead_days, '
+        'reminder_minute, hide_amounts_in_notifications, reminder_prompt_shown '
+        'FROM app_settings',
+      );
+      expect(s, {
+        'currency_code': 'TRY',
+        'reminders_enabled': 1,
+        'reminder_lead_days': 2,
+        'reminder_minute': 540,
+        'hide_amounts_in_notifications': 0,
+        'reminder_prompt_shown': 0,
+      });
+      for (final table in ['plans', 'recurring_payments']) {
+        expect(
+          await row(
+            db,
+            'SELECT reminders_enabled, reminder_lead_days FROM $table',
+          ),
+          {'reminders_enabled': 1, 'reminder_lead_days': null},
+          reason: table,
+        );
+      }
+      expect(await row(db, 'SELECT amount_minor FROM payments'), {
+        'amount_minor': 2500,
+      });
+      await db.close();
+    },
+  );
+
+  test('v2 -> current: choices kept, offsets become "2 days"', () async {
+    final schema = await verifier.schemaAt(2);
+    final raw = schema.rawDatabase;
+    seedCommon(
+      schema,
+      settingsExtra:
+          ', reminders_enabled, remind_days7, remind_days3, remind_days1, '
+          'remind_same_day, reminder_minute, hide_amounts_in_notifications, '
+          'reminder_prompt_shown',
+      values: ', 0, 1, 1, 0, 1, 600, 1, 1',
+    );
+    raw.execute('UPDATE plans SET reminders_enabled = 0 WHERE id = 1');
+    raw.execute(
+      'INSERT INTO plans (id, source_id, kind, installment_count, origin) '
+      "VALUES (2, 1, 'payIn4', 4, 'template')",
+    );
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, db.schemaVersion);
+    final s = await row(
+      db,
+      'SELECT reminders_enabled, reminder_lead_days, reminder_minute, '
+      'hide_amounts_in_notifications, reminder_prompt_shown FROM app_settings',
+    );
+    expect(s, {
+      'reminders_enabled': 0,
+      'reminder_lead_days': 2,
+      'reminder_minute': 600,
+      'hide_amounts_in_notifications': 1,
+      'reminder_prompt_shown': 1,
+    });
+    final plans = await db
+        .customSelect(
+          'SELECT id, reminders_enabled, reminder_lead_days FROM plans '
+          'ORDER BY id',
+        )
+        .get();
+    expect(plans.map((r) => r.data), [
+      {'id': 1, 'reminders_enabled': 0, 'reminder_lead_days': null}, // Off
+      {'id': 2, 'reminders_enabled': 1, 'reminder_lead_days': null}, // General
+    ]);
+    await db.close();
+  });
+
+  test('per-plan days outside 1, 2, 3, 5, 7 are refused', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final sourceId = await db
+        .into(db.sources)
+        .insert(
+          SourcesCompanion.insert(name: 'Klarna', kind: SourceKind.provider),
+        );
+    PlansCompanion plan(int? days) => PlansCompanion.insert(
+      sourceId: sourceId,
+      kind: PlanKind.payIn4,
+      installmentCount: 4,
+      origin: PlanOrigin.template,
+      reminderLeadDays: Value(days),
+    );
+    await db.into(db.plans).insert(plan(5));
+    await db.into(db.plans).insert(plan(null));
+    await expectLater(
+      db.into(db.plans).insert(plan(4)),
+      throwsA(isA<SqliteException>()),
+    );
+    await db.close();
+  });
+
   test('foreign keys are enforced and payments cascade', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final sourceId = await db

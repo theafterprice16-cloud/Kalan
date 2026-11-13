@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/design/widgets.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
 import '../../core/theme/kalan_theme.dart';
@@ -41,22 +42,53 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
     super.dispose();
   }
 
-  bool _matches(Currency c, String q) {
-    if (q.isEmpty) return true;
-    return [
-      c.code,
-      c.symbol,
-      c.distinctiveSymbol,
-      currencyName(context, c),
-    ].any((t) => t.toLowerCase().contains(q));
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final region = ref.watch(deviceRegionProvider);
-    final q = _query.text.trim().toLowerCase();
-    final items = Currency.all.where((c) => _matches(c, q)).toList();
+    final q = foldForSearch(_query.text.trim());
+    final names = {for (final c in Currency.all) c: currencyName(context, c)};
+    final language = context.localeName.split(RegExp('[-_]')).first;
+    final sorted = [...Currency.all]
+      ..sort((a, b) => compareNames(names[a]!, names[b]!, language));
+
+    Widget tile(Currency c, String section) {
+      final selected = c == widget.selected;
+      return Semantics(
+        selected: selected,
+        child: ListTile(
+          key: ValueKey('$section-${c.code}'),
+          minTileHeight: 64,
+          leading: _SymbolBox(c.symbol),
+          title: Text(names[c]!),
+          subtitle: Text(
+            c.pickerLabel,
+            style: TextStyle(color: context.colors.textMuted),
+          ),
+          trailing: selected ? const Icon(Icons.check) : null,
+          onTap: () => Navigator.of(context).pop(c),
+        ),
+      );
+    }
+
+    final List<Widget> rows;
+    if (q.isEmpty) {
+      final suggested = Currency.suggested(
+        region: ref.watch(deviceRegionProvider),
+        languageCode: language,
+      );
+      rows = [
+        SectionTitle(l10n.currencySuggested),
+        for (final c in suggested) tile(c, 'suggested'),
+        SectionTitle(l10n.currencyAll),
+        for (final c in sorted) tile(c, 'currency'),
+      ];
+    } else {
+      rows = [
+        for (final c in sorted)
+          if (matchesCurrency(c, names[c]!, q)) tile(c, 'currency'),
+      ];
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.fieldCurrency)),
       body: Column(
@@ -74,7 +106,7 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
             ),
           ),
           Expanded(
-            child: items.isEmpty
+            child: rows.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(32),
                     child: Text(
@@ -83,33 +115,50 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
                       style: TextStyle(color: context.colors.textMuted),
                     ),
                   )
-                : ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: (context, i) {
-                      final c = items[i];
-                      final selected = c == widget.selected;
-                      return Semantics(
-                        selected: selected,
-                        child: ListTile(
-                          key: ValueKey('currency-${c.code}'),
-                          minTileHeight: 64,
-                          leading: _SymbolBox(c.symbolFor(region)),
-                          title: Text(currencyName(context, c)),
-                          subtitle: Text(
-                            c.code,
-                            style: TextStyle(color: context.colors.textMuted),
-                          ),
-                          trailing: selected ? const Icon(Icons.check) : null,
-                          onTap: () => Navigator.of(context).pop(c),
-                        ),
-                      );
-                    },
-                  ),
+                : ListView(children: rows),
           ),
         ],
       ),
     );
   }
+}
+
+/// Lowercase without Turkish dotted/dotless i differences or accents that
+/// matter for search ("İsrail", "israil" and "ISRAIL" all match).
+String foldForSearch(String text) => text
+    .replaceAll('İ', 'i')
+    .replaceAll('I', 'i')
+    .toLowerCase()
+    .replaceAll('\u0307', '')
+    .replaceAll('ı', 'i');
+
+/// Search by name, ISO code, symbol or distinctive symbol; [query] is
+/// already folded.
+bool matchesCurrency(Currency c, String name, String query) => [
+  c.code,
+  c.symbol,
+  c.distinctiveSymbol,
+  name,
+].any((t) => foldForSearch(t).contains(query));
+
+const _turkishOrder = 'abcçdefgğhıijklmnoöprsştuüvyz';
+
+/// Sorts names in the app language; Turkish letters keep their place.
+int compareNames(String a, String b, String language) {
+  if (language != 'tr') return a.toLowerCase().compareTo(b.toLowerCase());
+  String key(String s) => String.fromCharCodes(
+    s
+        .replaceAll('İ', 'i')
+        .replaceAll('I', 'ı')
+        .toLowerCase()
+        .replaceAll('\u0307', '')
+        .runes
+        .map((r) {
+          final i = _turkishOrder.indexOf(String.fromCharCode(r));
+          return i < 0 ? r + 0x100 : 0x41 + i;
+        }),
+  );
+  return key(a).compareTo(key(b));
 }
 
 class _SymbolBox extends StatelessWidget {
@@ -160,10 +209,7 @@ class CurrencyField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final region = ref.watch(deviceRegionProvider);
-    final label =
-        '${value.symbolFor(region)} · ${value.code} · '
-        '${currencyName(context, value)}';
+    final label = '${value.pickerLabel} · ${currencyName(context, value)}';
     return Semantics(
       button: true,
       label: l10n.fieldCurrency,
@@ -199,7 +245,6 @@ class CurrencyChangeDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final region = ref.watch(deviceRegionProvider);
     final sample = scaleMinor(
       123456,
       fromDecimals: 2,
@@ -211,7 +256,7 @@ class CurrencyChangeDialog extends ConsumerWidget {
       toDecimals: to.decimals,
     );
     String show(int minor, Currency c) =>
-        formatMoney(minor, c, localeName: context.localeName, region: region);
+        formatMoney(minor, c, localeName: context.localeName);
     return AlertDialog(
       title: Text(l10n.currencyChangeTitle),
       content: Column(

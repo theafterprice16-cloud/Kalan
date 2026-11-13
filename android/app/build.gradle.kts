@@ -6,10 +6,14 @@ plugins {
 
 android {
     namespace = "app.kalan.mobile"
-    compileSdk = flutter.compileSdkVersion
+    // flutter_local_notifications 23 and androidx.core 1.19 need SDK 37 to
+    // compile against; targetSdk below stays Flutter's default.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // Required by flutter_local_notifications for scheduled reminders.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -46,4 +50,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

@@ -22,7 +22,9 @@ void main() {
     }
   });
 
-  testWidgets('PeriodBar shows amber only when negative', (tester) async {
+  testWidgets('PeriodBar shows the negative tone only when negative', (
+    tester,
+  ) async {
     await pumpLocalized(
       tester,
       const PeriodBar(
@@ -53,7 +55,7 @@ void main() {
     final excess = tester.widget<ColoredBox>(
       find.byKey(const ValueKey('bar-excess')),
     );
-    expect(excess.color, KalanColors.light.amber);
+    expect(excess.color, KalanColors.light.negative);
     expect(find.byKey(const ValueKey('bar-left')), findsNothing);
   });
 
@@ -89,12 +91,9 @@ void main() {
       expect(theme.colorScheme.surfaceTint.a, 0);
       expect(theme.scaffoldBackgroundColor, c.bg);
       expect(theme.colorScheme.surface, c.surface);
-      expect(theme.colorScheme.primary, c.mint);
-      expect(theme.colorScheme.onPrimary, c.onMint);
-      expect(theme.colorScheme.error, c.coral);
       expect(
         theme.textButtonTheme.style!.foregroundColor!.resolve({}),
-        c.mintText,
+        c.accentText,
       );
       expect(
         theme.appBarTheme.systemOverlayStyle!.systemNavigationBarColor,

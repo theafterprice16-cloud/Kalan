@@ -4,7 +4,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 
 1. **İleri bakış** (Pro): önümüzdeki dönemler çubuk olarak, sıkışık dönem işareti, bütün planların bittiği tarih (PayDown).
 2. **Dene** (Pro): yeni bir planın etkisini kaydetmeden gösterme.
-3. **Yerel bildirimler**: ödemeden iki gün önce ve ödeme günü sabahı; gün ve saat ayarlanabilir (Frizzbee). Bildirimden "Ödendi" (BillWise). Ödenince kalan hatırlatmalar iptal olur. Israrlı hatırlatma, varsayılan kapalı (Due).
+3. ~~**Bildirim ve hatırlatmalar**~~ Tamamlandı (13 Kasım 2026): her ödeme için "önceden" (1, 2, 3, 5 ya da 7 gün; varsayılan 2) ve "gününde" bildirimi, saat ayarı (09:00), aynı gün ve türde birleştirme, en yakın 60, plan bazında Genel ayar / Kapalı / Farklı gün, "Bildirimde tutarı göster", ilk plandan sonra izin sayfası, dokununca ana ekran. Sonraya kalanlar (ayrı maddeler): bildirimden "Ödendi" işaretleme; **ısrarlı hatırlatma**, varsayılan kapalı (Due); otomatik çekim / elle ödeme ayrımı (`defaultLeadDaysFor` hazır); maaş günü özeti; hesap kesim uyarısı. Planlayıcı yeni türler için hazır.
 4. **İade bekliyor** işareti; gecikme ücreti kaydı (Frizzbee); kısmi ya da farklı tutarla ödeme (Bills Monitor).
 5. **Tutarları gizle** düğmesi (BillWise); Face ID ve parmak izi kilidi (Bobby); aylık takvim görünümü (Bills Monitor); durum filtresi ve arama (Tortol).
 6. **Dosyaya dışa aktarma ve dosyadan geri yükleme** (ücretsiz; kimlik dosyası B bölümü: "dışa aktarma her zaman açıktır").

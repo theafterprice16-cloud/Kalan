@@ -8,32 +8,38 @@ class RecurringRepository {
 
   final AppDatabase _db;
 
-  Stream<List<RecurringWithMarks>> watchAll() {
-    final query =
-        _db.select(_db.recurringPayments).join([
-          leftOuterJoin(
-            _db.recurringMarks,
-            _db.recurringMarks.recurringId.equalsExp(_db.recurringPayments.id),
-          ),
-        ])..orderBy([
-          OrderingTerm.asc(_db.recurringPayments.name.collate(Collate.noCase)),
-        ]);
-    return query.watch().map((rows) {
-      final items = <int, RecurringPaymentRow>{};
-      final marks = <int, Set<int>>{};
-      for (final row in rows) {
-        final item = row.readTable(_db.recurringPayments);
-        items[item.id] = item;
-        final mark = row.readTableOrNull(_db.recurringMarks);
-        final set = marks.putIfAbsent(item.id, () => <int>{});
-        if (mark != null) set.add(mark.occurrenceDay);
-      }
-      return [
-        for (final item in items.values)
-          RecurringWithMarks(item: item, paidDays: marks[item.id]!),
-      ];
-    });
+  JoinedSelectStatement<HasResultSet, dynamic> _allQuery() =>
+      _db.select(_db.recurringPayments).join([
+        leftOuterJoin(
+          _db.recurringMarks,
+          _db.recurringMarks.recurringId.equalsExp(_db.recurringPayments.id),
+        ),
+      ])..orderBy([
+        OrderingTerm.asc(_db.recurringPayments.name.collate(Collate.noCase)),
+      ]);
+
+  List<RecurringWithMarks> _group(List<TypedResult> rows) {
+    final items = <int, RecurringPaymentRow>{};
+    final marks = <int, Set<int>>{};
+    for (final row in rows) {
+      final item = row.readTable(_db.recurringPayments);
+      items[item.id] = item;
+      final mark = row.readTableOrNull(_db.recurringMarks);
+      final set = marks.putIfAbsent(item.id, () => <int>{});
+      if (mark != null) set.add(mark.occurrenceDay);
+    }
+    return [
+      for (final item in items.values)
+        RecurringWithMarks(item: item, paidDays: marks[item.id]!),
+    ];
   }
+
+  Stream<List<RecurringWithMarks>> watchAll() =>
+      _allQuery().watch().map(_group);
+
+  /// One-off read (reminders, background isolates).
+  Future<List<RecurringWithMarks>> all() async =>
+      _group(await _allQuery().get());
 
   Future<RecurringPaymentRow?> byId(int id) => (_db.select(
     _db.recurringPayments,

@@ -95,8 +95,8 @@ class LetterBadge extends StatelessWidget {
   }
 }
 
-/// One bar per period: spoken for in chartCommitted, left in mint. When
-/// spoken for exceeds income, the excess is amber.
+/// One bar per period: spoken for in chartCommitted, left in accent. When
+/// spoken for exceeds income, the excess is negative.
 class PeriodBar extends StatelessWidget {
   const PeriodBar({
     required this.spokenForMinor,
@@ -153,7 +153,7 @@ class PeriodBar extends StatelessWidget {
                     flex: left,
                     child: ColoredBox(
                       key: const ValueKey('bar-left'),
-                      color: colors.mint,
+                      color: colors.accent,
                     ),
                   ),
                 if (excess > 0)
@@ -161,7 +161,7 @@ class PeriodBar extends StatelessWidget {
                     flex: excess,
                     child: ColoredBox(
                       key: const ValueKey('bar-excess'),
-                      color: colors.amber,
+                      color: colors.negative,
                     ),
                   ),
                 if (spent + left + excess == 0)
@@ -268,7 +268,7 @@ class EmptyState extends StatelessWidget {
   }
 }
 
-/// Coral "Overdue" badge: icon and text, never color alone.
+/// "Overdue" badge in late: icon and text, never color alone.
 class OverdueBadge extends StatelessWidget {
   const OverdueBadge({required this.label, super.key});
 
@@ -276,17 +276,17 @@ class OverdueBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coral = context.colors.coral;
+    final late = context.colors.late;
     return Row(
       key: const ValueKey('overdue-badge'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.schedule, size: 16, color: coral),
+        Icon(Icons.schedule, size: 16, color: late),
         const SizedBox(width: 4),
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium
-              ?.copyWith(color: coral, fontWeight: FontWeight.w600),
+              ?.copyWith(color: late, fontWeight: FontWeight.w600),
         ),
       ],
     );

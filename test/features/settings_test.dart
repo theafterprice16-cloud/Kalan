@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
+import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -8,6 +9,7 @@ void main() {
   testWidgets('switching the language to English', (tester) async {
     final db = await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Dil'));
     await tester.tap(find.text('Dil'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('English'));
@@ -86,7 +88,7 @@ void main() {
     expect(find.text(r'Örnek: ₺1.234,56 → $1.234,56'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('currency-confirm')));
     await tester.pumpAndSettle();
-    expect(find.text(r'$ · USD · ABD doları'), findsOneWidget);
+    expect(find.text(r'US$ · USD · ABD doları'), findsOneWidget);
     await openTab(tester, 'Bu dönem');
     expect(find.text(r'$50.000'), findsOneWidget);
   });
@@ -136,6 +138,11 @@ void main() {
     await openTab(tester, 'Ayarlar');
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('currency-EUR')),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(find.byKey(const ValueKey('currency-EUR')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Vazgeç'));
@@ -178,6 +185,7 @@ void main() {
     expect(ground(), KalanColors.dark.bg);
 
     await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Tema'));
     expect(find.text('Sistem'), findsOneWidget);
     await tester.tap(find.text('Tema'));
     await tester.pumpAndSettle();
@@ -189,6 +197,32 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Koyu'));
     await tester.pumpAndSettle();
+    expect(ground(), KalanColors.dark.bg);
+  });
+
+  testWidgets('the theme choice survives a restart', (tester) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    final store = MemoryThemeModeStore();
+    final overrides = [themeModeStoreProvider.overrideWithValue(store)];
+    Color ground() =>
+        Theme.of(tester.element(find.byType(Scaffold).first))
+            .scaffoldBackgroundColor;
+
+    await pumpApp(tester, seed: seedSettings, overrides: overrides);
+    expect(store.read(), ThemeMode.system);
+    expect(ground(), KalanColors.light.bg);
+    await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Tema'));
+    await tester.tap(find.text('Tema'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Koyu'));
+    await tester.pumpAndSettle();
+    expect(store.read(), ThemeMode.dark);
+
+    // A fresh app on the same device storage starts dark.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await pumpApp(tester, seed: seedSettings, overrides: overrides);
     expect(ground(), KalanColors.dark.bg);
   });
 }

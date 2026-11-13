@@ -5,42 +5,92 @@ import 'package:material_ui/material_ui.dart';
 import '../helpers/app_harness.dart';
 
 void main() {
-  testWidgets('picker lists all 17 currencies with symbol, code and name', (
+  testWidgets('picker lists all 75 currencies with symbol, code and name', (
     tester,
   ) async {
     await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
-    for (final c in Currency.all) {
-      final row = find.byKey(ValueKey('currency-${c.code}'));
-      await tester.scrollUntilVisible(
-        row,
-        64,
-        scrollable: find.byType(Scrollable).last,
-      );
-      // CHF's symbol is its code, so it may appear twice.
-      expect(
-        find.descendant(of: row, matching: find.text(c.code)),
-        findsWidgets,
-      );
+    // Suggested first: a Turkish phone gets the lira.
+    expect(find.text('Önerilen'), findsOneWidget);
+    expect(find.byKey(const ValueKey('suggested-TRY')), findsOneWidget);
+    expect(find.text('Tüm para birimleri'), findsOneWidget);
+    // Walk the whole list once; every currency shows its picker label.
+    final seen = <String>{};
+    for (var i = 0; i < 80 && seen.length < Currency.all.length; i++) {
+      for (final c in Currency.all) {
+        final row = find.byKey(ValueKey('currency-${c.code}'));
+        if (row.evaluate().isEmpty) continue;
+        expect(
+          find.descendant(of: row, matching: find.text(c.pickerLabel)),
+          findsWidgets, // CHF's symbol is its label too
+        );
+        // The plain symbol, intact (also right-to-left ones like ر.س).
+        expect(
+          find.descendant(of: row, matching: find.text(c.symbol)),
+          findsWidgets,
+        );
+        seen.add(c.code);
+      }
+      await tester.drag(find.byType(Scrollable).last, const Offset(0, -300));
+      await tester.pumpAndSettle();
     }
-    // Searching by symbol and by localized name.
-    await tester.enterText(find.byKey(const ValueKey('currency-search')), 'Rp');
+    expect(seen, hasLength(75));
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, 30000));
     await tester.pumpAndSettle();
+
+    Future<void> search(String q) async {
+      await tester.enterText(find.byKey(const ValueKey('currency-search')), q);
+      await tester.pumpAndSettle();
+    }
+
+    // By symbol, by distinctive symbol, by code, by name.
+    await search('Rp');
     expect(find.text('Endonezya rupisi'), findsOneWidget);
-    await tester.enterText(
-      find.byKey(const ValueKey('currency-search')),
-      'sterlin',
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('GBP'), findsOneWidget);
-    await tester.enterText(
-      find.byKey(const ValueKey('currency-search')),
-      'xyz',
-    );
-    await tester.pumpAndSettle();
+    await search(r'COL$');
+    expect(find.text('Kolombiya pesosu'), findsOneWidget);
+    await search('kwd');
+    expect(find.text('Kuveyt dinarı'), findsOneWidget);
+    await search('sterlin');
+    expect(find.text('£ · GBP'), findsOneWidget);
+    await search('israil');
+    expect(find.text('İsrail şekeli'), findsOneWidget);
+    await search('د.ك');
+    expect(find.text('Kuveyt dinarı'), findsOneWidget);
+    await search('¥');
+    expect(find.text('Japon yeni'), findsOneWidget);
+    expect(find.text('Çin yuanı'), findsOneWidget);
+    await search('xyz');
     expect(find.text('Eşleşen para birimi yok.'), findsOneWidget);
+  });
+
+  Future<void> openPicker(WidgetTester tester, Locale locale) async {
+    await pumpApp(tester, locale: locale);
+    await tester.tap(find.byKey(const ValueKey('currency-field')));
+    await tester.pumpAndSettle();
+  }
+
+  List<String> suggested(WidgetTester tester) => tester
+      .widgetList<ListTile>(find.byType(ListTile))
+      .map((t) => (t.key! as ValueKey<String>).value)
+      .where((k) => k.startsWith('suggested-'))
+      .map((k) => k.substring('suggested-'.length))
+      .toList();
+
+  testWidgets('suggestions follow the region', (tester) async {
+    await openPicker(tester, const Locale('es', 'MX'));
+    expect(suggested(tester), ['MXN']);
+  });
+
+  testWidgets('Panama suggests the balboa and the dollar', (tester) async {
+    await openPicker(tester, const Locale('es', 'PA'));
+    expect(suggested(tester), ['PAB', 'USD']);
+  });
+
+  testWidgets('without a known region, the language decides', (tester) async {
+    await openPicker(tester, const Locale('tr'));
+    expect(suggested(tester), ['TRY']);
   });
 
   testWidgets('setup suggests by region; rupiah takes no decimals', (
@@ -59,16 +109,12 @@ void main() {
     );
     expect(field.keyboardType.decimal, isFalse);
 
+    // A decimal separator never gets in.
     await tester.enterText(find.byKey(income), '5,000,000.5');
-    await scrollTo(tester, find.text('Start'));
-    await tester.tap(find.text('Start'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Enter the amount in numbers, like 1250.'),
-      findsOneWidget,
-    );
+    expect(find.text('5,000,000.5'), findsNothing);
 
     await tester.enterText(find.byKey(income), '5,000,000');
+    await scrollTo(tester, find.text('Start'));
     await tester.tap(find.text('Start'));
     await tester.pumpAndSettle();
     final s = await db.select(db.appSettings).getSingle();
@@ -77,9 +123,45 @@ void main() {
     expect(find.text('Rp5,000,000'), findsOneWidget);
   });
 
+  testWidgets('a three-digit dinar is entered, stored and shown', (
+    tester,
+  ) async {
+    final db = await pumpApp(tester, locale: const Locale('en', 'KW'));
+    expect(find.text('KWD · Kuwaiti dinar'), findsOneWidget);
+    const income = ValueKey('net-income');
+    await scrollTo(tester, find.byKey(income));
+    await tester.enterText(find.byKey(income), '1,250.5005');
+    expect(find.text('1,250.5005'), findsNothing); // four digits stay out
+    await tester.enterText(find.byKey(income), '1,250.500');
+    expect(find.text('1,250.500'), findsOneWidget);
+    await scrollTo(tester, find.text('Start'));
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    final s = await db.select(db.appSettings).getSingle();
+    expect(s.currencyCode, 'KWD');
+    expect(s.netIncomeMinor, 1250500);
+    expect(find.textContaining('1,250.500'), findsWidgets);
+  });
+
+  testWidgets('a yen amount has no decimal key', (tester) async {
+    await pumpApp(tester, locale: const Locale('en', 'JP'));
+    expect(find.text('JP¥ · JPY · Japanese yen'), findsOneWidget);
+    const income = ValueKey('net-income');
+    await scrollTo(tester, find.byKey(income));
+    final field = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(income),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(field.keyboardType.decimal, isFalse);
+    await tester.enterText(find.byKey(income), '12500.5');
+    expect(find.text('12500.5'), findsNothing);
+  });
+
   testWidgets('a currency picked during setup is saved', (tester) async {
     final db = await pumpApp(tester, locale: const Locale('en', 'US'));
-    expect(find.text(r'$ · USD · US dollar'), findsOneWidget);
+    expect(find.text(r'US$ · USD · US dollar'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('currency-field')));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -89,7 +171,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('currency-MXN')));
     await tester.pumpAndSettle();
-    // Outside Mexico the peso shows its distinctive symbol.
+    // Fields name the currency with its distinctive symbol and code.
     expect(find.text(r'MX$ · MXN · Mexican peso'), findsOneWidget);
     await scrollTo(tester, find.text('Start'));
     await tester.tap(find.text('Start'));
@@ -126,6 +208,7 @@ void main() {
   ) async {
     final db = await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Dil'));
     await tester.tap(find.text('Dil'));
     await tester.pumpAndSettle();
     final options = find.descendant(

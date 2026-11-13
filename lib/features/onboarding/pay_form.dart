@@ -171,6 +171,7 @@ class OptionalAmountField extends ConsumerWidget {
       key: fieldKey,
       controller: controller,
       keyboardType: TextInputType.numberWithOptions(decimal: c.decimals > 0),
+      inputFormatters: amountInputFormatters(c, localeName: context.localeName),
       decoration: InputDecoration(
         labelText: label,
         helperText: helperText,
@@ -209,6 +210,7 @@ class AmountField extends ConsumerWidget {
       key: fieldKey,
       controller: controller,
       keyboardType: ref.amountKeyboard,
+      inputFormatters: ref.amountFormatters(context),
       decoration: InputDecoration(labelText: label),
       onChanged: onChanged,
       validator: (text) {

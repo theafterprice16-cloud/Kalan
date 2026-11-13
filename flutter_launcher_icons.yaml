@@ -5,7 +5,9 @@ flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
   remove_alpha_ios: true
-  # Adaptive icon: Gece & Nane ground (bg) behind the mark.
-  adaptive_icon_background: "#0B0F14"
+  # iOS 18 dark appearance: the mark on the dark ground (#11161D).
+  image_path_ios_dark_transparent: "assets/brand/icon_1024_dark.png"
+  # Adaptive icon: Mürekkep ve Safran light ground (bg) behind the mark.
+  adaptive_icon_background: "#F5F0E6"
   adaptive_icon_foreground: "assets/brand/icon_foreground.png"
   min_sdk_android: 21

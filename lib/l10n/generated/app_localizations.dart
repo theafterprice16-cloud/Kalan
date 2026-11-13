@@ -1061,7 +1061,7 @@ abstract class AppLocalizations {
   /// Currency name by ISO code. Add a branch when adding a currency.
   ///
   /// In en, this message translates to:
-  /// **'{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} other{{code}}}'**
+  /// **'{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} NZD{New Zealand dollar} ZAR{South African rand} ARS{Argentine peso} PEN{Peruvian sol} UYU{Uruguayan peso} PYG{Paraguayan guaraní} BOB{Bolivian boliviano} VES{Venezuelan bolívar} CRC{Costa Rican colón} GTQ{Guatemalan quetzal} HNL{Honduran lempira} NIO{Nicaraguan córdoba} DOP{Dominican peso} PAB{Panamanian balboa} AOA{Angolan kwanza} MZN{Mozambican metical} XOF{West African CFA franc} XAF{Central African CFA franc} BYN{Belarusian ruble} KGS{Kyrgyzstani som} UZS{Uzbekistani som} TWD{New Taiwan dollar} HKD{Hong Kong dollar} MOP{Macanese pataca} SAR{Saudi riyal} AED{UAE dirham} QAR{Qatari riyal} KWD{Kuwaiti dinar} BHD{Bahraini dinar} OMR{Omani rial} EGP{Egyptian pound} JOD{Jordanian dinar} IQD{Iraqi dinar} MAD{Moroccan dirham} DZD{Algerian dinar} TND{Tunisian dinar} LBP{Lebanese pound} LYD{Libyan dinar} INR{Indian rupee} PKR{Pakistani rupee} NGN{Nigerian naira} PHP{Philippine peso} KES{Kenyan shilling} CDF{Congolese franc} GNF{Guinean franc} HTG{Haitian gourde} MGA{Malagasy ariary} SRD{Surinamese dollar} TJS{Tajikistani somoni} SDG{Sudanese pound} YER{Yemeni rial} SYP{Syrian pound} MRU{Mauritanian ouguiya} ILS{Israeli new shekel} PLN{Polish złoty} SEK{Swedish krona} JPY{Japanese yen} VND{Vietnamese dong} other{{code}}}'**
   String currencyName(String code);
 
   /// No description provided for @currencySearch.
@@ -1075,6 +1075,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No currency matches.'**
   String get currencyNoMatch;
+
+  /// Currency picker section: currencies for the device region (or the app language).
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested'**
+  String get currencySuggested;
+
+  /// Currency picker section: every currency.
+  ///
+  /// In en, this message translates to:
+  /// **'All currencies'**
+  String get currencyAll;
 
   /// No description provided for @currencyChangeTitle.
   ///
@@ -1249,6 +1261,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeDark;
+
+  /// Android notification channel name (system settings).
+  ///
+  /// In en, this message translates to:
+  /// **'Payment reminders'**
+  String get reminderChannelName;
+
+  /// Android notification channel description (system settings).
+  ///
+  /// In en, this message translates to:
+  /// **'Short reminders before a payment is due.'**
+  String get reminderChannelDescription;
+
+  /// Title of the permission sheet shown once after the first plan is saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminderPromptTitle;
+
+  /// Bottom sheet shown once after the first plan is saved, before the system permission dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll let you know before a payment is due. Reminders are set up only on this phone.'**
+  String get reminderPromptBody;
+
+  /// Permission sheet button; opens the system notification permission dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on reminders'**
+  String get reminderPromptAccept;
+
+  /// Permission sheet button; closes the sheet, the app never asks again.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get reminderPromptLater;
+
+  /// Settings section title.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get settingsReminders;
+
+  /// Settings > Reminders: the master switch. Off cancels every pending reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get remindersEnabled;
+
+  /// Settings > Reminders: the time reminders arrive (local time).
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get reminderTime;
+
+  /// Settings > Reminders: calm status line when the system blocks Kalan's notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission is off'**
+  String get remindersPermissionOff;
+
+  /// Button next to the permission status line; opens the phone's notification settings for Kalan.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get openPhoneSettings;
+
+  /// Settings > Reminders: opens the help page.
+  ///
+  /// In en, this message translates to:
+  /// **'Not getting reminders?'**
+  String get remindersHelpLink;
+
+  /// Help page intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone can hold reminders back. These are the usual reasons.'**
+  String get remindersHelpIntro;
+
+  /// Help page heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission'**
+  String get remindersHelpPermissionTitle;
+
+  /// Help page text.
+  ///
+  /// In en, this message translates to:
+  /// **'Open phone settings, find Kalan and turn notifications on.'**
+  String get remindersHelpPermissionBody;
+
+  /// Help page heading (iPhone only).
+  ///
+  /// In en, this message translates to:
+  /// **'iPhone: Focus'**
+  String get remindersHelpIosTitle;
+
+  /// Help page text (iPhone only).
+  ///
+  /// In en, this message translates to:
+  /// **'A Focus such as Do Not Disturb or Sleep can silence reminders. In Settings > Focus, choose the Focus and add Kalan under Allowed Apps.'**
+  String get remindersHelpIosBody;
+
+  /// Help page heading (Android only).
+  ///
+  /// In en, this message translates to:
+  /// **'Android: battery saving'**
+  String get remindersHelpAndroidTitle;
+
+  /// Help page text (Android only).
+  ///
+  /// In en, this message translates to:
+  /// **'Battery saving can delay reminders. In Settings > Apps > Kalan > Battery, choose Unrestricted. Reminders may still arrive a few minutes late.'**
+  String get remindersHelpAndroidBody;
+
+  /// Settings > Reminders on the web build, where notifications are off.
+  ///
+  /// In en, this message translates to:
+  /// **'This works on your phone.'**
+  String get remindersWebOnly;
+
+  /// Debug builds only: schedules a sample notification.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification (in 10 seconds)'**
+  String get debugTestNotification;
+
+  /// Debug builds only: snackbar after the test button.
+  ///
+  /// In en, this message translates to:
+  /// **'A test notification arrives in 10 seconds.'**
+  String get testNotificationScheduled;
+
+  /// Debug builds only: body of the sample notification.
+  ///
+  /// In en, this message translates to:
+  /// **'Test: reminders work on this phone.'**
+  String get testNotificationText;
+
+  /// Subtitle under the master reminders switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Before a payment is due and on the day'**
+  String get remindersEnabledHint;
+
+  /// Notification body some days before payments due on one date. Amounts shown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment on {date}: {name}, {total}} other{{count} payments on {date}, {total} in total}}'**
+  String reminderAhead(int count, String date, String name, String total);
+
+  /// Same as reminderAhead with amounts hidden for lock-screen privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment on {date}: {name}} other{{count} payments on {date}}}'**
+  String reminderAheadHidden(int count, String date, String name);
+
+  /// Notification body when one early reminder gathers payments due on different dates (plans with different 'days before'). date is the earliest.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment from {date}, {total} in total} other{{count} payments from {date}, {total} in total}}'**
+  String reminderAheadMixed(int count, String date, String total);
+
+  /// Same as reminderAheadMixed with amounts hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment from {date}} other{{count} payments from {date}}}'**
+  String reminderAheadMixedHidden(int count, String date);
+
+  /// Notification body on the due day. Amounts shown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment today: {name}, {total}} other{{count} payments today, {total} in total}}'**
+  String reminderToday(int count, String name, String total);
+
+  /// Same as reminderToday with amounts hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment today: {name}} other{{count} payments today}}'**
+  String reminderTodayHidden(int count, String name);
+
+  /// Expanded notification (Android big text, iOS long body): the body, then the plan names on a new line.
+  ///
+  /// In en, this message translates to:
+  /// **'{body}\n{names}'**
+  String reminderExpanded(String body, String names);
+
+  /// Joins plan names in an expanded notification (a comma and a space).
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get reminderNameSeparator;
+
+  /// Settings > Reminders: row that opens the 'days before' choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Days before'**
+  String get reminderLeadDays;
+
+  /// A 'days before' value (1, 2, 3, 5 or 7) in lists and subtitles.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day before} other{{days} days before}}'**
+  String reminderLeadDaysValue(int days);
+
+  /// Screen reader label of the 'days before' row.
+  ///
+  /// In en, this message translates to:
+  /// **'Days before, now {days, plural, =1{1 day} other{{days} days}}'**
+  String reminderLeadDaysSemantics(int days);
+
+  /// Settings > Reminders switch; off hides amounts on the lock screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Show amount in notifications'**
+  String get reminderShowAmount;
+
+  /// Plan and recurring payment detail: row with this item's reminder choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder'**
+  String get planReminder;
+
+  /// Reminder choice that follows Settings; shows the current global days before.
+  ///
+  /// In en, this message translates to:
+  /// **'General setting ({days, plural, =1{1 day before} other{{days} days before}})'**
+  String planReminderGeneral(int days);
+
+  /// Reminder choice: no reminders for this plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get planReminderOff;
+
+  /// Reminder choice: this plan uses its own days before (picked next).
+  ///
+  /// In en, this message translates to:
+  /// **'Different day'**
+  String get planReminderCustom;
 }
 
 class _AppLocalizationsDelegate

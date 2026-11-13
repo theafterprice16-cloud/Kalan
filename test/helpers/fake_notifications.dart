@@ -1,0 +1,53 @@
+import 'package:kalan/core/reminders/reminder_models.dart';
+import 'package:kalan/features/reminders/notification_gateway.dart';
+
+/// Records what would be handed to the operating system.
+class FakeNotificationGateway implements NotificationGateway {
+  FakeNotificationGateway({
+    this.granted = true,
+    this.supported = true,
+    this.grantOnRequest = true,
+  });
+
+  @override
+  final bool supported;
+
+  /// Whether the system allows notifications right now.
+  bool granted;
+
+  /// What the system dialog answers.
+  bool grantOnRequest;
+  int permissionRequests = 0;
+  int replaceCalls = 0;
+  int openSettingsCalls = 0;
+  String? testBody;
+  List<PlannedReminder> pending = const [];
+
+  List<String> get bodies => [for (final n in pending) n.body];
+
+  @override
+  Future<bool> requestPermission() async {
+    permissionRequests++;
+    granted = grantOnRequest;
+    return granted;
+  }
+
+  @override
+  Future<bool> permissionGranted() async => granted;
+
+  @override
+  Future<void> replaceAll(List<PlannedReminder> reminders) async {
+    replaceCalls++;
+    pending = List.of(reminders);
+  }
+
+  @override
+  Future<void> showTest({
+    required String title,
+    required String body,
+    required Duration delay,
+  }) async => testBody = body;
+
+  @override
+  Future<void> openSystemSettings() async => openSettingsCalls++;
+}

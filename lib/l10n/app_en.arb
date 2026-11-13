@@ -323,7 +323,7 @@
   "languageEnglish": "English",
   "settingsCurrency": "Currency",
   "settingsCurrencyNote": "Amounts aren't converted; only the currency label changes.",
-  "currencyName": "{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} other{{code}}}",
+  "currencyName": "{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} NZD{New Zealand dollar} ZAR{South African rand} ARS{Argentine peso} PEN{Peruvian sol} UYU{Uruguayan peso} PYG{Paraguayan guaraní} BOB{Bolivian boliviano} VES{Venezuelan bolívar} CRC{Costa Rican colón} GTQ{Guatemalan quetzal} HNL{Honduran lempira} NIO{Nicaraguan córdoba} DOP{Dominican peso} PAB{Panamanian balboa} AOA{Angolan kwanza} MZN{Mozambican metical} XOF{West African CFA franc} XAF{Central African CFA franc} BYN{Belarusian ruble} KGS{Kyrgyzstani som} UZS{Uzbekistani som} TWD{New Taiwan dollar} HKD{Hong Kong dollar} MOP{Macanese pataca} SAR{Saudi riyal} AED{UAE dirham} QAR{Qatari riyal} KWD{Kuwaiti dinar} BHD{Bahraini dinar} OMR{Omani rial} EGP{Egyptian pound} JOD{Jordanian dinar} IQD{Iraqi dinar} MAD{Moroccan dirham} DZD{Algerian dinar} TND{Tunisian dinar} LBP{Lebanese pound} LYD{Libyan dinar} INR{Indian rupee} PKR{Pakistani rupee} NGN{Nigerian naira} PHP{Philippine peso} KES{Kenyan shilling} CDF{Congolese franc} GNF{Guinean franc} HTG{Haitian gourde} MGA{Malagasy ariary} SRD{Surinamese dollar} TJS{Tajikistani somoni} SDG{Sudanese pound} YER{Yemeni rial} SYP{Syrian pound} MRU{Mauritanian ouguiya} ILS{Israeli new shekel} PLN{Polish złoty} SEK{Swedish krona} JPY{Japanese yen} VND{Vietnamese dong} other{{code}}}",
   "@currencyName": {
     "description": "Currency name by ISO code. Add a branch when adding a currency.",
     "placeholders": {
@@ -334,6 +334,14 @@
   },
   "currencySearch": "Search currency",
   "currencyNoMatch": "No currency matches.",
+  "currencySuggested": "Suggested",
+  "@currencySuggested": {
+    "description": "Currency picker section: currencies for the device region (or the app language)."
+  },
+  "currencyAll": "All currencies",
+  "@currencyAll": {
+    "description": "Currency picker section: every currency."
+  },
   "currencyChangeTitle": "Change currency",
   "currencyChangePreview": "Example: {before} → {after}",
   "@currencyChangePreview": {
@@ -400,5 +408,286 @@
   "settingsTheme": "Theme",
   "themeSystem": "System",
   "themeLight": "Light",
-  "themeDark": "Dark"
+  "themeDark": "Dark",
+  "reminderChannelName": "Payment reminders",
+  "@reminderChannelName": {
+    "description": "Android notification channel name (system settings)."
+  },
+  "reminderChannelDescription": "Short reminders before a payment is due.",
+  "@reminderChannelDescription": {
+    "description": "Android notification channel description (system settings)."
+  },
+  "reminderPromptTitle": "Reminders",
+  "@reminderPromptTitle": {
+    "description": "Title of the permission sheet shown once after the first plan is saved."
+  },
+  "reminderPromptBody": "We'll let you know before a payment is due. Reminders are set up only on this phone.",
+  "@reminderPromptBody": {
+    "description": "Bottom sheet shown once after the first plan is saved, before the system permission dialog."
+  },
+  "reminderPromptAccept": "Turn on reminders",
+  "@reminderPromptAccept": {
+    "description": "Permission sheet button; opens the system notification permission dialog."
+  },
+  "reminderPromptLater": "Not now",
+  "@reminderPromptLater": {
+    "description": "Permission sheet button; closes the sheet, the app never asks again."
+  },
+  "settingsReminders": "Reminders",
+  "@settingsReminders": {
+    "description": "Settings section title."
+  },
+  "remindersEnabled": "Reminders",
+  "@remindersEnabled": {
+    "description": "Settings > Reminders: the master switch. Off cancels every pending reminder."
+  },
+  "reminderTime": "Time",
+  "@reminderTime": {
+    "description": "Settings > Reminders: the time reminders arrive (local time)."
+  },
+  "remindersPermissionOff": "Notification permission is off",
+  "@remindersPermissionOff": {
+    "description": "Settings > Reminders: calm status line when the system blocks Kalan's notifications."
+  },
+  "openPhoneSettings": "Open settings",
+  "@openPhoneSettings": {
+    "description": "Button next to the permission status line; opens the phone's notification settings for Kalan."
+  },
+  "remindersHelpLink": "Not getting reminders?",
+  "@remindersHelpLink": {
+    "description": "Settings > Reminders: opens the help page."
+  },
+  "remindersHelpIntro": "Your phone can hold reminders back. These are the usual reasons.",
+  "@remindersHelpIntro": {
+    "description": "Help page intro."
+  },
+  "remindersHelpPermissionTitle": "Notification permission",
+  "@remindersHelpPermissionTitle": {
+    "description": "Help page heading."
+  },
+  "remindersHelpPermissionBody": "Open phone settings, find Kalan and turn notifications on.",
+  "@remindersHelpPermissionBody": {
+    "description": "Help page text."
+  },
+  "remindersHelpIosTitle": "iPhone: Focus",
+  "@remindersHelpIosTitle": {
+    "description": "Help page heading (iPhone only)."
+  },
+  "remindersHelpIosBody": "A Focus such as Do Not Disturb or Sleep can silence reminders. In Settings > Focus, choose the Focus and add Kalan under Allowed Apps.",
+  "@remindersHelpIosBody": {
+    "description": "Help page text (iPhone only)."
+  },
+  "remindersHelpAndroidTitle": "Android: battery saving",
+  "@remindersHelpAndroidTitle": {
+    "description": "Help page heading (Android only)."
+  },
+  "remindersHelpAndroidBody": "Battery saving can delay reminders. In Settings > Apps > Kalan > Battery, choose Unrestricted. Reminders may still arrive a few minutes late.",
+  "@remindersHelpAndroidBody": {
+    "description": "Help page text (Android only)."
+  },
+  "remindersWebOnly": "This works on your phone.",
+  "@remindersWebOnly": {
+    "description": "Settings > Reminders on the web build, where notifications are off."
+  },
+  "debugTestNotification": "Test notification (in 10 seconds)",
+  "@debugTestNotification": {
+    "description": "Debug builds only: schedules a sample notification."
+  },
+  "testNotificationScheduled": "A test notification arrives in 10 seconds.",
+  "@testNotificationScheduled": {
+    "description": "Debug builds only: snackbar after the test button."
+  },
+  "testNotificationText": "Test: reminders work on this phone.",
+  "@testNotificationText": {
+    "description": "Debug builds only: body of the sample notification."
+  },
+  "remindersEnabledHint": "Before a payment is due and on the day",
+  "@remindersEnabledHint": {
+    "description": "Subtitle under the master reminders switch."
+  },
+  "reminderAhead": "{count, plural, =1{1 payment on {date}: {name}, {total}} other{{count} payments on {date}, {total} in total}}",
+  "@reminderAhead": {
+    "description": "Notification body some days before payments due on one date. Amounts shown.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "date": {
+        "type": "String",
+        "example": "Friday, November 14",
+        "description": "Due date: day, month name and weekday"
+      },
+      "name": {
+        "type": "String",
+        "example": "Klarna",
+        "description": "Plan name (used when count is 1)"
+      },
+      "total": {
+        "type": "String",
+        "example": "₺850",
+        "description": "Formatted amount or total"
+      }
+    }
+  },
+  "reminderAheadHidden": "{count, plural, =1{1 payment on {date}: {name}} other{{count} payments on {date}}}",
+  "@reminderAheadHidden": {
+    "description": "Same as reminderAhead with amounts hidden for lock-screen privacy.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "date": {
+        "type": "String",
+        "example": "Friday, November 14",
+        "description": "Due date"
+      },
+      "name": {
+        "type": "String",
+        "example": "Klarna",
+        "description": "Plan name (used when count is 1)"
+      }
+    }
+  },
+  "reminderAheadMixed": "{count, plural, =1{1 payment from {date}, {total} in total} other{{count} payments from {date}, {total} in total}}",
+  "@reminderAheadMixed": {
+    "description": "Notification body when one early reminder gathers payments due on different dates (plans with different 'days before'). date is the earliest.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "date": {
+        "type": "String",
+        "example": "Thursday, November 13",
+        "description": "Earliest due date"
+      },
+      "total": {
+        "type": "String",
+        "example": "₺2,450",
+        "description": "Formatted total"
+      }
+    }
+  },
+  "reminderAheadMixedHidden": "{count, plural, =1{1 payment from {date}} other{{count} payments from {date}}}",
+  "@reminderAheadMixedHidden": {
+    "description": "Same as reminderAheadMixed with amounts hidden.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "date": {
+        "type": "String",
+        "example": "Thursday, November 13",
+        "description": "Earliest due date"
+      }
+    }
+  },
+  "reminderToday": "{count, plural, =1{1 payment today: {name}, {total}} other{{count} payments today, {total} in total}}",
+  "@reminderToday": {
+    "description": "Notification body on the due day. Amounts shown.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "name": {
+        "type": "String",
+        "example": "Klarna",
+        "description": "Plan name (used when count is 1)"
+      },
+      "total": {
+        "type": "String",
+        "example": "₺850",
+        "description": "Formatted amount or total"
+      }
+    }
+  },
+  "reminderTodayHidden": "{count, plural, =1{1 payment today: {name}} other{{count} payments today}}",
+  "@reminderTodayHidden": {
+    "description": "Same as reminderToday with amounts hidden.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "name": {
+        "type": "String",
+        "example": "Klarna",
+        "description": "Plan name (used when count is 1)"
+      }
+    }
+  },
+  "reminderExpanded": "{body}\n{names}",
+  "@reminderExpanded": {
+    "description": "Expanded notification (Android big text, iOS long body): the body, then the plan names on a new line.",
+    "placeholders": {
+      "body": {
+        "type": "String",
+        "example": "3 payments today, ₺2,450 in total",
+        "description": "The short body"
+      },
+      "names": {
+        "type": "String",
+        "example": "Klarna, Afterpay, Rent",
+        "description": "Plan names joined with reminderNameSeparator"
+      }
+    }
+  },
+  "reminderNameSeparator": ", ",
+  "@reminderNameSeparator": {
+    "description": "Joins plan names in an expanded notification (a comma and a space)."
+  },
+  "reminderLeadDays": "Days before",
+  "@reminderLeadDays": {
+    "description": "Settings > Reminders: row that opens the 'days before' choice."
+  },
+  "reminderLeadDaysValue": "{days, plural, =1{1 day before} other{{days} days before}}",
+  "@reminderLeadDaysValue": {
+    "description": "A 'days before' value (1, 2, 3, 5 or 7) in lists and subtitles.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "description": "Days before the due date"
+      }
+    }
+  },
+  "reminderLeadDaysSemantics": "Days before, now {days, plural, =1{1 day} other{{days} days}}",
+  "@reminderLeadDaysSemantics": {
+    "description": "Screen reader label of the 'days before' row.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "description": "Current days before"
+      }
+    }
+  },
+  "reminderShowAmount": "Show amount in notifications",
+  "@reminderShowAmount": {
+    "description": "Settings > Reminders switch; off hides amounts on the lock screen."
+  },
+  "planReminder": "Reminder",
+  "@planReminder": {
+    "description": "Plan and recurring payment detail: row with this item's reminder choice."
+  },
+  "planReminderGeneral": "General setting ({days, plural, =1{1 day before} other{{days} days before}})",
+  "@planReminderGeneral": {
+    "description": "Reminder choice that follows Settings; shows the current global days before.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "description": "Global days before"
+      }
+    }
+  },
+  "planReminderOff": "Off",
+  "@planReminderOff": {
+    "description": "Reminder choice: no reminders for this plan."
+  },
+  "planReminderCustom": "Different day",
+  "@planReminderCustom": {
+    "description": "Reminder choice: this plan uses its own days before (picked next)."
+  }
 }
