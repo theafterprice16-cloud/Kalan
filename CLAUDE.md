@@ -20,6 +20,14 @@ Ek: Arayüz metni kodda sabit yazılmaz (`lib/l10n/*.arb`, Türkçe ve İngilizc
 
 Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedikçe yeni dil ekleme, mevcut çevirileri değiştirme.
 
+## Hatırlatmalar
+
+Ödemeyi etkileyen her değişiklikten sonra bildirimler yeniden kurulur; yeni bildirim kuralı önce saf Dart planlayıcıya testle eklenir.
+
+- Planlayıcı: `lib/core/reminders` (saf Dart). Platform: `lib/features/reminders` (`NotificationGateway` arkasında). Yeniden kurma `ReminderSync` ile veritabanı akışlarından tek merkezde.
+- Yalnızca yerel bildirim; Android'de kesin olmayan zamanlama (exact alarm izni yok).
+- Web'de kapalı (`NotificationGateway.supported`).
+
 ## Renk
 
 Renk paleti Gece & Nane'dir (docs/DESIGN_TOKENS.md). Yalnızca KalanColors tokenları kullanılır. Yeni renk, ton ya da degrade eklemek için önce kullanıcıdan onay alınır. Her yeni ekran açık ve koyu temada golden testle doğrulanır.
@@ -56,6 +64,7 @@ lib/
   core/
     date/       LocalDate (saat dilimsiz gün)
     money/      Currency, para biçimlendirme ve ayrıştırma
+    reminders/  Saf Dart hatırlatma planlayıcısı
     engine/     Saf Dart hesap motoru (Flutter import'u yasak, testle denetlenir)
     design/     AmountText, LetterBadge, PeriodBar, form alanları
     theme/      KalanColors (Gece & Nane), tema, tema seçimi
@@ -64,7 +73,7 @@ lib/
     db/         Drift tabloları ve AppDatabase
     repositories/
   entitlement/  Ücretsiz/Pro yetki soyutlaması
-  features/     onboarding, home, plans, sources, recurring, settings, roadmap
+  features/     onboarding, home, plans, sources, recurring, settings, roadmap, reminders, currency
   l10n/         app_en.arb, app_tr.arb, generated/
 assets/roadmap.json   Yol Haritası içeriği (docs/ROADMAP_CONTENT.md)
 assets/brand/         İkon kaynakları (SVG + PNG)

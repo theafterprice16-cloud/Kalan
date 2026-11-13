@@ -71,3 +71,27 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | flutter_launcher_icons | Yalnızca geliştirme bağımlılığı; uygulamaya girmez, ağ kullanmaz. Ürettiği hatalı Xcode ayarı geri alınır ve testle korunur. |
 | Karartma | `bg` %60 opaklık; yeni ton sayılmaz. |
 | Golden testleri | Flutter SDK'daki Roboto ile çizilir; CI aynı SDK sürümünü kullanır. Test yazı tipinde "→" karakteri olmadığı için önizleme penceresinde kutu görünür; cihazda sistem yazı tipi çizer. |
+
+## Hatırlatmalar (13 Kasım 2026)
+
+| Konu | Karar |
+|---|---|
+| Kapsam | Yalnızca yerel bildirim (`flutter_local_notifications`). Sunucu, push servisi, Firebase, hesap ve internet yok. Ücretsiz sürümde tam çalışır, Pro'ya bağlı değildir. |
+| Zamanlama | 7 gün önce, 3 gün önce, 1 gün önce ve ödeme günü ayrı ayrı açılıp kapanır; varsayılan 3 gün önce ve ödeme günü. Saat varsayılan 09:00, cihazın yerel saatine göre. |
+| Tarih kaynağı | Bildirimler, hesap motorunun ürettiği ve veritabanında saklanan gerçek ödeme tarihinden hesaplanır (ekstre, son ödeme günü, hafta sonu kaydırması uygulanmış). Bildirim kodu tarih hesaplamaz. |
+| Saf Dart planlayıcı | `lib/core/reminders`: ödemeler + ayarlar + "şimdi" → bildirim listesi. Aynı güne ve aynı türe düşen ödemeler tek özet olur; ödenmiş, arşivlenmiş ve hatırlatması kapalı planlar ile geçmiş zamanlar atlanır. Yeni bildirim kuralı önce burada testle eklenir. |
+| Kimlikler | `vade günü (epoch) × 4 + tür`. Kararlı olduğu için aynı bildirim iki kez kurulmaz; yeniden kurma eskisinin yerine geçer. Israrlı hatırlatma ileride ayrı bir tür olarak eklenebilir. |
+| Kayan pencere | iOS en çok 64 bekleyen bildirim tutar; en yakın 60 kurulur. Her yeniden kurmada bekleyenlerin hepsi silinir ve baştan kurulur (gösterilmiş bildirimler bildirim merkezinde kalır). |
+| Yeniden kurma anları | Uygulama açılınca ve öne gelince (saat dilimi de yenilenir); plan, ödeme, sabit ödeme, "ödendi" ve ayar değişikliklerinde (veritabanı akışları tek merkezden dinlenir); Android'de yeniden başlatma, saat ve saat dilimi değişiminde (`ReminderRescheduleReceiver`, arka planda Dart). |
+| Android zamanlama | Kesin olmayan (`inexactAllowWhileIdle`) zamanlama. `SCHEDULE_EXACT_ALARM` ve `USE_EXACT_ALARM` kullanılmaz: mağaza bu izinleri alarm/takvim uygulamalarına ayırıyor. Hatırlatma birkaç dakika geç gelebilir; bu kabul edildi. |
+| Android kanalı | "Ödeme hatırlatmaları", varsayılan önem. Tek renkli `ic_stat_kalan` ikonu, vurgu rengi mint (#3DDC97, KalanColors). |
+| iOS | İzin yalnızca alert, sound ve badge için istenir. Uygulama ön plandayken de bildirim görünür. |
+| İzin akışı | İlk plan ya da ilk sabit ödeme kaydedilince önce Kalan'ın açıklama penceresi, sonra sistem izni. "Şimdi değil" kesindir: hatırlatmalar kapalı başlar, bir daha kendiliğinden sorulmaz, Ayarlar'dan açılır (açılınca sistem izni istenir). |
+| "Ödendi" düğmesi | Yalnızca ödeme günü bildiriminde ve o gün tek ödeme varsa. Uygulama kapalıyken arka plan izolatında çalışır: veritabanını açar (`shareAcrossIsolates`), ödemeyi işaretler, bildirimi kaldırır, hatırlatmaları yeniden kurar. |
+| Tutar gizliliği | "Bildirimlerde tutarı gizle" tek gizlilik servisinde (`PrivacySettings`). İleride gelecek "tutarları gizle" düğmesi de buraya eklenecek. |
+| Plan bazında | Plan ve sabit ödeme ayrıntısında "Bu plan için hatırlatma" anahtarı (şema v2 sütunu, varsayılan açık). |
+| Kayıt yeri | Hatırlatma ayarları ve plan anahtarları Drift şema v2'de (göç testiyle). Arka plan izolatı aynı veritabanını okur. |
+| Derin bağlantı | Bildirime dokununca `/day/<tarih>` ("Günün ödemeleri") açılır; uygulama kapalıysa açılış rotası olarak. |
+| Web | Bildirim kodu web'de çalışmaz; Ayarlar'da "Bu özellik telefonda çalışır" yazar. |
+| Paketler | `flutter_local_notifications` (yerel bildirim), `timezone` (yaz saati doğru yerel saat), `flutter_timezone` (cihazın saat dilimi adı). Üçü de ağ kullanmaz. `timezone` paketi yalnızca web'de saat dilimi verisini indirmek için kullanılan bir dosyada `http`'ye bağlı; Kalan gömülü veriyi kullanır ve o dosyayı içe aktarmaz. Ağ bekçisi testi bu istisnayı yalnızca bu koşullarla kabul eder. |
+
