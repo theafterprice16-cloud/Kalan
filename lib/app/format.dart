@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
@@ -31,12 +32,8 @@ extension MoneyRefX on WidgetRef {
   Currency get currency => watch(currencyProvider);
 
   /// Formats minor units in the user's currency and the app's language.
-  String money(BuildContext context, int minor) => formatMoney(
-    minor,
-    currency,
-    localeName: context.localeName,
-    region: watch(deviceRegionProvider),
-  );
+  String money(BuildContext context, int minor) =>
+      formatMoney(minor, currency, localeName: context.localeName);
 
   /// Parses typed text; null when invalid.
   int? parseMoney(BuildContext context, String text) =>
@@ -54,4 +51,22 @@ extension MoneyRefX on WidgetRef {
   /// No decimal key for currencies without minor digits.
   TextInputType get amountKeyboard =>
       TextInputType.numberWithOptions(decimal: currency.decimals > 0);
+
+  /// Keeps amount fields to what the current currency allows.
+  List<TextInputFormatter> amountFormatters(BuildContext context) =>
+      amountInputFormatters(currency, localeName: context.localeName);
 }
+
+/// No separator for zero-digit currencies (JPY), at most three minor
+/// digits for KWD and two for TRY; see [acceptsAmountInput].
+List<TextInputFormatter> amountInputFormatters(
+  Currency currency, {
+  required String localeName,
+}) => [
+  TextInputFormatter.withFunction(
+    (oldValue, newValue) =>
+        acceptsAmountInput(newValue.text, currency, localeName: localeName)
+        ? newValue
+        : oldValue,
+  ),
+];

@@ -49,8 +49,6 @@ Future<void> runReminderTask(
         location: () => tz.local,
         now: DateTime.now,
         localeFor: (s) => appLocale(s.localeCode),
-        region: () =>
-            WidgetsBinding.instance.platformDispatcher.locale.countryCode,
       ),
     );
   } finally {

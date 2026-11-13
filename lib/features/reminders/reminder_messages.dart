@@ -14,13 +14,12 @@ String reminderText(
   required AppLocalizations l10n,
   required Currency currency,
   required bool hideAmounts,
-  String? region,
 }) {
   final when = l10n.reminderWhen(reminder.offset.name);
   final count = reminder.payments.length;
   if (hideAmounts) return l10n.reminderCountOnly(when, count);
   String money(int minor) =>
-      formatMoney(minor, currency, localeName: l10n.localeName, region: region);
+      formatMoney(minor, currency, localeName: l10n.localeName);
   if (count > 1) {
     return l10n.reminderSummary(when, count, money(reminder.totalMinor));
   }

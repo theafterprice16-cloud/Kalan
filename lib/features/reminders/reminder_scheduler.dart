@@ -29,7 +29,6 @@ class ReminderScheduler {
     required this.location,
     required this.now,
     required this.localeFor,
-    this.region,
   });
 
   final AppDatabase db;
@@ -41,7 +40,6 @@ class ReminderScheduler {
 
   /// App language for notification text (settings override or device).
   final Locale Function(SettingsRow settings) localeFor;
-  final String? Function()? region;
 
   /// The reminders that would be scheduled right now.
   Future<List<ScheduledNotification>> build() async {
@@ -104,7 +102,6 @@ class ReminderScheduler {
             l10n: l10n,
             currency: currency,
             hideAmounts: reminderSettings.hideAmounts,
-            region: region?.call(),
           ),
           fireAt: localWallClock(r.fireDate, r.minuteOfDay, zone),
           payload: NotificationPayload(

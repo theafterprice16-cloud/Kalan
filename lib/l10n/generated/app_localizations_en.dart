@@ -584,6 +584,64 @@ class AppLocalizationsEn extends AppLocalizations {
       'CAD': 'Canadian dollar',
       'AUD': 'Australian dollar',
       'CHF': 'Swiss franc',
+      'NZD': 'New Zealand dollar',
+      'ZAR': 'South African rand',
+      'ARS': 'Argentine peso',
+      'PEN': 'Peruvian sol',
+      'UYU': 'Uruguayan peso',
+      'PYG': 'Paraguayan guaraní',
+      'BOB': 'Bolivian boliviano',
+      'VES': 'Venezuelan bolívar',
+      'CRC': 'Costa Rican colón',
+      'GTQ': 'Guatemalan quetzal',
+      'HNL': 'Honduran lempira',
+      'NIO': 'Nicaraguan córdoba',
+      'DOP': 'Dominican peso',
+      'PAB': 'Panamanian balboa',
+      'AOA': 'Angolan kwanza',
+      'MZN': 'Mozambican metical',
+      'XOF': 'West African CFA franc',
+      'XAF': 'Central African CFA franc',
+      'BYN': 'Belarusian ruble',
+      'KGS': 'Kyrgyzstani som',
+      'UZS': 'Uzbekistani som',
+      'TWD': 'New Taiwan dollar',
+      'HKD': 'Hong Kong dollar',
+      'MOP': 'Macanese pataca',
+      'SAR': 'Saudi riyal',
+      'AED': 'UAE dirham',
+      'QAR': 'Qatari riyal',
+      'KWD': 'Kuwaiti dinar',
+      'BHD': 'Bahraini dinar',
+      'OMR': 'Omani rial',
+      'EGP': 'Egyptian pound',
+      'JOD': 'Jordanian dinar',
+      'IQD': 'Iraqi dinar',
+      'MAD': 'Moroccan dirham',
+      'DZD': 'Algerian dinar',
+      'TND': 'Tunisian dinar',
+      'LBP': 'Lebanese pound',
+      'LYD': 'Libyan dinar',
+      'INR': 'Indian rupee',
+      'PKR': 'Pakistani rupee',
+      'NGN': 'Nigerian naira',
+      'PHP': 'Philippine peso',
+      'KES': 'Kenyan shilling',
+      'CDF': 'Congolese franc',
+      'GNF': 'Guinean franc',
+      'HTG': 'Haitian gourde',
+      'MGA': 'Malagasy ariary',
+      'SRD': 'Surinamese dollar',
+      'TJS': 'Tajikistani somoni',
+      'SDG': 'Sudanese pound',
+      'YER': 'Yemeni rial',
+      'SYP': 'Syrian pound',
+      'MRU': 'Mauritanian ouguiya',
+      'ILS': 'Israeli new shekel',
+      'PLN': 'Polish złoty',
+      'SEK': 'Swedish krona',
+      'JPY': 'Japanese yen',
+      'VND': 'Vietnamese dong',
       'other': '$code',
     });
     return '$_temp0';
@@ -594,6 +652,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currencyNoMatch => 'No currency matches.';
+
+  @override
+  String get currencySuggested => 'Suggested';
+
+  @override
+  String get currencyAll => 'All currencies';
 
   @override
   String get currencyChangeTitle => 'Change currency';

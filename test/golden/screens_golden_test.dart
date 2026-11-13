@@ -233,6 +233,28 @@ void main() {
         await shoot(tester, '10-currency-change-$theme');
       });
 
+      testWidgets('currency picker', (tester) async {
+        await start(tester);
+        await openTab(tester, 'Ayarlar');
+        await scrollTo(tester, find.text('Para birimi'));
+        await tester.tap(find.text('Para birimi'));
+        await shoot(tester, '15-currency-picker-$theme');
+      });
+
+      testWidgets('currency search, right-to-left symbols', (tester) async {
+        await start(tester);
+        await openTab(tester, 'Ayarlar');
+        await scrollTo(tester, find.text('Para birimi'));
+        await tester.tap(find.text('Para birimi'));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const ValueKey('currency-search')),
+          'dinar',
+        );
+        FocusManager.instance.primaryFocus?.unfocus();
+        await shoot(tester, '16-currency-search-$theme');
+      });
+
       testWidgets('settings, reminders section', (tester) async {
         await start(tester);
         await openTab(tester, 'Ayarlar');

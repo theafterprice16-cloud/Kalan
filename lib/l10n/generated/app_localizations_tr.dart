@@ -578,6 +578,64 @@ class AppLocalizationsTr extends AppLocalizations {
       'CAD': 'Kanada doları',
       'AUD': 'Avustralya doları',
       'CHF': 'İsviçre frangı',
+      'NZD': 'Yeni Zelanda doları',
+      'ZAR': 'Güney Afrika randı',
+      'ARS': 'Arjantin pesosu',
+      'PEN': 'Peru solü',
+      'UYU': 'Uruguay pesosu',
+      'PYG': 'Paraguay guaranisi',
+      'BOB': 'Bolivya bolivianosu',
+      'VES': 'Venezuela bolivarı',
+      'CRC': 'Kosta Rika kolonu',
+      'GTQ': 'Guatemala quetzalı',
+      'HNL': 'Honduras lempirası',
+      'NIO': 'Nikaragua kordobası',
+      'DOP': 'Dominik pesosu',
+      'PAB': 'Panama balboası',
+      'AOA': 'Angola kvanzası',
+      'MZN': 'Mozambik metikali',
+      'XOF': 'Batı Afrika CFA frangı',
+      'XAF': 'Orta Afrika CFA frangı',
+      'BYN': 'Belarus rublesi',
+      'KGS': 'Kırgızistan somu',
+      'UZS': 'Özbekistan somu',
+      'TWD': 'Yeni Tayvan doları',
+      'HKD': 'Hong Kong doları',
+      'MOP': 'Makao patakası',
+      'SAR': 'Suudi riyali',
+      'AED': 'BAE dirhemi',
+      'QAR': 'Katar riyali',
+      'KWD': 'Kuveyt dinarı',
+      'BHD': 'Bahreyn dinarı',
+      'OMR': 'Umman riyali',
+      'EGP': 'Mısır lirası',
+      'JOD': 'Ürdün dinarı',
+      'IQD': 'Irak dinarı',
+      'MAD': 'Fas dirhemi',
+      'DZD': 'Cezayir dinarı',
+      'TND': 'Tunus dinarı',
+      'LBP': 'Lübnan lirası',
+      'LYD': 'Libya dinarı',
+      'INR': 'Hindistan rupisi',
+      'PKR': 'Pakistan rupisi',
+      'NGN': 'Nijerya nairası',
+      'PHP': 'Filipin pesosu',
+      'KES': 'Kenya şilini',
+      'CDF': 'Kongo frangı',
+      'GNF': 'Gine frangı',
+      'HTG': 'Haiti gurdu',
+      'MGA': 'Madagaskar ariarisi',
+      'SRD': 'Surinam doları',
+      'TJS': 'Tacikistan somonisi',
+      'SDG': 'Sudan lirası',
+      'YER': 'Yemen riyali',
+      'SYP': 'Suriye lirası',
+      'MRU': 'Moritanya ugiyası',
+      'ILS': 'İsrail şekeli',
+      'PLN': 'Polonya zlotisi',
+      'SEK': 'İsveç kronu',
+      'JPY': 'Japon yeni',
+      'VND': 'Vietnam dongu',
       'other': '$code',
     });
     return '$_temp0';
@@ -588,6 +646,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get currencyNoMatch => 'Eşleşen para birimi yok.';
+
+  @override
+  String get currencySuggested => 'Önerilen';
+
+  @override
+  String get currencyAll => 'Tüm para birimleri';
 
   @override
   String get currencyChangeTitle => 'Para birimini değiştir';

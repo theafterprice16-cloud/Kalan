@@ -33,7 +33,11 @@ void main() {
   testWidgets('income is optional and validated', (tester) async {
     final db = await pumpApp(tester);
     await scrollTo(tester, find.byKey(_income));
+    // Letters never reach the field.
     await tester.enterText(find.byKey(_income), 'abc');
+    expect(find.text('abc'), findsNothing);
+    // "." groups thousands in Turkish, so "62.5" is not an amount.
+    await tester.enterText(find.byKey(_income), '62.5');
     await scrollTo(tester, find.text('Başla'));
     await tester.tap(find.text('Başla'));
     await tester.pumpAndSettle();

@@ -131,8 +131,7 @@ class SettingsScreen extends ConsumerWidget {
         minor == null ? l10n.notSet : ref.money(context, minor);
     final currency = Currency.fromCode(s.currencyCode);
     final currencyLabel =
-        '${currency.symbolFor(ref.watch(deviceRegionProvider))} · '
-        '${currency.code} · ${currencyName(context, currency)}';
+        '${currency.pickerLabel} · ${currencyName(context, currency)}';
     final languageLabel = switch (s.localeCode) {
       'tr' => l10n.languageTurkish,
       'en' => l10n.languageEnglish,

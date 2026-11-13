@@ -327,6 +327,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           key: key,
           controller: c,
           keyboardType: ref.amountKeyboard,
+          inputFormatters: ref.amountFormatters(context),
           decoration: InputDecoration(labelText: label),
           validator: c == _total
               ? _totalValidator

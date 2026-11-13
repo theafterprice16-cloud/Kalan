@@ -30,7 +30,6 @@ ReminderScheduler schedulerFor(
   location: () => tz.getLocation(zone),
   now: () => now,
   localeFor: (s) => Locale(s.localeCode ?? 'tr'),
-  region: () => 'TR',
 );
 
 Future<void> setReminders(AppDatabase db, AppSettingsCompanion c) =>

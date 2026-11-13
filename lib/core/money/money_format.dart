@@ -8,17 +8,17 @@ import 'currency.dart';
 /// Layout (symbol position, separators, spacing) comes from the app
 /// language through intl; symbol and digits come from [Currency]. Amounts
 /// stay integers: intl formats the whole part, the minor part is added
-/// from the integer remainder. Whole amounts drop their minor digits.
+/// from the integer remainder with exactly [Currency.decimals] digits.
+/// Whole amounts drop their minor digits.
+///
+/// Amounts always carry the currency's own symbol, also when it is shared
+/// ("$" for COP); the picker tells currencies apart. A right-to-left
+/// symbol (ر.س) is isolated so the digits keep their order.
 ///
 /// tr, TRY, 123456 → ₺1.234,56 · de, EUR → 1.234,56 € ·
 /// id, IDR, 1234567 → Rp1.234.567.
-String formatMoney(
-  int minor,
-  Currency currency, {
-  required String localeName,
-  String? region,
-}) {
-  final symbol = currency.symbolFor(region);
+String formatMoney(int minor, Currency currency, {required String localeName}) {
+  final symbol = isolateRtl(currency.symbol);
   final format = _currencyFormat(localeName, currency.code, symbol);
   final symbols = format.symbols;
   final factor = currency.minorPerMajor;
@@ -51,6 +51,13 @@ NumberFormat _currencyFormat(String locale, String code, String symbol) =>
       ),
     );
 
+/// Wraps [text] in a first-strong isolate (U+2068 … U+2069) when it holds
+/// right-to-left letters, so it shows intact inside left-to-right text.
+String isolateRtl(String text) =>
+    _rtl.hasMatch(text) ? '\u2068$text\u2069' : text;
+
+final _rtl = RegExp('[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]');
+
 NumberSymbols _symbols(String localeName) =>
     NumberFormat.decimalPattern(localeName).symbols;
 
@@ -77,6 +84,25 @@ String amountInputExample(Currency currency, {required String localeName}) =>
       localeName: localeName,
     );
 
+/// Whether an amount field may hold [text] while typing: digits, spaces
+/// and separators only; no decimal separator for currencies without minor
+/// digits (JPY) and at most [Currency.decimals] digits after it (three for
+/// KWD). Anything else is kept out of the field; [parseAmount] still
+/// checks the full value.
+bool acceptsAmountInput(
+  String text,
+  Currency currency, {
+  required String localeName,
+}) {
+  if (!RegExp(r'^[0-9., ]*$').hasMatch(text)) return false;
+  final decimalSep = _symbols(localeName).DECIMAL_SEP;
+  final parts = text.split(decimalSep);
+  if (parts.length == 1) return true;
+  if (currency.decimals == 0 || parts.length > 2) return false;
+  return RegExp(r'^[0-9]*$').hasMatch(parts[1]) &&
+      parts[1].length <= currency.decimals;
+}
+
 /// Parses typed text into minor units using the app language's separators.
 ///
 /// Spaces and currency symbols are ignored. The decimal separator may
@@ -91,7 +117,16 @@ int? parseAmount(
   required String localeName,
 }) {
   if (input.contains('-')) return null;
-  final cleaned = input.replaceAll(RegExp(r'[^0-9.,]'), '');
+  // Symbols may hold separators ("B/.", "د.ك"); drop them first.
+  var text = input;
+  for (final s in [
+    currency.distinctiveSymbol,
+    currency.symbol,
+    currency.code,
+  ]..sort((a, b) => b.length.compareTo(a.length))) {
+    text = text.replaceAll(s, '');
+  }
+  final cleaned = text.replaceAll(RegExp(r'[^0-9.,]'), '');
   if (cleaned.isEmpty) return null;
 
   final symbols = _symbols(localeName);

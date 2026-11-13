@@ -24,15 +24,12 @@ final privacySettingsProvider = Provider(
 );
 
 final reminderSchedulerProvider = Provider((ref) {
-  // Read now, not inside the closures: the scheduler outlives this build.
-  final region = ref.watch(deviceRegionProvider);
   return ReminderScheduler(
     db: ref.watch(databaseProvider),
     gateway: ref.watch(notificationGatewayProvider),
     location: () => tz.local,
     now: ref.watch(clockProvider),
     localeFor: (s) => appLocale(s.localeCode),
-    region: () => region,
   );
 });
 

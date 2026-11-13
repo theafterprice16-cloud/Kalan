@@ -88,7 +88,7 @@ void main() {
     expect(find.text(r'Örnek: ₺1.234,56 → $1.234,56'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('currency-confirm')));
     await tester.pumpAndSettle();
-    expect(find.text(r'$ · USD · ABD doları'), findsOneWidget);
+    expect(find.text(r'US$ · USD · ABD doları'), findsOneWidget);
     await openTab(tester, 'Bu dönem');
     expect(find.text(r'$50.000'), findsOneWidget);
   });
@@ -138,6 +138,11 @@ void main() {
     await openTab(tester, 'Ayarlar');
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('currency-EUR')),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(find.byKey(const ValueKey('currency-EUR')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Vazgeç'));
