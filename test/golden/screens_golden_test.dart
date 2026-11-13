@@ -103,6 +103,35 @@ Future<void> seedRich(AppDatabase db, {required int incomeMinor}) async {
   await seedRent(db);
 }
 
+/// One single-payment plan.
+Future<void> seedOne(
+  AppDatabase db,
+  String name,
+  LocalDate due,
+  int minor,
+) async {
+  final plans = PlanRepository(db);
+  final source = await SourceRepository(db, plans).findOrCreateProvider(name);
+  await plans.saveDraft(
+    PlanCalculator.monthly(firstDate: due, totalMinor: minor, count: 1),
+    sourceId: source,
+    origin: PlanOrigin.template,
+  );
+}
+
+/// Zeynep on 1 Nov 2026: 850 from 28 Oct unpaid; [more] adds three older
+/// ones.
+Future<void> seedPastDue(AppDatabase db, {bool more = false}) async {
+  await seedSettings(db, incomeMinor: 3000000, payDay: 1);
+  await seedOne(db, 'Telefon', LocalDate(2026, 11, 10), 1200000);
+  await seedOne(db, 'Klarna', LocalDate(2026, 10, 28), 85000);
+  if (more) {
+    await seedOne(db, 'Afterpay', LocalDate(2026, 9, 20), 45000);
+    await seedOne(db, 'Zip', LocalDate(2026, 10, 12), 30000);
+    await seedOne(db, 'Kart', LocalDate(2026, 10, 25), 125000);
+  }
+}
+
 /// A phone already 3 of 10 installments in when it was added.
 Future<void> seedUnderway(AppDatabase db) async {
   final plans = PlanRepository(db);
@@ -152,6 +181,8 @@ void main() {
       Locale locale = const Locale('tr', 'TR'),
       FakeNotificationGateway? gateway,
       bool underway = false,
+      Future<void> Function(AppDatabase db)? seed,
+      LocalDate? today,
     }) async {
       tester.view.physicalSize = const Size(780, 1688);
       tester.view.devicePixelRatio = 2;
@@ -159,12 +190,15 @@ void main() {
       await pumpApp(
         tester,
         locale: locale,
-        seed: onboarded
-            ? (db) async {
-                await seedRich(db, incomeMinor: income);
-                if (underway) await seedUnderway(db);
-              }
-            : null,
+        today: today,
+        seed:
+            seed ??
+            (onboarded
+                ? (db) async {
+                    await seedRich(db, incomeMinor: income);
+                    if (underway) await seedUnderway(db);
+                  }
+                : null),
         overrides: [
           themeModeStoreProvider.overrideWithValue(MemoryThemeModeStore(mode)),
           notificationGatewayProvider.overrideWithValue(
@@ -292,6 +326,43 @@ void main() {
         await start(tester, route: Routes.remindersHelp);
         await shoot(tester, '13-reminders-help-$theme');
       });
+
+      // Past-due payments in both languages.
+      for (final (lang, locale, paid) in [
+        ('tr', const Locale('tr', 'TR'), 'Ödendi'),
+        ('en', const Locale('en', 'US'), 'Paid'),
+      ]) {
+        final nov1 = LocalDate(2026, 11, 1);
+
+        testWidgets('home, one past due, $lang', (tester) async {
+          await start(tester, locale: locale, today: nov1, seed: seedPastDue);
+          await shoot(tester, '23-home-past-due-$lang-$theme');
+        });
+
+        testWidgets('home, four past due, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: nov1,
+            seed: (db) => seedPastDue(db, more: true),
+          );
+          await shoot(tester, '24-home-past-due-four-$lang-$theme');
+        });
+
+        testWidgets('when did you pay, $lang', (tester) async {
+          await start(tester, locale: locale, today: nov1, seed: seedPastDue);
+          await tester.tap(find.text(paid).first);
+          await shoot(tester, '25-paid-when-$lang-$theme');
+        });
+
+        testWidgets('marked paid with undo, $lang', (tester) async {
+          await start(tester, locale: locale, today: nov1, seed: seedPastDue);
+          await tester.tap(find.text(paid).first);
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('paid-when-today')));
+          await shoot(tester, '26-marked-paid-undo-$lang-$theme');
+        });
+      }
 
       // "Already underway" in both languages.
       for (final (lang, locale, plansTab, addPlan, monthly, cardKind) in [

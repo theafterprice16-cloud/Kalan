@@ -18,6 +18,8 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 
 - ~~**Devam eden planı ortasından ekleme**~~ Tamamlandı (13 Kasım 2026): her plan türünde "Bu plan zaten sürüyor" anahtarı; ödenmiş taksit sayısı ve sıradaki ödeme tarihi girilir, geçmiş taksitler "Kalan'dan önce ödendi" kaydı olarak saklanır; ilerleme "3/10", plan ayrıntısında tek satır özet; "Planı düzenle" ile sonradan düzeltme; aylık ve kart planlarında toplam taksit sayısı da değişir (plan toplamı sabit, ödenmemişler yeniden bölünür).
 
+- ~~**Günü geçenler bölümü**~~ Tamamlandı (13 Kasım 2026): ödenmemiş ve günü geçmiş ödemeler ana ekranda ayrı bölümde, bu dönemin kalanından düşülerek; "Ödendi" → "Bugün" ya da "Gününde"; satır kendiliğinden kalkmaz; "ödendi" bilgi mesajında "Geri al". Sonraya: gecikme ücreti kaydı, tekrarlayan hatırlatma, simge sayacı, bildirimden "ödendi".
+
 ## Notlar
 
 - Tutar gösteren her yeni yer (bildirim, widget, dışa aktarma) `formatMoney` kullanır; dışa aktarma ham tam sayı tutarı ve para birimi kodunu yazar.

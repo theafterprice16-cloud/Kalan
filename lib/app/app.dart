@@ -54,6 +54,9 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     }
     if (!mounted) return;
     ref.invalidate(notificationPermissionProvider);
+    // The date may have changed (past midnight): past-due rows and their
+    // "days ago" follow today.
+    ref.invalidate(todayProvider);
     ref.read(reminderSyncProvider).request();
   }
 

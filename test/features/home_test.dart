@@ -66,6 +66,47 @@ void main() {
     expect(paid.single.seq, 1);
   });
 
+  testWidgets('"Undo" takes back a one-tap "paid"', (tester) async {
+    final db = await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 5000000);
+        await seedPayIn4(db);
+      },
+    );
+    await tester.tap(find.byTooltip('Ödendi olarak işaretle').first);
+    await tester.pumpAndSettle();
+    // Above "Add plan", not over it.
+    expect(
+      tester.getRect(find.byType(SnackBar)).bottom,
+      lessThanOrEqualTo(tester.getRect(find.byType(FloatingActionButton)).top),
+    );
+    await tester.tap(find.widgetWithText(SnackBarAction, 'Geri al'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Ödendi olarak işaretle'), findsNWidgets(2));
+    expect(find.byTooltip('Ödenmedi olarak işaretle'), findsNothing);
+    final paid = await (db.select(
+      db.payments,
+    )..where((p) => p.paidAt.isNotNull())).get();
+    expect(paid, isEmpty);
+  });
+
+  testWidgets('"not paid" has no "Undo"', (tester) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 5000000);
+        await seedPayIn4(db);
+      },
+    );
+    await tester.tap(find.byTooltip('Ödendi olarak işaretle').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Ödenmedi olarak işaretle'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ödenmedi olarak işaretlendi.'), findsOneWidget);
+    expect(find.byType(SnackBarAction), findsNothing);
+  });
+
   testWidgets(
     'negative period uses the negative tone and says how much is short',
     (tester) async {
@@ -126,7 +167,7 @@ void main() {
     expect(find.byKey(const ValueKey('bar-left')), findsNothing);
   });
 
-  testWidgets('unpaid payments from earlier periods are listed separately', (
+  testWidgets('past-due payments count in this period, listed apart', (
     tester,
   ) async {
     await pumpApp(
@@ -137,11 +178,19 @@ void main() {
         await seedPayIn4(db, first: LocalDate(2026, 10, 30), source: 'Zip');
       },
     );
-    expect(find.text('Ödenmemiş'), findsOneWidget);
-    expect(find.text('1/4'), findsOneWidget);
-    expect(find.text('2/4'), findsOneWidget);
-    // Only 27 Nov and 11 Dec count toward this period.
-    expect(find.text('Bu dönem 2 ödeme var. Toplam ₺200.'), findsOneWidget);
+    expect(find.text('Günü geçen 2 ödeme'), findsOneWidget);
+    expect(
+      find.text('Ödenmemiş olanlar bu dönemin kalanından düşüldü.'),
+      findsOneWidget,
+    );
+    expect(find.text('21 gün önce'), findsOneWidget);
+    expect(find.text('7 gün önce'), findsOneWidget);
+    // The two past-due ones now count in this period too.
+    expect(find.text('Bu dönem 4 ödeme var. Toplam ₺400.'), findsOneWidget);
+    // Not listed twice.
+    await scrollTo(tester, find.text('3/4'));
+    expect(find.text('1/4'), findsNothing);
+    expect(find.text('2/4'), findsNothing);
   });
 
   testWidgets('English and dollars', (tester) async {
@@ -191,7 +240,7 @@ void main() {
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
   });
 
-  testWidgets('unpaid past payments carry a late "Overdue" badge', (
+  testWidgets('past-due rows say "days ago" in late; paid asks when', (
     tester,
   ) async {
     await pumpApp(
@@ -204,14 +253,21 @@ void main() {
     );
     final badges = find.byKey(const ValueKey('overdue-badge'));
     expect(badges, findsNWidgets(2));
-    expect(find.text('Gecikti'), findsNWidgets(2));
     final label = tester.widget<Text>(
       find.descendant(of: badges.first, matching: find.byType(Text)),
     );
+    expect(label.data, '21 gün önce');
     expect(label.style!.color, KalanColors.light.late);
-    // Paying one removes its badge.
-    await tester.tap(find.byTooltip('Ödendi olarak işaretle').first);
+    expect(
+      find.descendant(of: badges.first, matching: find.byIcon(Icons.schedule)),
+      findsOneWidget,
+    );
+    // Paying one ("today") removes its row.
+    await tester.tap(find.text('Ödendi').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('paid-when-today')));
     await tester.pumpAndSettle();
     expect(badges, findsOneWidget);
+    expect(find.text('Günü geçen 1 ödeme'), findsOneWidget);
   });
 }

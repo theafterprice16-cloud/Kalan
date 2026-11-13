@@ -207,6 +207,43 @@ void main() {
     await db.close();
   });
 
+  test(
+    'v4 -> current: no paid-on day, payments stay where they were',
+    () async {
+      final schema = await verifier.schemaAt(4);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at, '
+        'paid_before_kalan) VALUES (1, 2, 20435, 2500, 1700000000, 1)',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final rows = await db
+          .customSelect(
+            'SELECT seq, due_day, paid_at, paid_before_kalan, paid_on_day '
+            'FROM payments ORDER BY seq',
+          )
+          .get();
+      expect(rows.map((r) => r.data), [
+        {
+          'seq': 1,
+          'due_day': 20405,
+          'paid_at': null,
+          'paid_before_kalan': 0,
+          'paid_on_day': null,
+        },
+        {
+          'seq': 2,
+          'due_day': 20435,
+          'paid_at': 1700000000,
+          'paid_before_kalan': 1,
+          'paid_on_day': null,
+        },
+      ]);
+      await db.close();
+    },
+  );
+
   test('per-plan days outside 1, 2, 3, 5, 7 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final sourceId = await db

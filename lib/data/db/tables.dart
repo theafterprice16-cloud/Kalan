@@ -74,6 +74,11 @@ class Payments extends Table {
   BoolColumn get paidBeforeKalan =>
       boolean().withDefault(const Constant(false))();
 
+  /// The day it was paid, as chosen in the past-due list (schema v5):
+  /// "today" or "on the due date". Empty for every other "paid", which
+  /// keeps counting on its due date ([countingDate]).
+  IntColumn get paidOnDay => integer().nullable()();
+
   @override
   List<Set<Column>> get uniqueKeys => [
     {planId, seq},

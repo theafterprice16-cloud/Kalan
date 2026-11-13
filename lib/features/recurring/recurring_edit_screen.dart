@@ -10,6 +10,7 @@ import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/engine/engine.dart';
 import '../../core/reminders/reminder_models.dart';
+import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
@@ -85,6 +86,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
     final repo = ref.read(recurringRepositoryProvider);
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final l10n = context.l10n;
     final amount = ref.parseMoney(context, _amount.text)!;
     final existing = _existing;
@@ -114,14 +116,18 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
         ),
       );
     }
-    messenger.showSnackBar(SnackBar(content: Text(l10n.recurringSaved)));
-    router.pop();
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.recurringSaved)),
+      fallback: messenger,
+      tabs: tabs,
+    );
   }
 
   Future<void> _delete() async {
     final l10n = context.l10n;
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -141,8 +147,11 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
     );
     if (ok != true) return;
     await ref.read(recurringRepositoryProvider).delete(_existing!.id);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.recurringDeleted)));
-    router.pop();
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.recurringDeleted)),
+      fallback: messenger,
+      tabs: tabs,
+    );
   }
 
   @override

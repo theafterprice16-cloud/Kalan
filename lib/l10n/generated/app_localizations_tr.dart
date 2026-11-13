@@ -19,6 +19,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get actionCancel => 'Vazgeç';
 
   @override
+  String get actionUndo => 'Geri al';
+
+  @override
   String get actionDelete => 'Sil';
 
   @override
@@ -154,12 +157,6 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get homeNoIncomeHint =>
       'Net tutarı Ayarlar\'da girersen kalanı da gösteririm.';
-
-  @override
-  String get homeOverdueTitle => 'Ödenmemiş';
-
-  @override
-  String get homeOverdueHelp => 'Tarihi geçti, ödendi olarak işaretlenmedi.';
 
   @override
   String get homePaymentsTitle => 'Bu dönemin ödemeleri';
@@ -716,9 +713,6 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get overdueBadge => 'Gecikti';
-
-  @override
   String get settingsTheme => 'Tema';
 
   @override
@@ -1068,4 +1062,89 @@ class AppLocalizationsTr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String pastDueTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Günü geçen $countString ödeme',
+      one: 'Günü geçen 1 ödeme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pastDueDaysAgo(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString gün önce',
+      one: '1 gün önce',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pastDueDeducted =>
+      'Ödenmemiş olanlar bu dönemin kalanından düşüldü.';
+
+  @override
+  String get pastDueMarkPaid => 'Ödendi';
+
+  @override
+  String pastDueShowAll(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tümünü göster ($countString)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pastDueRowSemantics(String plan, String amount, int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$plan, $amount, son ödeme günü $daysString gün önce geçti',
+      one: '$plan, $amount, son ödeme günü 1 gün önce geçti',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paidWhenTitle => 'Ne zaman ödedin?';
+
+  @override
+  String get paidWhenToday => 'Bugün';
+
+  @override
+  String get paidWhenTodayHint => 'Bu dönemin hesabında kalır.';
+
+  @override
+  String paidWhenOnDue(String date) {
+    return 'Gününde, $date';
+  }
+
+  @override
+  String get paidWhenOnDueHint => 'Ödeme o döneme yazılır.';
 }

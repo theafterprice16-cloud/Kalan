@@ -18,6 +18,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/sources/source_edit_screen.dart';
 import '../../features/sources/sources_screen.dart';
 import 'routes.dart';
+import 'tab_messengers.dart';
 
 /// Where the app starts (home); tests start elsewhere.
 final initialRouteProvider = Provider<String>((ref) => Routes.home);
@@ -48,14 +49,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(
             routes: [
-              GoRoute(path: Routes.home, builder: (_, _) => const HomeScreen()),
+              GoRoute(
+                path: Routes.home,
+                builder: (_, _) => const _Tab(Routes.home, HomeScreen()),
+              ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: Routes.plans,
-                builder: (_, _) => const PlansScreen(),
+                builder: (_, _) => const _Tab(Routes.plans, PlansScreen()),
               ),
             ],
           ),
@@ -63,7 +67,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.settings,
-                builder: (_, _) => const SettingsScreen(),
+                builder: (_, _) =>
+                    const _Tab(Routes.settings, SettingsScreen()),
               ),
             ],
           ),
@@ -116,3 +121,17 @@ final routerProvider = Provider<GoRouter>((ref) {
   });
   return router;
 });
+
+/// Each tab has its own messenger (see [TabMessengers]).
+class _Tab extends ConsumerWidget {
+  const _Tab(this.path, this.child);
+
+  final String path;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => ScaffoldMessenger(
+    key: ref.watch(tabMessengersProvider).keyFor(path),
+    child: child,
+  );
+}

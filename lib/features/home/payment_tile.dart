@@ -8,6 +8,7 @@ import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import 'home_view.dart';
+import 'past_due.dart';
 
 /// A payment row with a one-tap "paid" toggle.
 class PaymentTile extends ConsumerWidget {
@@ -19,20 +20,20 @@ class PaymentTile extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
     final paid = !entry.isPaid;
-    if (entry.isRecurring) {
-      await ref
-          .read(recurringRepositoryProvider)
-          .setPaid(entry.recurringId!, entry.date.epochDay, paid: paid);
+    // Read now: undo can run after this row has left the tree.
+    final plans = ref.read(planRepositoryProvider);
+    final recurring = ref.read(recurringRepositoryProvider);
+    Future<void> set({required bool paid}) => entry.isRecurring
+        ? recurring.setPaid(entry.recurringId!, entry.date.epochDay, paid: paid)
+        : plans.setPaid(entry.paymentId!, paid: paid);
+    await set(paid: paid);
+    if (paid) {
+      showMarkedPaid(messenger, l10n, onUndo: () => set(paid: false));
     } else {
-      await ref
-          .read(planRepositoryProvider)
-          .setPaid(entry.paymentId!, paid: paid);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.markedUnpaid)));
     }
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text(paid ? l10n.markedPaid : l10n.markedUnpaid)),
-      );
   }
 
   @override
@@ -61,7 +62,7 @@ class PaymentTile extends ConsumerWidget {
             entry.installmentCount!,
           ),
         ),
-      if (!entry.isPaid && days < 0) OverdueBadge(label: l10n.overdueBadge),
+      if (!entry.isPaid && days < 0) DaysAgoNote(days: -days),
       if (soon)
         Row(
           mainAxisSize: MainAxisSize.min,

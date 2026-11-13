@@ -7,7 +7,7 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | # | Konu | Karar |
 |---|---|---|
 | 1 | Paket kimliği | Geçici olarak `app.kalan.mobile` (iOS Bundle ID ve Android applicationId). Kimlik dosyasının önerdiği `kalan.app` alan adından türetildi. Mağazaya ilk yüklemeden önce kesinleştir; yüklemeden sonra değiştirilemez. |
-| 2 | Vadesi geçmiş, ödenmemiş ödeme | Kendi tarihinin döneminde kalır. Ana ekranın üstünde sakin bir "Ödenmemiş" bölümünde de listelenir. İçinde bulunulan dönemin söz verilmiş tutarına ikinci kez eklenmez. |
+| 2 | Vadesi geçmiş, ödenmemiş ödeme | **Değiştirildi (13 Kasım 2026):** ödenmemiş ve günü geçmiş ödeme, hangi dönemden gelirse gelsin içinde bulunulan dönemin söz verilmiş tutarına girer ve "Günü geçenler" bölümünde listelenir ("Günü geçenler" bölümüne bak). Eski kural: kendi döneminde kalır, bu döneme eklenmezdi. |
 | 3 | Maaş günü hafta sonuna denk gelirse | Dönem yine o gün başlar (kaydırma yok). |
 | 4 | Ekstre günü yapılan alışveriş | O günün ekstresine girer (alışveriş günü ≤ ekstre günü). |
 | 5 | Kuruş artığı | `taban(toplam / n)` her ödemeye; artan kuruş ilk ödemeye eklenir. |
@@ -32,7 +32,7 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 22 | 4 ödemeli plan | İlk ödeme alışveriş günü; sonra 14 günde bir, toplam 4 ödeme. |
 | 23 | Kart taksidi tarihi | Ödeme tarihi, taksidin düştüğü ekstre tarihinden sonraki ilk son ödeme günüdür (aynı gün sayılmaz). Hafta sonu kaydırması kart başına ayar, varsayılan açık; cumartesi ve pazar pazartesiye kayar. Resmi tatiller BACKLOG'da. |
 | 24 | Yarıda başlayan plan | **Değiştirildi (13 Kasım 2026):** ayrı plan türü kaldırıldı; yerine her türde "Bu plan zaten sürüyor" anahtarı var ("Devam eden planı ortasından ekleme" bölümü). Eski kural: kalan taksit sayısı girilir, yalnızca kalan ödemeler kaydedilirdi. Bu yolla eklenmiş planlar olduğu gibi çalışmaya devam eder. |
-| 24a | Sabit ödemelerin geçmiş tekrarları | "Ödenmemiş" bölümünde gösterilmez (yalnızca plan ödemeleri). Aksi hâlde başlangıçtan bu yana işaretlenmemiş her kira satırı listeyi doldururdu. |
+| 24a | Sabit ödemelerin geçmiş tekrarları | "Günü geçenler" bölümünde gösterilmez ve bu döneme taşınmaz (yalnızca plan ödemeleri). Aksi hâlde başlangıçtan bu yana işaretlenmemiş her kira satırı listeyi doldururdu. Bu dönemin günü geçmiş sabit ödemesi dönem listesinde kalır ve "x gün önce" notunu taşır. |
 | 24b | Yaklaşan ödeme | Ödenmemiş ve bugün ya da yarın olan ödemede kehribar nokta ve "Bugün"/"Yarın" metni. |
 | 25 | Ödenmiş ödemenin düzeltilmesi | Ödenmiş ödeme düzeltilemez; önce "ödenmedi" yapılır. |
 
@@ -158,4 +158,24 @@ Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sah
 | Ücretsiz sınır | Değişmedi: aynı `canAddPlan` ve hak yönetimi; ortasından eklenen plan da açık plan sayılır (testli). |
 | Anahtar rengi | Prompt anahtar için accent istiyordu; DESIGN_TOKENS kuralı (accent yalnızca "kalan") gereği anahtarlar mürekkep rengindedir. |
 | Test değişiklikleri | Kaldırılan tür yüzünden iki mevcut ekran testi güncellendi: `add_plan_test.dart`'taki "plan already started" testi kaldırıldı (yerine `underway_test.dart`), `accessibility_test.dart` döngüsü "Yarıda başlayan" yerine her türde anahtarı açıyor. Motor testlerinin hiçbiri değişmedi. |
+
+## Günü geçenler (13 Kasım 2026)
+
+Ürün sahibiyle netleşen kararlar: geciken ödeme = etkin son ödeme günü bugünden önce olan ödenmemiş ödeme; her zaman içinde bulunulan dönemin söz verilmiş tutarına girer; "Ödendi" denince "Bugün" ya da "Gününde" sorulur; satır kendiliğinden kalkmaz; bölüm boşsa görünmez; ücretsizdir.
+
+| Konu | Karar |
+|---|---|
+| Tek dönem kuralı | Saf `countingDate` (`lib/core/engine/past_due.dart`): ödenmemiş ve günü geçmiş → bugün (yani bu dönem); ödenmiş ve `paidOnDay` son ödeme gününden sonra → `paidOnDay`; diğer her şey → son ödeme günü (önceki davranış). Ana ekranın dönem toplamı bu fonksiyonla hesaplanır; başka kopyası yok. `isPastDue` ve `daysPastDue` aynı dosyada. Eski `isOverdue` fonksiyonu ve testi değiştirilmeden duruyor; kullanılmıyor. |
+| Değişmezlik | Günü geçmiş ödemesi olmayan veride hiçbir dönem toplamı değişmez (tablo testiyle kilitli). Eski ödenmiş kayıtların `paidOnDay` alanı boştur; son ödeme günlerinin döneminde kalırlar (Örnek 4). |
+| Ödendiği gün | Yeni sütun `payments.paidOnDay` (epoch günü, boş olabilir; şema v5, geçiş testli). Yalnızca "Ne zaman ödedin?" penceresi doldurur: "Bugün" → bugün, "Gününde" → son ödeme günü. Mevcut `paidAt` zaman damgası yeniden yorumlanmadı (kullanıcılar zamanında ödediğini çoğu zaman günler sonra işaretliyor). "Ödenmedi" yapılınca `paidOnDay` da silinir. |
+| Gösterim | Ana ekranda büyük sayının kartının hemen altında, bu dönemin listesinin üstünde. En eski son ödeme günü en üstte; en çok 3 satır, fazlası "Tümünü göster (n)" ile aynı yerde açılır. Önceki dönemden gelen ödeme varsa başlığın altında textMuted açıklama satırı. Geciken ödeme dönem listesinde ikinci kez görünmez. "Bu dönem N ödeme var" cümlesi ve toplamı geciken ödemeleri de sayar (toplamla tutarlı). |
+| Satır | Harf rozeti, plan adı (büyük yazıda kısalır), "x gün önce" notu ve saat ikonu (late; renk tek başına değil), tutar, "Ödendi" metin düğmesi (accentText). Satıra dokunmak plan ayrıntısını açar. Gün sayısı takvim günü farkıdır. |
+| Pencere | Alt sayfa: "Bugün · Bu dönemin hesabında kalır.", "Gününde, 28 Ekim · Ödeme o döneme yazılır.", Vazgeç. "Ödendi" sonrası bilgi mesajında sakin bir "Geri al" düğmesi var (6 saniye, kendiliğinden kapanır): ödeme ödenmemiş hâline ve ödendiği gün bilgisi silinmiş olarak döner; günü geçenlerdeki satır geri gelir. Aynı düğme ana ekrandaki tek dokunuşla "ödendi"de de var; "ödenmedi" mesajında yok (tekrar dokunmak yeter). Her sekme kendi `ScaffoldMessenger`ını kullanır (`lib/core/routing/tab_messengers.dart`): mesaj "Plan ekle" düğmesinin üstünde durur, onu örtmez; yalnızca mesajı gösteren sekmede çizilir. Tam ekran sayfalar (plan ekleme, plan silme, sabit ödeme, ödeme düzeni, kaynak) kapanırken mesajı `popWithMessage` ile dönülen sekmenin mesaj alanında gösterir; sekmeye dönülmüyorsa kendi alanında. Plan ayrıntısında geciken bir ödeme "ödendi" yapılınca da aynı pencere açılır; günü geçmemiş ödemelerin akışı aynı. |
+| Plan ayrıntısı | Eski "Gecikti" etiketi yerine "x gün önce" notu ve saat ikonu (aynı `OverdueBadge` biçimi, late). Başka değişiklik yok. |
+| Gün değişimi | Uygulama ön plana dönünce "bugün" yenilenir (`todayProvider` geçersiz kılınır); bölüm ve gün notları buna göre güncellenir. |
+| Sabit ödemeler | Geçmiş dönemlerdeki işaretlenmemiş tekrarlar bölüme girmez (karar 24a). |
+| Kırılım | Ana ekranda söz verilmiş tutarın kırılımı yok; yeni kırılım eklenmedi. |
+| Bildirimler | Geciken ödemeye yeni bildirim kurulmaz (tetiklenme anı geçmişte). "Ödendi" sonrası mevcut yeniden kurma (veritabanı akışı) çalışır; testli. |
+| Ortasından eklenenler | "Kalan'dan önce ödendi" kayıtları ödenmiş olduğu için asla geciken sayılmaz; testli. |
+| Test değişiklikleri | Eski karar 2'yi kodlayan üç mevcut ekran testi yeni karara göre güncellendi (`home_test.dart`'ta iki test, `underway_test.dart`'ta bir satır). Ana ekran golden'ları seed verisindeki iki geciken ödemeyi artık bu dönemde gösterir. Motor testlerinin hiçbiri değişmedi. |
 

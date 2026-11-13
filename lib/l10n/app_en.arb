@@ -3,6 +3,10 @@
   "appTitle": "Kalan",
   "actionSave": "Save",
   "actionCancel": "Cancel",
+  "actionUndo": "Undo",
+  "@actionUndo": {
+    "description": "Snackbar action that takes back \"paid\". Calm, no judgement."
+  },
   "actionDelete": "Delete",
   "actionEdit": "Edit",
   "actionAddPlan": "Add plan",
@@ -83,8 +87,6 @@
     }
   },
   "homeNoIncomeHint": "Add your take-home pay in Settings to see what's left.",
-  "homeOverdueTitle": "Not paid yet",
-  "homeOverdueHelp": "The date has passed and these aren't marked as paid.",
   "homePaymentsTitle": "This period's payments",
   "homeBarLabel": "Spoken for {spokenFor} of {income}.",
   "@homeBarLabel": {
@@ -387,7 +389,6 @@
       }
     }
   },
-  "overdueBadge": "Overdue",
   "settingsTheme": "Theme",
   "themeSystem": "System",
   "themeLight": "Light",
@@ -811,5 +812,94 @@
         "description": "Smallest allowed count"
       }
     }
+  },
+  "pastDueTitle": "{count, plural, =1{1 past-due payment} other{{count} past-due payments}}",
+  "@pastDueTitle": {
+    "description": "Home, section title above unpaid payments whose due date has passed. Calm and non-judgmental: a fact, not a warning. No exclamation marks.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Number of past-due payments"
+      }
+    }
+  },
+  "pastDueDaysAgo": "{days, plural, =1{1 day ago} other{{days} days ago}}",
+  "@pastDueDaysAgo": {
+    "description": "Note next to a clock icon: how many days ago the due date passed. Calm and non-judgmental: a fact, not a warning. No exclamation marks.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Calendar days since the due date"
+      }
+    }
+  },
+  "pastDueDeducted": "Unpaid ones are deducted from this period's remaining amount.",
+  "@pastDueDeducted": {
+    "description": "Muted line under the past-due title when a payment comes from an earlier pay period. Calm and non-judgmental: a fact, not a warning. No exclamation marks."
+  },
+  "pastDueMarkPaid": "Paid",
+  "@pastDueMarkPaid": {
+    "description": "Text button on a past-due row; opens 'When did you pay?'."
+  },
+  "pastDueShowAll": "{count, plural, other{Show all ({count})}}",
+  "@pastDueShowAll": {
+    "description": "Expands the past-due section when it has more than 3 payments.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "All past-due payments"
+      }
+    }
+  },
+  "pastDueRowSemantics": "{days, plural, =1{{plan}, {amount}, due 1 day ago} other{{plan}, {amount}, due {days} days ago}}",
+  "@pastDueRowSemantics": {
+    "description": "Screen reader label of a past-due row. Calm and non-judgmental: a fact, not a warning. No exclamation marks.",
+    "placeholders": {
+      "plan": {
+        "type": "String",
+        "example": "Klarna",
+        "description": "Plan name"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺850",
+        "description": "Formatted amount"
+      },
+      "days": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Days since the due date"
+      }
+    }
+  },
+  "paidWhenTitle": "When did you pay?",
+  "@paidWhenTitle": {
+    "description": "Title of the sheet shown when a past-due payment is marked paid."
+  },
+  "paidWhenToday": "Today",
+  "@paidWhenToday": {
+    "description": "Option: the payment was made today."
+  },
+  "paidWhenTodayHint": "Stays in this period.",
+  "@paidWhenTodayHint": {
+    "description": "Muted line under 'Today': the amount stays in the current pay period."
+  },
+  "paidWhenOnDue": "On the due date, {date}",
+  "@paidWhenOnDue": {
+    "description": "Option: it was paid on its due date.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "October 28",
+        "description": "The due date, day and month"
+      }
+    }
+  },
+  "paidWhenOnDueHint": "Counted in that period.",
+  "@paidWhenOnDueHint": {
+    "description": "Muted line under 'On the due date': the amount moves back to its own pay period."
   }
 }

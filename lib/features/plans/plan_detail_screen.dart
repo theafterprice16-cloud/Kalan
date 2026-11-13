@@ -10,9 +10,11 @@ import '../../core/design/form_fields.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
+import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
+import '../home/past_due.dart';
 import '../onboarding/pay_form.dart';
 import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
@@ -26,6 +28,7 @@ class PlanDetailScreen extends ConsumerWidget {
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final router = GoRouter.of(context);
     final ok = await showDialog<bool>(
       context: context,
@@ -46,8 +49,11 @@ class PlanDetailScreen extends ConsumerWidget {
     );
     if (ok != true) return;
     await ref.read(planRepositoryProvider).deletePlan(planId);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.planDeleted)));
-    router.pop();
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.planDeleted)),
+      fallback: messenger,
+      tabs: tabs,
+    );
   }
 
   @override
@@ -252,6 +258,12 @@ class _PaymentRow extends ConsumerWidget {
     final secondary = theme.textTheme.bodyMedium?.copyWith(
       color: colors.textMuted,
     );
+    final today = ref.watch(todayProvider);
+    final pastDue = isPastDue(
+      dueDate: payment.date,
+      isPaid: payment.isPaid,
+      today: today,
+    );
     return InkWell(
       onTap: () => _edit(context, ref),
       child: Padding(
@@ -279,9 +291,13 @@ class _PaymentRow extends ConsumerWidget {
                     children: [
                       if (payment.isPaid)
                         Text(l10n.paidLabel, style: secondary),
-                      if (!payment.isPaid &&
-                          payment.dueDay < ref.watch(todayProvider).epochDay)
-                        OverdueBadge(label: l10n.overdueBadge),
+                      if (pastDue)
+                        DaysAgoNote(
+                          days: daysPastDue(
+                            dueDate: payment.date,
+                            today: today,
+                          ),
+                        ),
                       if (payment.isEdited)
                         Text(l10n.editedTag, style: secondary),
                     ],
@@ -296,9 +312,17 @@ class _PaymentRow extends ConsumerWidget {
             ),
             IconButton(
               tooltip: payment.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
-              onPressed: () => ref
-                  .read(planRepositoryProvider)
-                  .setPaid(payment.id, paid: !payment.isPaid),
+              // A past-due payment asks when it was paid, as on home.
+              onPressed: pastDue
+                  ? () => markPastDuePaid(
+                      context,
+                      ref,
+                      paymentId: payment.id,
+                      dueDate: payment.date,
+                    )
+                  : () => ref
+                        .read(planRepositoryProvider)
+                        .setPaid(payment.id, paid: !payment.isPaid),
               icon: Icon(
                 payment.isPaid
                     ? Icons.check_circle

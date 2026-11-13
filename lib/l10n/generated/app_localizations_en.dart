@@ -19,6 +19,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionCancel => 'Cancel';
 
   @override
+  String get actionUndo => 'Undo';
+
+  @override
   String get actionDelete => 'Delete';
 
   @override
@@ -156,13 +159,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeNoIncomeHint =>
       'Add your take-home pay in Settings to see what\'s left.';
-
-  @override
-  String get homeOverdueTitle => 'Not paid yet';
-
-  @override
-  String get homeOverdueHelp =>
-      'The date has passed and these aren\'t marked as paid.';
 
   @override
   String get homePaymentsTitle => 'This period\'s payments';
@@ -722,9 +718,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get overdueBadge => 'Overdue';
-
-  @override
   String get settingsTheme => 'Theme';
 
   @override
@@ -1081,4 +1074,89 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String pastDueTitle(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString past-due payments',
+      one: '1 past-due payment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pastDueDaysAgo(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString days ago',
+      one: '1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pastDueDeducted =>
+      'Unpaid ones are deducted from this period\'s remaining amount.';
+
+  @override
+  String get pastDueMarkPaid => 'Paid';
+
+  @override
+  String pastDueShowAll(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show all ($countString)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pastDueRowSemantics(String plan, String amount, int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$plan, $amount, due $daysString days ago',
+      one: '$plan, $amount, due 1 day ago',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paidWhenTitle => 'When did you pay?';
+
+  @override
+  String get paidWhenToday => 'Today';
+
+  @override
+  String get paidWhenTodayHint => 'Stays in this period.';
+
+  @override
+  String paidWhenOnDue(String date) {
+    return 'On the due date, $date';
+  }
+
+  @override
+  String get paidWhenOnDueHint => 'Counted in that period.';
 }
