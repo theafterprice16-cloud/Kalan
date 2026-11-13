@@ -1,162 +1,178 @@
+import 'package:timezone/timezone.dart' as tz;
+
 import '../date/local_date.dart';
 
-/// When a reminder fires relative to the payment's due date.
-enum ReminderOffset {
-  days7(7),
-  days3(3),
-  days1(1),
-  sameDay(0);
+/// The two notifications every payment gets.
+enum ReminderKind {
+  /// Some days before the due date ("lead days").
+  ahead,
 
-  const ReminderOffset(this.days);
-
-  /// Days before the due date.
-  final int days;
+  /// On the due date itself.
+  onDay,
 }
 
-/// Which stored payment a reminder points at. Encoded into notification
-/// payloads, so the format must stay stable.
-sealed class PaymentRef {
-  const PaymentRef();
+/// "How many days before" choices offered in Settings and per plan.
+const leadDayChoices = [1, 2, 3, 5, 7];
 
-  /// "p:12" for a plan payment, "r:3:20405" for a recurring occurrence.
-  String encode();
+/// The initial global "days before". Some providers take the money a day
+/// early, so two days leaves room.
+const initialLeadDays = 2;
 
-  static PaymentRef? decode(String? text) {
-    if (text == null) return null;
-    final parts = text.split(':');
-    switch (parts) {
-      case ['p', final id]:
-        final paymentId = int.tryParse(id);
-        return paymentId == null ? null : PlanPaymentRef(paymentId);
-      case ['r', final id, final day]:
-        final recurringId = int.tryParse(id);
-        final epochDay = int.tryParse(day);
-        return recurringId == null || epochDay == null
-            ? null
-            : RecurringRef(recurringId, epochDay);
-      default:
-        return null;
-    }
+/// A plan's (or recurring payment's) own reminder choice.
+class ReminderChoice {
+  /// Its own "days before"; the time still comes from the global setting.
+  factory ReminderChoice.days(int leadDays) {
+    assert(leadDayChoices.contains(leadDays), 'unsupported: $leadDays');
+    return ReminderChoice._(off: false, leadDays: leadDays);
   }
-}
 
-class PlanPaymentRef extends PaymentRef {
-  const PlanPaymentRef(this.paymentId);
-  final int paymentId;
+  const ReminderChoice._({required this.off, this.leadDays});
 
-  @override
-  String encode() => 'p:$paymentId';
+  /// Follows the global setting (the default).
+  static const general = ReminderChoice._(off: false);
 
-  @override
-  bool operator ==(Object other) =>
-      other is PlanPaymentRef && other.paymentId == paymentId;
+  /// No reminders at all for this plan.
+  static const disabled = ReminderChoice._(off: true);
 
-  @override
-  int get hashCode => paymentId.hashCode;
-}
+  final bool off;
 
-class RecurringRef extends PaymentRef {
-  const RecurringRef(this.recurringId, this.epochDay);
-  final int recurringId;
-  final int epochDay;
+  /// Null when the global setting applies.
+  final int? leadDays;
 
-  @override
-  String encode() => 'r:$recurringId:$epochDay';
+  bool get isGeneral => !off && leadDays == null;
 
   @override
   bool operator ==(Object other) =>
-      other is RecurringRef &&
-      other.recurringId == recurringId &&
-      other.epochDay == epochDay;
+      other is ReminderChoice && other.off == off && other.leadDays == leadDays;
 
   @override
-  int get hashCode => Object.hash(recurringId, epochDay);
+  int get hashCode => Object.hash(off, leadDays);
+
+  @override
+  String toString() => off
+      ? 'ReminderChoice.disabled'
+      : leadDays == null
+      ? 'ReminderChoice.general'
+      : 'ReminderChoice.days($leadDays)';
 }
 
-/// A payment as the reminder planner sees it. The date is the real due
-/// date from the calculation engine (statement, due day and weekend shift
-/// already applied); the planner never computes dates of its own.
+/// A payment as the planner sees it. [date] is the effective due date the
+/// calculation engine stored (statement, due day and weekend shift already
+/// applied), the same day the screens show. The planner never computes
+/// payment dates.
 class ReminderPayment {
   const ReminderPayment({
-    required this.ref,
     required this.name,
     required this.date,
     required this.amountMinor,
-    this.seq,
-    this.count,
     this.isPaid = false,
-    this.remindersEnabled = true,
+    this.choice = ReminderChoice.general,
   });
 
-  final PaymentRef ref;
   final String name;
   final LocalDate date;
   final int amountMinor;
-
-  /// Progress ("3/4") for plan payments; null for recurring payments.
-  final int? seq;
-  final int? count;
   final bool isPaid;
-
-  /// The plan's or recurring payment's own switch.
-  final bool remindersEnabled;
+  final ReminderChoice choice;
 }
 
-/// The user's reminder settings.
+/// The user's global reminder settings.
 class ReminderSettings {
   const ReminderSettings({
     this.enabled = true,
-    this.offsets = defaultOffsets,
+    this.leadDays = initialLeadDays,
     this.minuteOfDay = 9 * 60,
-    this.hideAmounts = false,
+    this.showAmounts = true,
   });
 
-  static const defaultOffsets = {ReminderOffset.days3, ReminderOffset.sameDay};
-
+  /// Master switch; off cancels every pending reminder.
   final bool enabled;
-  final Set<ReminderOffset> offsets;
+
+  /// Global "days before" (one of [leadDayChoices]).
+  final int leadDays;
 
   /// Local wall-clock time, minutes after midnight (09:00 = 540).
   final int minuteOfDay;
 
-  /// Hide amounts in notification text.
-  final bool hideAmounts;
+  /// Amounts in notification text (off for lock-screen privacy).
+  final bool showAmounts;
 }
 
-/// One notification to schedule: everything due on [dueDate], announced
-/// [offset] days earlier at [minuteOfDay] local time.
+/// "Days before" for a payment that follows the global setting.
+///
+/// The one place that decides it: when manual and automatic payments get
+/// their own defaults (backlog), only this function changes.
+int defaultLeadDaysFor(ReminderPayment payment, ReminderSettings settings) =>
+    settings.leadDays;
+
+/// "Days before" that applies to [payment].
+int leadDaysFor(ReminderPayment payment, ReminderSettings settings) {
+  final days = payment.choice.leadDays ?? defaultLeadDaysFor(payment, settings);
+  // Never on the due day itself: that is the on-day reminder.
+  return days < 1 ? 1 : days;
+}
+
+/// Notification text in the app language. Implemented next to the
+/// localizations; the planner stays pure Dart.
+abstract interface class ReminderTexts {
+  /// The notification title (the app name).
+  String get title;
+
+  /// Text for [payments] due on [dueDates] (one date unless an "ahead"
+  /// notification gathers payments with different lead days).
+  ReminderText describe({
+    required ReminderKind kind,
+    required List<ReminderPayment> payments,
+    required List<LocalDate> dueDates,
+    required bool showAmounts,
+  });
+}
+
+/// The short body and the expanded body (body plus the names).
+class ReminderText {
+  const ReminderText({required this.body, required this.expanded});
+
+  final String body;
+  final String expanded;
+}
+
+/// What a tapped reminder opens: the home screen.
+const reminderPayload = 'home';
+
+/// One notification to schedule.
 class PlannedReminder {
   const PlannedReminder({
     required this.id,
+    required this.kind,
     required this.fireDate,
-    required this.minuteOfDay,
-    required this.offset,
-    required this.dueDate,
+    required this.fireAt,
     required this.payments,
+    required this.dueDates,
+    required this.title,
+    required this.body,
+    required this.expandedBody,
+    this.payload = reminderPayload,
   });
 
-  /// Stable per due date and offset: the same reminder is never scheduled
-  /// twice, and rescheduling replaces it.
+  /// Stable per fire day and kind, so rescheduling replaces a reminder
+  /// instead of adding a second one.
   final int id;
+  final ReminderKind kind;
   final LocalDate fireDate;
-  final int minuteOfDay;
-  final ReminderOffset offset;
-  final LocalDate dueDate;
+
+  /// The real moment: [fireDate] at the chosen local time.
+  final tz.TZDateTime fireAt;
   final List<ReminderPayment> payments;
+
+  /// Distinct due dates of [payments], earliest first.
+  final List<LocalDate> dueDates;
+  final String title;
+  final String body;
+  final String expandedBody;
+  final String payload;
 
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
 
-  bool get isSummary => payments.length > 1;
-
-  /// "Paid" action: only on the due day, and only for a single payment.
-  PaymentRef? get paidAction =>
-      offset == ReminderOffset.sameDay && payments.length == 1
-      ? payments.single.ref
-      : null;
-
-  /// Deep link opened when the notification is tapped.
-  String get route => '/day/$dueDate';
-
-  static int idFor(LocalDate dueDate, ReminderOffset offset) =>
-      dueDate.epochDay * ReminderOffset.values.length + offset.index;
+  static int idFor(LocalDate fireDate, ReminderKind kind) =>
+      fireDate.epochDay * ReminderKind.values.length + kind.index;
 }

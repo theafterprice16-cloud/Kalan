@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/date/local_date.dart';
+import '../../core/design/choice_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/money/currency.dart';
@@ -44,9 +45,9 @@ class SettingsScreen extends ConsumerWidget {
     SettingsRow s,
   ) async {
     final l10n = context.l10n;
-    final picked = await showDialog<_Choice<String?>>(
+    final picked = await showDialog<Choice<String?>>(
       context: context,
-      builder: (_) => _ChoiceDialog<String?>(
+      builder: (_) => ChoiceDialog<String?>(
         title: l10n.settingsLanguage,
         selected: s.localeCode,
         options: [
@@ -63,9 +64,9 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _pickTheme(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
-    final picked = await showDialog<_Choice<ThemeMode>>(
+    final picked = await showDialog<Choice<ThemeMode>>(
       context: context,
-      builder: (_) => _ChoiceDialog<ThemeMode>(
+      builder: (_) => ChoiceDialog<ThemeMode>(
         title: l10n.settingsTheme,
         selected: ref.read(themeModeProvider),
         options: [
@@ -106,7 +107,7 @@ class SettingsScreen extends ConsumerWidget {
     required int? current,
     required AppSettingsCompanion Function(int?) toChanges,
   }) async {
-    final result = await showDialog<_Choice<int?>>(
+    final result = await showDialog<Choice<int?>>(
       context: context,
       builder: (_) => _AmountDialog(
         title: title,
@@ -231,48 +232,6 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 /// Wraps a dialog result so "cleared" (null value) differs from "cancelled".
-class _Choice<T> {
-  const _Choice(this.value);
-  final T value;
-}
-
-class _ChoiceDialog<T> extends StatelessWidget {
-  const _ChoiceDialog({
-    required this.title,
-    required this.selected,
-    required this.options,
-    this.note,
-  });
-
-  final String title;
-  final T selected;
-  final List<(T, String)> options;
-  final String? note;
-
-  @override
-  Widget build(BuildContext context) {
-    return SimpleDialog(
-      title: Text(title),
-      children: [
-        if (note != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Text(note!),
-          ),
-        for (final (value, label) in options)
-          Semantics(
-            selected: value == selected,
-            child: ListTile(
-              title: Text(label),
-              trailing: value == selected ? const Icon(Icons.check) : null,
-              onTap: () => Navigator.pop(context, _Choice<T>(value)),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _AmountDialog extends StatefulWidget {
   const _AmountDialog({
     required this.title,
@@ -337,7 +296,7 @@ class _AmountDialogState extends State<_AmountDialog> {
             final text = _controller.text;
             Navigator.pop(
               context,
-              _Choice(
+              Choice(
                 text.trim().isEmpty
                     ? null
                     : parseAmount(

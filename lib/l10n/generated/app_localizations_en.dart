@@ -760,39 +760,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeDark => 'Dark';
 
   @override
-  String reminderWhen(String offset) {
-    String _temp0 = intl.Intl.selectLogic(offset, {
-      'days7': 'In 7 days',
-      'days3': 'In 3 days',
-      'days1': 'Tomorrow',
-      'sameDay': 'Today',
-      'other': 'Soon',
-    });
-    return '$_temp0';
-  }
-
-  @override
-  String reminderSingle(String when, String name, String amount) {
-    return '$when: $name · $amount';
-  }
-
-  @override
-  String reminderSummary(String when, int count, String total) {
-    return '$when you have $count payments · $total in total';
-  }
-
-  @override
-  String reminderCountOnly(String when, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count payments',
-      one: '1 payment',
-    );
-    return '$when you have $_temp0';
-  }
-
-  @override
   String get reminderChannelName => 'Payment reminders';
 
   @override
@@ -800,17 +767,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Short reminders before a payment is due.';
 
   @override
-  String get notificationPaidAction => 'Paid';
-
-  @override
   String get reminderPromptTitle => 'Reminders';
 
   @override
   String get reminderPromptBody =>
-      'Shall we let you know before a payment is due? Reminders are prepared only on this phone.';
+      'We\'ll let you know before a payment is due. Reminders are set up only on this phone.';
 
   @override
-  String get reminderPromptAccept => 'Remind me';
+  String get reminderPromptAccept => 'Turn on reminders';
 
   @override
   String get reminderPromptLater => 'Not now';
@@ -819,32 +783,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsReminders => 'Reminders';
 
   @override
-  String get remindersEnabled => 'Payment reminders';
-
-  @override
-  String get reminderDays7 => '7 days before';
-
-  @override
-  String get reminderDays3 => '3 days before';
-
-  @override
-  String get reminderDays1 => '1 day before';
-
-  @override
-  String get reminderSameDay => 'On the day';
+  String get remindersEnabled => 'Reminders';
 
   @override
   String get reminderTime => 'Time';
 
   @override
-  String get reminderHideAmounts => 'Hide amounts in notifications';
+  String get remindersPermissionOff => 'Notification permission is off';
 
   @override
-  String get remindersPermissionOff =>
-      'Notifications are off for Kalan, so reminders won’t show.';
-
-  @override
-  String get openPhoneSettings => 'Open phone settings';
+  String get openPhoneSettings => 'Open settings';
 
   @override
   String get remindersHelpLink => 'Not getting reminders?';
@@ -878,7 +826,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get remindersWebOnly => 'This works on your phone.';
 
   @override
-  String get debugTestNotification => 'Send test notification (in 10 s)';
+  String get debugTestNotification => 'Test notification (in 10 seconds)';
 
   @override
   String get testNotificationScheduled =>
@@ -888,13 +836,127 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotificationText => 'Test: reminders work on this phone.';
 
   @override
-  String get planReminderToggle => 'Reminders for this plan';
+  String get remindersEnabledHint => 'Before a payment is due and on the day';
 
   @override
-  String dayPaymentsTitle(String date) {
-    return 'Payments on $date';
+  String reminderAhead(int count, String date, String name, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments on $date, $total in total',
+      one: '1 payment on $date: $name, $total',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get dayPaymentsEmpty => 'No payments on this day.';
+  String reminderAheadHidden(int count, String date, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments on $date',
+      one: '1 payment on $date: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderAheadMixed(int count, String date, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments from $date, $total in total',
+      one: '1 payment from $date, $total in total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderAheadMixedHidden(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments from $date',
+      one: '1 payment from $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderToday(int count, String name, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments today, $total in total',
+      one: '1 payment today: $name, $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderTodayHidden(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments today',
+      one: '1 payment today: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderExpanded(String body, String names) {
+    return '$body\n$names';
+  }
+
+  @override
+  String get reminderNameSeparator => ', ';
+
+  @override
+  String get reminderLeadDays => 'Days before';
+
+  @override
+  String reminderLeadDaysValue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days before',
+      one: '1 day before',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderLeadDaysSemantics(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return 'Days before, now $_temp0';
+  }
+
+  @override
+  String get reminderShowAmount => 'Show amount in notifications';
+
+  @override
+  String get planReminder => 'Reminder';
+
+  @override
+  String planReminderGeneral(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days before',
+      one: '1 day before',
+    );
+    return 'General setting ($_temp0)';
+  }
+
+  @override
+  String get planReminderOff => 'Off';
+
+  @override
+  String get planReminderCustom => 'Different day';
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -38,10 +40,20 @@ final notificationPermissionProvider = FutureProvider<bool>(
   (ref) => ref.watch(notificationGatewayProvider).permissionGranted(),
 );
 
+/// Quiet time before a reschedule, so a burst of changes runs it once.
+final reminderDebounceProvider = Provider<Duration>(
+  (ref) => const Duration(milliseconds: 300),
+);
+
 /// Reschedules every reminder whenever plans, payments, recurring payments
-/// or settings change. One central listener instead of calls from screens.
+/// or settings (reminder settings, language, currency) change. One central
+/// listener instead of calls from screens; the app also requests a run on
+/// start and when it comes back to the foreground.
 final reminderSyncProvider = Provider<ReminderSync>((ref) {
-  final sync = ReminderSync(ref.watch(reminderSchedulerProvider));
+  final sync = ReminderSync(
+    ref.watch(reminderSchedulerProvider),
+    debounce: ref.watch(reminderDebounceProvider),
+  );
   ref.listen(plansProvider, (_, _) => sync.request());
   ref.listen(recurringProvider, (_, _) => sync.request());
   ref.listen(settingsProvider, (_, _) => sync.request());
@@ -49,21 +61,31 @@ final reminderSyncProvider = Provider<ReminderSync>((ref) {
   return sync;
 });
 
-/// Coalesces bursts of changes into at most one running reschedule plus
-/// one queued.
+/// Debounces requests and runs at most one reschedule at a time, in the
+/// background (the work is asynchronous; the UI never waits for it).
 class ReminderSync {
-  ReminderSync(this._scheduler);
+  ReminderSync(this._scheduler, {required this.debounce});
 
   final ReminderScheduler _scheduler;
+  final Duration debounce;
+  Timer? _timer;
   Future<void>? _running;
   bool _again = false;
   bool _disposed = false;
+  Completer<void>? _idle;
 
-  /// Completes when no reschedule is running.
-  Future<void> get idle => _running ?? Future.value();
+  /// Completes when no reschedule is waiting or running.
+  Future<void> get idle => _idle?.future ?? Future.value();
 
   void request() {
     if (_disposed) return;
+    _idle ??= Completer<void>();
+    _timer?.cancel();
+    _timer = Timer(debounce, _start);
+  }
+
+  void _start() {
+    _timer = null;
     if (_running != null) {
       _again = true;
       return;
@@ -83,7 +105,19 @@ class ReminderSync {
       }
     } while (_again && !_disposed);
     _running = null;
+    if (_timer == null) _finish();
   }
 
-  void dispose() => _disposed = true;
+  void _finish() {
+    final idle = _idle;
+    _idle = null;
+    if (idle != null && !idle.isCompleted) idle.complete();
+  }
+
+  void dispose() {
+    _disposed = true;
+    _timer?.cancel();
+    _timer = null;
+    _finish();
+  }
 }

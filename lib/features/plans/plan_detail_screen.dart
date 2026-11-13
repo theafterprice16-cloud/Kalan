@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,6 +13,8 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../onboarding/pay_form.dart';
+import '../reminders/reminder_choice_tile.dart';
+import '../reminders/reminder_settings_store.dart';
 import 'plan_labels.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -152,13 +156,23 @@ class PlanDetailScreen extends ConsumerWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
-            child: SwitchListTile(
-              key: const ValueKey('item-reminders'),
-              title: Text(l10n.planReminderToggle),
-              value: plan.plan.remindersEnabled,
-              onChanged: (v) => ref
-                  .read(planRepositoryProvider)
-                  .setRemindersEnabled(plan.plan.id, enabled: v),
+            child: ReminderChoiceTile(
+              value: reminderChoiceOf(
+                enabled: plan.plan.remindersEnabled,
+                leadDays: plan.plan.reminderLeadDays,
+              ),
+              onChanged: (choice) {
+                final (enabled, leadDays) = reminderColumnsOf(choice);
+                return unawaited(
+                  ref
+                      .read(planRepositoryProvider)
+                      .setReminderChoice(
+                        plan.plan.id,
+                        enabled: enabled,
+                        leadDays: leadDays,
+                      ),
+                );
+              },
             ),
           ),
           SectionTitle(l10n.planPaymentsTitle),

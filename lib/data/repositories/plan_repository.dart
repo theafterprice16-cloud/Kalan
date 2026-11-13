@@ -141,11 +141,18 @@ class PlanRepository {
     }
   });
 
-  /// "Reminders for this plan".
-  Future<void> setRemindersEnabled(int planId, {required bool enabled}) =>
-      (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
-        PlansCompanion(remindersEnabled: Value(enabled)),
-      );
+  /// The plan's reminder choice: off when [enabled] is false, otherwise its
+  /// own [leadDays] or, when null, the global setting.
+  Future<void> setReminderChoice(
+    int planId, {
+    required bool enabled,
+    int? leadDays,
+  }) => (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+    PlansCompanion(
+      remindersEnabled: Value(enabled),
+      reminderLeadDays: Value(leadDays),
+    ),
+  );
 
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();

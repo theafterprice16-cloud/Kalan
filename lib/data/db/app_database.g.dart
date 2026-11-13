@@ -618,6 +618,20 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _reminderLeadDaysMeta = const VerificationMeta(
+    'reminderLeadDays',
+  );
+  @override
+  late final GeneratedColumn<int> reminderLeadDays = GeneratedColumn<int>(
+    'reminder_lead_days',
+    aliasedName,
+    true,
+    check: () =>
+        reminderLeadDays.isNull() |
+        reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -631,6 +645,7 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     origin,
     createdAt,
     remindersEnabled,
+    reminderLeadDays,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -714,6 +729,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         ),
       );
     }
+    if (data.containsKey('reminder_lead_days')) {
+      context.handle(
+        _reminderLeadDaysMeta,
+        reminderLeadDays.isAcceptableOrUnknown(
+          data['reminder_lead_days']!,
+          _reminderLeadDaysMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -771,6 +795,10 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}reminders_enabled'],
       )!,
+      reminderLeadDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_lead_days'],
+      ),
     );
   }
 
@@ -797,8 +825,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   final PlanOrigin origin;
   final DateTime createdAt;
 
-  /// "Reminders for this plan" (schema v2).
+  /// Reminder choice (schema v2, v3): off when false; otherwise the
+  /// global "days before" ([reminderLeadDays] null) or its own.
   final bool remindersEnabled;
+  final int? reminderLeadDays;
   const PlanRow({
     required this.id,
     required this.sourceId,
@@ -811,6 +841,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     required this.origin,
     required this.createdAt,
     required this.remindersEnabled,
+    this.reminderLeadDays,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -836,6 +867,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['reminders_enabled'] = Variable<bool>(remindersEnabled);
+    if (!nullToAbsent || reminderLeadDays != null) {
+      map['reminder_lead_days'] = Variable<int>(reminderLeadDays);
+    }
     return map;
   }
 
@@ -856,6 +890,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       origin: Value(origin),
       createdAt: Value(createdAt),
       remindersEnabled: Value(remindersEnabled),
+      reminderLeadDays: reminderLeadDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderLeadDays),
     );
   }
 
@@ -880,6 +917,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       remindersEnabled: serializer.fromJson<bool>(json['remindersEnabled']),
+      reminderLeadDays: serializer.fromJson<int?>(json['reminderLeadDays']),
     );
   }
   @override
@@ -901,6 +939,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       ),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'remindersEnabled': serializer.toJson<bool>(remindersEnabled),
+      'reminderLeadDays': serializer.toJson<int?>(reminderLeadDays),
     };
   }
 
@@ -916,6 +955,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     PlanOrigin? origin,
     DateTime? createdAt,
     bool? remindersEnabled,
+    Value<int?> reminderLeadDays = const Value.absent(),
   }) => PlanRow(
     id: id ?? this.id,
     sourceId: sourceId ?? this.sourceId,
@@ -928,6 +968,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     origin: origin ?? this.origin,
     createdAt: createdAt ?? this.createdAt,
     remindersEnabled: remindersEnabled ?? this.remindersEnabled,
+    reminderLeadDays: reminderLeadDays.present
+        ? reminderLeadDays.value
+        : this.reminderLeadDays,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -952,6 +995,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       remindersEnabled: data.remindersEnabled.present
           ? data.remindersEnabled.value
           : this.remindersEnabled,
+      reminderLeadDays: data.reminderLeadDays.present
+          ? data.reminderLeadDays.value
+          : this.reminderLeadDays,
     );
   }
 
@@ -968,7 +1014,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('isCashAdvance: $isCashAdvance, ')
           ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
-          ..write('remindersEnabled: $remindersEnabled')
+          ..write('remindersEnabled: $remindersEnabled, ')
+          ..write('reminderLeadDays: $reminderLeadDays')
           ..write(')'))
         .toString();
   }
@@ -986,6 +1033,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     origin,
     createdAt,
     remindersEnabled,
+    reminderLeadDays,
   );
   @override
   bool operator ==(Object other) =>
@@ -1001,7 +1049,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.isCashAdvance == this.isCashAdvance &&
           other.origin == this.origin &&
           other.createdAt == this.createdAt &&
-          other.remindersEnabled == this.remindersEnabled);
+          other.remindersEnabled == this.remindersEnabled &&
+          other.reminderLeadDays == this.reminderLeadDays);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
@@ -1016,6 +1065,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<PlanOrigin> origin;
   final Value<DateTime> createdAt;
   final Value<bool> remindersEnabled;
+  final Value<int?> reminderLeadDays;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1028,6 +1078,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.origin = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
+    this.reminderLeadDays = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
@@ -1041,6 +1092,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     required PlanOrigin origin,
     this.createdAt = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
+    this.reminderLeadDays = const Value.absent(),
   }) : sourceId = Value(sourceId),
        kind = Value(kind),
        installmentCount = Value(installmentCount),
@@ -1057,6 +1109,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<String>? origin,
     Expression<DateTime>? createdAt,
     Expression<bool>? remindersEnabled,
+    Expression<int>? reminderLeadDays,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1070,6 +1123,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       if (origin != null) 'origin': origin,
       if (createdAt != null) 'created_at': createdAt,
       if (remindersEnabled != null) 'reminders_enabled': remindersEnabled,
+      if (reminderLeadDays != null) 'reminder_lead_days': reminderLeadDays,
     });
   }
 
@@ -1085,6 +1139,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<PlanOrigin>? origin,
     Value<DateTime>? createdAt,
     Value<bool>? remindersEnabled,
+    Value<int?>? reminderLeadDays,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -1098,6 +1153,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       origin: origin ?? this.origin,
       createdAt: createdAt ?? this.createdAt,
       remindersEnabled: remindersEnabled ?? this.remindersEnabled,
+      reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
     );
   }
 
@@ -1141,6 +1197,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     if (remindersEnabled.present) {
       map['reminders_enabled'] = Variable<bool>(remindersEnabled.value);
     }
+    if (reminderLeadDays.present) {
+      map['reminder_lead_days'] = Variable<int>(reminderLeadDays.value);
+    }
     return map;
   }
 
@@ -1157,7 +1216,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('isCashAdvance: $isCashAdvance, ')
           ..write('origin: $origin, ')
           ..write('createdAt: $createdAt, ')
-          ..write('remindersEnabled: $remindersEnabled')
+          ..write('remindersEnabled: $remindersEnabled, ')
+          ..write('reminderLeadDays: $reminderLeadDays')
           ..write(')'))
         .toString();
   }
@@ -1717,6 +1777,20 @@ class $RecurringPaymentsTable extends RecurringPayments
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _reminderLeadDaysMeta = const VerificationMeta(
+    'reminderLeadDays',
+  );
+  @override
+  late final GeneratedColumn<int> reminderLeadDays = GeneratedColumn<int>(
+    'reminder_lead_days',
+    aliasedName,
+    true,
+    check: () =>
+        reminderLeadDays.isNull() |
+        reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1727,6 +1801,7 @@ class $RecurringPaymentsTable extends RecurringPayments
     endDay,
     createdAt,
     remindersEnabled,
+    reminderLeadDays,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1791,6 +1866,15 @@ class $RecurringPaymentsTable extends RecurringPayments
         ),
       );
     }
+    if (data.containsKey('reminder_lead_days')) {
+      context.handle(
+        _reminderLeadDaysMeta,
+        reminderLeadDays.isAcceptableOrUnknown(
+          data['reminder_lead_days']!,
+          _reminderLeadDaysMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1834,6 +1918,10 @@ class $RecurringPaymentsTable extends RecurringPayments
         DriftSqlType.bool,
         data['${effectivePrefix}reminders_enabled'],
       )!,
+      reminderLeadDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_lead_days'],
+      ),
     );
   }
 
@@ -1856,8 +1944,9 @@ class RecurringPaymentRow extends DataClass
   final int? endDay;
   final DateTime createdAt;
 
-  /// "Reminders for this payment" (schema v2).
+  /// Reminder choice, as on [Plans] (schema v2, v3).
   final bool remindersEnabled;
+  final int? reminderLeadDays;
   const RecurringPaymentRow({
     required this.id,
     required this.name,
@@ -1867,6 +1956,7 @@ class RecurringPaymentRow extends DataClass
     this.endDay,
     required this.createdAt,
     required this.remindersEnabled,
+    this.reminderLeadDays,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1885,6 +1975,9 @@ class RecurringPaymentRow extends DataClass
     }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['reminders_enabled'] = Variable<bool>(remindersEnabled);
+    if (!nullToAbsent || reminderLeadDays != null) {
+      map['reminder_lead_days'] = Variable<int>(reminderLeadDays);
+    }
     return map;
   }
 
@@ -1900,6 +1993,9 @@ class RecurringPaymentRow extends DataClass
           : Value(endDay),
       createdAt: Value(createdAt),
       remindersEnabled: Value(remindersEnabled),
+      reminderLeadDays: reminderLeadDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reminderLeadDays),
     );
   }
 
@@ -1919,6 +2015,7 @@ class RecurringPaymentRow extends DataClass
       endDay: serializer.fromJson<int?>(json['endDay']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       remindersEnabled: serializer.fromJson<bool>(json['remindersEnabled']),
+      reminderLeadDays: serializer.fromJson<int?>(json['reminderLeadDays']),
     );
   }
   @override
@@ -1935,6 +2032,7 @@ class RecurringPaymentRow extends DataClass
       'endDay': serializer.toJson<int?>(endDay),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'remindersEnabled': serializer.toJson<bool>(remindersEnabled),
+      'reminderLeadDays': serializer.toJson<int?>(reminderLeadDays),
     };
   }
 
@@ -1947,6 +2045,7 @@ class RecurringPaymentRow extends DataClass
     Value<int?> endDay = const Value.absent(),
     DateTime? createdAt,
     bool? remindersEnabled,
+    Value<int?> reminderLeadDays = const Value.absent(),
   }) => RecurringPaymentRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1956,6 +2055,9 @@ class RecurringPaymentRow extends DataClass
     endDay: endDay.present ? endDay.value : this.endDay,
     createdAt: createdAt ?? this.createdAt,
     remindersEnabled: remindersEnabled ?? this.remindersEnabled,
+    reminderLeadDays: reminderLeadDays.present
+        ? reminderLeadDays.value
+        : this.reminderLeadDays,
   );
   RecurringPaymentRow copyWithCompanion(RecurringPaymentsCompanion data) {
     return RecurringPaymentRow(
@@ -1973,6 +2075,9 @@ class RecurringPaymentRow extends DataClass
       remindersEnabled: data.remindersEnabled.present
           ? data.remindersEnabled.value
           : this.remindersEnabled,
+      reminderLeadDays: data.reminderLeadDays.present
+          ? data.reminderLeadDays.value
+          : this.reminderLeadDays,
     );
   }
 
@@ -1986,7 +2091,8 @@ class RecurringPaymentRow extends DataClass
           ..write('startDay: $startDay, ')
           ..write('endDay: $endDay, ')
           ..write('createdAt: $createdAt, ')
-          ..write('remindersEnabled: $remindersEnabled')
+          ..write('remindersEnabled: $remindersEnabled, ')
+          ..write('reminderLeadDays: $reminderLeadDays')
           ..write(')'))
         .toString();
   }
@@ -2001,6 +2107,7 @@ class RecurringPaymentRow extends DataClass
     endDay,
     createdAt,
     remindersEnabled,
+    reminderLeadDays,
   );
   @override
   bool operator ==(Object other) =>
@@ -2013,7 +2120,8 @@ class RecurringPaymentRow extends DataClass
           other.startDay == this.startDay &&
           other.endDay == this.endDay &&
           other.createdAt == this.createdAt &&
-          other.remindersEnabled == this.remindersEnabled);
+          other.remindersEnabled == this.remindersEnabled &&
+          other.reminderLeadDays == this.reminderLeadDays);
 }
 
 class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
@@ -2025,6 +2133,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
   final Value<int?> endDay;
   final Value<DateTime> createdAt;
   final Value<bool> remindersEnabled;
+  final Value<int?> reminderLeadDays;
   const RecurringPaymentsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -2034,6 +2143,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
     this.endDay = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
+    this.reminderLeadDays = const Value.absent(),
   });
   RecurringPaymentsCompanion.insert({
     this.id = const Value.absent(),
@@ -2044,6 +2154,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
     this.endDay = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
+    this.reminderLeadDays = const Value.absent(),
   }) : name = Value(name),
        amountMinor = Value(amountMinor),
        recurrence = Value(recurrence),
@@ -2057,6 +2168,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
     Expression<int>? endDay,
     Expression<DateTime>? createdAt,
     Expression<bool>? remindersEnabled,
+    Expression<int>? reminderLeadDays,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2067,6 +2179,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
       if (endDay != null) 'end_day': endDay,
       if (createdAt != null) 'created_at': createdAt,
       if (remindersEnabled != null) 'reminders_enabled': remindersEnabled,
+      if (reminderLeadDays != null) 'reminder_lead_days': reminderLeadDays,
     });
   }
 
@@ -2079,6 +2192,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
     Value<int?>? endDay,
     Value<DateTime>? createdAt,
     Value<bool>? remindersEnabled,
+    Value<int?>? reminderLeadDays,
   }) {
     return RecurringPaymentsCompanion(
       id: id ?? this.id,
@@ -2089,6 +2203,7 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
       endDay: endDay ?? this.endDay,
       createdAt: createdAt ?? this.createdAt,
       remindersEnabled: remindersEnabled ?? this.remindersEnabled,
+      reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
     );
   }
 
@@ -2121,6 +2236,9 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
     if (remindersEnabled.present) {
       map['reminders_enabled'] = Variable<bool>(remindersEnabled.value);
     }
+    if (reminderLeadDays.present) {
+      map['reminder_lead_days'] = Variable<int>(reminderLeadDays.value);
+    }
     return map;
   }
 
@@ -2134,7 +2252,8 @@ class RecurringPaymentsCompanion extends UpdateCompanion<RecurringPaymentRow> {
           ..write('startDay: $startDay, ')
           ..write('endDay: $endDay, ')
           ..write('createdAt: $createdAt, ')
-          ..write('remindersEnabled: $remindersEnabled')
+          ..write('remindersEnabled: $remindersEnabled, ')
+          ..write('reminderLeadDays: $reminderLeadDays')
           ..write(')'))
         .toString();
   }
@@ -2543,65 +2662,18 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _remindDays7Meta = const VerificationMeta(
-    'remindDays7',
+  static const VerificationMeta _reminderLeadDaysMeta = const VerificationMeta(
+    'reminderLeadDays',
   );
   @override
-  late final GeneratedColumn<bool> remindDays7 = GeneratedColumn<bool>(
-    'remind_days7',
+  late final GeneratedColumn<int> reminderLeadDays = GeneratedColumn<int>(
+    'reminder_lead_days',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    check: () => reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("remind_days7" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _remindDays3Meta = const VerificationMeta(
-    'remindDays3',
-  );
-  @override
-  late final GeneratedColumn<bool> remindDays3 = GeneratedColumn<bool>(
-    'remind_days3',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("remind_days3" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
-  );
-  static const VerificationMeta _remindDays1Meta = const VerificationMeta(
-    'remindDays1',
-  );
-  @override
-  late final GeneratedColumn<bool> remindDays1 = GeneratedColumn<bool>(
-    'remind_days1',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("remind_days1" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
-  static const VerificationMeta _remindSameDayMeta = const VerificationMeta(
-    'remindSameDay',
-  );
-  @override
-  late final GeneratedColumn<bool> remindSameDay = GeneratedColumn<bool>(
-    'remind_same_day',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("remind_same_day" IN (0, 1))',
-    ),
-    defaultValue: const Constant(true),
+    defaultValue: const Constant(2),
   );
   static const VerificationMeta _reminderMinuteMeta = const VerificationMeta(
     'reminderMinute',
@@ -2657,10 +2729,7 @@ class $AppSettingsTable extends AppSettings
     tightThresholdMinor,
     debugPro,
     remindersEnabled,
-    remindDays7,
-    remindDays3,
-    remindDays1,
-    remindSameDay,
+    reminderLeadDays,
     reminderMinute,
     hideAmountsInNotifications,
     reminderPromptShown,
@@ -2745,39 +2814,12 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
-    if (data.containsKey('remind_days7')) {
+    if (data.containsKey('reminder_lead_days')) {
       context.handle(
-        _remindDays7Meta,
-        remindDays7.isAcceptableOrUnknown(
-          data['remind_days7']!,
-          _remindDays7Meta,
-        ),
-      );
-    }
-    if (data.containsKey('remind_days3')) {
-      context.handle(
-        _remindDays3Meta,
-        remindDays3.isAcceptableOrUnknown(
-          data['remind_days3']!,
-          _remindDays3Meta,
-        ),
-      );
-    }
-    if (data.containsKey('remind_days1')) {
-      context.handle(
-        _remindDays1Meta,
-        remindDays1.isAcceptableOrUnknown(
-          data['remind_days1']!,
-          _remindDays1Meta,
-        ),
-      );
-    }
-    if (data.containsKey('remind_same_day')) {
-      context.handle(
-        _remindSameDayMeta,
-        remindSameDay.isAcceptableOrUnknown(
-          data['remind_same_day']!,
-          _remindSameDayMeta,
+        _reminderLeadDaysMeta,
+        reminderLeadDays.isAcceptableOrUnknown(
+          data['reminder_lead_days']!,
+          _reminderLeadDaysMeta,
         ),
       );
     }
@@ -2859,21 +2901,9 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}reminders_enabled'],
       )!,
-      remindDays7: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}remind_days7'],
-      )!,
-      remindDays3: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}remind_days3'],
-      )!,
-      remindDays1: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}remind_days1'],
-      )!,
-      remindSameDay: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}remind_same_day'],
+      reminderLeadDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_lead_days'],
       )!,
       reminderMinute: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -2920,18 +2950,17 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// Honoured only in debug builds.
   final bool debugPro;
   final bool remindersEnabled;
-  final bool remindDays7;
-  final bool remindDays3;
-  final bool remindDays1;
-  final bool remindSameDay;
+
+  /// Global "days before" (1, 2, 3, 5 or 7).
+  final int reminderLeadDays;
 
   /// Local time, minutes after midnight.
   final int reminderMinute;
 
-  /// Privacy: hide amounts in notifications.
+  /// Privacy: hide amounts in notifications ("show amount" off).
   final bool hideAmountsInNotifications;
 
-  /// The in-app reminder prompt was answered (never asked again).
+  /// The permission sheet was shown (never asked again).
   final bool reminderPromptShown;
   const SettingsRow({
     required this.id,
@@ -2944,10 +2973,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     this.tightThresholdMinor,
     required this.debugPro,
     required this.remindersEnabled,
-    required this.remindDays7,
-    required this.remindDays3,
-    required this.remindDays1,
-    required this.remindSameDay,
+    required this.reminderLeadDays,
     required this.reminderMinute,
     required this.hideAmountsInNotifications,
     required this.reminderPromptShown,
@@ -2979,10 +3005,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     }
     map['debug_pro'] = Variable<bool>(debugPro);
     map['reminders_enabled'] = Variable<bool>(remindersEnabled);
-    map['remind_days7'] = Variable<bool>(remindDays7);
-    map['remind_days3'] = Variable<bool>(remindDays3);
-    map['remind_days1'] = Variable<bool>(remindDays1);
-    map['remind_same_day'] = Variable<bool>(remindSameDay);
+    map['reminder_lead_days'] = Variable<int>(reminderLeadDays);
     map['reminder_minute'] = Variable<int>(reminderMinute);
     map['hide_amounts_in_notifications'] = Variable<bool>(
       hideAmountsInNotifications,
@@ -3013,10 +3036,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           : Value(tightThresholdMinor),
       debugPro: Value(debugPro),
       remindersEnabled: Value(remindersEnabled),
-      remindDays7: Value(remindDays7),
-      remindDays3: Value(remindDays3),
-      remindDays1: Value(remindDays1),
-      remindSameDay: Value(remindSameDay),
+      reminderLeadDays: Value(reminderLeadDays),
       reminderMinute: Value(reminderMinute),
       hideAmountsInNotifications: Value(hideAmountsInNotifications),
       reminderPromptShown: Value(reminderPromptShown),
@@ -3043,10 +3063,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       ),
       debugPro: serializer.fromJson<bool>(json['debugPro']),
       remindersEnabled: serializer.fromJson<bool>(json['remindersEnabled']),
-      remindDays7: serializer.fromJson<bool>(json['remindDays7']),
-      remindDays3: serializer.fromJson<bool>(json['remindDays3']),
-      remindDays1: serializer.fromJson<bool>(json['remindDays1']),
-      remindSameDay: serializer.fromJson<bool>(json['remindSameDay']),
+      reminderLeadDays: serializer.fromJson<int>(json['reminderLeadDays']),
       reminderMinute: serializer.fromJson<int>(json['reminderMinute']),
       hideAmountsInNotifications: serializer.fromJson<bool>(
         json['hideAmountsInNotifications'],
@@ -3072,10 +3089,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'tightThresholdMinor': serializer.toJson<int?>(tightThresholdMinor),
       'debugPro': serializer.toJson<bool>(debugPro),
       'remindersEnabled': serializer.toJson<bool>(remindersEnabled),
-      'remindDays7': serializer.toJson<bool>(remindDays7),
-      'remindDays3': serializer.toJson<bool>(remindDays3),
-      'remindDays1': serializer.toJson<bool>(remindDays1),
-      'remindSameDay': serializer.toJson<bool>(remindSameDay),
+      'reminderLeadDays': serializer.toJson<int>(reminderLeadDays),
       'reminderMinute': serializer.toJson<int>(reminderMinute),
       'hideAmountsInNotifications': serializer.toJson<bool>(
         hideAmountsInNotifications,
@@ -3095,10 +3109,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     Value<int?> tightThresholdMinor = const Value.absent(),
     bool? debugPro,
     bool? remindersEnabled,
-    bool? remindDays7,
-    bool? remindDays3,
-    bool? remindDays1,
-    bool? remindSameDay,
+    int? reminderLeadDays,
     int? reminderMinute,
     bool? hideAmountsInNotifications,
     bool? reminderPromptShown,
@@ -3117,10 +3128,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         : this.tightThresholdMinor,
     debugPro: debugPro ?? this.debugPro,
     remindersEnabled: remindersEnabled ?? this.remindersEnabled,
-    remindDays7: remindDays7 ?? this.remindDays7,
-    remindDays3: remindDays3 ?? this.remindDays3,
-    remindDays1: remindDays1 ?? this.remindDays1,
-    remindSameDay: remindSameDay ?? this.remindSameDay,
+    reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
     reminderMinute: reminderMinute ?? this.reminderMinute,
     hideAmountsInNotifications:
         hideAmountsInNotifications ?? this.hideAmountsInNotifications,
@@ -3152,18 +3160,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       remindersEnabled: data.remindersEnabled.present
           ? data.remindersEnabled.value
           : this.remindersEnabled,
-      remindDays7: data.remindDays7.present
-          ? data.remindDays7.value
-          : this.remindDays7,
-      remindDays3: data.remindDays3.present
-          ? data.remindDays3.value
-          : this.remindDays3,
-      remindDays1: data.remindDays1.present
-          ? data.remindDays1.value
-          : this.remindDays1,
-      remindSameDay: data.remindSameDay.present
-          ? data.remindSameDay.value
-          : this.remindSameDay,
+      reminderLeadDays: data.reminderLeadDays.present
+          ? data.reminderLeadDays.value
+          : this.reminderLeadDays,
       reminderMinute: data.reminderMinute.present
           ? data.reminderMinute.value
           : this.reminderMinute,
@@ -3189,10 +3188,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('tightThresholdMinor: $tightThresholdMinor, ')
           ..write('debugPro: $debugPro, ')
           ..write('remindersEnabled: $remindersEnabled, ')
-          ..write('remindDays7: $remindDays7, ')
-          ..write('remindDays3: $remindDays3, ')
-          ..write('remindDays1: $remindDays1, ')
-          ..write('remindSameDay: $remindSameDay, ')
+          ..write('reminderLeadDays: $reminderLeadDays, ')
           ..write('reminderMinute: $reminderMinute, ')
           ..write('hideAmountsInNotifications: $hideAmountsInNotifications, ')
           ..write('reminderPromptShown: $reminderPromptShown')
@@ -3212,10 +3208,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     tightThresholdMinor,
     debugPro,
     remindersEnabled,
-    remindDays7,
-    remindDays3,
-    remindDays1,
-    remindSameDay,
+    reminderLeadDays,
     reminderMinute,
     hideAmountsInNotifications,
     reminderPromptShown,
@@ -3234,10 +3227,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.tightThresholdMinor == this.tightThresholdMinor &&
           other.debugPro == this.debugPro &&
           other.remindersEnabled == this.remindersEnabled &&
-          other.remindDays7 == this.remindDays7 &&
-          other.remindDays3 == this.remindDays3 &&
-          other.remindDays1 == this.remindDays1 &&
-          other.remindSameDay == this.remindSameDay &&
+          other.reminderLeadDays == this.reminderLeadDays &&
           other.reminderMinute == this.reminderMinute &&
           other.hideAmountsInNotifications == this.hideAmountsInNotifications &&
           other.reminderPromptShown == this.reminderPromptShown);
@@ -3254,10 +3244,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<int?> tightThresholdMinor;
   final Value<bool> debugPro;
   final Value<bool> remindersEnabled;
-  final Value<bool> remindDays7;
-  final Value<bool> remindDays3;
-  final Value<bool> remindDays1;
-  final Value<bool> remindSameDay;
+  final Value<int> reminderLeadDays;
   final Value<int> reminderMinute;
   final Value<bool> hideAmountsInNotifications;
   final Value<bool> reminderPromptShown;
@@ -3272,10 +3259,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.tightThresholdMinor = const Value.absent(),
     this.debugPro = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
-    this.remindDays7 = const Value.absent(),
-    this.remindDays3 = const Value.absent(),
-    this.remindDays1 = const Value.absent(),
-    this.remindSameDay = const Value.absent(),
+    this.reminderLeadDays = const Value.absent(),
     this.reminderMinute = const Value.absent(),
     this.hideAmountsInNotifications = const Value.absent(),
     this.reminderPromptShown = const Value.absent(),
@@ -3291,10 +3275,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.tightThresholdMinor = const Value.absent(),
     this.debugPro = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
-    this.remindDays7 = const Value.absent(),
-    this.remindDays3 = const Value.absent(),
-    this.remindDays1 = const Value.absent(),
-    this.remindSameDay = const Value.absent(),
+    this.reminderLeadDays = const Value.absent(),
     this.reminderMinute = const Value.absent(),
     this.hideAmountsInNotifications = const Value.absent(),
     this.reminderPromptShown = const Value.absent(),
@@ -3311,10 +3292,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<int>? tightThresholdMinor,
     Expression<bool>? debugPro,
     Expression<bool>? remindersEnabled,
-    Expression<bool>? remindDays7,
-    Expression<bool>? remindDays3,
-    Expression<bool>? remindDays1,
-    Expression<bool>? remindSameDay,
+    Expression<int>? reminderLeadDays,
     Expression<int>? reminderMinute,
     Expression<bool>? hideAmountsInNotifications,
     Expression<bool>? reminderPromptShown,
@@ -3331,10 +3309,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
         'tight_threshold_minor': tightThresholdMinor,
       if (debugPro != null) 'debug_pro': debugPro,
       if (remindersEnabled != null) 'reminders_enabled': remindersEnabled,
-      if (remindDays7 != null) 'remind_days7': remindDays7,
-      if (remindDays3 != null) 'remind_days3': remindDays3,
-      if (remindDays1 != null) 'remind_days1': remindDays1,
-      if (remindSameDay != null) 'remind_same_day': remindSameDay,
+      if (reminderLeadDays != null) 'reminder_lead_days': reminderLeadDays,
       if (reminderMinute != null) 'reminder_minute': reminderMinute,
       if (hideAmountsInNotifications != null)
         'hide_amounts_in_notifications': hideAmountsInNotifications,
@@ -3354,10 +3329,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<int?>? tightThresholdMinor,
     Value<bool>? debugPro,
     Value<bool>? remindersEnabled,
-    Value<bool>? remindDays7,
-    Value<bool>? remindDays3,
-    Value<bool>? remindDays1,
-    Value<bool>? remindSameDay,
+    Value<int>? reminderLeadDays,
     Value<int>? reminderMinute,
     Value<bool>? hideAmountsInNotifications,
     Value<bool>? reminderPromptShown,
@@ -3373,10 +3345,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       tightThresholdMinor: tightThresholdMinor ?? this.tightThresholdMinor,
       debugPro: debugPro ?? this.debugPro,
       remindersEnabled: remindersEnabled ?? this.remindersEnabled,
-      remindDays7: remindDays7 ?? this.remindDays7,
-      remindDays3: remindDays3 ?? this.remindDays3,
-      remindDays1: remindDays1 ?? this.remindDays1,
-      remindSameDay: remindSameDay ?? this.remindSameDay,
+      reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
       reminderMinute: reminderMinute ?? this.reminderMinute,
       hideAmountsInNotifications:
           hideAmountsInNotifications ?? this.hideAmountsInNotifications,
@@ -3419,17 +3388,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     if (remindersEnabled.present) {
       map['reminders_enabled'] = Variable<bool>(remindersEnabled.value);
     }
-    if (remindDays7.present) {
-      map['remind_days7'] = Variable<bool>(remindDays7.value);
-    }
-    if (remindDays3.present) {
-      map['remind_days3'] = Variable<bool>(remindDays3.value);
-    }
-    if (remindDays1.present) {
-      map['remind_days1'] = Variable<bool>(remindDays1.value);
-    }
-    if (remindSameDay.present) {
-      map['remind_same_day'] = Variable<bool>(remindSameDay.value);
+    if (reminderLeadDays.present) {
+      map['reminder_lead_days'] = Variable<int>(reminderLeadDays.value);
     }
     if (reminderMinute.present) {
       map['reminder_minute'] = Variable<int>(reminderMinute.value);
@@ -3458,10 +3418,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('tightThresholdMinor: $tightThresholdMinor, ')
           ..write('debugPro: $debugPro, ')
           ..write('remindersEnabled: $remindersEnabled, ')
-          ..write('remindDays7: $remindDays7, ')
-          ..write('remindDays3: $remindDays3, ')
-          ..write('remindDays1: $remindDays1, ')
-          ..write('remindSameDay: $remindSameDay, ')
+          ..write('reminderLeadDays: $reminderLeadDays, ')
           ..write('reminderMinute: $reminderMinute, ')
           ..write('hideAmountsInNotifications: $hideAmountsInNotifications, ')
           ..write('reminderPromptShown: $reminderPromptShown')
@@ -3863,6 +3820,7 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   required PlanOrigin origin,
   Value<DateTime> createdAt,
   Value<bool> remindersEnabled,
+  Value<int?> reminderLeadDays,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -3876,6 +3834,7 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<PlanOrigin> origin,
   Value<DateTime> createdAt,
   Value<bool> remindersEnabled,
+  Value<int?> reminderLeadDays,
 });
 
 final class $$PlansTableReferences
@@ -3975,6 +3934,11 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
 
   ColumnFilters<bool> get remindersEnabled => $composableBuilder(
     column: $table.remindersEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4086,6 +4050,11 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4156,6 +4125,11 @@ class $$PlansTableAnnotationComposer
 
   GeneratedColumn<bool> get remindersEnabled => $composableBuilder(
     column: $table.remindersEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
     builder: (column) => column,
   );
 
@@ -4247,6 +4221,7 @@ class $$PlansTableTableManager
                 Value<PlanOrigin> origin = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> remindersEnabled = const Value.absent(),
+                Value<int?> reminderLeadDays = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -4259,6 +4234,7 @@ class $$PlansTableTableManager
                 origin: origin,
                 createdAt: createdAt,
                 remindersEnabled: remindersEnabled,
+                reminderLeadDays: reminderLeadDays,
               ),
           createCompanionCallback:
               ({
@@ -4273,6 +4249,7 @@ class $$PlansTableTableManager
                 required PlanOrigin origin,
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> remindersEnabled = const Value.absent(),
+                Value<int?> reminderLeadDays = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -4285,6 +4262,7 @@ class $$PlansTableTableManager
                 origin: origin,
                 createdAt: createdAt,
                 remindersEnabled: remindersEnabled,
+                reminderLeadDays: reminderLeadDays,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -4727,6 +4705,7 @@ typedef $$RecurringPaymentsTableCreateCompanionBuilder =
       Value<int?> endDay,
       Value<DateTime> createdAt,
       Value<bool> remindersEnabled,
+      Value<int?> reminderLeadDays,
     });
 typedef $$RecurringPaymentsTableUpdateCompanionBuilder =
     RecurringPaymentsCompanion Function({
@@ -4738,6 +4717,7 @@ typedef $$RecurringPaymentsTableUpdateCompanionBuilder =
       Value<int?> endDay,
       Value<DateTime> createdAt,
       Value<bool> remindersEnabled,
+      Value<int?> reminderLeadDays,
     });
 
 final class $$RecurringPaymentsTableReferences
@@ -4822,6 +4802,11 @@ class $$RecurringPaymentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> recurringMarksRefs(
     Expression<bool> Function($$RecurringMarksTableFilterComposer f) f,
   ) {
@@ -4896,6 +4881,11 @@ class $$RecurringPaymentsTableOrderingComposer
     column: $table.remindersEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RecurringPaymentsTableAnnotationComposer
@@ -4935,6 +4925,11 @@ class $$RecurringPaymentsTableAnnotationComposer
 
   GeneratedColumn<bool> get remindersEnabled => $composableBuilder(
     column: $table.remindersEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
     builder: (column) => column,
   );
 
@@ -5005,6 +5000,7 @@ class $$RecurringPaymentsTableTableManager
                 Value<int?> endDay = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> remindersEnabled = const Value.absent(),
+                Value<int?> reminderLeadDays = const Value.absent(),
               }) => RecurringPaymentsCompanion(
                 id: id,
                 name: name,
@@ -5014,6 +5010,7 @@ class $$RecurringPaymentsTableTableManager
                 endDay: endDay,
                 createdAt: createdAt,
                 remindersEnabled: remindersEnabled,
+                reminderLeadDays: reminderLeadDays,
               ),
           createCompanionCallback:
               ({
@@ -5025,6 +5022,7 @@ class $$RecurringPaymentsTableTableManager
                 Value<int?> endDay = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> remindersEnabled = const Value.absent(),
+                Value<int?> reminderLeadDays = const Value.absent(),
               }) => RecurringPaymentsCompanion.insert(
                 id: id,
                 name: name,
@@ -5034,6 +5032,7 @@ class $$RecurringPaymentsTableTableManager
                 endDay: endDay,
                 createdAt: createdAt,
                 remindersEnabled: remindersEnabled,
+                reminderLeadDays: reminderLeadDays,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -5396,10 +5395,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int?> tightThresholdMinor,
       Value<bool> debugPro,
       Value<bool> remindersEnabled,
-      Value<bool> remindDays7,
-      Value<bool> remindDays3,
-      Value<bool> remindDays1,
-      Value<bool> remindSameDay,
+      Value<int> reminderLeadDays,
       Value<int> reminderMinute,
       Value<bool> hideAmountsInNotifications,
       Value<bool> reminderPromptShown,
@@ -5416,10 +5412,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<int?> tightThresholdMinor,
       Value<bool> debugPro,
       Value<bool> remindersEnabled,
-      Value<bool> remindDays7,
-      Value<bool> remindDays3,
-      Value<bool> remindDays1,
-      Value<bool> remindSameDay,
+      Value<int> reminderLeadDays,
       Value<int> reminderMinute,
       Value<bool> hideAmountsInNotifications,
       Value<bool> reminderPromptShown,
@@ -5485,23 +5478,8 @@ class $$AppSettingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<bool> get remindDays7 => $composableBuilder(
-    column: $table.remindDays7,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get remindDays3 => $composableBuilder(
-    column: $table.remindDays3,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get remindDays1 => $composableBuilder(
-    column: $table.remindDays1,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get remindSameDay => $composableBuilder(
-    column: $table.remindSameDay,
+  ColumnFilters<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5580,23 +5558,8 @@ class $$AppSettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get remindDays7 => $composableBuilder(
-    column: $table.remindDays7,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get remindDays3 => $composableBuilder(
-    column: $table.remindDays3,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get remindDays1 => $composableBuilder(
-    column: $table.remindDays1,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get remindSameDay => $composableBuilder(
-    column: $table.remindSameDay,
+  ColumnOrderings<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5670,23 +5633,8 @@ class $$AppSettingsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<bool> get remindDays7 => $composableBuilder(
-    column: $table.remindDays7,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get remindDays3 => $composableBuilder(
-    column: $table.remindDays3,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get remindDays1 => $composableBuilder(
-    column: $table.remindDays1,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get remindSameDay => $composableBuilder(
-    column: $table.remindSameDay,
+  GeneratedColumn<int> get reminderLeadDays => $composableBuilder(
+    column: $table.reminderLeadDays,
     builder: (column) => column,
   );
 
@@ -5747,10 +5695,7 @@ class $$AppSettingsTableTableManager
                 Value<int?> tightThresholdMinor = const Value.absent(),
                 Value<bool> debugPro = const Value.absent(),
                 Value<bool> remindersEnabled = const Value.absent(),
-                Value<bool> remindDays7 = const Value.absent(),
-                Value<bool> remindDays3 = const Value.absent(),
-                Value<bool> remindDays1 = const Value.absent(),
-                Value<bool> remindSameDay = const Value.absent(),
+                Value<int> reminderLeadDays = const Value.absent(),
                 Value<int> reminderMinute = const Value.absent(),
                 Value<bool> hideAmountsInNotifications = const Value.absent(),
                 Value<bool> reminderPromptShown = const Value.absent(),
@@ -5765,10 +5710,7 @@ class $$AppSettingsTableTableManager
                 tightThresholdMinor: tightThresholdMinor,
                 debugPro: debugPro,
                 remindersEnabled: remindersEnabled,
-                remindDays7: remindDays7,
-                remindDays3: remindDays3,
-                remindDays1: remindDays1,
-                remindSameDay: remindSameDay,
+                reminderLeadDays: reminderLeadDays,
                 reminderMinute: reminderMinute,
                 hideAmountsInNotifications: hideAmountsInNotifications,
                 reminderPromptShown: reminderPromptShown,
@@ -5785,10 +5727,7 @@ class $$AppSettingsTableTableManager
                 Value<int?> tightThresholdMinor = const Value.absent(),
                 Value<bool> debugPro = const Value.absent(),
                 Value<bool> remindersEnabled = const Value.absent(),
-                Value<bool> remindDays7 = const Value.absent(),
-                Value<bool> remindDays3 = const Value.absent(),
-                Value<bool> remindDays1 = const Value.absent(),
-                Value<bool> remindSameDay = const Value.absent(),
+                Value<int> reminderLeadDays = const Value.absent(),
                 Value<int> reminderMinute = const Value.absent(),
                 Value<bool> hideAmountsInNotifications = const Value.absent(),
                 Value<bool> reminderPromptShown = const Value.absent(),
@@ -5803,10 +5742,7 @@ class $$AppSettingsTableTableManager
                 tightThresholdMinor: tightThresholdMinor,
                 debugPro: debugPro,
                 remindersEnabled: remindersEnabled,
-                remindDays7: remindDays7,
-                remindDays3: remindDays3,
-                remindDays1: remindDays1,
-                remindSameDay: remindSameDay,
+                reminderLeadDays: reminderLeadDays,
                 reminderMinute: reminderMinute,
                 hideAmountsInNotifications: hideAmountsInNotifications,
                 reminderPromptShown: reminderPromptShown,

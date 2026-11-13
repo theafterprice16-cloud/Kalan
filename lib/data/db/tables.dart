@@ -47,9 +47,13 @@ class Plans extends Table {
   TextColumn get origin => textEnum<PlanOrigin>()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
-  /// "Reminders for this plan" (schema v2).
+  /// Reminder choice (schema v2, v3): off when false; otherwise the
+  /// global "days before" ([reminderLeadDays] null) or its own.
   BoolColumn get remindersEnabled =>
       boolean().withDefault(const Constant(true))();
+  IntColumn get reminderLeadDays => integer().nullable().check(
+    reminderLeadDays.isNull() | reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
+  )();
 }
 
 @DataClassName('PaymentRow')
@@ -83,9 +87,12 @@ class RecurringPayments extends Table {
   IntColumn get endDay => integer().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
-  /// "Reminders for this payment" (schema v2).
+  /// Reminder choice, as on [Plans] (schema v2, v3).
   BoolColumn get remindersEnabled =>
       boolean().withDefault(const Constant(true))();
+  IntColumn get reminderLeadDays => integer().nullable().check(
+    reminderLeadDays.isNull() | reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
+  )();
 }
 
 /// "Paid" marks for individual occurrences of a recurring payment.
@@ -124,24 +131,26 @@ class AppSettings extends Table {
   /// Honoured only in debug builds.
   BoolColumn get debugPro => boolean().withDefault(const Constant(false))();
 
-  // Reminders (schema v2). Defaults: on, 3 days before and on the day, 09:00.
+  // Reminders (schema v2, v3). Defaults: on, 2 days before and on the
+  // day, 09:00, amounts shown.
   BoolColumn get remindersEnabled =>
       boolean().withDefault(const Constant(true))();
-  BoolColumn get remindDays7 => boolean().withDefault(const Constant(false))();
-  BoolColumn get remindDays3 => boolean().withDefault(const Constant(true))();
-  BoolColumn get remindDays1 => boolean().withDefault(const Constant(false))();
-  BoolColumn get remindSameDay => boolean().withDefault(const Constant(true))();
+
+  /// Global "days before" (1, 2, 3, 5 or 7).
+  IntColumn get reminderLeadDays => integer()
+      .withDefault(const Constant(2))
+      .check(reminderLeadDays.isIn(const [1, 2, 3, 5, 7]))();
 
   /// Local time, minutes after midnight.
   IntColumn get reminderMinute => integer()
       .withDefault(const Constant(540))
       .check(reminderMinute.isBetweenValues(0, 1439))();
 
-  /// Privacy: hide amounts in notifications.
+  /// Privacy: hide amounts in notifications ("show amount" off).
   BoolColumn get hideAmountsInNotifications =>
       boolean().withDefault(const Constant(false))();
 
-  /// The in-app reminder prompt was answered (never asked again).
+  /// The permission sheet was shown (never asked again).
   BoolColumn get reminderPromptShown =>
       boolean().withDefault(const Constant(false))();
 

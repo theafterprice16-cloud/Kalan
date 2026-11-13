@@ -5,13 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/routing/router.dart';
+import '../core/routing/routes.dart';
 import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
-import '../features/reminders/notification_gateway.dart';
 import '../features/reminders/reminder_providers.dart';
-import '../features/reminders/reminder_scheduler.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'locale.dart';
 import 'providers.dart';
@@ -27,19 +26,23 @@ class KalanApp extends ConsumerStatefulWidget {
 
 class _KalanAppState extends ConsumerState<KalanApp> {
   late final AppLifecycleListener _lifecycle;
-  StreamSubscription<NotificationResponse>? _responses;
+  StreamSubscription<NotificationResponse>? _taps;
 
   @override
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(onResume: _onResume);
-    _responses = notificationResponses.stream.listen(_onResponse);
+    _taps = notificationTaps.stream.listen(_onTap);
+    // App start: schedule from the stored data right away.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(reminderSyncProvider).request();
+    });
   }
 
   @override
   void dispose() {
     _lifecycle.dispose();
-    unawaited(_responses?.cancel());
+    unawaited(_taps?.cancel());
     super.dispose();
   }
 
@@ -54,18 +57,9 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     ref.read(reminderSyncProvider).request();
   }
 
-  Future<void> _onResponse(NotificationResponse response) async {
-    if (response.actionId == ReminderIds.paidAction) {
-      await handlePaidAction(
-        payload: response.payload,
-        notificationId: response.id,
-        scheduler: ref.read(reminderSchedulerProvider),
-      );
-      return;
-    }
-    final route = NotificationPayload.decode(response.payload)?.route;
-    if (route != null) unawaited(ref.read(routerProvider).push(route));
-  }
+  /// A tapped reminder opens the home screen.
+  void _onTap(NotificationResponse response) =>
+      ref.read(routerProvider).go(Routes.home);
 
   @override
   Widget build(BuildContext context) {

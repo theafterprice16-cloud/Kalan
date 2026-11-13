@@ -2,7 +2,6 @@ import 'dart:ui' show DartPluginRegistrant;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -19,7 +18,10 @@ import 'reminder_scheduler.dart';
 Future<void> refreshLocalTimeZone() async {
   tzdata.initializeTimeZones();
   try {
-    final info = await FlutterTimezone.getLocalTimezone();
+    // Never let a slow platform answer hold back rescheduling.
+    final info = await FlutterTimezone.getLocalTimezone().timeout(
+      const Duration(seconds: 2),
+    );
     tz.setLocalLocation(tz.getLocation(info.identifier));
   } on Object {
     // Unknown zone name: keep the previous (or UTC) location.
@@ -38,10 +40,7 @@ Future<void> runReminderTask(
   try {
     final settings = await SettingsRepository(db).get();
     final l10n = lookupAppLocalizations(appLocale(settings?.localeCode));
-    final gateway = await LocalNotificationsGateway.initialize(
-      l10n: l10n,
-      onBackground: onNotificationBackgroundResponse,
-    );
+    final gateway = await LocalNotificationsGateway.initialize(l10n: l10n);
     await body(
       ReminderScheduler(
         db: db,
@@ -54,21 +53,6 @@ Future<void> runReminderTask(
   } finally {
     await db.close();
   }
-}
-
-/// "Paid" pressed on a notification while the app is closed.
-@pragma('vm:entry-point')
-Future<void> onNotificationBackgroundResponse(
-  NotificationResponse response,
-) async {
-  if (response.actionId != ReminderIds.paidAction) return;
-  await runReminderTask(
-    (scheduler) => handlePaidAction(
-      payload: response.payload,
-      notificationId: response.id,
-      scheduler: scheduler,
-    ),
-  );
 }
 
 /// Android: boot, clock or time zone change (ReminderRescheduleReceiver).

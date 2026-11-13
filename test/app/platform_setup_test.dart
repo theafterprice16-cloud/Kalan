@@ -20,7 +20,6 @@ void main() {
     for (final receiver in [
       'ScheduledNotificationReceiver',
       'ScheduledNotificationBootReceiver',
-      'ActionBroadcastReceiver',
       '.ReminderRescheduleReceiver',
     ]) {
       expect(manifest, contains(receiver), reason: receiver);
@@ -68,10 +67,12 @@ void main() {
     }
   });
 
-  test('iOS registers plugins for the background "Paid" action', () {
+  test('iOS shows reminders in the foreground; no notification actions', () {
     final delegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();
-    expect(delegate, contains('setPluginRegistrantCallback'));
     expect(delegate, contains('UNUserNotificationCenter.current().delegate'));
     expect(delegate, contains('"kalan/system"'));
+    // "Paid" from a notification is a later backlog item.
+    expect(delegate, isNot(contains('setPluginRegistrantCallback')));
+    expect(manifest, isNot(contains('ActionBroadcastReceiver')));
   });
 }

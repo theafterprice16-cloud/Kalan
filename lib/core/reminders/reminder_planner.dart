@@ -1,57 +1,77 @@
+import 'package:timezone/timezone.dart' as tz;
+
 import '../date/local_date.dart';
 import 'reminder_models.dart';
+import 'reminder_time.dart';
 
-/// iOS keeps at most 64 pending notifications; stay below it.
+/// iOS keeps at most 64 pending notifications; four stay free. The same
+/// cap applies on Android, so both platforms follow one code path.
 const maxScheduledReminders = 60;
 
-/// Decides which notifications to schedule. Pure and deterministic.
+/// Decides which notifications to schedule. Pure and deterministic: the
+/// same input always gives the same list, with the same ids.
 ///
-/// Payments due on the same day are grouped into one notification per
-/// offset. Paid payments, payments whose plan has reminders off and
-/// anything that would fire at or before now are skipped. Only the
-/// [limit] soonest reminders are returned, ordered by fire time.
+/// Every unpaid payment whose plan has reminders on gets an "ahead"
+/// notification [leadDaysFor] days before its due date and an "on day"
+/// notification on it, at the chosen local time. Notifications of the
+/// same kind on the same day are merged into one. Anything at or before
+/// [now] is skipped (a past "ahead" does not drop the "on day"). The
+/// [limit] soonest are returned, ordered by time.
 List<PlannedReminder> planReminders({
   required Iterable<ReminderPayment> payments,
   required ReminderSettings settings,
-  required LocalDate today,
-  required int nowMinuteOfDay,
+  required tz.TZDateTime now,
+  required ReminderTexts texts,
   int limit = maxScheduledReminders,
 }) {
-  if (!settings.enabled || settings.offsets.isEmpty) return const [];
+  if (!settings.enabled) return const [];
+  final location = now.location;
 
-  final byDay = <LocalDate, List<ReminderPayment>>{};
+  final groups = <(LocalDate, ReminderKind), List<ReminderPayment>>{};
   for (final p in payments) {
-    if (p.isPaid || !p.remindersEnabled) continue;
-    byDay.putIfAbsent(p.date, () => []).add(p);
+    if (p.isPaid || p.choice.off) continue;
+    final ahead = p.date.addDays(-leadDaysFor(p, settings));
+    groups.putIfAbsent((ahead, ReminderKind.ahead), () => []).add(p);
+    groups.putIfAbsent((p.date, ReminderKind.onDay), () => []).add(p);
   }
 
-  bool isFuture(LocalDate date, int minute) =>
-      date > today || (date == today && minute > nowMinuteOfDay);
-
   final planned = <PlannedReminder>[];
-  for (final MapEntry(key: due, value: group) in byDay.entries) {
-    group.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-    for (final offset in settings.offsets) {
-      final fireDate = due.addDays(-offset.days);
-      if (!isFuture(fireDate, settings.minuteOfDay)) continue;
-      planned.add(
-        PlannedReminder(
-          id: PlannedReminder.idFor(due, offset),
-          fireDate: fireDate,
-          minuteOfDay: settings.minuteOfDay,
-          offset: offset,
-          dueDate: due,
-          payments: List.unmodifiable(group),
-        ),
-      );
+  for (final MapEntry(key: (fireDate, kind), value: group) in groups.entries) {
+    final fireAt = localWallClock(fireDate, settings.minuteOfDay, location);
+    if (!fireAt.isAfter(now)) continue;
+    group.sort((a, b) {
+      final byDate = a.date.compareTo(b.date);
+      if (byDate != 0) return byDate;
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+    final dueDates = <LocalDate>[];
+    for (final p in group) {
+      if (dueDates.isEmpty || dueDates.last != p.date) dueDates.add(p.date);
     }
+    final text = texts.describe(
+      kind: kind,
+      payments: group,
+      dueDates: dueDates,
+      showAmounts: settings.showAmounts,
+    );
+    planned.add(
+      PlannedReminder(
+        id: PlannedReminder.idFor(fireDate, kind),
+        kind: kind,
+        fireDate: fireDate,
+        fireAt: fireAt,
+        payments: List.unmodifiable(group),
+        dueDates: List.unmodifiable(dueDates),
+        title: texts.title,
+        body: text.body,
+        expandedBody: text.expanded,
+      ),
+    );
   }
 
   planned.sort((a, b) {
-    final byFire = a.fireDate.compareTo(b.fireDate);
-    if (byFire != 0) return byFire;
-    // Same moment: the nearer due date first.
-    return a.dueDate.compareTo(b.dueDate);
+    final byTime = a.fireAt.compareTo(b.fireAt);
+    return byTime != 0 ? byTime : a.kind.index.compareTo(b.kind.index);
   });
   return planned.length > limit ? planned.sublist(0, limit) : planned;
 }

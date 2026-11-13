@@ -1,8 +1,6 @@
 import Flutter
 import UIKit
 import UserNotifications
-// Needed for FlutterLocalNotificationsPlugin.setPluginRegistrantCallback.
-import flutter_local_notifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -16,10 +14,6 @@ import flutter_local_notifications
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    // The "Paid" action runs in a background isolate; it needs the plugins.
-    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in
-      GeneratedPluginRegistrant.register(with: registry)
-    }
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
     // "Open phone settings" from Settings > Reminders.

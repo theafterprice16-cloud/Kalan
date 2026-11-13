@@ -15,5 +15,4 @@ abstract final class Routes {
   static const pay = '/pay';
   static const roadmap = '/roadmap';
   static const remindersHelp = '/reminders-help';
-  static String day(String isoDate) => '/day/$isoDate';
 }

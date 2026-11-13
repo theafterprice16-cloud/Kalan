@@ -125,17 +125,20 @@ void main() {
       bool onboarded = true,
       List<Override> extra = const [],
       String? route,
+      Locale locale = const Locale('tr', 'TR'),
+      FakeNotificationGateway? gateway,
     }) async {
       tester.view.physicalSize = const Size(780, 1688);
       tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
       await pumpApp(
         tester,
+        locale: locale,
         seed: onboarded ? (db) => seedRich(db, incomeMinor: income) : null,
         overrides: [
           themeModeStoreProvider.overrideWithValue(MemoryThemeModeStore(mode)),
           notificationGatewayProvider.overrideWithValue(
-            FakeNotificationGateway(),
+            gateway ?? FakeNotificationGateway(),
           ),
           clockProvider.overrideWithValue(() => DateTime.utc(2026, 11, 20, 5)),
           if (route != null) initialRouteProvider.overrideWithValue(route),
@@ -255,37 +258,72 @@ void main() {
         await shoot(tester, '16-currency-search-$theme');
       });
 
-      testWidgets('settings, reminders section', (tester) async {
-        await start(tester);
-        await openTab(tester, 'Ayarlar');
-        // Put the section title near the top of the screen.
-        await scrollTo(tester, find.text('Hatırlatmalar'));
-        final top = tester.getTopLeft(find.text('Hatırlatmalar')).dy;
-        await tester.drag(find.byType(Scrollable).first, Offset(0, 80 - top));
-        await shoot(tester, '11-settings-reminders-$theme');
-      });
-
-      testWidgets('payments of the day', (tester) async {
-        await start(tester, route: '/day/2026-11-20');
-        await shoot(tester, '12-day-payments-$theme');
-      });
-
       testWidgets('reminders help', (tester) async {
         await start(tester, route: Routes.remindersHelp);
         await shoot(tester, '13-reminders-help-$theme');
       });
 
-      testWidgets('reminder prompt', (tester) async {
-        await start(tester);
-        await tester.tap(find.text('Plan ekle'));
-        await tester.pumpAndSettle();
-        await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
-        await tester.enterText(find.byKey(const ValueKey('total')), '400');
-        await tester.pumpAndSettle();
-        await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
-        await tester.tap(find.byKey(const ValueKey('save-plan')));
-        await shoot(tester, '14-reminder-prompt-$theme');
-      });
+      // Reminder screens in both languages.
+      for (final (lang, locale, settingsTab, plansTab, addPlan) in [
+        ('tr', const Locale('tr', 'TR'), 'Ayarlar', 'Planlar', 'Plan ekle'),
+        ('en', const Locale('en', 'US'), 'Settings', 'Plans', 'Add plan'),
+      ]) {
+        Future<void> openReminders(WidgetTester tester) async {
+          await openTab(tester, settingsTab);
+          // Put the section near the top of the screen.
+          const key = ValueKey('reminders-enabled');
+          await scrollTo(tester, find.byKey(key));
+          final top = tester.getTopLeft(find.byKey(key)).dy;
+          await tester.drag(
+            find.byType(Scrollable).first,
+            Offset(0, 140 - top),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+        }
+
+        testWidgets('settings, reminders section, $lang', (tester) async {
+          await start(tester, locale: locale);
+          await openReminders(tester);
+          await shoot(tester, '11-reminders-settings-$lang-$theme');
+        });
+
+        testWidgets('settings, reminders, permission off, $lang', (
+          tester,
+        ) async {
+          await start(
+            tester,
+            locale: locale,
+            gateway: FakeNotificationGateway(granted: false),
+          );
+          await openReminders(tester);
+          await shoot(tester, '12-reminders-permission-off-$lang-$theme');
+        });
+
+        testWidgets('permission sheet, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            gateway: FakeNotificationGateway(granted: false),
+          );
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+          await tester.enterText(find.byKey(const ValueKey('total')), '400');
+          await tester.pumpAndSettle();
+          await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+          await tester.tap(find.byKey(const ValueKey('save-plan')));
+          await shoot(tester, '14-reminder-sheet-$lang-$theme');
+        });
+
+        testWidgets('plan reminder choice, $lang', (tester) async {
+          await start(tester, locale: locale);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Mont'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('item-reminders')));
+          await shoot(tester, '17-plan-reminder-choice-$lang-$theme');
+        });
+      }
     });
   }
 }

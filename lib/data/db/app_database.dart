@@ -28,7 +28,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,6 +54,23 @@ class AppDatabase extends _$AppDatabase {
         ]) {
           await m.addColumn(s, column);
         }
+      },
+      // v3: one "days before" choice instead of separate offsets, and a
+      // per-plan "days before". Plans keep their on/off switch; with no
+      // own days they follow the global setting ("General").
+      from2To3: (m, schema) async {
+        await m.addColumn(schema.plans, schema.plans.reminderLeadDays);
+        await m.addColumn(
+          schema.recurringPayments,
+          schema.recurringPayments.reminderLeadDays,
+        );
+        // Rebuilds the settings row without the v2 offset columns.
+        await m.alterTable(
+          TableMigration(
+            schema.appSettings,
+            newColumns: [schema.appSettings.reminderLeadDays],
+          ),
+        );
       },
     ),
     beforeOpen: (details) async {

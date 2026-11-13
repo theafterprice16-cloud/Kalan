@@ -3,11 +3,14 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/theme/kalan_theme.dart';
 import 'reminder_providers.dart';
 
-/// After the first plan or recurring payment is saved: Kalan's own short
-/// explanation first, then the system permission dialog. "Not now" is
-/// final; reminders can be turned on later in Settings.
+/// Right after the first plan is saved: Kalan's short explanation, then
+/// (only on "Turn on reminders") the system permission dialog. Shown once;
+/// "Not now", a dismissed sheet or a refusal are never asked about again.
+/// Skipped when the system already allows notifications (Android 12 and
+/// older have no dialog).
 Future<void> askForRemindersIfNeeded(
   BuildContext context,
   WidgetRef ref,
@@ -15,45 +18,77 @@ Future<void> askForRemindersIfNeeded(
   final gateway = ref.read(notificationGatewayProvider);
   if (!gateway.supported) return;
   final settings = await ref.read(settingsRepositoryProvider).get();
-  if (settings == null || settings.reminderPromptShown || !context.mounted) {
+  if (settings == null || settings.reminderPromptShown) return;
+  final store = ref.read(reminderSettingsStoreProvider);
+  if (await gateway.permissionGranted()) {
+    await store.markPromptShown();
     return;
   }
-  final remind = await showDialog<bool>(
+  await store.markPromptShown();
+  if (!context.mounted) return;
+  final accepted = await showModalBottomSheet<bool>(
     context: context,
-    barrierDismissible: false,
-    builder: (_) => const ReminderPromptDialog(),
+    showDragHandle: true,
+    // Grows with large text and scrolls instead of overflowing.
+    isScrollControlled: true,
+    builder: (_) => const ReminderPermissionSheet(),
   );
-  final store = ref.read(reminderSettingsStoreProvider);
-  if (remind ?? false) {
-    await gateway.requestPermission();
-    await store.markPromptAnswered(remind: true);
-  } else {
-    await store.markPromptAnswered(remind: false);
-  }
+  if (accepted ?? false) await gateway.requestPermission();
   ref.invalidate(notificationPermissionProvider);
 }
 
-class ReminderPromptDialog extends StatelessWidget {
-  const ReminderPromptDialog({super.key});
+class ReminderPermissionSheet extends StatelessWidget {
+  const ReminderPermissionSheet({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AlertDialog(
-      key: const ValueKey('reminder-prompt'),
-      icon: const Icon(Icons.notifications_none),
-      title: Text(l10n.reminderPromptTitle),
-      content: Text(l10n.reminderPromptBody),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(l10n.reminderPromptLater),
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: SingleChildScrollView(
+        key: const ValueKey('reminder-sheet'),
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ExcludeSemantics(
+              child: Icon(
+                Icons.notifications_none,
+                size: 32,
+                color: context.colors.text,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Semantics(
+              header: true,
+              child: Text(
+                l10n.reminderPromptTitle,
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.reminderPromptBody,
+              style: theme.textTheme.bodyLarge,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              key: const ValueKey('reminder-sheet-accept'),
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.reminderPromptAccept),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              key: const ValueKey('reminder-sheet-later'),
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.reminderPromptLater),
+            ),
+          ],
         ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: Text(l10n.reminderPromptAccept),
-        ),
-      ],
+      ),
     );
   }
 }

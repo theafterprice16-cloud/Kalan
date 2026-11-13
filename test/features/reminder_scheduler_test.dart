@@ -8,7 +8,7 @@ import 'package:kalan/core/date/local_date.dart';
 import 'package:kalan/core/reminders/reminder_models.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
-import 'package:kalan/features/reminders/notification_gateway.dart';
+import 'package:kalan/data/repositories/recurring_repository.dart';
 import 'package:kalan/features/reminders/reminder_scheduler.dart';
 import 'package:material_ui/material_ui.dart' show Locale;
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -47,77 +47,168 @@ void main() {
     db = AppDatabase(NativeDatabase.memory());
     gateway = FakeNotificationGateway();
     await seedSettings(db);
-    // 20 Nov, 4 Dec, 18 Dec, 1 Jan; 100 TL each.
+    // Fri 20 Nov, Fri 4 Dec, Fri 18 Dec, Fri 1 Jan; ₺100 each.
     await seedPayIn4(db);
   });
   tearDown(() => db.close());
 
-  test('stored payments become notifications with engine dates', () async {
+  Future<List<String>> bodies() async => [
+    for (final n in await schedulerFor(db, gateway).build()) n.body,
+  ];
+
+  test('stored payments: "2 days before" and "on the day" at 09:00', () async {
     final list = await schedulerFor(db, gateway).build();
-    final first = list.first;
-    expect(first.text, 'Bugün: Klarna 1/4 · ₺100');
-    expect(first.fireAt.toUtc(), DateTime.utc(2026, 11, 20, 6)); // 09:00 TRT
-    expect(first.hasPaidAction, isTrue);
-    final paymentId = (await db.select(db.payments).get()).first.id;
-    expect(first.payload.encode(), '/day/2026-11-20|p:$paymentId');
-    expect(list.map((n) => n.text).toList(), [
-      'Bugün: Klarna 1/4 · ₺100',
-      '3 gün sonra: Klarna 2/4 · ₺100',
-      'Bugün: Klarna 2/4 · ₺100',
-      '3 gün sonra: Klarna 3/4 · ₺100',
-      'Bugün: Klarna 3/4 · ₺100',
-      '3 gün sonra: Klarna 4/4 · ₺100',
-      'Bugün: Klarna 4/4 · ₺100',
+    expect(list.first.fireAt.toUtc(), DateTime.utc(2026, 11, 20, 6)); // TRT
+    expect(list.every((n) => n.title == 'Kalan'), isTrue);
+    expect(list.every((n) => n.payload == reminderPayload), isTrue);
+    expect(list.map((n) => n.body), [
+      'Bugün 1 ödeme var: Klarna, ₺100',
+      '4 Aralık Cuma günü 1 ödeme var: Klarna, ₺100',
+      'Bugün 1 ödeme var: Klarna, ₺100',
+      '18 Aralık Cuma günü 1 ödeme var: Klarna, ₺100',
+      'Bugün 1 ödeme var: Klarna, ₺100',
+      '1 Ocak Cuma günü 1 ödeme var: Klarna, ₺100',
+      'Bugün 1 ödeme var: Klarna, ₺100',
     ]);
+    expect(list[1].fireDate, LocalDate(2026, 12, 2));
   });
 
-  test('recurring payments are reminded too, grouped with plans', () async {
-    await seedRent(db); // 1st of every month, 15.000 TL
-    final texts = [
-      for (final n in await schedulerFor(db, gateway).build()) n.text,
-    ];
-    expect(texts, contains('3 gün sonra: Kira · ₺15.000'));
-    expect(texts, contains('Bugün: Kira · ₺15.000'));
+  test('recurring payments are included and merged with plans', () async {
+    await seedRent(db); // 1st of every month, ₺15.000
+    final texts = await bodies();
+    expect(texts, contains('1 Aralık Salı günü 1 ödeme var: Kira, ₺15.000'));
     // 1 Jan: Klarna 4/4 and rent on the same day.
-    expect(texts, contains('Bugün 2 ödemen var · toplam ₺15.100'));
+    expect(texts, contains('Bugün 2 ödeme var, toplam ₺15.100'));
   });
 
-  test('settings: hidden amounts, other offsets, time, language', () async {
+  test('settings: hidden amounts, 1 day, 20:30, English', () async {
     await setReminders(
       db,
       const AppSettingsCompanion(
         hideAmountsInNotifications: Value(true),
-        remindDays3: Value(false),
-        remindDays1: Value(true),
+        reminderLeadDays: Value(1),
         reminderMinute: Value(20 * 60 + 30),
         localeCode: Value('en'),
       ),
     );
     final list = await schedulerFor(db, gateway).build();
-    expect(list.first.text, 'Today you have 1 payment');
-    expect(list[1].text, 'Tomorrow you have 1 payment');
-    expect(list.first.fireAt.hour, 20);
-    expect(list.first.fireAt.minute, 30);
+    expect(list.first.body, '1 payment today: Klarna');
+    expect(list[1].body, '1 payment on Friday, December 4: Klarna');
+    expect(list[1].fireDate, LocalDate(2026, 12, 3));
+    expect((list.first.fireAt.hour, list.first.fireAt.minute), (20, 30));
   });
 
-  test(
-    'nothing is scheduled when switched off, globally or per plan',
-    () async {
+  test('a currency change changes the text', () async {
+    await setReminders(
+      db,
+      const AppSettingsCompanion(currencyCode: Value('IDR')),
+    );
+    expect((await bodies()).first, 'Bugün 1 ödeme var: Klarna, Rp10.000');
+  });
+
+  group('per plan', () {
+    late int planId;
+    setUp(() async => planId = (await db.select(db.plans).getSingle()).id);
+
+    test('"Off": nothing for that plan', () async {
+      await PlanRepository(db).setReminderChoice(planId, enabled: false);
+      expect(await bodies(), isEmpty);
+    });
+
+    test('"Different day": its own days before', () async {
+      await PlanRepository(db)
+          .setReminderChoice(planId, enabled: true, leadDays: 5);
+      final list = await schedulerFor(db, gateway).build();
+      expect(list[1].fireDate, LocalDate(2026, 11, 29));
+    });
+
+    test('recurring payment "Off"', () async {
+      final rentId = await seedRent(db);
+      final repo = RecurringRepository(db);
+      final rent = (await repo.byId(rentId))!;
+      await repo.update(rent.copyWith(remindersEnabled: false));
+      expect((await bodies()).any((b) => b.contains('Kira')), isFalse);
+    });
+  });
+
+  group('rescheduling replaces what is pending', () {
+    test('master switch off cancels everything', () async {
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, hasLength(7));
       await setReminders(
         db,
         const AppSettingsCompanion(remindersEnabled: Value(false)),
       );
-      expect(await schedulerFor(db, gateway).build(), isEmpty);
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, isEmpty);
+    });
 
+    test('a deleted plan leaves no reminder behind', () async {
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
+      final planId = (await db.select(db.plans).getSingle()).id;
+      await PlanRepository(db).deletePlan(planId);
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, isEmpty);
+    });
+
+    test(
+      '"Paid" drops that payment\'s reminders, undo brings them back',
+      () async {
+        final scheduler = schedulerFor(db, gateway);
+        await scheduler.rescheduleAll();
+        final first = (await db.select(db.payments).get()).first;
+        await PlanRepository(db).setPaid(first.id, paid: true, now: now);
+        await scheduler.rescheduleAll();
+        expect(gateway.pending.first.fireDate, LocalDate(2026, 12, 2));
+        expect(gateway.pending, hasLength(6));
+
+        await PlanRepository(db).setPaid(first.id, paid: false, now: now);
+        await scheduler.rescheduleAll();
+        expect(gateway.pending, hasLength(7));
+      },
+    );
+
+    test('a settings change moves the reminders', () async {
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
       await setReminders(
         db,
-        const AppSettingsCompanion(remindersEnabled: Value(true)),
+        const AppSettingsCompanion(reminderLeadDays: Value(7)),
       );
-      final planId = (await db.select(db.plans).getSingle()).id;
-      await PlanRepository(db).setRemindersEnabled(planId, enabled: false);
-      expect(await schedulerFor(db, gateway).build(), isEmpty);
-    },
-  );
+      await scheduler.rescheduleAll();
+      expect(gateway.pending[1].fireDate, LocalDate(2026, 11, 27));
+      expect(gateway.replaceCalls, 2);
+    });
+
+    test('the same data gives the same ids: no duplicates', () async {
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
+      final first = [for (final n in gateway.pending) n.id];
+      await scheduler.rescheduleAll();
+      expect([for (final n in gateway.pending) n.id], first);
+      expect(first.toSet(), hasLength(first.length));
+    });
+
+    test('never more than 60 pending', () async {
+      for (var i = 0; i < 30; i++) {
+        await seedPayIn4(
+          db,
+          first: LocalDate(2026, 11, 21).addDays(i * 3),
+          source: 'P$i',
+        );
+      }
+      await schedulerFor(db, gateway).rescheduleAll();
+      expect(gateway.pending, hasLength(60));
+    });
+
+    test('web or unsupported: nothing is touched', () async {
+      final web = FakeNotificationGateway(supported: false);
+      await schedulerFor(db, web).rescheduleAll();
+      expect(web.replaceCalls, 0);
+    });
+  });
 
   test('another time zone keeps 09:00 local', () async {
     final london = await schedulerFor(
@@ -126,106 +217,41 @@ void main() {
       zone: 'Europe/London',
     ).build();
     final istanbul = await schedulerFor(db, gateway).build();
-    expect(london.first.fireAt.hour, 9);
-    expect(istanbul.first.fireAt.hour, 9);
+    expect((london.first.fireAt.hour, istanbul.first.fireAt.hour), (9, 9));
     expect(
       london.first.fireAt.difference(istanbul.first.fireAt),
       const Duration(hours: 3),
     );
   });
 
-  test('Paid action marks the payment and drops its reminders', () async {
-    final scheduler = schedulerFor(db, gateway);
-    await scheduler.rescheduleAll();
-    final today = gateway.pending.first;
-    expect(today.hasPaidAction, isTrue);
+  test('app closed (Android reboot or time change): a background isolate '
+      'reschedules from the stored data', () async {
+    final dir = await Directory.systemTemp.createTemp('kalan');
+    final path = '${dir.path}/kalan.sqlite';
+    final appDb = AppDatabase(NativeDatabase(File(path)));
+    await seedSettings(appDb);
+    await seedPayIn4(appDb);
+    await appDb.close();
 
-    final handled = await handlePaidAction(
-      payload: today.payload.encode(),
-      notificationId: today.id,
-      scheduler: scheduler,
-      now: now,
-    );
-    expect(handled, isTrue);
-    final first = (await db.select(db.payments).get()).first;
-    expect(first.paidAt, isNotNull);
-    expect(gateway.cancelled, [today.id]);
-    expect(gateway.texts, isNot(contains('Bugün: Klarna 1/4 · ₺100')));
-    expect(gateway.texts.first, '3 gün sonra: Klarna 2/4 · ₺100');
+    final texts = await Isolate.run(() async {
+      tzdata.initializeTimeZones();
+      driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+      final bg = AppDatabase(NativeDatabase(File(path)));
+      final gw = FakeNotificationGateway();
+      await ReminderScheduler(
+        db: bg,
+        gateway: gw,
+        location: () => tz.getLocation('Europe/Istanbul'),
+        now: () => DateTime.utc(2026, 11, 20, 5),
+        localeFor: (_) => const Locale('tr'),
+      ).rescheduleAll();
+      await bg.close();
+      return gw.bodies;
+    });
+    expect(texts.take(2), [
+      'Bugün 1 ödeme var: Klarna, ₺100',
+      '4 Aralık Cuma günü 1 ödeme var: Klarna, ₺100',
+    ]);
+    await dir.delete(recursive: true);
   });
-
-  test('Paid action on a recurring payment marks that occurrence', () async {
-    final rentId = await seedRent(db);
-    final day = LocalDate(2026, 12, 1).epochDay;
-    final payload = NotificationPayload(
-      route: '/day/2026-12-01',
-      paymentRef: RecurringRef(rentId, day).encode(),
-    ).encode();
-    await handlePaidAction(
-      payload: payload,
-      notificationId: 7,
-      scheduler: schedulerFor(db, gateway),
-    );
-    final marks = await db.select(db.recurringMarks).get();
-    expect(marks.single.occurrenceDay, day);
-  });
-
-  test('payloads without a payment are ignored', () async {
-    for (final payload in [null, '/day/2026-11-20', 'garbage']) {
-      expect(
-        await handlePaidAction(
-          payload: payload,
-          notificationId: 1,
-          scheduler: schedulerFor(db, gateway),
-        ),
-        isFalse,
-      );
-    }
-    expect(gateway.replaceCalls, 0);
-  });
-
-  test(
-    'Paid with the app closed: a background isolate marks the payment',
-    () async {
-      // The app's database lives in a file; the app is closed.
-      final dir = await Directory.systemTemp.createTemp('kalan');
-      final path = '${dir.path}/kalan.sqlite';
-      final appDb = AppDatabase(NativeDatabase(File(path)));
-      await seedSettings(appDb);
-      await seedPayIn4(appDb);
-      final scheduler = schedulerFor(appDb, FakeNotificationGateway());
-      final payload = (await scheduler.build()).first.payload.encode();
-      await appDb.close();
-
-      // What the notification plugin does: run the handler in a separate
-      // isolate that opens the database on its own.
-      final remaining = await Isolate.run(() async {
-        tzdata.initializeTimeZones();
-        driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
-        final bg = AppDatabase(NativeDatabase(File(path)));
-        final gw = FakeNotificationGateway();
-        await handlePaidAction(
-          payload: payload,
-          notificationId: 1,
-          scheduler: ReminderScheduler(
-            db: bg,
-            gateway: gw,
-            location: () => tz.getLocation('Europe/Istanbul'),
-            now: () => DateTime.utc(2026, 11, 20, 5),
-            localeFor: (_) => const Locale('tr'),
-          ),
-        );
-        await bg.close();
-        return gw.texts;
-      });
-      expect(remaining.first, '3 gün sonra: Klarna 2/4 · ₺100');
-
-      final reopened = AppDatabase(NativeDatabase(File(path)));
-      final payments = await reopened.select(reopened.payments).get();
-      expect(payments.first.paidAt, isNotNull);
-      expect(payments.skip(1).every((p) => p.paidAt == null), isTrue);
-      await reopened.close();
-      await dir.delete(recursive: true);
-    },
-  );
 }

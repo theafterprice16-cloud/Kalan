@@ -754,33 +754,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get themeDark => 'Koyu';
 
   @override
-  String reminderWhen(String offset) {
-    String _temp0 = intl.Intl.selectLogic(offset, {
-      'days7': '7 gün sonra',
-      'days3': '3 gün sonra',
-      'days1': 'Yarın',
-      'sameDay': 'Bugün',
-      'other': 'Yakında',
-    });
-    return '$_temp0';
-  }
-
-  @override
-  String reminderSingle(String when, String name, String amount) {
-    return '$when: $name · $amount';
-  }
-
-  @override
-  String reminderSummary(String when, int count, String total) {
-    return '$when $count ödemen var · toplam $total';
-  }
-
-  @override
-  String reminderCountOnly(String when, int count) {
-    return '$when $count ödemen var';
-  }
-
-  @override
   String get reminderChannelName => 'Ödeme hatırlatmaları';
 
   @override
@@ -788,17 +761,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Ödeme gününden önce kısa hatırlatmalar.';
 
   @override
-  String get notificationPaidAction => 'Ödendi';
-
-  @override
   String get reminderPromptTitle => 'Hatırlatmalar';
 
   @override
   String get reminderPromptBody =>
-      'Ödeme gününden önce sana haber verelim mi? Bildirimler yalnızca bu telefonda hazırlanır.';
+      'Ödeme gününden önce sana haber verelim. Hatırlatmalar yalnızca bu telefonda kurulur.';
 
   @override
-  String get reminderPromptAccept => 'Hatırlat';
+  String get reminderPromptAccept => 'Hatırlatmaları aç';
 
   @override
   String get reminderPromptLater => 'Şimdi değil';
@@ -807,32 +777,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsReminders => 'Hatırlatmalar';
 
   @override
-  String get remindersEnabled => 'Ödeme hatırlatmaları';
-
-  @override
-  String get reminderDays7 => '7 gün önce';
-
-  @override
-  String get reminderDays3 => '3 gün önce';
-
-  @override
-  String get reminderDays1 => '1 gün önce';
-
-  @override
-  String get reminderSameDay => 'Ödeme günü';
+  String get remindersEnabled => 'Hatırlatmalar';
 
   @override
   String get reminderTime => 'Saat';
 
   @override
-  String get reminderHideAmounts => 'Bildirimlerde tutarı gizle';
+  String get remindersPermissionOff => 'Bildirim izni kapalı';
 
   @override
-  String get remindersPermissionOff =>
-      'Kalan için bildirimler kapalı, bu yüzden hatırlatmalar görünmez.';
-
-  @override
-  String get openPhoneSettings => 'Telefon ayarlarını aç';
+  String get openPhoneSettings => 'Ayarları aç';
 
   @override
   String get remindersHelpLink => 'Bildirimler gelmiyor mu?';
@@ -866,24 +820,138 @@ class AppLocalizationsTr extends AppLocalizations {
   String get remindersWebOnly => 'Bu özellik telefonda çalışır.';
 
   @override
-  String get debugTestNotification => 'Test bildirimi gönder (10 sn sonra)';
+  String get debugTestNotification => 'Deneme bildirimi (10 saniye sonra)';
 
   @override
   String get testNotificationScheduled =>
-      '10 saniye içinde bir test bildirimi gelecek.';
+      '10 saniye içinde bir deneme bildirimi gelecek.';
 
   @override
   String get testNotificationText =>
-      'Test: hatırlatmalar bu telefonda çalışıyor.';
+      'Deneme: hatırlatmalar bu telefonda çalışıyor.';
 
   @override
-  String get planReminderToggle => 'Bu plan için hatırlatma';
+  String get remindersEnabledHint => 'Ödeme gününden önce ve ödeme günü';
 
   @override
-  String dayPaymentsTitle(String date) {
-    return '$date ödemeleri';
+  String reminderAhead(int count, String date, String name, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$date günü $count ödeme var, toplam $total',
+      one: '$date günü 1 ödeme var: $name, $total',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get dayPaymentsEmpty => 'Bu gün ödeme yok.';
+  String reminderAheadHidden(int count, String date, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$date günü $count ödeme var',
+      one: '$date günü 1 ödeme var: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderAheadMixed(int count, String date, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$date gününden itibaren $count ödeme var, toplam $total',
+      one: '$date gününden itibaren 1 ödeme var, toplam $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderAheadMixedHidden(int count, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$date gününden itibaren $count ödeme var',
+      one: '$date gününden itibaren 1 ödeme var',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderToday(int count, String name, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bugün $count ödeme var, toplam $total',
+      one: 'Bugün 1 ödeme var: $name, $total',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderTodayHidden(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bugün $count ödeme var',
+      one: 'Bugün 1 ödeme var: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderExpanded(String body, String names) {
+    return '$body\n$names';
+  }
+
+  @override
+  String get reminderNameSeparator => ', ';
+
+  @override
+  String get reminderLeadDays => 'Kaç gün önce';
+
+  @override
+  String reminderLeadDaysValue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün önce',
+      one: '1 gün önce',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderLeadDaysSemantics(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün',
+      one: '1 gün',
+    );
+    return 'Kaç gün önce, şu an $_temp0';
+  }
+
+  @override
+  String get reminderShowAmount => 'Bildirimde tutarı göster';
+
+  @override
+  String get planReminder => 'Hatırlatma';
+
+  @override
+  String planReminderGeneral(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün önce',
+      one: '1 gün önce',
+    );
+    return 'Genel ayar ($_temp0)';
+  }
+
+  @override
+  String get planReminderOff => 'Kapalı';
+
+  @override
+  String get planReminderCustom => 'Farklı gün';
 }
