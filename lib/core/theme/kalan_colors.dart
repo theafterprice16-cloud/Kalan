@@ -1,8 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 
-/// The "Gece & Nane" palette (docs/DESIGN_TOKENS.md). The only place in the
-/// app where colors are defined. Adding a color, tone or gradient needs the
-/// product owner's approval first.
+/// The "Mürekkep ve Safran" palette (docs/DESIGN_TOKENS.md). The only place
+/// in the app where colors are defined. Adding a color, tone or gradient
+/// needs the product owner's approval first.
 @immutable
 class KalanColors extends ThemeExtension<KalanColors> {
   const KalanColors({
@@ -12,87 +12,93 @@ class KalanColors extends ThemeExtension<KalanColors> {
     required this.border,
     required this.text,
     required this.textMuted,
-    required this.mint,
-    required this.onMint,
-    required this.mintText,
-    required this.amber,
-    required this.amberText,
-    required this.coral,
+    required this.accent,
+    required this.onAccent,
+    required this.accentText,
+    required this.negative,
+    required this.negativeText,
+    required this.late,
     required this.chartCommitted,
+    required this.focus,
   });
 
-  static const dark = KalanColors(
-    bg: Color(0xFF0B0F14),
-    surface: Color(0xFF151B23),
-    surfaceRaised: Color(0xFF1E2630),
-    border: Color(0xFF2A3441),
-    text: Color(0xFFF2F5F7),
-    textMuted: Color(0xFF9AA5B1),
-    mint: Color(0xFF3DDC97),
-    onMint: Color(0xFF0B0F14),
-    mintText: Color(0xFF3DDC97),
-    amber: Color(0xFFFFB547),
-    amberText: Color(0xFFFFB547),
-    coral: Color(0xFFFF5C5C),
-    chartCommitted: Color(0xFF6B7684),
-  );
-
   static const light = KalanColors(
-    bg: Color(0xFFF7F8FA),
-    surface: Color(0xFFFFFFFF),
-    surfaceRaised: Color(0xFFEEF1F4),
-    border: Color(0xFFDDE2E8),
-    text: Color(0xFF0B0F14),
-    textMuted: Color(0xFF5B6673),
-    // Never text on light grounds (1.66:1); fills with onMint text only.
-    mint: Color(0xFF3DDC97),
-    onMint: Color(0xFF0B0F14),
-    mintText: Color(0xFF0E7A53),
-    amber: Color(0xFFFFB547),
-    amberText: Color(0xFFA15C00),
-    coral: Color(0xFFC62F2F),
-    chartCommitted: Color(0xFF5B6673),
+    bg: Color(0xFFF5F0E6),
+    surface: Color(0xFFFCF9F2),
+    surfaceRaised: Color(0xFFFFFFFF),
+    border: Color(0xFF8E8576),
+    text: Color(0xFF1A2330),
+    textMuted: Color(0xFF566070),
+    accent: Color(0xFF1D4E89),
+    onAccent: Color(0xFFFCF9F2),
+    accentText: Color(0xFF1D4E89),
+    negative: Color(0xFF8A5A00),
+    negativeText: Color(0xFF7D5200),
+    late: Color(0xFFA3193F),
+    chartCommitted: Color(0xFFB87A0A),
+    focus: Color(0xFF2D6CC8),
   );
 
-  /// Screen ground.
+  static const dark = KalanColors(
+    bg: Color(0xFF11161D),
+    surface: Color(0xFF19212B),
+    surfaceRaised: Color(0xFF222C38),
+    border: Color(0xFF6B7888),
+    text: Color(0xFFEFE9DD),
+    textMuted: Color(0xFFA8B0BB),
+    accent: Color(0xFF8FB8F2),
+    onAccent: Color(0xFF0D1B2E),
+    accentText: Color(0xFF9CC1F5),
+    negative: Color(0xFFEEC56E),
+    negativeText: Color(0xFFEEC56E),
+    late: Color(0xFFF7668C),
+    chartCommitted: Color(0xFFC98F24),
+    focus: Color(0xFFBCD6FB),
+  );
+
+  /// Screen ground (paper).
   final Color bg;
 
-  /// Cards, lists, sheets.
+  /// Cards and lists.
   final Color surface;
 
-  /// Selected rows, input fields, letter badges.
+  /// Dialogs, bottom sheets, raised cards, input fields, letter badges.
   final Color surfaceRaised;
 
-  /// Thin dividers and card outlines; decoration only.
+  /// Dividers, input and card outlines.
   final Color border;
+
+  /// Main text (ink).
   final Color text;
 
-  /// Secondary text: dates, descriptions.
+  /// Secondary text: descriptions, dates.
   final Color textMuted;
 
-  /// "Left" accent fills, primary buttons, the ring's bright segment.
-  final Color mint;
+  /// Only "left": the big number, the primary button fill, the bar's left
+  /// part.
+  final Color accent;
 
-  /// Text and icons on [mint] fills.
-  final Color onMint;
+  /// Text and icons on [accent] fills.
+  final Color onAccent;
 
-  /// Mint as text: the big "left" number, links.
-  final Color mintText;
+  /// Accent as text: links, secondary button labels.
+  final Color accentText;
 
-  /// Fill when "left" goes negative; warning badges.
-  final Color amber;
+  /// Only when "left" is negative: the big number and the period mark,
+  /// always with a minus sign and a word.
+  final Color negative;
 
-  /// Amber as text: a negative "left", warning text.
-  final Color amberText;
+  /// The text that explains a negative period.
+  final Color negativeText;
 
-  /// Only overdue payments, errors and irreversible deletes.
-  final Color coral;
+  /// Only overdue payments, errors and deletes; always with an icon or word.
+  final Color late;
 
-  /// The "spoken for" part of the period bar.
+  /// The "spoken for" part of the bar; never text on top.
   final Color chartCommitted;
 
-  /// Modal barrier: the ground at partial opacity (not a new tone).
-  Color get scrim => bg.withValues(alpha: 0.6);
+  /// Keyboard focus ring (2 px wide, 2 px gap).
+  final Color focus;
 
   @override
   KalanColors copyWith({
@@ -102,13 +108,14 @@ class KalanColors extends ThemeExtension<KalanColors> {
     Color? border,
     Color? text,
     Color? textMuted,
-    Color? mint,
-    Color? onMint,
-    Color? mintText,
-    Color? amber,
-    Color? amberText,
-    Color? coral,
+    Color? accent,
+    Color? onAccent,
+    Color? accentText,
+    Color? negative,
+    Color? negativeText,
+    Color? late,
     Color? chartCommitted,
+    Color? focus,
   }) => KalanColors(
     bg: bg ?? this.bg,
     surface: surface ?? this.surface,
@@ -116,13 +123,14 @@ class KalanColors extends ThemeExtension<KalanColors> {
     border: border ?? this.border,
     text: text ?? this.text,
     textMuted: textMuted ?? this.textMuted,
-    mint: mint ?? this.mint,
-    onMint: onMint ?? this.onMint,
-    mintText: mintText ?? this.mintText,
-    amber: amber ?? this.amber,
-    amberText: amberText ?? this.amberText,
-    coral: coral ?? this.coral,
+    accent: accent ?? this.accent,
+    onAccent: onAccent ?? this.onAccent,
+    accentText: accentText ?? this.accentText,
+    negative: negative ?? this.negative,
+    negativeText: negativeText ?? this.negativeText,
+    late: late ?? this.late,
     chartCommitted: chartCommitted ?? this.chartCommitted,
+    focus: focus ?? this.focus,
   );
 
   @override

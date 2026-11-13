@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
+import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -191,6 +192,32 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Koyu'));
     await tester.pumpAndSettle();
+    expect(ground(), KalanColors.dark.bg);
+  });
+
+  testWidgets('the theme choice survives a restart', (tester) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    final store = MemoryThemeModeStore();
+    final overrides = [themeModeStoreProvider.overrideWithValue(store)];
+    Color ground() =>
+        Theme.of(tester.element(find.byType(Scaffold).first))
+            .scaffoldBackgroundColor;
+
+    await pumpApp(tester, seed: seedSettings, overrides: overrides);
+    expect(store.read(), ThemeMode.system);
+    expect(ground(), KalanColors.light.bg);
+    await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Tema'));
+    await tester.tap(find.text('Tema'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Koyu'));
+    await tester.pumpAndSettle();
+    expect(store.read(), ThemeMode.dark);
+
+    // A fresh app on the same device storage starts dark.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await pumpApp(tester, seed: seedSettings, overrides: overrides);
     expect(ground(), KalanColors.dark.bg);
   });
 }

@@ -127,7 +127,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
             child: Text(l10n.actionCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.coral),
+            style: TextButton.styleFrom(foregroundColor: context.colors.late),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.actionDelete),
           ),

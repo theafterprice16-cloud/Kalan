@@ -66,7 +66,7 @@ class PaymentTile extends ConsumerWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.circle, size: 10, color: colors.amber),
+            Icon(Icons.circle, size: 10, color: colors.text),
             const SizedBox(width: 4),
             Text(
               days == 0 ? l10n.dueToday : l10n.dueTomorrow,
@@ -128,7 +128,7 @@ class PaymentTile extends ConsumerWidget {
             onPressed: () => _toggle(context, ref),
             icon: Icon(
               entry.isPaid ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: entry.isPaid ? colors.mintText : null,
+              color: entry.isPaid ? colors.accentText : null,
             ),
           ),
         ),

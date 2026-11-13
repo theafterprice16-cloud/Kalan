@@ -100,7 +100,7 @@ class RemindersSection extends ConsumerWidget {
                 children: [
                   StatusNote(
                     icon: Icons.notifications_off_outlined,
-                    color: colors.amberText,
+                    color: colors.text,
                     text: l10n.remindersPermissionOff,
                   ),
                   Align(

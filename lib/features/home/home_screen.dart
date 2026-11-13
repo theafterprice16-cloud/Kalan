@@ -84,9 +84,9 @@ class _Header extends ConsumerWidget {
     if (left == null) {
       numberColor = theme.colorScheme.onSurface;
     } else if (s.status == PeriodStatus.negative) {
-      numberColor = colors.amberText;
+      numberColor = colors.negative;
     } else {
-      numberColor = colors.mintText;
+      numberColor = colors.accent;
     }
 
     return Padding(
@@ -152,7 +152,7 @@ class _Header extends ConsumerWidget {
                 StatusNote(
                   key: const ValueKey('status-tight'),
                   icon: Icons.hourglass_bottom,
-                  color: colors.amberText,
+                  color: colors.text,
                   text: l10n.homeTight(
                     ref.money(context, view.tightThresholdMinor!),
                   ),
@@ -163,8 +163,8 @@ class _Header extends ConsumerWidget {
                 StatusNote(
                   key: const ValueKey('status-negative'),
                   icon: Icons.remove_circle_outline,
-                  color: colors.amberText,
-                  textColor: colors.textMuted,
+                  color: colors.negative,
+                  textColor: colors.negativeText,
                   text: l10n.homeNegative(ref.money(context, -left!)),
                 ),
               ],

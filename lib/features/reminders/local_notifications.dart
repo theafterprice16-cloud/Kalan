@@ -92,7 +92,7 @@ class LocalNotificationsGateway implements NotificationGateway {
           _l10n.reminderChannelName,
           channelDescription: _l10n.reminderChannelDescription,
           icon: ReminderIds.androidIcon,
-          color: KalanColors.dark.mint,
+          color: KalanColors.light.accent,
           actions: paidAction
               ? [
                   AndroidNotificationAction(

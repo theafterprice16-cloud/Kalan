@@ -32,7 +32,7 @@ class PlanDetailScreen extends ConsumerWidget {
             child: Text(l10n.actionCancel),
           ),
           TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.coral),
+            style: TextButton.styleFrom(foregroundColor: context.colors.late),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.actionDelete),
           ),
@@ -268,7 +268,7 @@ class _PaymentRow extends ConsumerWidget {
                 payment.isPaid
                     ? Icons.check_circle
                     : Icons.radio_button_unchecked,
-                color: payment.isPaid ? colors.mintText : null,
+                color: payment.isPaid ? colors.accentText : null,
               ),
             ),
           ],

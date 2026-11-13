@@ -114,6 +114,6 @@ void main() {
         matching: find.byType(Text),
       ),
     );
-    expect(number.style!.color, KalanColors.dark.mintText);
+    expect(number.style!.color, KalanColors.dark.accent);
   });
 }
