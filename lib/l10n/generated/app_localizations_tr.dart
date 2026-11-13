@@ -1049,4 +1049,23 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get underwayRevertConfirm => 'Devam et';
+
+  @override
+  String get resizeHint =>
+      'Plan toplamı aynı kalır; ödenmemiş taksitler yeniden bölünür.';
+
+  @override
+  String errorCountMin(int min) {
+    final intl.NumberFormat minNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String minString = minNumberFormat.format(min);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      min,
+      locale: localeName,
+      other: 'Burada en az $minString olabilir; ödenmiş taksitler kalır.',
+    );
+    return '$_temp0';
+  }
 }

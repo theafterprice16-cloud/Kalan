@@ -146,6 +146,62 @@ void main() {
     );
   });
 
+  group('changing the installment count', () {
+    int total(List<PaymentRow> r) => r.fold(0, (s, p) => s + p.amountMinor);
+
+    test('10 -> 12: same total, new payments follow the plan', () async {
+      final rejected = await plans.editPlan(
+        planId,
+        count: 12,
+        paidBefore: 3,
+        pattern: const MonthlyPattern(),
+      );
+      expect(rejected, isNull);
+      final r = await rows();
+      expect(r, hasLength(12));
+      expect(total(r), 850000);
+      expect(r.take(3).every((p) => p.amountMinor == 85000), isTrue);
+      expect(r[10].date, d(2027, 7, 5));
+      expect(r[11].date, d(2027, 8, 5));
+      expect(before(r).where((b) => b), hasLength(3));
+      final plan = (await plans.all()).single;
+      expect(plan.plan.installmentCount, 12);
+      expect(plan.paidCount, 3);
+    });
+
+    test('10 -> 8 with 2 paid before: both steps in one go', () async {
+      expect(await plans.editPlan(planId, count: 8, paidBefore: 2), isNull);
+      final r = await rows();
+      expect(r, hasLength(8));
+      expect(total(r), 850000);
+      expect(before(r), [true, true, ...List.filled(6, false)]);
+      // 8,500 - 1,700 paid, over 6 unpaid.
+      expect(r.skip(2).map((p) => p.amountMinor).toSet(), {
+        (850000 - 170000) ~/ 6,
+        (850000 - 170000) ~/ 6 + (850000 - 170000) % 6,
+      });
+    });
+
+    test(
+      'never below a payment marked paid in Kalan; nothing changes',
+      () async {
+        final fifth = (await rows())[4];
+        await plans.setPaid(fifth.id, paid: true, now: now);
+        final rejected = await plans.editPlan(
+          planId,
+          count: 5,
+          paidBefore: 1,
+          pattern: const MonthlyPattern(),
+        );
+        expect(rejected, ResizeRejection.tooFew);
+        final r = await rows();
+        expect(r, hasLength(10));
+        expect(before(r).where((b) => b), hasLength(3)); // rolled back
+        expect(r[4].paidAt, now);
+      },
+    );
+  });
+
   test('an underway plan counts as one open plan', () async {
     expect(await plans.countOpenPlans(), 1);
     expect((await plans.all()).single.isOpen, isTrue);

@@ -368,6 +368,15 @@ void main() {
           await shoot(tester, '20-underway-plan-detail-$lang-$theme');
         });
 
+        testWidgets('plan edit, $lang', (tester) async {
+          await start(tester, locale: locale, underway: true);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Tablet'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('plan-edit')));
+          await shoot(tester, '22-plan-edit-$lang-$theme');
+        });
+
         testWidgets('plans list underway, $lang', (tester) async {
           await start(tester, locale: locale, underway: true);
           await openTab(tester, plansTab);

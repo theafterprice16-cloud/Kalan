@@ -7,6 +7,7 @@ export 'payment_edit.dart';
 export 'period_summary.dart';
 export 'plan_calculator.dart';
 export 'plan_draft.dart';
+export 'plan_resize.dart';
 export 'recurring.dart';
 export 'schedule.dart';
 export 'split.dart';

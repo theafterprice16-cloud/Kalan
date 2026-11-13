@@ -1060,4 +1060,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get underwayRevertConfirm => 'Continue';
+
+  @override
+  String get resizeHint =>
+      'The plan total stays the same; unpaid installments are split again.';
+
+  @override
+  String errorCountMin(int min) {
+    final intl.NumberFormat minNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String minString = minNumberFormat.format(min);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      min,
+      locale: localeName,
+      other:
+          'This can\'t be less than $minString here: paid installments stay.',
+      one: 'This can\'t be less than 1 here.',
+    );
+    return '$_temp0';
+  }
 }
