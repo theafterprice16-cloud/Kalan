@@ -56,7 +56,7 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | Ağ izni | Ana `AndroidManifest.xml`'de INTERNET izni yok (testle denetlenir). `debug` ve `profile` manifest'lerindeki izin Flutter'ın geliştirme araçları (hot reload) için zorunlu ve yayın derlemesine girmez. |
 | İkon üretimi | `tool/generate_icons.py` yalnızca geliştirmede çalışır ve Pillow ister; uygulamanın bağımlılığı değildir. |
 | SQLite derlemesi | `sqlite3` 3.x paketi (drift_flutter üzerinden) derleme sırasında hazır SQLite ikilisini GitHub'dan indirir ve SHA-256 ile doğrular. Bu yalnızca derleme anıdır; uygulama çalışırken ağ kullanılmaz. |
-| Şema | Drift `schemaVersion` 1. Şema anlık görüntüsü `drift_schemas/`, göç testleri `test/drift/`. Yabancı anahtarlar açık; plan silinince ödemeleri silinir, planı olan kaynak silinemez. |
+| Şema | Drift `schemaVersion` 3 (v2 ve v3: hatırlatmalar). Şema anlık görüntüsü `drift_schemas/`, göç testleri `test/drift/`. Yabancı anahtarlar açık; plan silinince ödemeleri silinir, planı olan kaynak silinemez. |
 
 
 ## Palet: Gece & Nane (12 Kasım 2026)
@@ -72,28 +72,37 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | Karartma | `bg` %60 opaklık; yeni ton sayılmaz. |
 | Golden testleri | Flutter SDK'daki Roboto ile çizilir; CI aynı SDK sürümünü kullanır. Test yazı tipinde "→" karakteri olmadığı için önizleme penceresinde kutu görünür; cihazda sistem yazı tipi çizer. |
 
-## Hatırlatmalar (13 Kasım 2026)
+## Hatırlatmalar (13 Kasım 2026, ikinci sürüm)
+
+Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sahibiyle netleşen kararlar: iki bildirim ("önceden" ve "gününde"), tek "kaç gün önce" seçimi, bildirimde "Ödendi" düğmesi yok, dokununca ana ekran.
 
 | Konu | Karar |
 |---|---|
-| Kapsam | Yalnızca yerel bildirim (`flutter_local_notifications`). Sunucu, push servisi, Firebase, hesap ve internet yok. Ücretsiz sürümde tam çalışır, Pro'ya bağlı değildir. |
-| Zamanlama | 7 gün önce, 3 gün önce, 1 gün önce ve ödeme günü ayrı ayrı açılıp kapanır; varsayılan 3 gün önce ve ödeme günü. Saat varsayılan 09:00, cihazın yerel saatine göre. |
-| Tarih kaynağı | Bildirimler, hesap motorunun ürettiği ve veritabanında saklanan gerçek ödeme tarihinden hesaplanır (ekstre, son ödeme günü, hafta sonu kaydırması uygulanmış). Bildirim kodu tarih hesaplamaz. |
-| Saf Dart planlayıcı | `lib/core/reminders`: ödemeler + ayarlar + "şimdi" → bildirim listesi. Aynı güne ve aynı türe düşen ödemeler tek özet olur; ödenmiş, arşivlenmiş ve hatırlatması kapalı planlar ile geçmiş zamanlar atlanır. Yeni bildirim kuralı önce burada testle eklenir. |
-| Kimlikler | `vade günü (epoch) × 4 + tür`. Kararlı olduğu için aynı bildirim iki kez kurulmaz; yeniden kurma eskisinin yerine geçer. Israrlı hatırlatma ileride ayrı bir tür olarak eklenebilir. |
-| Kayan pencere | iOS en çok 64 bekleyen bildirim tutar; en yakın 60 kurulur. Her yeniden kurmada bekleyenlerin hepsi silinir ve baştan kurulur (gösterilmiş bildirimler bildirim merkezinde kalır). |
-| Yeniden kurma anları | Uygulama açılınca ve öne gelince (saat dilimi de yenilenir); plan, ödeme, sabit ödeme, "ödendi" ve ayar değişikliklerinde (veritabanı akışları tek merkezden dinlenir); Android'de yeniden başlatma, saat ve saat dilimi değişiminde (`ReminderRescheduleReceiver`, arka planda Dart). |
-| Android zamanlama | Kesin olmayan (`inexactAllowWhileIdle`) zamanlama. `SCHEDULE_EXACT_ALARM` ve `USE_EXACT_ALARM` kullanılmaz: mağaza bu izinleri alarm/takvim uygulamalarına ayırıyor. Hatırlatma birkaç dakika geç gelebilir; bu kabul edildi. |
-| Android kanalı | "Ödeme hatırlatmaları", varsayılan önem. Tek renkli `ic_stat_kalan` ikonu, vurgu rengi KalanColors'tan (Mürekkep ve Safran ile birlikte açık `accent`, #1D4E89). |
-| iOS | İzin yalnızca alert, sound ve badge için istenir. Uygulama ön plandayken de bildirim görünür. |
-| İzin akışı | İlk plan ya da ilk sabit ödeme kaydedilince önce Kalan'ın açıklama penceresi, sonra sistem izni. "Şimdi değil" kesindir: hatırlatmalar kapalı başlar, bir daha kendiliğinden sorulmaz, Ayarlar'dan açılır (açılınca sistem izni istenir). |
-| "Ödendi" düğmesi | Yalnızca ödeme günü bildiriminde ve o gün tek ödeme varsa. Uygulama kapalıyken arka plan izolatında çalışır: veritabanını açar (`shareAcrossIsolates`), ödemeyi işaretler, bildirimi kaldırır, hatırlatmaları yeniden kurar. |
-| Tutar gizliliği | "Bildirimlerde tutarı gizle" tek gizlilik servisinde (`PrivacySettings`). İleride gelecek "tutarları gizle" düğmesi de buraya eklenecek. |
-| Plan bazında | Plan ve sabit ödeme ayrıntısında "Bu plan için hatırlatma" anahtarı (şema v2 sütunu, varsayılan açık). |
-| Kayıt yeri | Hatırlatma ayarları ve plan anahtarları Drift şema v2'de (göç testiyle). Arka plan izolatı aynı veritabanını okur. |
-| Derin bağlantı | Bildirime dokununca `/day/<tarih>` ("Günün ödemeleri") açılır; uygulama kapalıysa açılış rotası olarak. |
+| Kapsam | Yalnızca yerel bildirim (`flutter_local_notifications`). Sunucu, push servisi, Firebase, hesap, analiz ve internet yok. Ücretsiz sürümde tam çalışır, Pro'ya bağlı değildir. |
+| İki bildirim | Her ödeme için biri "kaç gün önce" ("önceden"), biri ödeme günü ("gününde"). Önceden bildirimi hiçbir zaman ödeme gününe düşmez (en az 1 gün). |
+| Kaç gün önce | Seçenekler 1, 2, 3, 5, 7; varsayılan 2 (bazı sağlayıcılar parayı bir gün erken çekiyor). Genel ayarı plana uygulayan tek fonksiyon `defaultLeadDaysFor` (`lib/core/reminders/reminder_models.dart`); elle/otomatik ödeme ayrımı geldiğinde yalnızca orası değişir. |
+| Saat | Varsayılan 09:00, Ayarlar'dan değişir (sistem saat seçici, dilin 12/24 saat biçimi). Kuruluma adım eklenmedi. Yerel saat diliminde hesaplanır; yaz saati geçişinde 09:00 yine 09:00'dır. |
+| Tutar | Varsayılan görünür. "Bildirimde tutarı göster" kapalıyken metinde tutar olmaz (kilit ekranı gizliliği). Ayar tek gizlilik servisinde (`PrivacySettings`); veritabanında `hideAmountsInNotifications` sütunu olarak (tersi) duruyor. |
+| Birleştirme | Aynı gün ve aynı türdeki bildirimler tek bildirimdir; gruplama tetiklenme gününe göre yapılır. Farklı "kaç gün önce" seçen planlar aynı güne düşerse tek "önceden" bildirimi olur ve metin en erken tarihi söyler ("13 Kasım Perşembe gününden itibaren 2 ödeme var"). Tek para birimi olduğu için toplam yazılır; plan adları genişletilmiş gövdede (Android BigText, iOS uzun gövde) virgülle sıralanır. |
+| 60 sınırı | iOS en çok 64 bekleyen bildirim tutar; tarih sırasına göre en yakın 60 kurulur. Android'de de aynı kural, tek kod yolu. |
+| Kimlikler | `tetiklenme günü (epoch) × 2 + tür`. Deterministik: yeniden kurma çift bildirim üretmez. |
+| Saf Dart planlayıcı | `lib/core/reminders`: ödemeler (etkin tarihleriyle), genel ayarlar, plan seçimleri, şimdiki an (saat dilimiyle) ve metin üreticisi (dil) → sıralı bildirim listesi (kimlik, an, başlık, gövde, genişletilmiş gövde, payload). Metinleri `L10nReminderTexts` ARB'den, tarihi intl'den (`MMMMEEEEd`: "14 Kasım Cuma", "Friday, November 14"), tutarı ortak para biçimlendiricisinden üretir. |
+| Tarih kaynağı | Hesap motorunun ürettiği ve veritabanında saklanan etkin son ödeme günü (kart hesap kesimi ve hafta sonu kaydırması uygulanmış). Bildirim, ekrandaki günle aynıdır; bildirim kodu tarih hesaplamaz. |
+| Hariç tutulanlar | Ödenmiş ödemeler, "Kapalı" planlar, ana anahtar kapalıyken her şey, tetiklenme anı geçmiş bildirimler (geçmiş "önceden" bildirimi atlanır, "gününde" yine kurulur). Uygulamada plan arşivi yok; bitmiş planların ödemeleri zaten ödenmiş olduğundan hariçtir. |
+| Plan bazında | Plan ayrıntısında ve sabit ödeme düzenleme ekranında "Hatırlatma": Genel ayar (varsayılan) / Kapalı / Farklı gün (1, 2, 3, 5, 7). Saat her zaman genel ayardan. Plan ekleme ekranına eklenmedi (yirmi saniye kuralı: en çok dört alan). |
+| Yeniden kurma | Her çalışmada Kalan'ın bekleyen bildirimleri iptal edilir ve liste baştan kurulur (gösterilmiş bildirimler bildirim merkezinde kalır). Tetikleyiciler: uygulama açılışı, ön plana dönüş (saat dilimi de yenilenir), plan ekleme/düzenleme/silme, "ödendi" ve geri alma, sabit ödeme değişiklikleri, hatırlatma ayarları, dil ve para birimi değişikliği (veritabanı akışları tek merkezden, `ReminderSync`); Android'de yeniden başlatma, saat ve saat dilimi değişimi (`ReminderRescheduleReceiver`, uygulama açılmadan arka planda Dart). Art arda gelen değişiklikler 300 ms beklemeyle tek çalışmada toplanır; arayüz beklemez. |
+| Android zamanlama | Kesin olmayan (`inexactAllowWhileIdle`) zamanlama. `SCHEDULE_EXACT_ALARM` ve `USE_EXACT_ALARM` istenmez: Google Play bu izinleri hatırlatma uygulamalarında kısıtlıyor; birkaç dakikalık kayma kabul edildi. Eklentinin önyükleme alıcısı ve `RECEIVE_BOOT_COMPLETED` ile bildirimler yeniden başlatmada korunur. |
+| Android kanalı ve ikon | "Ödeme hatırlatmaları", varsayılan önem. Küçük ikon `ic_stat_kalan`: logonun beyaz silueti, şeffaf zemin, şekil değişmeden. Vurgu rengi `KalanColors.light.accent` (DESIGN_TOKENS accent, #1D4E89); kodda kaynağı yorumla belirtildi. |
+| iOS | İzin alert, sound ve badge için. Uygulama ön plandayken de bildirim görünür (`UNUserNotificationCenter` delegesi ve sunum seçenekleri). Uygulama ikonu kullanılır. |
+| İzin akışı | Uygulama açılışında sorulmaz. İlk plan kaydedildikten hemen sonra Kalan'ın alt sayfası: "Hatırlatmaları aç" sistem iznini ister, "Şimdi değil" kapatır. Sayfa bir kez gösterilir; "Şimdi değil", kaydırarak kapatma ya da sistem reddi tekrar sorulmaz. Hatırlatmalar açık kalır; izin kapalıyken Ayarlar > Hatırlatmalar'da "Bildirim izni kapalı" satırı ve "Ayarları aç" düğmesi görünür. Sistem zaten izin veriyorsa (Android 12 ve altı) sayfa gösterilmez. Sabit ödeme izin sormaz. |
+| "Ödendi" düğmesi | Bildirimde yok (ayrı bir backlog maddesi). Önceki sürümdeki eylem, arka plan işleyicisi, iOS eklenti kaydı ve `ActionBroadcastReceiver` kaldırıldı. |
+| Dokunma | Bildirime dokununca ana ekran açılır (go_router); uygulama kapalıyken de uygulama ana ekranda başlar. Önceki sürümdeki "Günün ödemeleri" ekranı kaldırıldı. |
+| Kayıt | Drift şema v3: genel `reminderLeadDays` (varsayılan 2), plan ve sabit ödemede `reminderLeadDays` (boş = genel ayar) ve mevcut aç/kapa sütunu. v2'nin ayrı gün sütunları kaldırıldı. Geçişte mevcut planlar "Genel ayar" olur; v1 ve v2'den geçiş testli. |
+| Deneme bildirimi | Yalnızca debug derlemede (`kDebugMode`) Ayarlar > Hatırlatmalar'ın altında "Deneme bildirimi (10 saniye sonra)". Yayın derlemesinde derlenmez. |
 | Web | Bildirim kodu web'de çalışmaz; Ayarlar'da "Bu özellik telefonda çalışır" yazar. |
-| Paketler | `flutter_local_notifications` (yerel bildirim), `timezone` (yaz saati doğru yerel saat), `flutter_timezone` (cihazın saat dilimi adı). Üçü de ağ kullanmaz. `timezone` paketi yalnızca web'de saat dilimi verisini indirmek için kullanılan bir dosyada `http`'ye bağlı; Kalan gömülü veriyi kullanır ve o dosyayı içe aktarmaz. Ağ bekçisi testi bu istisnayı yalnızca bu koşullarla kabul eder. |
+| Renk | Ayarlar'da seçili seçenek ve açık anahtar, DESIGN_TOKENS kuralı gereği mürekkep (`text`) rengindedir; prompt "accent" diyordu, bağlayıcı belge kazandı (accent yalnızca "kalan" için). Seçili seçenekte onay işareti de vardır. |
+| Paketler | `flutter_local_notifications` 23.0.1 (yerel bildirim), `timezone` 0.11.2 (yaz saati doğru yerel saat), `flutter_timezone` 5.1.1 (cihazın saat dilimi adı). Hepsi kararlı, bakımı süren sürümler; hiçbiri ağ kullanmaz. Sistem ayarlarını açmak için ek paket yok: küçük bir platform kanalı (`kalan/system`). `timezone` paketi yalnızca web'de saat dilimi verisini indirmek için kullanılan bir dosyada `http`'ye bağlı; Kalan gömülü veriyi kullanır ve o dosyayı içe aktarmaz. Ağ bekçisi testi bu istisnayı yalnızca bu koşullarla kabul eder. |
+| Android derleme | `flutter_local_notifications` 23 ve `androidx.core` 1.19 için `compileSdk = 37`; hedef SDK Flutter varsayılanı. |
 
 ## Palet: Mürekkep ve Safran (13 Kasım 2026)
 

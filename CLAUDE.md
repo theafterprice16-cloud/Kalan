@@ -24,7 +24,9 @@ Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedik�
 
 Ödemeyi etkileyen her değişiklikten sonra bildirimler yeniden kurulur; yeni bildirim kuralı önce saf Dart planlayıcıya testle eklenir.
 
-- Planlayıcı: `lib/core/reminders` (saf Dart). Platform: `lib/features/reminders` (`NotificationGateway` arkasında). Yeniden kurma `ReminderSync` ile veritabanı akışlarından tek merkezde.
+- Her ödeme için iki bildirim: "önceden" (genel ayar 1/2/3/5/7 gün, varsayılan 2; plan bazında Genel ayar / Kapalı / Farklı gün) ve "gününde", 09:00. Aynı gün ve türde tek bildirim, en yakın 60. Varsayılan gün tek yerde: `defaultLeadDaysFor`.
+- Planlayıcı: `lib/core/reminders` (saf Dart; metinleri `ReminderTexts` arayüzüyle alır). Platform: `lib/features/reminders` (`NotificationGateway` arkasında). Yeniden kurma `ReminderSync` ile veritabanı akışlarından tek merkezde, kısa beklemeyle.
+- Tarih her zaman motorun sakladığı etkin son ödeme günü. Bildirimde "Ödendi" düğmesi yok; dokununca ana ekran.
 - Yalnızca yerel bildirim; Android'de kesin olmayan zamanlama (exact alarm izni yok).
 - Web'de kapalı (`NotificationGateway.supported`).
 
