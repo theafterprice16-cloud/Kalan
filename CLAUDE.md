@@ -111,3 +111,4 @@ test/                 lib/ yapısını izler
 - Her değişiklikten sonra format, analyze, test temiz olmalı.
 - Yeni paket eklemeden önce gerekçeyi `docs/DECISIONS.md`'ye yaz; ağ yapan paket ekleme.
 - Plan oluşturmanın tek yolu: taslak (`PlanDraft`) → kullanıcı onayı → kayıt.
+- PR birleştirme: testler, `flutter analyze` ve CI (Android derlemesi dahil) yeşilse ve değişiklik istenen işin kapsamındaysa, PR ürün sahibine sormadan birleştirilir; ardından ona kısaca bildirilir. Kırmızı test, kural çelişkisi ya da yeni paket varsa önce sorulur.
