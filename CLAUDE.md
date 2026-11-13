@@ -30,6 +30,11 @@ Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedik�
 - Yalnızca yerel bildirim; Android'de kesin olmayan zamanlama (exact alarm izni yok).
 - Web'de kapalı (`NotificationGateway.supported`).
 
+## Ortasından eklenen planlar
+
+- "Bu plan zaten sürüyor": geçmiş taksitler gerçek ödeme kaydıdır (`payments.paidBeforeKalan`, ödenmiş). Tek tek listelenmez, tarihleri gösterilmez, gecikmiş sayılmaz, bildirim almaz; dönem toplamına normal ödenmiş ödeme gibi girer.
+- Geriye tarih yalnızca motorun `underwayDates` fonksiyonuyla (ileri yön kuralıyla tutarlı). Düzenleme, uygulamada "ödendi" işaretlenen ödemelere asla dokunmaz.
+
 ## Renk
 
 Tüm geliştirmeler Mürekkep ve Safran paletine uyar; yalnızca tema tokenları kullanılır; yeni renk eklemek için ürün sahibinden onay alınır.

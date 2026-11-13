@@ -13,7 +13,7 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 5 | Kuruş artığı | `taban(toplam / n)` her ödemeye; artan kuruş ilk ödemeye eklenir. |
 | 6 | Tek ödemenin tutarı düzeltilince | Fark, sonraki ödenmemiş ve elle düzeltilmemiş ödemelere eşit dağıtılır (artık kuruş ilkine). Böyle ödeme yoksa ya da bir ödeme 0 veya altına düşecekse düzeltme yapılmaz. Plan toplamı değişmez. |
 | 7 | Plan adı | İsteğe bağlı; boşsa kaynak adı gösterilir. Şablon ekranında "Ayrıntı ekle" altında katlı durur, dört alana sayılmaz. |
-| 8 | Aylık taksit şablonu | Toplam tutar ve taksit sayısı sorulur. Taksit tutarıyla giriş "Yarıda başlayan plan" ve "Elle giriş"te var. |
+| 8 | Aylık taksit şablonu | Toplam tutar ve taksit sayısı sorulur. (Eski not: taksit tutarıyla giriş "Yarıda başlayan plan"daydı; o tür 13 Kasım 2026'da "Bu plan zaten sürüyor" anahtarıyla değiştirildi, aşağıya bak.) |
 | 9 | Plan ne zaman biter | Bütün ödemeleri "ödendi" olunca arşive geçer. Tarihin geçmesi tek başına yetmez. |
 | 10 | Sıkışık dönem | Eşik varsayılan olarak boş (kapalı). Kalan < eşik ise ana ekranda kehribar işaret ve "Sıkışık dönem" metni. Gelir girilmemişse hesaplanmaz. Eksiye düşen dönem mercan ve metinle gösterilir; sıkışık dönemden önceliklidir. |
 | 11 | Sabit ödeme | Tekrar: haftalık, iki haftada bir, aylık, yıllık. Tutar zorunlu (değişken faturada kullanıcı bildiği tutarı girer, uygulama tahmin üretmez). Bitiş tarihi isteğe bağlı. Her tekrar için "ödendi" işareti var. Ücretsiz sınıra sayılmaz. |
@@ -31,7 +31,7 @@ Kimlik dosyasında ya da ilk prompt'ta cevabı olmayan, 12 Kasım 2026'daki plan
 | 21 | Maaş günü girişi | Aylık: ayın günü (1-31; ay kısaysa son güne sıkışır). İki haftada bir: son maaş tarihi. Haftalık: haftanın günü. Net tutar bir maaşın tutarıdır. |
 | 22 | 4 ödemeli plan | İlk ödeme alışveriş günü; sonra 14 günde bir, toplam 4 ödeme. |
 | 23 | Kart taksidi tarihi | Ödeme tarihi, taksidin düştüğü ekstre tarihinden sonraki ilk son ödeme günüdür (aynı gün sayılmaz). Hafta sonu kaydırması kart başına ayar, varsayılan açık; cumartesi ve pazar pazartesiye kayar. Resmi tatiller BACKLOG'da. |
-| 24 | Yarıda başlayan plan | Toplam taksit sayısı, kalan taksit sayısı, taksit tutarı ve sonraki ödeme tarihi girilir. Yalnızca kalan ödemeler kaydedilir; plan toplamı bunların toplamıdır. İlerleme etiketi baştan sayar ("4/12"). Kart kaynağında sonraki tarihler kartın son ödeme gününe göre üretilir. |
+| 24 | Yarıda başlayan plan | **Değiştirildi (13 Kasım 2026):** ayrı plan türü kaldırıldı; yerine her türde "Bu plan zaten sürüyor" anahtarı var ("Devam eden planı ortasından ekleme" bölümü). Eski kural: kalan taksit sayısı girilir, yalnızca kalan ödemeler kaydedilirdi. Bu yolla eklenmiş planlar olduğu gibi çalışmaya devam eder. |
 | 24a | Sabit ödemelerin geçmiş tekrarları | "Ödenmemiş" bölümünde gösterilmez (yalnızca plan ödemeleri). Aksi hâlde başlangıçtan bu yana işaretlenmemiş her kira satırı listeyi doldururdu. |
 | 24b | Yaklaşan ödeme | Ödenmemiş ve bugün ya da yarın olan ödemede kehribar nokta ve "Bugün"/"Yarın" metni. |
 | 25 | Ödenmiş ödemenin düzeltilmesi | Ödenmiş ödeme düzeltilemez; önce "ödenmedi" yapılır. |
@@ -134,4 +134,27 @@ Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sah
 | Seçici | Ada, koda, sembole ve ayırt edici sembole göre arama (Türkçe i/İ ve ı farkı gözetilmez). Liste adına göre sıralı (Türkçede ç, ğ, ı, ö, ş, ü kendi yerinde). Başta "Önerilen": cihaz bölgesinin birimi, sonra orada birlikte kullanılanlar (PA → PAB, USD; PS → JOD, ILS). Bölge bilinmiyorsa uygulama dili ("tr" → TRY, başka → USD). |
 | Adlar | 75 ad yalnızca Türkçe ve İngilizce ARB'de. Mevcut Türkçe "Kazak tengesi" çevirisi korundu (tablodaki "Kazakistan tengesi" yerine); mevcut çeviriler değiştirilmez kuralı. |
 | Doğrulanamayanlar | Tablodaki notlar (KZT kuruş kullanımı, AUD/NZD nakit yuvarlaması, SAR/AED yeni işaretleri, CDF'de dolar, SYP sıfır atma) kayda yansıtılmadı; tablo değerleri kullanıldı. |
+
+## Devam eden planı ortasından ekleme (13 Kasım 2026)
+
+Ürün sahibiyle netleşen kararlar: ödenmiş taksit sayısı girilir (kalan değil; ekstredeki "3/10" ile aynı), sıradaki ödeme tarihi girilir, geçmiş taksitler gerçek ödeme kaydı olarak "Kalan'dan önce ödendi" işaretiyle saklanır.
+
+| Konu | Karar |
+|---|---|
+| Ayrı tür yerine anahtar | "Yarıda başlayan" plan türü (karar 24) kaldırıldı; kalan sayısıyla giriş ve dördüncü bir yol bırakılmadı. Her türde "Bu plan zaten sürüyor" anahtarı, tutar ve taksit alanlarının altında. Kapalıyken ekran öncekiyle aynı (tek fark anahtarın kendisi). Motordaki eski `PlanCalculator.midway` ve testleri değiştirilmeden duruyor; arayüz kullanmıyor. |
+| Alanlar | Aylık ve kart: mevcut sayı alanı "Toplam taksit" adını alır, "Ödenmiş taksit" eklenir, ilk ödeme / satın alma tarihi yerine "Sıradaki ödeme tarihi" gelir. 4 ödemeli: toplam 4 sabit, ödenmiş 1–3 seçilir, sıradaki tarih. Elle giriş: yalnızca "Ödenmiş taksit"; girilen listenin ilk N ödemesi işaretlenir, tarihler değişmez. Ekrana tek anahtar ve en çok üç alan eklendi. |
+| Kayıt | `payments.paidBeforeKalan` (bool, varsayılan false; mevcut `isEdited` gibi ödeme satırında). Şema v4; geçişte bütün mevcut kayıtlar false, tutar ve tarih değişmez (testli). Bu kayıtlar `paidAt` dolu, yani ödenmiş; işaret yalnızca gösterimi ve düzenlemeyi ayırır. |
+| Geriye tarih | Saf `underwayDates` (motor): aylıkta sıradaki tarihin ayın günü, motorun ay sonu kuralıyla (31 Ocak, 28 Şubat, 31 Mart); 4 ödemelide 14 gün; kartta `dueMonthOf` ve `CardTerms.dueInMonth` ile kartın aylık son ödeme günü (hafta sonu kaydırması dahil). Tutarlılık testli: ilk tarihten ileri kurulan plan aynı listeyi verir. Aylıkta ilk tarih ay sonuna kırpılmışsa (ör. sıradaki 31 Mart, 1 ödenmiş → 28 Şubat) ileri yön de planın kendi gününü (31) kullanır; liste yine aynıdır. |
+| Kart önerisi | `nextCardDueAfter`: bugünden sonraki ilk son ödeme günü (bugün son ödeme günüyse bir sonraki). Kart seçilince ya da anahtar açılınca dolar; kullanıcı tarihi değiştirince öneri bir daha üzerine yazmaz. |
+| Tutarlar | Toplam tutar eskisi gibi girilir ve `splitEvenly` ile bölünür: kuruş farkı ilk taksitte kalır (bu bir "Kalan'dan önce ödendi" kaydı olabilir). |
+| Dönem hesabı | Bu kayıtlar ödenmiş ödemeler gibi söz verilmiş tutara girer: tarihi içinde bulunulan döneme düşen dahil olur, önceki dönemler hesaplanmaz. Ana ekranda listelenmez; "Bu dönem N ödeme var" cümlesindeki sayı ve toplam tutar onları da içerir (toplamla tutarlı kalsın diye). |
+| Hiç gecikmiş değil | Ödenmiş oldukları için gecikmiş sayılmaz, bildirim kurulmaz (planlayıcı testiyle kilitli), late kullanılmaz. |
+| Gösterim | Plan ayrıntısında ödeme listesinin üstünde tek satır: "3 taksit Kalan'dan önce ödendi · ₺2.550" (textMuted, dokunulmaz); tek tek satır ve tarih yok. Ekleme ekranının önizlemesinde de aynı satır; listelenen ödemeler yalnızca kalanlar. |
+| İlerleme | Liste ve ayrıntıda mevcut "{paid}/{count} ödendi" metni korundu (içinde "3/10" gösterimi var; mevcut çeviri ve testler değişmesin diye). Sayılar ARB'de `decimalPattern` biçimiyle intl'den gelir. Ekran okuyucu etiketi: "10 taksitten 3 tanesi ödendi". Ödenmiş sayısı = Kalan'dan önce ödenenler + uygulamada işaretlenenler (+ eski yolla eklenmiş planların baştaki eksik sırası). |
+| Düzenleme ekranı | Uygulamada plan düzenleme ekranı yoktu; plan ayrıntısına "Planı düzenle" eklendi. Aynı anahtar ve alanlar dolu gelir; toplam taksit salt okunur gösterilir (taksit sayısını değiştirmek bu işin kapsamında değil). |
+| Düzenleme kuralları | Uygulamada "ödendi" işaretlenen ödemelere asla dokunulmaz. Ödenmiş taksit alanı planın başındaki, uygulamada işaretlenmemiş ödemeleri kapsar; üst sınır bu baştaki dizinin uzunluğu (ve toplam − 1). Sayı artarsa sıradakiler işaretlenir; azalırsa ya da anahtar kapanırsa onay sorulur ("2 taksit ödenmemiş olarak geri gelecek.") ve o kayıtlar ödenmemiş olur; tarihi geçmişte kalanlar normal kuralla gecikmiş görünür. Sıradaki tarih değişirse uygulamada ödenmiş ve elle düzenlenmiş ödemeler dışındakiler planın düzeniyle yeniden hesaplanır (kartta mevcut kural gibi); elle girişte tarih alanı yok. |
+| Eski planlar | Ayrı "Yarıda başlayan" türüyle eklenmiş planlar (ilk sırası 1 değil) değişmeden çalışır, eski açıklama satırını gösterir; düzenle düğmesi onlarda yok. |
+| Ücretsiz sınır | Değişmedi: aynı `canAddPlan` ve hak yönetimi; ortasından eklenen plan da açık plan sayılır (testli). |
+| Anahtar rengi | Prompt anahtar için accent istiyordu; DESIGN_TOKENS kuralı (accent yalnızca "kalan") gereği anahtarlar mürekkep rengindedir. |
+| Test değişiklikleri | Kaldırılan tür yüzünden iki mevcut ekran testi güncellendi: `add_plan_test.dart`'taki "plan already started" testi kaldırıldı (yerine `underway_test.dart`), `accessibility_test.dart` döngüsü "Yarıda başlayan" yerine her türde anahtarı açıyor. Motor testlerinin hiçbiri değişmedi. |
 
