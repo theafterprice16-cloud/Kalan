@@ -796,5 +796,20 @@
   "underwayRevertConfirm": "Continue",
   "@underwayRevertConfirm": {
     "description": "Button in the confirmation that brings installments back as unpaid."
+  },
+  "resizeHint": "The plan total stays the same; unpaid installments are split again.",
+  "@resizeHint": {
+    "description": "Help under 'Total installments' on the plan edit screen."
+  },
+  "errorCountMin": "{min, plural, =1{This can't be less than 1 here.} other{This can't be less than {min} here: paid installments stay.}}",
+  "@errorCountMin": {
+    "description": "Validation under 'Total installments' when the new count would drop a paid installment.",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Smallest allowed count"
+      }
+    }
   }
 }

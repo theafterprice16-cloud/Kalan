@@ -209,6 +209,113 @@ class PlanRepository {
     }
   });
 
+  /// Changes the plan's installment count, keeping its total ([resizePlan]):
+  /// paid and hand-edited payments stay; removed payments come off the
+  /// end; new ones follow [pattern] from the last payment not edited by
+  /// hand. Returns the reason when the change is not possible.
+  Future<ResizeRejection?> resize(
+    int planId, {
+    required int count,
+    UnderwayPattern? pattern,
+  }) => _db.transaction(() async {
+    final rows =
+        await (_db.select(_db.payments)
+              ..where((p) => p.planId.equals(planId))
+              ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
+            .get();
+    if (count == rows.length) return null;
+    if (count > rows.length && pattern == null) {
+      return ResizeRejection.cannotSplit;
+    }
+    var anchor = rows.length - 1;
+    while (anchor > 0 && rows[anchor].isEdited) {
+      anchor--;
+    }
+    final dates = count > rows.length
+        ? underwayDates(
+            nextDate: rows[anchor].date,
+            paidCount: anchor,
+            totalCount: count,
+            pattern: pattern!,
+          )
+        : const <LocalDate>[];
+    final result = resizePlan(
+      payments: [for (final r in rows) r.toState()],
+      newCount: count,
+      dateAt: (i) => dates[i],
+    );
+    switch (result) {
+      case ResizeRejected(:final reason):
+        return reason;
+      case ResizeApplied(:final payments):
+        for (final r in rows.skip(count)) {
+          await (_db.delete(
+            _db.payments,
+          )..where((p) => p.id.equals(r.id))).go();
+        }
+        for (final (i, after) in payments.indexed) {
+          if (i < rows.length) {
+            if (rows[i].amountMinor == after.amountMinor) continue;
+            await (_db.update(
+              _db.payments,
+            )..where((p) => p.id.equals(rows[i].id))).write(
+              PaymentsCompanion(amountMinor: Value(after.amountMinor)),
+            );
+          } else {
+            await _db
+                .into(_db.payments)
+                .insert(
+                  PaymentsCompanion.insert(
+                    planId: planId,
+                    seq: after.seq,
+                    dueDay: after.date.epochDay,
+                    amountMinor: after.amountMinor,
+                  ),
+                );
+          }
+        }
+        await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+          PlansCompanion(installmentCount: Value(count)),
+        );
+        return null;
+    }
+  });
+
+  /// The plan edit screen's save: the installment count and "already
+  /// underway" together, in the order that keeps both valid.
+  Future<ResizeRejection?> editPlan(
+    int planId, {
+    required int count,
+    required int paidBefore,
+    LocalDate? nextDate,
+    UnderwayPattern? pattern,
+  }) => _db
+      .transaction(() async {
+        final current = await (_db.select(
+          _db.plans,
+        )..where((p) => p.id.equals(planId))).getSingle();
+        Future<void> underway() => setPaidBefore(
+          planId,
+          count: paidBefore,
+          nextDate: nextDate,
+          pattern: nextDate == null ? null : pattern,
+        );
+        if (count >= current.installmentCount) {
+          final rejected = await resize(planId, count: count, pattern: pattern);
+          if (rejected != null) return rejected;
+          await underway();
+        } else {
+          await underway();
+          final rejected = await resize(planId, count: count, pattern: pattern);
+          if (rejected != null) throw _Rollback(rejected);
+        }
+        return null;
+      })
+      .catchError(
+        (Object e) => (e as _Rollback).reason,
+        test: (e) => e is _Rollback,
+      );
+
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();
 
@@ -254,4 +361,10 @@ class PlanRepository {
       }
     }
   });
+}
+
+/// Undoes an [PlanRepository.editPlan] whose second step was refused.
+class _Rollback implements Exception {
+  const _Rollback(this.reason);
+  final ResizeRejection reason;
 }

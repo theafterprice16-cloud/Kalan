@@ -1561,6 +1561,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get underwayRevertConfirm;
+
+  /// Help under 'Total installments' on the plan edit screen.
+  ///
+  /// In en, this message translates to:
+  /// **'The plan total stays the same; unpaid installments are split again.'**
+  String get resizeHint;
+
+  /// Validation under 'Total installments' when the new count would drop a paid installment.
+  ///
+  /// In en, this message translates to:
+  /// **'{min, plural, =1{This can\'t be less than 1 here.} other{This can\'t be less than {min} here: paid installments stay.}}'**
+  String errorCountMin(int min);
 }
 
 class _AppLocalizationsDelegate

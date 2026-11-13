@@ -419,6 +419,39 @@ void main() {
       expect(rows[3].paidAt, isNotNull);
     });
 
+    testWidgets('the total installments change; the plan total stays', (
+      tester,
+    ) async {
+      final db = await pumpExample5(tester);
+      await openEdit(tester);
+      expect(
+        find.text(
+          'Plan toplamı aynı kalır; ödenmemiş taksitler yeniden bölünür.',
+        ),
+        findsOneWidget,
+      );
+      // Below the payment marked paid in Kalan (the 4th): refused.
+      await tester.enterText(
+        find.byKey(const ValueKey('total-installments')),
+        '4',
+      );
+      await tapKey(tester, 'save-plan-edit');
+      expect(
+        find.text('Burada en az 5 olabilir; ödenmiş taksitler kalır.'),
+        findsOneWidget,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('total-installments')),
+        '12',
+      );
+      await tapKey(tester, 'save-plan-edit');
+      final rows = await paymentsOf(db);
+      expect(rows, hasLength(12));
+      expect(rows.fold(0, (s, r) => s + r.amountMinor), 850000);
+      expect(find.text('4/12 ödendi'), findsOneWidget);
+      expect(find.text('Toplam ₺8.500'), findsOneWidget);
+    });
+
     testWidgets('a plain plan can be marked as underway later', (tester) async {
       final db = await pumpMehmet(
         tester,

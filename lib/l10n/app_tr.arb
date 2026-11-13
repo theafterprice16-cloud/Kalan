@@ -243,5 +243,7 @@
   "planEdit": "Planı düzenle",
   "planUpdated": "Plan güncellendi.",
   "underwayRevert": "{count, plural, other{{count} taksit ödenmemiş olarak geri gelecek.}}",
-  "underwayRevertConfirm": "Devam et"
+  "underwayRevertConfirm": "Devam et",
+  "resizeHint": "Plan toplamı aynı kalır; ödenmemiş taksitler yeniden bölünür.",
+  "errorCountMin": "{min, plural, other{Burada en az {min} olabilir; ödenmiş taksitler kalır.}}"
 }

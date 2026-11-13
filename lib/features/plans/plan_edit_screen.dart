@@ -26,6 +26,8 @@ class PlanEditScreen extends ConsumerStatefulWidget {
 class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _paid = TextEditingController();
+  final _count = TextEditingController();
+  String? _countError;
   bool _loaded = false;
   bool _underway = false;
   int _paidPayIn4 = 1;
@@ -36,6 +38,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   @override
   void dispose() {
     _paid.dispose();
+    _count.dispose();
     super.dispose();
   }
 
@@ -46,6 +49,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     _underway = before > 0;
     final initial = before > 0 ? before : 1;
     _paid.text = '$initial';
+    _count.text = '${plan.plan.installmentCount}';
     _paidPayIn4 = initial.clamp(1, 3);
   }
 
@@ -66,6 +70,27 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     PlanKind.manual => null,
   };
 
+  /// The count can change where new payments have a date rule: monthly
+  /// and card plans. Pay in 4 is always 4; manual entry has no rule.
+  bool _countEditable(PlanWithPayments plan) =>
+      plan.plan.kind != PlanKind.payIn4 && _pattern(plan) != null;
+
+  int _newCount(PlanWithPayments plan) =>
+      int.tryParse(_count.text.trim()) ?? plan.plan.installmentCount;
+
+  String? _validateCount(PlanWithPayments plan, String? v) {
+    final l10n = context.l10n;
+    final n = int.tryParse(v?.trim() ?? '');
+    if (n == null || n < 1 || n > PlanCalculator.maxInstallments) {
+      return l10n.errorCountInvalid;
+    }
+    final min = minInstallmentCount([
+      for (final p in plan.payments) p.toState(),
+    ]);
+    if (n < min) return l10n.errorCountMin(min);
+    return _countError;
+  }
+
   /// The payment the "next payment date" belongs to, when it may move.
   PaymentRow? _nextPayment(PlanWithPayments plan) {
     final n = _paidCount(plan);
@@ -78,13 +103,20 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final l10n = context.l10n;
     final n = int.tryParse(v?.trim() ?? '');
     if (n == null || n < 1) return l10n.errorPaidMin;
-    if (n >= plan.plan.installmentCount) return l10n.errorPaidAll;
-    final max = maxPaidBeforeOf(plan.payments);
+    final count = _newCount(plan);
+    if (n >= count) return l10n.errorPaidAll;
+    // New payments at the end are unpaid too, so a plan with nothing
+    // marked in Kalan can count up to the new total.
+    final run = leadingRunOf(plan.payments);
+    final max = run == plan.payments.length
+        ? count - 1
+        : maxPaidBeforeOf(plan.payments);
     if (n > max) return l10n.errorPaidMax(max);
     return null;
   }
 
   Future<void> _save(PlanWithPayments plan) async {
+    setState(() => _countError = null);
     if (!_formKey.currentState!.validate()) return;
     final l10n = context.l10n;
     final router = GoRouter.of(context);
@@ -116,14 +148,24 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final pattern = _pattern(plan);
     final moveDates =
         _underway && _nextDateTouched && pattern != null && _nextDate != null;
-    await ref
+    final rejected = await ref
         .read(planRepositoryProvider)
-        .setPaidBefore(
+        .editPlan(
           plan.plan.id,
-          count: count,
+          count: _newCount(plan),
+          paidBefore: count,
           nextDate: moveDates ? _nextDate : null,
-          pattern: moveDates ? pattern : null,
+          pattern: pattern,
         );
+    if (rejected != null) {
+      // What is left cannot be split that finely; say so under the field.
+      setState(() {
+        _saving = false;
+        _countError = l10n.errorTotalTooSmall;
+      });
+      _formKey.currentState!.validate();
+      return;
+    }
     messenger.showSnackBar(SnackBar(content: Text(l10n.planUpdated)));
     router.pop();
   }
@@ -158,6 +200,22 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
+            if (!payIn4) ...[
+              TextFormField(
+                key: const ValueKey('total-installments'),
+                controller: _count,
+                enabled: _countEditable(plan),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: l10n.fieldTotalInstallments,
+                  helperText: _countEditable(plan) ? l10n.resizeHint : null,
+                  helperMaxLines: 3,
+                ),
+                onChanged: (_) => setState(() => _countError = null),
+                validator: (v) => _validateCount(plan, v),
+              ),
+              gap,
+            ],
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOut,
@@ -183,17 +241,6 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                   if (_underway) ...[
                     const SizedBox(height: 8),
                     if (!payIn4) ...[
-                      TextFormField(
-                        key: const ValueKey('total-installments'),
-                        initialValue: context.l10n.numberValue(
-                          plan.plan.installmentCount,
-                        ),
-                        enabled: false,
-                        decoration: InputDecoration(
-                          labelText: l10n.fieldTotalInstallments,
-                        ),
-                      ),
-                      gap,
                       TextFormField(
                         key: const ValueKey('paid-count'),
                         controller: _paid,
