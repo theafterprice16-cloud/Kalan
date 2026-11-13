@@ -26,7 +26,9 @@ Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedik�
 
 - Her ödeme için iki bildirim: "önceden" (genel ayar 1/2/3/5/7 gün, varsayılan 2; plan bazında Genel ayar / Kapalı / Farklı gün) ve "gününde", 09:00. Aynı gün ve türde tek bildirim, en yakın 60. Varsayılan gün tek yerde: `defaultLeadDaysFor`.
 - Planlayıcı: `lib/core/reminders` (saf Dart; metinleri `ReminderTexts` arayüzüyle alır). Platform: `lib/features/reminders` (`NotificationGateway` arkasında). Yeniden kurma `ReminderSync` ile veritabanı akışlarından tek merkezde, kısa beklemeyle.
-- Tarih her zaman motorun sakladığı etkin son ödeme günü. Bildirimde "Ödendi" düğmesi yok; dokununca ana ekran.
+- Tarih her zaman motorun sakladığı etkin son ödeme günü. Dokununca ana ekran.
+- Bildirim düğmeleri: "Ödendi" / "Hepsi ödendi", "Akşam hatırlat" (gününde, saat ≤ 18:00), "Yarın hatırlat" (önceden, ertesi gün ödeme yoksa); en çok iki. Kurallar `reminderActions`'ta. İşleyici tek: `ReminderActionHandler`, arka planda `reminderActionInBackground`; işaretleme yalnızca repository'lerin "ödendi" kodundan. Ertelemeler `reminder_snoozes` tablosunda, planlayıcıya girdi.
+- Veritabanı süreç içinde paylaşılır (`AppDatabase.openShared`); arka plandaki isolate ayrı bağlantı açmaz.
 - Yalnızca yerel bildirim; Android'de kesin olmayan zamanlama (exact alarm izni yok).
 - Web'de kapalı (`NotificationGateway.supported`).
 

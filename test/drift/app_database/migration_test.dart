@@ -244,6 +244,53 @@ void main() {
     },
   );
 
+  test('v5 -> current: no snoozes, payments and marks unchanged', () async {
+    final schema = await verifier.schemaAt(5);
+    seedCommon(schema);
+    schema.rawDatabase.execute(
+      'INSERT INTO recurring_marks (recurring_id, occurrence_day, paid_at) '
+      'VALUES (1, 20400, 1700000000)',
+    );
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, db.schemaVersion);
+    expect(await db.select(db.reminderSnoozes).get(), isEmpty);
+    final payment = await db.select(db.payments).getSingle();
+    expect(payment.dueDay, 20405);
+    expect(payment.paidAt, equals(null));
+    final mark = await db.select(db.recurringMarks).getSingle();
+    expect(mark.occurrenceDay, 20400);
+    await db.close();
+  });
+
+  test('the same snooze twice is stored once', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final entry = ReminderSnoozesCompanion.insert(
+      kind: 1,
+      fireDay: 20406,
+      minuteOfDay: 1200,
+      refs: 'p1,p2',
+    );
+    await db.into(db.reminderSnoozes).insert(entry);
+    await db
+        .into(db.reminderSnoozes)
+        .insert(entry, mode: InsertMode.insertOrIgnore);
+    expect(await db.select(db.reminderSnoozes).get(), hasLength(1));
+    await expectLater(
+      db
+          .into(db.reminderSnoozes)
+          .insert(
+            ReminderSnoozesCompanion.insert(
+              kind: 2,
+              fireDay: 20406,
+              minuteOfDay: 540,
+              refs: 'p1',
+            ),
+          ),
+      throwsA(isA<SqliteException>()),
+    );
+    await db.close();
+  });
+
   test('per-plan days outside 1, 2, 3, 5, 7 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final sourceId = await db

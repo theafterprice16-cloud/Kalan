@@ -48,6 +48,11 @@
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+        <!-- flutter_local_notifications: reminder buttons ("Paid", "Remind
+             tonight", ...) run in the background without opening the app. -->
+        <receiver
+            android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
         <!-- Kalan: re-plan reminders in local time after a reboot or a
              clock or time zone change, without opening the app. -->
         <receiver

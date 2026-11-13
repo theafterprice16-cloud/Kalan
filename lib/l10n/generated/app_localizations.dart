@@ -1346,6 +1346,42 @@ abstract class AppLocalizations {
   /// **'Test: reminders work on this phone.'**
   String get testNotificationText;
 
+  /// Notification button: marks the one payment in the reminder as paid. Shown on a small system button: keep it very short (1-2 words), calm, no exclamation mark; other languages may run longer, so prefer the shortest natural form.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get reminderActionPaid;
+
+  /// Notification button on a reminder with several payments: marks all of them as paid. System button: keep it very short (1-2 words), calm, no exclamation mark.
+  ///
+  /// In en, this message translates to:
+  /// **'All paid'**
+  String get reminderActionAllPaid;
+
+  /// Notification button on the on-the-day reminder: the same reminder again at 20:00 today. System button: keep it very short (1-2 words), calm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind tonight'**
+  String get reminderActionRemindTonight;
+
+  /// Notification button on the days-before reminder: the same reminder again tomorrow at the same time. System button: keep it very short (1-2 words), calm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind tomorrow'**
+  String get reminderActionRemindTomorrow;
+
+  /// Debug builds only: schedules the on-the-day reminder of the nearest unpaid payment, with its buttons.
+  ///
+  /// In en, this message translates to:
+  /// **'Test reminder with buttons (in 10 seconds)'**
+  String get debugTestReminderActions;
+
+  /// Debug builds only: snackbar when there is no unpaid payment for the test reminder.
+  ///
+  /// In en, this message translates to:
+  /// **'No unpaid payment to try it with.'**
+  String get testReminderNoPayment;
+
   /// Subtitle under the master reminders switch.
   ///
   /// In en, this message translates to:

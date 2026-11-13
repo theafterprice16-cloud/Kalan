@@ -18,6 +18,14 @@ class L10nReminderTexts implements ReminderTexts {
   @override
   String get title => l10n.appTitle;
 
+  @override
+  String actionTitle(ReminderAction action) => switch (action) {
+    ReminderAction.paid => l10n.reminderActionPaid,
+    ReminderAction.allPaid => l10n.reminderActionAllPaid,
+    ReminderAction.remindTonight => l10n.reminderActionRemindTonight,
+    ReminderAction.remindTomorrow => l10n.reminderActionRemindTomorrow,
+  };
+
   String _date(LocalDate date) =>
       DateFormat.MMMMEEEEd(l10n.localeName).format(date.toDateTime());
 

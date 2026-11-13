@@ -806,6 +806,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testNotificationText => 'Test: reminders work on this phone.';
 
   @override
+  String get reminderActionPaid => 'Paid';
+
+  @override
+  String get reminderActionAllPaid => 'All paid';
+
+  @override
+  String get reminderActionRemindTonight => 'Remind tonight';
+
+  @override
+  String get reminderActionRemindTomorrow => 'Remind tomorrow';
+
+  @override
+  String get debugTestReminderActions =>
+      'Test reminder with buttons (in 10 seconds)';
+
+  @override
+  String get testReminderNoPayment => 'No unpaid payment to try it with.';
+
+  @override
   String get remindersEnabledHint => 'Before a payment is due and on the day';
 
   @override

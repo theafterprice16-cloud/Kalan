@@ -67,12 +67,19 @@ void main() {
     }
   });
 
-  test('iOS shows reminders in the foreground; no notification actions', () {
+  test('iOS shows reminders in the foreground; buttons run in background', () {
     final delegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();
     expect(delegate, contains('UNUserNotificationCenter.current().delegate'));
     expect(delegate, contains('"kalan/system"'));
-    // "Paid" from a notification is a later backlog item.
-    expect(delegate, isNot(contains('setPluginRegistrantCallback')));
-    expect(manifest, isNot(contains('ActionBroadcastReceiver')));
+    // "Paid" from a notification: the background engine gets the plugins
+    // on iOS, and Android has the plugin's action receiver.
+    expect(delegate, contains('setPluginRegistrantCallback'));
+    expect(
+      manifest,
+      contains(
+        'android:name="com.dexterous.flutterlocalnotifications.'
+        'ActionBroadcastReceiver"',
+      ),
+    );
   });
 }

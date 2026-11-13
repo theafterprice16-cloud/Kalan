@@ -19,16 +19,36 @@ part 'app_database.g.dart';
     RecurringPayments,
     RecurringMarks,
     AppSettings,
+    ReminderSnoozes,
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openDefault());
+  AppDatabase([QueryExecutor? executor]) : super(executor ?? openShared());
 
-  static QueryExecutor _openDefault() => driftDatabase(name: 'kalan');
+  /// The app's database file, shared by every isolate in the process: the
+  /// app, a notification action handled in the background and Android's
+  /// reschedule receiver. The first one to open it starts a small database
+  /// isolate; the others connect to it, so there is one SQLite connection,
+  /// writes never collide, and the app's screens see a background write
+  /// at once (see DECISIONS, "Bildirimden ödendi").
+  ///
+  /// [path] and [tempDirectory] are for tests (no path_provider there).
+  static QueryExecutor openShared({
+    String name = 'kalan',
+    Future<String> Function()? path,
+    Future<String?> Function()? tempDirectory,
+  }) => driftDatabase(
+    name: name,
+    native: DriftNativeOptions(
+      shareAcrossIsolates: true,
+      databasePath: path,
+      tempDirectoryPath: tempDirectory,
+    ),
+  );
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -82,9 +102,18 @@ class AppDatabase extends _$AppDatabase {
       from4To5: (m, schema) async {
         await m.addColumn(schema.payments, schema.payments.paidOnDay);
       },
+      // v6: "remind later" chosen from a notification. Starts empty.
+      from5To6: (m, schema) async {
+        await m.createTable(schema.reminderSnoozes);
+      },
     ),
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+      // Should a second connection ever open the file (another process),
+      // readers do not block the writer and a busy writer waits instead of
+      // failing. In-memory databases ignore both.
+      await customStatement('PRAGMA journal_mode = WAL');
+      await customStatement('PRAGMA busy_timeout = 5000');
     },
   );
 }

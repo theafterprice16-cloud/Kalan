@@ -23,6 +23,9 @@ abstract interface class NotificationGateway {
     required Duration delay,
   });
 
+  /// Debug builds only: [reminder] with its buttons, at its time.
+  Future<void> showTestReminder(PlannedReminder reminder);
+
   /// Opens the system's notification settings for Kalan.
   Future<void> openSystemSettings();
 }
@@ -49,6 +52,9 @@ class NoopNotificationGateway implements NotificationGateway {
     required String body,
     required Duration delay,
   }) async {}
+
+  @override
+  Future<void> showTestReminder(PlannedReminder reminder) async {}
 
   @override
   Future<void> openSystemSettings() async {}
