@@ -22,3 +22,22 @@ jobs:
         run: flutter analyze --fatal-infos --fatal-warnings
       - name: Test
         run: flutter test
+
+  android-build:
+    # Compiles Kotlin, the manifest and Gradle setup (reminders need
+    # desugaring and receivers). The sandbox has no Android SDK.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build debug APK
+        run: flutter build apk --debug

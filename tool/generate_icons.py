@@ -10,6 +10,7 @@ Writes:
   assets/brand/icon_1024.png            input for flutter_launcher_icons
   assets/brand/icon_foreground.png      Android adaptive foreground (safe zone)
   launch marks for iOS and Android      on the #0B0F14 splash ground
+  ic_stat_kalan (Android)               white notification icon
 
 Then run:  dart run flutter_launcher_icons
 and revert its edit to ios/Runner.xcodeproj/project.pbxproj (the tool
@@ -111,6 +112,27 @@ def render(px, ground=True, scale=1.0):
     return img.resize((px, px), Image.LANCZOS)
 
 
+def render_silhouette(px):
+    """Android status bar icon: the mark in white on a clear ground.
+
+    The system tints it; the accent colour (#3DDC97) is set in code.
+    """
+    ss = 4
+    big = px * ss
+    img = Image.new('RGBA', (big, big), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    # The mark (about 1023 units tall, centred at 1023) with a small margin,
+    # as Android's 24 dp guide asks (content within ~20 dp).
+    k = big / 1280
+    dx = dy = big / 2 - 1023.5 * k
+    for points, _ in SHAPES:
+        draw.polygon(
+            [(x * k + dx, y * k + dy) for x, y in polygon(points)],
+            fill=(255, 255, 255, 255),
+        )
+    return img.resize((px, px), Image.LANCZOS)
+
+
 def save(img, path, opaque=False):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     (img.convert('RGB') if opaque else img).save(path, optimize=True)
@@ -129,6 +151,12 @@ def main():
         save(render(px, ground=False), f'{launch}/LaunchImage{suffix}.png')
     save(render(384, ground=False),
          'android/app/src/main/res/drawable-nodpi/launch_mark.png')
+
+    # Notification icon (24 dp), referenced as ic_stat_kalan.
+    for folder, px in {'mdpi': 24, 'hdpi': 36, 'xhdpi': 48,
+                       'xxhdpi': 72, 'xxxhdpi': 96}.items():
+        save(render_silhouette(px),
+             f'android/app/src/main/res/drawable-{folder}/ic_stat_kalan.png')
 
 
 if __name__ == '__main__':
