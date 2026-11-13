@@ -8,6 +8,7 @@ import '../../core/design/form_fields.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
+import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
@@ -193,6 +194,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     final draft = _buildDraft();
     if (draft == null) return;
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final l10n = context.l10n;
     final router = GoRouter.of(context);
     if (!_canAdd) return;
@@ -217,9 +219,12 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               : PlanOrigin.template,
           title: _title.text,
         );
-    messenger.showSnackBar(SnackBar(content: Text(l10n.planSaved)));
     if (mounted) await askForRemindersIfNeeded(context, ref);
-    router.pop();
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.planSaved)),
+      fallback: messenger,
+      tabs: tabs,
+    );
   }
 
   bool get _canAdd {

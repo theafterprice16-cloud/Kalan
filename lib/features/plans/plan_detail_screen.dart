@@ -10,6 +10,7 @@ import '../../core/design/form_fields.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
+import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
@@ -27,6 +28,7 @@ class PlanDetailScreen extends ConsumerWidget {
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final router = GoRouter.of(context);
     final ok = await showDialog<bool>(
       context: context,
@@ -47,8 +49,11 @@ class PlanDetailScreen extends ConsumerWidget {
     );
     if (ok != true) return;
     await ref.read(planRepositoryProvider).deletePlan(planId);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.planDeleted)));
-    router.pop();
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.planDeleted)),
+      fallback: messenger,
+      tabs: tabs,
+    );
   }
 
   @override

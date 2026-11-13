@@ -18,6 +18,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/sources/source_edit_screen.dart';
 import '../../features/sources/sources_screen.dart';
 import 'routes.dart';
+import 'tab_messengers.dart';
 
 /// Where the app starts (home); tests start elsewhere.
 final initialRouteProvider = Provider<String>((ref) => Routes.home);
@@ -50,7 +51,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.home,
-                builder: (_, _) => const _Tab(HomeScreen()),
+                builder: (_, _) => const _Tab(Routes.home, HomeScreen()),
               ),
             ],
           ),
@@ -58,7 +59,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.plans,
-                builder: (_, _) => const _Tab(PlansScreen()),
+                builder: (_, _) => const _Tab(Routes.plans, PlansScreen()),
               ),
             ],
           ),
@@ -66,7 +67,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: Routes.settings,
-                builder: (_, _) => const _Tab(SettingsScreen()),
+                builder: (_, _) =>
+                    const _Tab(Routes.settings, SettingsScreen()),
               ),
             ],
           ),
@@ -120,14 +122,16 @@ final routerProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
-/// Each tab has its own messenger: its snackbars ("Undo" included) sit
-/// above the tab's "Add" button instead of covering it, and only the tab
-/// that showed one draws it.
-class _Tab extends StatelessWidget {
-  const _Tab(this.child);
+/// Each tab has its own messenger (see [TabMessengers]).
+class _Tab extends ConsumerWidget {
+  const _Tab(this.path, this.child);
 
+  final String path;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => ScaffoldMessenger(child: child);
+  Widget build(BuildContext context, WidgetRef ref) => ScaffoldMessenger(
+    key: ref.watch(tabMessengersProvider).keyFor(path),
+    child: child,
+  );
 }

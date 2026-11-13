@@ -103,6 +103,11 @@ void main() {
     await tester.tap(find.text('Sil'));
     await tester.pumpAndSettle();
     expect(find.text('Plan silindi.'), findsOneWidget);
+    // Back on the Plans tab: above its "Add plan" button.
+    expect(
+      tester.getRect(find.byType(SnackBar)).bottom,
+      lessThanOrEqualTo(tester.getRect(find.byType(FloatingActionButton)).top),
+    );
     expect(await db.select(db.plans).get(), isEmpty);
     expect(await db.select(db.payments).get(), isEmpty);
   });

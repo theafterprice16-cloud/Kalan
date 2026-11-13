@@ -8,6 +8,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 
@@ -68,6 +69,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
     final repo = ref.read(sourceRepositoryProvider);
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final l10n = context.l10n;
     final int id;
     final existing = _existing;
@@ -91,19 +93,29 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
         ),
       );
     }
-    messenger.showSnackBar(SnackBar(content: Text(l10n.sourceSaved)));
-    router.pop(id);
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.sourceSaved)),
+      fallback: messenger,
+      tabs: tabs,
+      result: id,
+    );
   }
 
   Future<void> _delete() async {
     final l10n = context.l10n;
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final ok = await ref.read(sourceRepositoryProvider).delete(_existing!.id);
-    messenger.showSnackBar(
-      SnackBar(content: Text(ok ? l10n.sourceDeleted : l10n.sourceInUse)),
-    );
-    if (ok) router.pop();
+    if (ok) {
+      router.popWithMessage(
+        SnackBar(content: Text(l10n.sourceDeleted)),
+        fallback: messenger,
+        tabs: tabs,
+      );
+    } else {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.sourceInUse)));
+    }
   }
 
   Widget _dayField(

@@ -66,6 +66,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Plan eklendi.'), findsOneWidget);
+    // Back on home: the message sits above "Add plan", drawn once.
+    expect(
+      tester.getRect(find.byType(SnackBar)).bottom,
+      lessThanOrEqualTo(tester.getRect(find.byType(FloatingActionButton)).top),
+    );
     expect(find.text('1/4'), findsOneWidget);
     expect(find.text('2/4'), findsOneWidget);
     final plan = await db.select(db.plans).getSingle();

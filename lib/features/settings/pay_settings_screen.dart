@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/routing/tab_messengers.dart';
 import '../onboarding/pay_form.dart';
 
 /// Pay frequency and payday, shared with onboarding.
@@ -20,10 +21,14 @@ class _PaySettingsScreenState extends ConsumerState<PaySettingsScreen> {
   Future<void> _save() async {
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
     final l10n = context.l10n;
     await ref.read(settingsRepositoryProvider).update(_pay!.toCompanion());
-    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsSaved)));
-    router.pop();
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.settingsSaved)),
+      fallback: messenger,
+      tabs: tabs,
+    );
   }
 
   @override
