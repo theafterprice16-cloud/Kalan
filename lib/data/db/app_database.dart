@@ -28,7 +28,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -71,6 +71,11 @@ class AppDatabase extends _$AppDatabase {
             newColumns: [schema.appSettings.reminderLeadDays],
           ),
         );
+      },
+      // v4: payments paid before the plan was added to Kalan. Every
+      // existing payment is false; amounts and dates do not change.
+      from3To4: (m, schema) async {
+        await m.addColumn(schema.payments, schema.payments.paidBeforeKalan);
       },
     ),
     beforeOpen: (details) async {

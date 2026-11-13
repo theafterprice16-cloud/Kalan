@@ -8,6 +8,7 @@ import '../../features/home/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/plans/add_plan_screen.dart';
 import '../../features/plans/plan_detail_screen.dart';
+import '../../features/plans/plan_edit_screen.dart';
 import '../../features/plans/plans_screen.dart';
 import '../../features/recurring/recurring_edit_screen.dart';
 import '../../features/reminders/reminders_help_screen.dart';
@@ -73,6 +74,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/plan/:id',
         builder: (_, state) =>
             PlanDetailScreen(planId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/plan/:id/edit',
+        builder: (_, state) =>
+            PlanEditScreen(planId: int.parse(state.pathParameters['id']!)),
       ),
       GoRoute(path: Routes.sources, builder: (_, _) => const SourcesScreen()),
       GoRoute(

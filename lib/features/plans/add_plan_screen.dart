@@ -15,8 +15,8 @@ import '../../entitlement/entitlement.dart';
 import '../reminders/reminder_prompt.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
-/// four fields.
-enum AddMode { payIn4, monthly, card, manual, midway }
+/// four fields. Any of them can be "already underway".
+enum AddMode { payIn4, monthly, card, manual }
 
 /// Provider names suggested as plain text. No logos.
 const providerSuggestions = [
@@ -52,9 +52,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   final _sourceFocus = FocusNode();
   final _total = TextEditingController();
   final _count = TextEditingController();
-  final _installment = TextEditingController();
-  final _totalCount = TextEditingController();
-  final _unpaidCount = TextEditingController();
+  final _paid = TextEditingController();
   final _step = TextEditingController(text: '1');
   final _defer = TextEditingController(text: '0');
   final _title = TextEditingController();
@@ -63,6 +61,16 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   late LocalDate _firstDate;
   late LocalDate _purchaseDate;
   late LocalDate _nextDate;
+  late LocalDate _today;
+
+  /// "This plan is already underway".
+  bool _underway = false;
+
+  /// Installments paid for Pay in 4 (1-3), chosen with chips.
+  int _paidPayIn4 = 1;
+
+  /// The user picked the next date; card suggestions no longer replace it.
+  bool _nextDateTouched = false;
   IntervalUnit _unit = IntervalUnit.month;
   int? _cardId;
   bool _cashAdvance = false;
@@ -72,19 +80,11 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   void initState() {
     super.initState();
     final today = ref.read(todayProvider);
+    _today = today;
     _firstDate = today;
     _purchaseDate = today;
     _nextDate = today;
-    for (final c in [
-      _source,
-      _total,
-      _count,
-      _installment,
-      _totalCount,
-      _unpaidCount,
-      _step,
-      _defer,
-    ]) {
+    for (final c in [_source, _total, _count, _paid, _step, _defer]) {
       c.addListener(_refresh);
     }
   }
@@ -93,17 +93,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   @override
   void dispose() {
-    for (final c in [
-      _source,
-      _total,
-      _count,
-      _installment,
-      _totalCount,
-      _unpaidCount,
-      _step,
-      _defer,
-      _title,
-    ]) {
+    for (final c in [_source, _total, _count, _paid, _step, _defer, _title]) {
       c.dispose();
     }
     _sourceFocus.dispose();
@@ -120,81 +110,83 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       if (s.cardTerms != null) s,
   ];
 
+  CardTerms? get _cardTerms =>
+      _sources.where((s) => s.id == _cardId).firstOrNull?.cardTerms;
+
+  /// The card's next due date after today: the suggested next payment date.
+  void _suggestNextDate() {
+    final terms = _cardTerms;
+    if (_mode == AddMode.card && terms != null && !_nextDateTouched) {
+      _nextDate = nextCardDueAfter(_today, terms);
+    }
+  }
+
+  bool get _nextDateSuggested =>
+      _mode == AddMode.card && _cardTerms != null && !_nextDateTouched;
+
   /// The draft for the current inputs, or null while incomplete.
   PlanDraft? _buildDraft() {
     try {
-      switch (_mode) {
-        case AddMode.payIn4:
-          final total = _amount(_total);
-          if (total == null) return null;
-          return PlanCalculator.payIn4(
-            firstDate: _firstDate,
-            totalMinor: total,
-          );
-        case AddMode.monthly:
-          final total = _amount(_total);
-          final count = _int(_count);
-          if (total == null || count == null) return null;
-          return PlanCalculator.monthly(
-            firstDate: _firstDate,
-            totalMinor: total,
-            count: count,
-          );
-        case AddMode.card:
-          final card = _sources.where((s) => s.id == _cardId).firstOrNull;
-          final total = _amount(_total);
-          final count = _int(_count);
-          final terms = card?.cardTerms;
-          if (terms == null || total == null || count == null) return null;
-          return PlanCalculator.card(
+      final total = _amount(_total);
+      if (total == null) return null;
+      final count = _mode == AddMode.payIn4 ? 4 : _int(_count);
+      if (count == null) return null;
+      if (_underway && _mode != AddMode.manual) {
+        final paid = _mode == AddMode.payIn4 ? _paidPayIn4 : _int(_paid);
+        if (paid == null) return null;
+        return underwayPlan(
+          kind: switch (_mode) {
+            AddMode.payIn4 => PlanKind.payIn4,
+            AddMode.monthly => PlanKind.monthly,
+            _ => PlanKind.card,
+          },
+          totalMinor: total,
+          count: count,
+          paidCount: paid,
+          nextDate: _nextDate,
+          terms: _mode == AddMode.card ? _cardTerms : null,
+          isCashAdvance: _cashAdvance,
+        );
+      }
+      final draft = switch (_mode) {
+        AddMode.payIn4 => PlanCalculator.payIn4(
+          firstDate: _firstDate,
+          totalMinor: total,
+        ),
+        AddMode.monthly => PlanCalculator.monthly(
+          firstDate: _firstDate,
+          totalMinor: total,
+          count: count,
+        ),
+        AddMode.card => switch (_cardTerms) {
+          final terms? => PlanCalculator.card(
             purchaseDate: _purchaseDate,
             totalMinor: total,
             count: count,
             terms: terms,
             deferMonths: _int(_defer) ?? 0,
             isCashAdvance: _cashAdvance,
-          );
-        case AddMode.manual:
-          final total = _amount(_total);
-          final count = _int(_count);
-          final step = _int(_step);
-          if (total == null || count == null || step == null) return null;
-          return PlanCalculator.manual(
+          ),
+          null => null,
+        },
+        AddMode.manual => switch (_int(_step)) {
+          final step? => PlanCalculator.manual(
             firstDate: _firstDate,
             totalMinor: total,
             count: count,
             unit: _unit,
             step: step,
-          );
-        case AddMode.midway:
-          final totalCount = _int(_totalCount);
-          final unpaid = _int(_unpaidCount);
-          final installment = _amount(_installment);
-          final step = _int(_step);
-          if (totalCount == null ||
-              unpaid == null ||
-              installment == null ||
-              step == null) {
-            return null;
-          }
-          return PlanCalculator.midway(
-            totalCount: totalCount,
-            remainingCount: unpaid,
-            installmentMinor: installment,
-            nextDate: _nextDate,
-            unit: _unit,
-            step: step,
-            cardTerms: findSourceByName(_sources, _source.text)?.cardTerms,
-          );
-      }
+          ),
+          null => null,
+        },
+      };
+      if (draft == null || !_underway) return draft;
+      final paid = _int(_paid);
+      return paid == null ? null : markPaidBefore(draft, paid);
     } on InvalidPlanInput {
       return null;
     }
   }
-
-  bool get _midwayOnCard =>
-      _mode == AddMode.midway &&
-      findSourceByName(_sources, _source.text)?.cardTerms != null;
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -220,7 +212,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
         .saveDraft(
           draft,
           sourceId: sourceId,
-          origin: _mode == AddMode.manual || _mode == AddMode.midway
+          origin: _mode == AddMode.manual
               ? PlanOrigin.manual
               : PlanOrigin.template,
           title: _title.text,
@@ -240,7 +232,12 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   Future<void> _addCard() async {
     final id = await context.push<int>(Routes.newSource(card: true));
-    if (id != null) setState(() => _cardId = id);
+    if (id != null) {
+      setState(() {
+        _cardId = id;
+        _suggestNextDate();
+      });
+    }
   }
 
   // Validators -------------------------------------------------------------
@@ -253,6 +250,15 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     return n == null || n < 1 || n > PlanCalculator.maxInstallments
         ? context.l10n.errorCountInvalid
         : null;
+  }
+
+  String? _paidValidator(String? v) {
+    final l10n = context.l10n;
+    final n = int.tryParse(v?.trim() ?? '');
+    if (n == null || n < 1) return l10n.errorPaidMin;
+    final count = _int(_count);
+    if (count != null && n >= count) return l10n.errorPaidAll;
+    return null;
   }
 
   String? _totalValidator(String? v) {
@@ -297,9 +303,11 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                       (AddMode.monthly, l10n.kindMonthly),
                       (AddMode.card, l10n.kindCard),
                       (AddMode.manual, l10n.kindManual),
-                      (AddMode.midway, l10n.kindMidway),
                     ],
-                    onSelected: (m) => setState(() => _mode = m),
+                    onSelected: (m) => setState(() {
+                      _mode = m;
+                      _suggestNextDate();
+                    }),
                   ),
                   const SizedBox(height: 16),
                   ..._fields(context),
@@ -365,22 +373,63 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       validator: (v) => _required(v) == null ? null : l10n.errorNameRequired,
     );
     final total = amount(_total, l10n.fieldTotal, const ValueKey('total'));
-    final payments = count(_count, l10n.fieldCount, const ValueKey('count'));
+    final payments = count(
+      _count,
+      _underway ? l10n.fieldTotalInstallments : l10n.fieldCount,
+      const ValueKey('count'),
+    );
+    final firstDate = date(
+      l10n.fieldFirstDate,
+      _firstDate,
+      (d) => _firstDate = d,
+      const ValueKey('first-date'),
+    );
+    final nextDate = DateField(
+      key: const ValueKey('next-date'),
+      label: l10n.fieldNextPaymentDate,
+      value: _nextDate,
+      format: context.longDate,
+      helperText: _nextDateSuggested ? l10n.underwayCardSuggested : null,
+      onChanged: (d) => setState(() {
+        _nextDate = d;
+        _nextDateTouched = true;
+      }),
+    );
+    // Off: the screen is exactly as before. On: the paid count, and the
+    // next payment date in place of the first or purchase date (manual
+    // entry keeps its own dates).
+    final underway = _UnderwaySection(
+      value: _underway,
+      onChanged: (on) => setState(() {
+        _underway = on;
+        _suggestNextDate();
+      }),
+      children: [
+        if (_mode == AddMode.payIn4)
+          ChoiceField<int>(
+            key: const ValueKey('paid-payin4'),
+            label: l10n.fieldPaidInstallments,
+            selected: _paidPayIn4,
+            options: [
+              for (final n in const [1, 2, 3]) (n, context.l10n.numberValue(n)),
+            ],
+            onSelected: (n) => setState(() => _paidPayIn4 = n),
+          )
+        else
+          TextFormField(
+            key: const ValueKey('paid-count'),
+            controller: _paid,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(labelText: l10n.fieldPaidInstallments),
+            validator: _paidValidator,
+          ),
+      ],
+    );
+    final dateField = !_underway || _mode == AddMode.manual ? null : nextDate;
 
     switch (_mode) {
       case AddMode.payIn4:
-        return [
-          source,
-          gap,
-          total,
-          gap,
-          date(
-            l10n.fieldFirstDate,
-            _firstDate,
-            (d) => _firstDate = d,
-            const ValueKey('first-date'),
-          ),
-        ];
+        return [source, gap, total, gap, underway, gap, dateField ?? firstDate];
       case AddMode.monthly:
         return [
           source,
@@ -389,12 +438,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           gap,
           payments,
           gap,
-          date(
-            l10n.fieldFirstDate,
-            _firstDate,
-            (d) => _firstDate = d,
-            const ValueKey('first-date'),
-          ),
+          underway,
+          gap,
+          dateField ?? firstDate,
         ];
       case AddMode.card:
         return [
@@ -404,12 +450,15 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           gap,
           payments,
           gap,
-          date(
-            l10n.fieldPurchaseDate,
-            _purchaseDate,
-            (d) => _purchaseDate = d,
-            const ValueKey('purchase-date'),
-          ),
+          underway,
+          gap,
+          dateField ??
+              date(
+                l10n.fieldPurchaseDate,
+                _purchaseDate,
+                (d) => _purchaseDate = d,
+                const ValueKey('purchase-date'),
+              ),
         ];
       case AddMode.manual:
         return [
@@ -419,53 +468,11 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           gap,
           payments,
           gap,
-          date(
-            l10n.fieldFirstDate,
-            _firstDate,
-            (d) => _firstDate = d,
-            const ValueKey('first-date'),
-          ),
+          underway,
+          gap,
+          firstDate,
           gap,
           _interval(context),
-        ];
-      case AddMode.midway:
-        return [
-          source,
-          gap,
-          count(
-            _totalCount,
-            l10n.fieldTotalCount,
-            const ValueKey('total-count'),
-          ),
-          gap,
-          TextFormField(
-            key: const ValueKey('unpaid-count'),
-            controller: _unpaidCount,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: l10n.fieldUnpaidCount),
-            validator: (v) {
-              final base = _countValidator(v);
-              if (base != null) return base;
-              final total = _int(_totalCount);
-              return total != null && int.parse(v!.trim()) > total
-                  ? l10n.errorRemainingTooHigh
-                  : null;
-            },
-          ),
-          gap,
-          amount(
-            _installment,
-            l10n.fieldInstallment,
-            const ValueKey('installment'),
-          ),
-          gap,
-          date(
-            l10n.fieldNextDate,
-            _nextDate,
-            (d) => _nextDate = d,
-            const ValueKey('next-date'),
-          ),
-          if (!_midwayOnCard) ...[gap, _interval(context)],
         ];
     }
   }
@@ -546,7 +553,10 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               for (final c in cards)
                 DropdownMenuItem(value: c.id, child: Text(c.name)),
             ],
-            onChanged: (id) => setState(() => _cardId = id),
+            onChanged: (id) => setState(() {
+              _cardId = id;
+              _suggestNextDate();
+            }),
             validator: (id) => id == null ? l10n.errorCardRequired : null,
           ),
         ),
@@ -578,18 +588,20 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
         ),
         if (_mode == AddMode.card) ...[
           const SizedBox(height: 8),
-          TextFormField(
-            key: const ValueKey('defer'),
-            controller: _defer,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: l10n.fieldDefer),
-            validator: (v) {
-              final n = int.tryParse(v?.trim() ?? '');
-              return n == null || n < 0 || n > 12
-                  ? l10n.errorDeferInvalid
-                  : null;
-            },
-          ),
+          // A plan already underway has no purchase date to defer from.
+          if (!_underway)
+            TextFormField(
+              key: const ValueKey('defer'),
+              controller: _defer,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: l10n.fieldDefer),
+              validator: (v) {
+                final n = int.tryParse(v?.trim() ?? '');
+                return n == null || n < 0 || n > 12
+                    ? l10n.errorDeferInvalid
+                    : null;
+              },
+            ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.fieldCashAdvance),
@@ -688,6 +700,8 @@ class _Preview extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final d = draft;
+    // Payments paid before Kalan are summed up, never listed with dates.
+    final listed = d?.payments.skip(d.paidBeforeCount).toList() ?? const [];
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -712,24 +726,36 @@ class _Preview extends ConsumerWidget {
             else ...[
               Text(
                 l10n.previewSummary(
-                  d.payments.length,
-                  ref.money(context, d.totalMinor),
+                  listed.length,
+                  ref.money(
+                    context,
+                    listed.fold(0, (sum, p) => sum + p.amountMinor),
+                  ),
                 ),
                 key: const ValueKey('preview-summary'),
                 style: theme.textTheme.bodyLarge,
               ),
-              if (d.startedMidway)
+              if (d.paidBeforeCount > 0)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    l10n.planStartedMidway(d.firstTrackedSeq - 1),
+                    l10n.paidBeforeSummary(
+                      d.paidBeforeCount,
+                      ref.money(
+                        context,
+                        d.payments
+                            .take(d.paidBeforeCount)
+                            .fold(0, (sum, p) => sum + p.amountMinor),
+                      ),
+                    ),
+                    key: const ValueKey('preview-paid-before'),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: context.colors.textMuted,
                     ),
                   ),
                 ),
               const SizedBox(height: 8),
-              for (final p in d.payments)
+              for (final p in listed)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Row(
@@ -755,6 +781,47 @@ class _Preview extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// "This plan is already underway": a switch with a short note; its fields
+/// slide in below when it is on.
+class _UnderwaySection extends StatelessWidget {
+  const _UnderwaySection({
+    required this.value,
+    required this.onChanged,
+    required this.children,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      alignment: Alignment.topCenter,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SwitchListTile(
+            key: const ValueKey('underway'),
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.underwayToggle),
+            subtitle: Text(
+              l10n.underwayHint,
+              style: TextStyle(color: context.colors.textMuted),
+            ),
+            value: value,
+            onChanged: onChanged,
+          ),
+          if (value) ...[const SizedBox(height: 8), ...children],
+        ],
       ),
     );
   }

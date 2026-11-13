@@ -69,6 +69,11 @@ class Payments extends Table {
   DateTimeColumn get paidAt => dateTime().nullable()();
   BoolColumn get isEdited => boolean().withDefault(const Constant(false))();
 
+  /// Paid before the plan was added to Kalan (schema v4): stored as paid,
+  /// never overdue, never listed one by one or reminded.
+  BoolColumn get paidBeforeKalan =>
+      boolean().withDefault(const Constant(false))();
+
   @override
   List<Set<Column>> get uniqueKeys => [
     {planId, seq},

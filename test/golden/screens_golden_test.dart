@@ -13,6 +13,8 @@ import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/data/repositories/plan_repository.dart';
+import 'package:kalan/data/repositories/source_repository.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -101,6 +103,28 @@ Future<void> seedRich(AppDatabase db, {required int incomeMinor}) async {
   await seedRent(db);
 }
 
+/// A phone already 3 of 10 installments in when it was added.
+Future<void> seedUnderway(AppDatabase db) async {
+  final plans = PlanRepository(db);
+  final source = await SourceRepository(
+    db,
+    plans,
+  ).findOrCreateProvider('Telefon');
+  await plans.saveDraft(
+    underwayPlan(
+      kind: PlanKind.monthly,
+      totalMinor: 850000,
+      count: 10,
+      paidCount: 3,
+      nextDate: LocalDate(2026, 12, 5),
+    ),
+    sourceId: source,
+    origin: PlanOrigin.template,
+    title: 'Tablet',
+    now: DateTime(2026, 11, 20),
+  );
+}
+
 Future<void> shoot(WidgetTester tester, String name) async {
   await tester.pumpAndSettle();
   await expectLater(
@@ -127,6 +151,7 @@ void main() {
       String? route,
       Locale locale = const Locale('tr', 'TR'),
       FakeNotificationGateway? gateway,
+      bool underway = false,
     }) async {
       tester.view.physicalSize = const Size(780, 1688);
       tester.view.devicePixelRatio = 2;
@@ -134,7 +159,12 @@ void main() {
       await pumpApp(
         tester,
         locale: locale,
-        seed: onboarded ? (db) => seedRich(db, incomeMinor: income) : null,
+        seed: onboarded
+            ? (db) async {
+                await seedRich(db, incomeMinor: income);
+                if (underway) await seedUnderway(db);
+              }
+            : null,
         overrides: [
           themeModeStoreProvider.overrideWithValue(MemoryThemeModeStore(mode)),
           notificationGatewayProvider.overrideWithValue(
@@ -262,6 +292,88 @@ void main() {
         await start(tester, route: Routes.remindersHelp);
         await shoot(tester, '13-reminders-help-$theme');
       });
+
+      // "Already underway" in both languages.
+      for (final (lang, locale, plansTab, addPlan, monthly, cardKind) in [
+        (
+          'tr',
+          const Locale('tr', 'TR'),
+          'Planlar',
+          'Plan ekle',
+          'Aylık taksit',
+          'Kredi kartı taksidi',
+        ),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Plans',
+          'Add plan',
+          'Monthly installments',
+          'Card installments',
+        ),
+      ]) {
+        Future<void> showUnderway(WidgetTester tester) async {
+          const key = ValueKey('underway');
+          await scrollTo(tester, find.byKey(key));
+          await tester.tap(find.byKey(key));
+          await tester.pumpAndSettle();
+          final top = tester.getTopLeft(find.byKey(key)).dy;
+          await tester.drag(
+            find.byType(Scrollable).first,
+            Offset(0, 260 - top),
+          );
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('add plan underway, monthly, $lang', (tester) async {
+          await start(tester, locale: locale);
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, monthly));
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+          await tester.enterText(find.byKey(const ValueKey('total')), '8500');
+          await tester.enterText(find.byKey(const ValueKey('count')), '10');
+          await tester.pumpAndSettle();
+          await showUnderway(tester);
+          await tester.enterText(find.byKey(const ValueKey('paid-count')), '3');
+          FocusManager.instance.primaryFocus?.unfocus();
+          await shoot(tester, '18-underway-add-monthly-$lang-$theme');
+        });
+
+        testWidgets('add plan underway, card, $lang', (tester) async {
+          await start(tester, locale: locale);
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, cardKind));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('card')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Bonus').last);
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byKey(const ValueKey('total')), '9000');
+          await tester.enterText(find.byKey(const ValueKey('count')), '9');
+          await tester.pumpAndSettle();
+          await showUnderway(tester);
+          await tester.enterText(find.byKey(const ValueKey('paid-count')), '4');
+          FocusManager.instance.primaryFocus?.unfocus();
+          await shoot(tester, '19-underway-add-card-$lang-$theme');
+        });
+
+        testWidgets('plan detail underway, $lang', (tester) async {
+          await start(tester, locale: locale, underway: true);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Tablet'));
+          await shoot(tester, '20-underway-plan-detail-$lang-$theme');
+        });
+
+        testWidgets('plans list underway, $lang', (tester) async {
+          await start(tester, locale: locale, underway: true);
+          await openTab(tester, plansTab);
+          await shoot(tester, '21-underway-plans-$lang-$theme');
+        });
+      }
 
       // Reminder screens in both languages.
       for (final (lang, locale, settingsTab, plansTab, addPlan) in [

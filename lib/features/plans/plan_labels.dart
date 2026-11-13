@@ -25,3 +25,29 @@ String recurrenceLabel(BuildContext context, Recurrence r) {
     Recurrence.yearly => l10n.recurrenceYearly,
   };
 }
+
+/// Plan progress as card statements show it ("3/10 paid"), with a spoken
+/// label ("3 of 10 installments paid"). Numbers come from intl.
+class PlanProgress extends StatelessWidget {
+  const PlanProgress({
+    required this.paid,
+    required this.total,
+    super.key,
+    this.style,
+  });
+
+  final int paid;
+  final int total;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Text(
+      l10n.planPaidOf(paid, total),
+      key: const ValueKey('plan-progress'),
+      style: style,
+      semanticsLabel: l10n.progressPaidOfSemantics(paid, total),
+    );
+  }
+}

@@ -95,9 +95,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorCountInvalid => 'Enter a number from 1 to 120.';
 
   @override
-  String get errorRemainingTooHigh => 'This can\'t be more than the total.';
-
-  @override
   String get errorTotalTooSmall =>
       'This amount can\'t be split into that many payments.';
 
@@ -230,11 +227,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No recurring payments. You can add rent, bills or subscriptions.';
 
   @override
-  String planPaidOf(int paid, int count) {
-    return '$paid/$count paid';
-  }
-
-  @override
   String planToPay(String amount) {
     return 'To pay $amount';
   }
@@ -284,9 +276,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kindManual => 'Custom';
-
-  @override
-  String get kindMidway => 'Already started';
 
   @override
   String get kindCashAdvance => 'Cash advance in installments';
@@ -378,18 +367,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unitMonths => 'months';
-
-  @override
-  String get fieldTotalCount => 'Total payments';
-
-  @override
-  String get fieldUnpaidCount => 'Payments not yet paid';
-
-  @override
-  String get fieldInstallment => 'Payment amount';
-
-  @override
-  String get fieldNextDate => 'Next payment date';
 
   @override
   String get fieldTitle => 'Plan name';
@@ -959,4 +936,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get planReminderCustom => 'Different day';
+
+  @override
+  String get underwayToggle => 'This plan is already underway';
+
+  @override
+  String get underwayHint =>
+      'No need to enter the installments you\'ve already paid.';
+
+  @override
+  String get fieldTotalInstallments => 'Total installments';
+
+  @override
+  String get fieldPaidInstallments => 'Installments paid';
+
+  @override
+  String get fieldNextPaymentDate => 'Next payment date';
+
+  @override
+  String get underwayCardSuggested =>
+      'Suggested from your card\'s statement date.';
+
+  @override
+  String get errorPaidAll =>
+      'If every installment is paid, there\'s no need to add this plan.';
+
+  @override
+  String get errorPaidMin =>
+      'Enter how many installments you\'ve paid, at least 1.';
+
+  @override
+  String errorPaidMax(int max) {
+    final intl.NumberFormat maxNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String maxString = maxNumberFormat.format(max);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: 'This can be at most $maxString here.',
+      one: 'This can be at most 1 here.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paidBeforeSummary(int count, String amount) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString installments paid before Kalan',
+      one: '1 installment paid before Kalan',
+    );
+    return '$_temp0 · $amount';
+  }
+
+  @override
+  String progressPaidOfSemantics(int paid, int total) {
+    final intl.NumberFormat paidNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String paidString = paidNumberFormat.format(paid);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString installments',
+      one: '1 installment',
+    );
+    return '$paidString of $_temp0 paid';
+  }
+
+  @override
+  String planPaidOf(int paid, int count) {
+    final intl.NumberFormat paidNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String paidString = paidNumberFormat.format(paid);
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$paidString/$countString paid';
+  }
+
+  @override
+  String numberValue(int value) {
+    final intl.NumberFormat valueNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String valueString = valueNumberFormat.format(value);
+
+    return '$valueString';
+  }
+
+  @override
+  String get planEdit => 'Edit plan';
+
+  @override
+  String get planUpdated => 'Plan updated.';
+
+  @override
+  String underwayRevert(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString installments will come back as unpaid.',
+      one: '1 installment will come back as unpaid.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get underwayRevertConfirm => 'Continue';
 }

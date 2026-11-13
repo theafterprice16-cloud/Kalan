@@ -70,15 +70,27 @@ void main() {
     await tester.tap(find.text('Plan ekle'));
     await tester.pumpAndSettle();
     for (final mode in [
+      '4 ödemeli plan',
       'Aylık taksit',
       'Kredi kartı taksidi',
       'Elle giriş',
-      'Yarıda başlayan',
     ]) {
+      // Back to the top, where the plan types are.
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, 5000));
+      await tester.pumpAndSettle();
       await scrollTo(tester, find.widgetWithText(ChoiceChip, mode));
       await tester.tap(find.widgetWithText(ChoiceChip, mode));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: mode);
+      // "This plan is already underway" and its fields, in every mode.
+      const underway = ValueKey('underway');
+      await scrollTo(tester, find.byKey(underway));
+      final on = tester.widget<SwitchListTile>(find.byKey(underway)).value;
+      if (!on) {
+        await tester.tap(find.byKey(underway));
+        await tester.pumpAndSettle();
+      }
+      expect(tester.takeException(), isNull, reason: '$mode, underway');
     }
   });
 

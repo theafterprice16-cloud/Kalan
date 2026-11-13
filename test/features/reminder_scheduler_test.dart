@@ -5,10 +5,12 @@ import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/date/local_date.dart';
+import 'package:kalan/core/engine/engine.dart' show PlanKind, underwayPlan;
 import 'package:kalan/core/reminders/reminder_models.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/recurring_repository.dart';
+import 'package:kalan/data/repositories/source_repository.dart';
 import 'package:kalan/features/reminders/reminder_scheduler.dart';
 import 'package:material_ui/material_ui.dart' show Locale;
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -208,6 +210,32 @@ void main() {
       await schedulerFor(db, web).rescheduleAll();
       expect(web.replaceCalls, 0);
     });
+  });
+
+  test('payments paid before Kalan are never reminded', () async {
+    // Dates in the future on purpose: even then nothing is scheduled.
+    final source = await SourceRepository(
+      db,
+      PlanRepository(db),
+    ).findOrCreateProvider('Telefon');
+    await PlanRepository(db).saveDraft(
+      underwayPlan(
+        kind: PlanKind.monthly,
+        totalMinor: 30000,
+        count: 3,
+        paidCount: 2,
+        nextDate: LocalDate(2027, 3, 10),
+      ),
+      sourceId: source,
+      origin: PlanOrigin.template,
+    );
+    final list = await schedulerFor(db, gateway).build();
+    final dates = {
+      for (final n in list)
+        for (final p in n.payments)
+          if (p.name == 'Telefon') p.date,
+    };
+    expect(dates, {LocalDate(2027, 3, 10)});
   });
 
   test('another time zone keeps 09:00 local', () async {

@@ -68,6 +68,9 @@ final homeViewProvider = Provider<HomeView?>((ref) {
 
   final entries = <HomeEntry>[];
   final overdue = <HomeEntry>[];
+  // Paid before Kalan: in the period's spoken-for total like any paid
+  // payment, but never listed (and, being paid, never overdue).
+  final paidBefore = <DatedAmount>[];
   for (final p in plans) {
     for (final pay in p.payments) {
       final date = LocalDate.fromEpochDay(pay.dueDay);
@@ -81,7 +84,11 @@ final homeViewProvider = Provider<HomeView?>((ref) {
         seq: pay.seq,
         installmentCount: p.plan.installmentCount,
       );
-      if (period.contains(date)) {
+      if (pay.paidBeforeKalan) {
+        if (period.contains(date)) {
+          paidBefore.add(DatedAmount(date, pay.amountMinor));
+        }
+      } else if (period.contains(date)) {
         entries.add(entry);
       } else if (isOverdue(date: date, isPaid: entry.isPaid, current: period)) {
         overdue.add(entry);
@@ -107,7 +114,10 @@ final homeViewProvider = Provider<HomeView?>((ref) {
   return HomeView(
     summary: summarizePeriod(
       period: period,
-      items: [for (final e in entries) DatedAmount(e.date, e.amountMinor)],
+      items: [
+        for (final e in entries) DatedAmount(e.date, e.amountMinor),
+        ...paidBefore,
+      ],
       incomeMinor: settings.netIncomeMinor,
       tightThresholdMinor: settings.tightThresholdMinor,
     ),

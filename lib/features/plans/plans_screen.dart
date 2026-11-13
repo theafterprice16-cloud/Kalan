@@ -120,11 +120,9 @@ class _PlanList extends ConsumerWidget {
                               planKindLabel(context, p.plan),
                               style: secondary,
                             ),
-                            Text(
-                              l10n.planPaidOf(
-                                p.paidCount,
-                                p.plan.installmentCount,
-                              ),
+                            PlanProgress(
+                              paid: p.paidCount,
+                              total: p.plan.installmentCount,
                               style: secondary,
                             ),
                             if (p.nextUnpaid != null)

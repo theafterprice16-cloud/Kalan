@@ -107,37 +107,6 @@ void main() {
     expect(find.text('1/3'), findsOneWidget);
   });
 
-  testWidgets('plan already started tracks only the unpaid payments', (
-    tester,
-  ) async {
-    final db = await pumpApp(
-      tester,
-      seed: (db) => seedSettings(db, incomeMinor: 5000000),
-    );
-    await openAddPlan(tester);
-    await tester.tap(find.widgetWithText(ChoiceChip, 'Yarıda başlayan'));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
-    await tester.enterText(find.byKey(const ValueKey('total-count')), '12');
-    await tester.enterText(find.byKey(const ValueKey('unpaid-count')), '9');
-    await tester.enterText(find.byKey(const ValueKey('installment')), '250');
-    await tester.pumpAndSettle();
-    await scrollTo(tester, find.byKey(const ValueKey('preview-summary')));
-    expect(find.text('9 ödeme, toplam ₺2.250.'), findsOneWidget);
-    expect(
-      find.text('Bu plan eklenmeden önce 3 ödeme yapılmış.'),
-      findsOneWidget,
-    );
-    expect(find.text('4/12'), findsOneWidget);
-    await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
-    await tester.tap(find.byKey(const ValueKey('save-plan')));
-    await tester.pumpAndSettle();
-    final payments = await db.select(db.payments).get();
-    expect(payments.map((p) => p.seq).first, 4);
-    expect(payments, hasLength(9));
-    expect(find.text('4/12'), findsOneWidget);
-  });
-
   testWidgets('empty form explains what is missing', (tester) async {
     final db = await pumpApp(tester, seed: seedSettings);
     await openAddPlan(tester);

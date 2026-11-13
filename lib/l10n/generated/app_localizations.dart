@@ -260,12 +260,6 @@ abstract class AppLocalizations {
   /// **'Enter a number from 1 to 120.'**
   String get errorCountInvalid;
 
-  /// No description provided for @errorRemainingTooHigh.
-  ///
-  /// In en, this message translates to:
-  /// **'This can\'t be more than the total.'**
-  String get errorRemainingTooHigh;
-
   /// No description provided for @errorTotalTooSmall.
   ///
   /// In en, this message translates to:
@@ -476,12 +470,6 @@ abstract class AppLocalizations {
   /// **'No recurring payments. You can add rent, bills or subscriptions.'**
   String get recurringEmpty;
 
-  /// No description provided for @planPaidOf.
-  ///
-  /// In en, this message translates to:
-  /// **'{paid}/{count} paid'**
-  String planPaidOf(int paid, int count);
-
   /// No description provided for @planToPay.
   ///
   /// In en, this message translates to:
@@ -547,12 +535,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get kindManual;
-
-  /// No description provided for @kindMidway.
-  ///
-  /// In en, this message translates to:
-  /// **'Already started'**
-  String get kindMidway;
 
   /// No description provided for @kindCashAdvance.
   ///
@@ -721,30 +703,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'months'**
   String get unitMonths;
-
-  /// No description provided for @fieldTotalCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Total payments'**
-  String get fieldTotalCount;
-
-  /// No description provided for @fieldUnpaidCount.
-  ///
-  /// In en, this message translates to:
-  /// **'Payments not yet paid'**
-  String get fieldUnpaidCount;
-
-  /// No description provided for @fieldInstallment.
-  ///
-  /// In en, this message translates to:
-  /// **'Payment amount'**
-  String get fieldInstallment;
-
-  /// No description provided for @fieldNextDate.
-  ///
-  /// In en, this message translates to:
-  /// **'Next payment date'**
-  String get fieldNextDate;
 
   /// No description provided for @fieldTitle.
   ///
@@ -1501,6 +1459,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Different day'**
   String get planReminderCustom;
+
+  /// Add/edit plan switch: the plan started before it was added to the app; earlier installments are counted as paid.
+  ///
+  /// In en, this message translates to:
+  /// **'This plan is already underway'**
+  String get underwayToggle;
+
+  /// Muted help text under the 'already underway' switch.
+  ///
+  /// In en, this message translates to:
+  /// **'No need to enter the installments you\'ve already paid.'**
+  String get underwayHint;
+
+  /// Field label: all installments of the plan, including paid ones.
+  ///
+  /// In en, this message translates to:
+  /// **'Total installments'**
+  String get fieldTotalInstallments;
+
+  /// Field label: installments already paid before adding the plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Installments paid'**
+  String get fieldPaidInstallments;
+
+  /// Field label: the date of the next unpaid installment.
+  ///
+  /// In en, this message translates to:
+  /// **'Next payment date'**
+  String get fieldNextPaymentDate;
+
+  /// Muted note under the next payment date of a card plan: the date was filled in from the card's statement and due days.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested from your card\'s statement date.'**
+  String get underwayCardSuggested;
+
+  /// Validation under 'Installments paid' when it equals or exceeds the total.
+  ///
+  /// In en, this message translates to:
+  /// **'If every installment is paid, there\'s no need to add this plan.'**
+  String get errorPaidAll;
+
+  /// Validation under 'Installments paid' when empty or below 1.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter how many installments you\'ve paid, at least 1.'**
+  String get errorPaidMin;
+
+  /// Validation under 'Installments paid' when editing a plan: payments marked paid in the app cannot be counted.
+  ///
+  /// In en, this message translates to:
+  /// **'{max, plural, =1{This can be at most 1 here.} other{This can be at most {max} here.}}'**
+  String errorPaidMax(int max);
+
+  /// Plan detail, one line above the payments: installments paid before the plan was added. 'Kalan' is the app name; do not translate it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 installment paid before Kalan} other{{count} installments paid before Kalan}} · {amount}'**
+  String paidBeforeSummary(int count, String amount);
+
+  /// Screen reader label of the plan progress (e.g. 3/10).
+  ///
+  /// In en, this message translates to:
+  /// **'{paid} of {total, plural, =1{1 installment} other{{total} installments}} paid'**
+  String progressPaidOfSemantics(int paid, int total);
+
+  /// Plan progress as on card statements (installments paid / all installments, e.g. 3/10), in the plan list and plan detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{paid}/{count} paid'**
+  String planPaidOf(int paid, int count);
+
+  /// A plain number for choice chips (e.g. installments paid: 1, 2, 3), formatted for the language.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}'**
+  String numberValue(int value);
+
+  /// Plan detail action and the title of the plan edit screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit plan'**
+  String get planEdit;
+
+  /// Snackbar after saving the plan edit screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan updated.'**
+  String get planUpdated;
+
+  /// Confirmation when lowering 'Installments paid' or switching 'already underway' off.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 installment will come back as unpaid.} other{{count} installments will come back as unpaid.}}'**
+  String underwayRevert(int count);
+
+  /// Button in the confirmation that brings installments back as unpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get underwayRevertConfirm;
 }
 
 class _AppLocalizationsDelegate
