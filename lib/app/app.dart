@@ -10,6 +10,7 @@ import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
+import '../features/reminders/reminder_actions.dart';
 import '../features/reminders/reminder_providers.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'locale.dart';
@@ -57,12 +58,26 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     // The date may have changed (past midnight): past-due rows and their
     // "days ago" follow today.
     ref.invalidate(todayProvider);
+    // A notification button may have marked payments while Kalan was in
+    // the background: read them again.
+    ref.invalidate(plansProvider);
+    ref.invalidate(recurringProvider);
     ref.read(reminderSyncProvider).request();
   }
 
-  /// A tapped reminder opens the home screen.
-  void _onTap(NotificationResponse response) =>
-      ref.read(routerProvider).go(Routes.home);
+  /// A tapped reminder opens the home screen. A button, should the
+  /// platform deliver one here, runs the same handler as in the
+  /// background.
+  void _onTap(NotificationResponse response) {
+    if (ReminderActionIds.parse(response.actionId) != null) {
+      unawaited(
+        ReminderActionHandler(ref.read(reminderSchedulerProvider))
+            .handle(actionId: response.actionId, payload: response.payload),
+      );
+      return;
+    }
+    ref.read(routerProvider).go(Routes.home);
+  }
 
   @override
   Widget build(BuildContext context) {

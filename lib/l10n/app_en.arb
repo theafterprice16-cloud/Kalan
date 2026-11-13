@@ -485,6 +485,30 @@
   "@testNotificationText": {
     "description": "Debug builds only: body of the sample notification."
   },
+  "reminderActionPaid": "Paid",
+  "@reminderActionPaid": {
+    "description": "Notification button: marks the one payment in the reminder as paid. Shown on a small system button: keep it very short (1-2 words), calm, no exclamation mark; other languages may run longer, so prefer the shortest natural form."
+  },
+  "reminderActionAllPaid": "All paid",
+  "@reminderActionAllPaid": {
+    "description": "Notification button on a reminder with several payments: marks all of them as paid. System button: keep it very short (1-2 words), calm, no exclamation mark."
+  },
+  "reminderActionRemindTonight": "Remind tonight",
+  "@reminderActionRemindTonight": {
+    "description": "Notification button on the on-the-day reminder: the same reminder again at 20:00 today. System button: keep it very short (1-2 words), calm."
+  },
+  "reminderActionRemindTomorrow": "Remind tomorrow",
+  "@reminderActionRemindTomorrow": {
+    "description": "Notification button on the days-before reminder: the same reminder again tomorrow at the same time. System button: keep it very short (1-2 words), calm."
+  },
+  "debugTestReminderActions": "Test reminder with buttons (in 10 seconds)",
+  "@debugTestReminderActions": {
+    "description": "Debug builds only: schedules the on-the-day reminder of the nearest unpaid payment, with its buttons."
+  },
+  "testReminderNoPayment": "No unpaid payment to try it with.",
+  "@testReminderNoPayment": {
+    "description": "Debug builds only: snackbar when there is no unpaid payment for the test reminder."
+  },
   "remindersEnabledHint": "Before a payment is due and on the day",
   "@remindersEnabledHint": {
     "description": "Subtitle under the master reminders switch."

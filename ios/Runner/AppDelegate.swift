@@ -1,6 +1,8 @@
 import Flutter
 import UIKit
 import UserNotifications
+// FlutterLocalNotificationsPlugin.setPluginRegistrantCallback.
+import flutter_local_notifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -14,6 +16,12 @@ import UserNotifications
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // Reminder buttons ("Paid", "Remind tonight") run in a background
+    // engine without opening the app; it needs the plugins (database,
+    // time zone, notifications) too.
+    FlutterLocalNotificationsPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
     // "Open phone settings" from Settings > Reminders.

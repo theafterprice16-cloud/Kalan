@@ -167,3 +167,28 @@ class AppSettings extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// "Remind tonight" / "Remind tomorrow" chosen from a notification (schema
+/// v6). Kept so a full reschedule does not lose it; deleted once its time
+/// has passed or none of its payments is still unpaid.
+@DataClassName('ReminderSnoozeRow')
+class ReminderSnoozes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// The kind of the notification it came from: 0 ahead, 1 on the day.
+  IntColumn get kind => integer().check(kind.isIn(const [0, 1]))();
+
+  /// Local day and time it fires (epoch day, minutes after midnight).
+  IntColumn get fireDay => integer()();
+  IntColumn get minuteOfDay =>
+      integer().check(minuteOfDay.isBetweenValues(0, 1439))();
+
+  /// The payments in it, as comma-separated keys ("p12,r3.20406").
+  TextColumn get refs => text()();
+
+  /// The same button twice makes one snooze.
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {kind, fireDay, minuteOfDay, refs},
+  ];
+}

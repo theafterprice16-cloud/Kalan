@@ -21,6 +21,7 @@ class FakeNotificationGateway implements NotificationGateway {
   int replaceCalls = 0;
   int openSettingsCalls = 0;
   String? testBody;
+  PlannedReminder? testReminder;
   List<PlannedReminder> pending = const [];
 
   List<String> get bodies => [for (final n in pending) n.body];
@@ -47,6 +48,10 @@ class FakeNotificationGateway implements NotificationGateway {
     required String body,
     required Duration delay,
   }) async => testBody = body;
+
+  @override
+  Future<void> showTestReminder(PlannedReminder reminder) async =>
+      testReminder = reminder;
 
   @override
   Future<void> openSystemSettings() async => openSettingsCalls++;

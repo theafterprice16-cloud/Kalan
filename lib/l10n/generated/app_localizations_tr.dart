@@ -802,6 +802,25 @@ class AppLocalizationsTr extends AppLocalizations {
       'Deneme: hatırlatmalar bu telefonda çalışıyor.';
 
   @override
+  String get reminderActionPaid => 'Ödendi';
+
+  @override
+  String get reminderActionAllPaid => 'Hepsi ödendi';
+
+  @override
+  String get reminderActionRemindTonight => 'Akşam hatırlat';
+
+  @override
+  String get reminderActionRemindTomorrow => 'Yarın hatırlat';
+
+  @override
+  String get debugTestReminderActions =>
+      'Eylemli deneme bildirimi (10 saniye sonra)';
+
+  @override
+  String get testReminderNoPayment => 'Denemek için ödenmemiş ödeme yok.';
+
+  @override
   String get remindersEnabledHint => 'Ödeme gününden önce ve ödeme günü';
 
   @override

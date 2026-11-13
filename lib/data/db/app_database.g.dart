@@ -3544,6 +3544,366 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   }
 }
 
+class $ReminderSnoozesTable extends ReminderSnoozes
+    with TableInfo<$ReminderSnoozesTable, ReminderSnoozeRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReminderSnoozesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<int> kind = GeneratedColumn<int>(
+    'kind',
+    aliasedName,
+    false,
+    check: () => kind.isIn(const [0, 1]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fireDayMeta = const VerificationMeta(
+    'fireDay',
+  );
+  @override
+  late final GeneratedColumn<int> fireDay = GeneratedColumn<int>(
+    'fire_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minuteOfDayMeta = const VerificationMeta(
+    'minuteOfDay',
+  );
+  @override
+  late final GeneratedColumn<int> minuteOfDay = GeneratedColumn<int>(
+    'minute_of_day',
+    aliasedName,
+    false,
+    check: () => ComparableExpr(minuteOfDay).isBetweenValues(0, 1439),
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _refsMeta = const VerificationMeta('refs');
+  @override
+  late final GeneratedColumn<String> refs = GeneratedColumn<String>(
+    'refs',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, kind, fireDay, minuteOfDay, refs];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reminder_snoozes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReminderSnoozeRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('fire_day')) {
+      context.handle(
+        _fireDayMeta,
+        fireDay.isAcceptableOrUnknown(data['fire_day']!, _fireDayMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fireDayMeta);
+    }
+    if (data.containsKey('minute_of_day')) {
+      context.handle(
+        _minuteOfDayMeta,
+        minuteOfDay.isAcceptableOrUnknown(
+          data['minute_of_day']!,
+          _minuteOfDayMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_minuteOfDayMeta);
+    }
+    if (data.containsKey('refs')) {
+      context.handle(
+        _refsMeta,
+        refs.isAcceptableOrUnknown(data['refs']!, _refsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_refsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {kind, fireDay, minuteOfDay, refs},
+  ];
+  @override
+  ReminderSnoozeRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReminderSnoozeRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}kind'],
+      )!,
+      fireDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fire_day'],
+      )!,
+      minuteOfDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}minute_of_day'],
+      )!,
+      refs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}refs'],
+      )!,
+    );
+  }
+
+  @override
+  $ReminderSnoozesTable createAlias(String alias) {
+    return $ReminderSnoozesTable(attachedDatabase, alias);
+  }
+}
+
+class ReminderSnoozeRow extends DataClass
+    implements Insertable<ReminderSnoozeRow> {
+  final int id;
+
+  /// The kind of the notification it came from: 0 ahead, 1 on the day.
+  final int kind;
+
+  /// Local day and time it fires (epoch day, minutes after midnight).
+  final int fireDay;
+  final int minuteOfDay;
+
+  /// The payments in it, as comma-separated keys ("p12,r3.20406").
+  final String refs;
+  const ReminderSnoozeRow({
+    required this.id,
+    required this.kind,
+    required this.fireDay,
+    required this.minuteOfDay,
+    required this.refs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['kind'] = Variable<int>(kind);
+    map['fire_day'] = Variable<int>(fireDay);
+    map['minute_of_day'] = Variable<int>(minuteOfDay);
+    map['refs'] = Variable<String>(refs);
+    return map;
+  }
+
+  ReminderSnoozesCompanion toCompanion(bool nullToAbsent) {
+    return ReminderSnoozesCompanion(
+      id: Value(id),
+      kind: Value(kind),
+      fireDay: Value(fireDay),
+      minuteOfDay: Value(minuteOfDay),
+      refs: Value(refs),
+    );
+  }
+
+  factory ReminderSnoozeRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReminderSnoozeRow(
+      id: serializer.fromJson<int>(json['id']),
+      kind: serializer.fromJson<int>(json['kind']),
+      fireDay: serializer.fromJson<int>(json['fireDay']),
+      minuteOfDay: serializer.fromJson<int>(json['minuteOfDay']),
+      refs: serializer.fromJson<String>(json['refs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'kind': serializer.toJson<int>(kind),
+      'fireDay': serializer.toJson<int>(fireDay),
+      'minuteOfDay': serializer.toJson<int>(minuteOfDay),
+      'refs': serializer.toJson<String>(refs),
+    };
+  }
+
+  ReminderSnoozeRow copyWith({
+    int? id,
+    int? kind,
+    int? fireDay,
+    int? minuteOfDay,
+    String? refs,
+  }) => ReminderSnoozeRow(
+    id: id ?? this.id,
+    kind: kind ?? this.kind,
+    fireDay: fireDay ?? this.fireDay,
+    minuteOfDay: minuteOfDay ?? this.minuteOfDay,
+    refs: refs ?? this.refs,
+  );
+  ReminderSnoozeRow copyWithCompanion(ReminderSnoozesCompanion data) {
+    return ReminderSnoozeRow(
+      id: data.id.present ? data.id.value : this.id,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      fireDay: data.fireDay.present ? data.fireDay.value : this.fireDay,
+      minuteOfDay: data.minuteOfDay.present
+          ? data.minuteOfDay.value
+          : this.minuteOfDay,
+      refs: data.refs.present ? data.refs.value : this.refs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReminderSnoozeRow(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('fireDay: $fireDay, ')
+          ..write('minuteOfDay: $minuteOfDay, ')
+          ..write('refs: $refs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, kind, fireDay, minuteOfDay, refs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReminderSnoozeRow &&
+          other.id == this.id &&
+          other.kind == this.kind &&
+          other.fireDay == this.fireDay &&
+          other.minuteOfDay == this.minuteOfDay &&
+          other.refs == this.refs);
+}
+
+class ReminderSnoozesCompanion extends UpdateCompanion<ReminderSnoozeRow> {
+  final Value<int> id;
+  final Value<int> kind;
+  final Value<int> fireDay;
+  final Value<int> minuteOfDay;
+  final Value<String> refs;
+  const ReminderSnoozesCompanion({
+    this.id = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.fireDay = const Value.absent(),
+    this.minuteOfDay = const Value.absent(),
+    this.refs = const Value.absent(),
+  });
+  ReminderSnoozesCompanion.insert({
+    this.id = const Value.absent(),
+    required int kind,
+    required int fireDay,
+    required int minuteOfDay,
+    required String refs,
+  }) : kind = Value(kind),
+       fireDay = Value(fireDay),
+       minuteOfDay = Value(minuteOfDay),
+       refs = Value(refs);
+  static Insertable<ReminderSnoozeRow> custom({
+    Expression<int>? id,
+    Expression<int>? kind,
+    Expression<int>? fireDay,
+    Expression<int>? minuteOfDay,
+    Expression<String>? refs,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kind != null) 'kind': kind,
+      if (fireDay != null) 'fire_day': fireDay,
+      if (minuteOfDay != null) 'minute_of_day': minuteOfDay,
+      if (refs != null) 'refs': refs,
+    });
+  }
+
+  ReminderSnoozesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? kind,
+    Value<int>? fireDay,
+    Value<int>? minuteOfDay,
+    Value<String>? refs,
+  }) {
+    return ReminderSnoozesCompanion(
+      id: id ?? this.id,
+      kind: kind ?? this.kind,
+      fireDay: fireDay ?? this.fireDay,
+      minuteOfDay: minuteOfDay ?? this.minuteOfDay,
+      refs: refs ?? this.refs,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<int>(kind.value);
+    }
+    if (fireDay.present) {
+      map['fire_day'] = Variable<int>(fireDay.value);
+    }
+    if (minuteOfDay.present) {
+      map['minute_of_day'] = Variable<int>(minuteOfDay.value);
+    }
+    if (refs.present) {
+      map['refs'] = Variable<String>(refs.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReminderSnoozesCompanion(')
+          ..write('id: $id, ')
+          ..write('kind: $kind, ')
+          ..write('fireDay: $fireDay, ')
+          ..write('minuteOfDay: $minuteOfDay, ')
+          ..write('refs: $refs')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3554,6 +3914,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $RecurringPaymentsTable(this);
   late final $RecurringMarksTable recurringMarks = $RecurringMarksTable(this);
   late final $AppSettingsTable appSettings = $AppSettingsTable(this);
+  late final $ReminderSnoozesTable reminderSnoozes = $ReminderSnoozesTable(
+    this,
+  );
   late final Index paymentsDueDay = Index(
     'payments_due_day',
     'CREATE INDEX payments_due_day ON payments (due_day)',
@@ -3569,6 +3932,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     recurringPayments,
     recurringMarks,
     appSettings,
+    reminderSnoozes,
     paymentsDueDay,
   ];
   @override
@@ -5938,6 +6302,217 @@ typedef $$AppSettingsTableProcessedTableManager =
       SettingsRow,
       PrefetchHooks Function()
     >;
+typedef $$ReminderSnoozesTableCreateCompanionBuilder =
+    ReminderSnoozesCompanion Function({
+      Value<int> id,
+      required int kind,
+      required int fireDay,
+      required int minuteOfDay,
+      required String refs,
+    });
+typedef $$ReminderSnoozesTableUpdateCompanionBuilder =
+    ReminderSnoozesCompanion Function({
+      Value<int> id,
+      Value<int> kind,
+      Value<int> fireDay,
+      Value<int> minuteOfDay,
+      Value<String> refs,
+    });
+
+class $$ReminderSnoozesTableFilterComposer
+    extends Composer<_$AppDatabase, $ReminderSnoozesTable> {
+  $$ReminderSnoozesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fireDay => $composableBuilder(
+    column: $table.fireDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minuteOfDay => $composableBuilder(
+    column: $table.minuteOfDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get refs => $composableBuilder(
+    column: $table.refs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReminderSnoozesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReminderSnoozesTable> {
+  $$ReminderSnoozesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fireDay => $composableBuilder(
+    column: $table.fireDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minuteOfDay => $composableBuilder(
+    column: $table.minuteOfDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get refs => $composableBuilder(
+    column: $table.refs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReminderSnoozesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReminderSnoozesTable> {
+  $$ReminderSnoozesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get fireDay =>
+      $composableBuilder(column: $table.fireDay, builder: (column) => column);
+
+  GeneratedColumn<int> get minuteOfDay => $composableBuilder(
+    column: $table.minuteOfDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get refs =>
+      $composableBuilder(column: $table.refs, builder: (column) => column);
+}
+
+class $$ReminderSnoozesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReminderSnoozesTable,
+          ReminderSnoozeRow,
+          $$ReminderSnoozesTableFilterComposer,
+          $$ReminderSnoozesTableOrderingComposer,
+          $$ReminderSnoozesTableAnnotationComposer,
+          $$ReminderSnoozesTableCreateCompanionBuilder,
+          $$ReminderSnoozesTableUpdateCompanionBuilder,
+          (
+            ReminderSnoozeRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ReminderSnoozesTable,
+              ReminderSnoozeRow
+            >,
+          ),
+          ReminderSnoozeRow,
+          PrefetchHooks Function()
+        > {
+  $$ReminderSnoozesTableTableManager(
+    _$AppDatabase db,
+    $ReminderSnoozesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReminderSnoozesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReminderSnoozesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReminderSnoozesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> kind = const Value.absent(),
+                Value<int> fireDay = const Value.absent(),
+                Value<int> minuteOfDay = const Value.absent(),
+                Value<String> refs = const Value.absent(),
+              }) => ReminderSnoozesCompanion(
+                id: id,
+                kind: kind,
+                fireDay: fireDay,
+                minuteOfDay: minuteOfDay,
+                refs: refs,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int kind,
+                required int fireDay,
+                required int minuteOfDay,
+                required String refs,
+              }) => ReminderSnoozesCompanion.insert(
+                id: id,
+                kind: kind,
+                fireDay: fireDay,
+                minuteOfDay: minuteOfDay,
+                refs: refs,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReminderSnoozesTable, ReminderSnoozeRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ReminderSnoozesTable,
+                    ReminderSnoozeRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReminderSnoozesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReminderSnoozesTable,
+      ReminderSnoozeRow,
+      $$ReminderSnoozesTableFilterComposer,
+      $$ReminderSnoozesTableOrderingComposer,
+      $$ReminderSnoozesTableAnnotationComposer,
+      $$ReminderSnoozesTableCreateCompanionBuilder,
+      $$ReminderSnoozesTableUpdateCompanionBuilder,
+      (
+        ReminderSnoozeRow,
+        BaseReferences<_$AppDatabase, $ReminderSnoozesTable, ReminderSnoozeRow>,
+      ),
+      ReminderSnoozeRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5954,4 +6529,6 @@ class $AppDatabaseManager {
       $$RecurringMarksTableTableManager(_db, _db.recurringMarks);
   $$AppSettingsTableTableManager get appSettings =>
       $$AppSettingsTableTableManager(_db, _db.appSettings);
+  $$ReminderSnoozesTableTableManager get reminderSnoozes =>
+      $$ReminderSnoozesTableTableManager(_db, _db.reminderSnoozes);
 }

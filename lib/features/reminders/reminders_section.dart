@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/format.dart';
 import '../../core/design/choice_dialog.dart';
@@ -12,6 +13,7 @@ import '../../core/reminders/reminder_models.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
+import 'local_notifications.dart';
 import 'reminder_providers.dart';
 import 'reminder_settings_store.dart';
 
@@ -173,6 +175,36 @@ class RemindersSection extends ConsumerWidget {
               );
               messenger.showSnackBar(
                 SnackBar(content: Text(l10n.testNotificationScheduled)),
+              );
+            },
+          ),
+        // Debug builds only: the nearest unpaid payment's "on the day"
+        // reminder with its buttons, so "Paid" can be tried at once.
+        if (kDebugMode)
+          ListTile(
+            key: const ValueKey('test-reminder-actions'),
+            leading: const Icon(Icons.notifications_active_outlined),
+            title: Text(l10n.debugTestReminderActions),
+            onTap: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final reminder = await ref
+                  .read(reminderSchedulerProvider)
+                  .testReminder(
+                    id: ReminderIds.testReminder,
+                    fireAt: tz.TZDateTime.now(tz.local)
+                        .add(const Duration(seconds: 10)),
+                  );
+              if (reminder != null) {
+                await gateway.showTestReminder(reminder);
+              }
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(
+                    reminder == null
+                        ? l10n.testReminderNoPayment
+                        : l10n.testNotificationScheduled,
+                  ),
+                ),
               );
             },
           ),

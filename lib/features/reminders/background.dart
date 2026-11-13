@@ -2,6 +2,7 @@ import 'dart:ui' show DartPluginRegistrant;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -11,6 +12,7 @@ import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../l10n/generated/app_localizations.dart';
 import 'local_notifications.dart';
+import 'reminder_actions.dart';
 import 'reminder_scheduler.dart';
 
 /// Loads the time zone database once and points tz.local at the device's
@@ -61,5 +63,26 @@ Future<void> rescheduleRemindersInBackgroundTask() async {
     await runReminderTask((scheduler) => scheduler.rescheduleAll());
   } finally {
     await const MethodChannel('kalan/background').invokeMethod<void>('done');
+  }
+}
+
+/// A notification button ("Paid", "All paid", "Remind tonight", "Remind
+/// tomorrow"). The plugin runs it in its own background isolate whether
+/// Kalan is closed, in the background or on screen; the app does not
+/// open. The database is shared with the app if it is running (see
+/// [AppDatabase.openShared]), so its screens update at once.
+///
+/// Never throws: a deleted plan or a damaged payload simply does nothing.
+@pragma('vm:entry-point')
+Future<void> reminderActionInBackground(NotificationResponse response) async {
+  try {
+    await runReminderTask(
+      (scheduler) =>
+          ReminderActionHandler(scheduler)
+              .handle(actionId: response.actionId, payload: response.payload),
+    );
+  } on Object {
+    // Nothing to show from the background; the next reschedule (app
+    // start, resume) brings the reminders back in step.
   }
 }
