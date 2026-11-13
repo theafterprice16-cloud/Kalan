@@ -7,6 +7,11 @@ void main() {
     const files = [
       'assets/brand/kalan_icon.svg',
       'assets/brand/kalan_mark.svg',
+      'assets/brand/kalan_icon_dark.svg',
+      'assets/brand/kalan_mark_dark.svg',
+      'assets/brand/icon_1024_dark.png',
+      'docs/kimlik/ikon-60px-acik.png',
+      'docs/kimlik/ikon-60px-koyu.png',
       'assets/brand/icon_1024.png',
       'assets/brand/icon_foreground.png',
       'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png',
@@ -29,38 +34,85 @@ void main() {
     expect(bytes[25], 2);
   });
 
-  test('icon SVG uses only Gece & Nane colors', () {
-    final svg = File('assets/brand/kalan_icon.svg').readAsStringSync();
-    final colors = RegExp('#[0-9A-Fa-f]{6}')
-        .allMatches(svg)
-        .map((m) => m[0]!.toUpperCase())
-        .toSet();
-    expect(colors, {'#0B0F14', '#F2F5F7', '#3DDC97'});
+  test('icon SVGs use only Mürekkep ve Safran colors', () {
+    Set<String> colorsIn(String path) =>
+        RegExp('#[0-9A-Fa-f]{6}')
+            .allMatches(File(path).readAsStringSync())
+            .map((m) => m[0]!.toUpperCase())
+            .toSet();
+    // ground (bg), K (text), two parts (chartCommitted), last part (accent)
+    expect(colorsIn('assets/brand/kalan_icon.svg'), {
+      '#F5F0E6',
+      '#1A2330',
+      '#B87A0A',
+      '#1D4E89',
+    });
+    expect(colorsIn('assets/brand/kalan_icon_dark.svg'), {
+      '#11161D',
+      '#EFE9DD',
+      '#C98F24',
+      '#8FB8F2',
+    });
   });
 
-  test('splash and adaptive icon grounds are #0B0F14', () {
-    for (final path in [
-      'android/app/src/main/res/values/colors.xml',
-      'android/app/src/main/res/values-night/colors.xml',
-    ]) {
-      expect(
-        File(path).readAsStringSync(),
-        contains('<color name="launch_background">#0B0F14</color>'),
-        reason: path,
-      );
+  test('light and dark icons share one shape', () {
+    List<String> paths(String file) =>
+        RegExp('d="([^"]*)"')
+            .allMatches(File(file).readAsStringSync())
+            .map((m) => m[1]!)
+            .toList();
+    expect(paths('assets/brand/kalan_icon.svg'), hasLength(5));
+    expect(
+      paths('assets/brand/kalan_icon_dark.svg'),
+      paths('assets/brand/kalan_icon.svg'),
+    );
+    expect(
+      paths('assets/brand/kalan_mark_dark.svg'),
+      paths('assets/brand/kalan_icon.svg'),
+    );
+  });
+
+  test('splash grounds follow the theme bg', () {
+    String read(String path) => File(path).readAsStringSync();
+    final light = read('android/app/src/main/res/values/colors.xml');
+    expect(light, contains('<color name="launch_background">#F5F0E6</color>'));
+    expect(
+      light,
+      contains('<color name="ic_launcher_background">#F5F0E6</color>'),
+    );
+    expect(
+      read('android/app/src/main/res/values-night/colors.xml'),
+      contains('<color name="launch_background">#11161D</color>'),
+    );
+    expect(
+      File('android/app/src/main/res/drawable-night-nodpi/launch_mark.png')
+          .existsSync(),
+      isTrue,
+    );
+    expect(
+      read('ios/Runner/Base.lproj/LaunchScreen.storyboard'),
+      contains('<color key="backgroundColor" name="LaunchBackground"/>'),
+    );
+    final named = read(
+      'ios/Runner/Assets.xcassets/LaunchBackground.colorset/Contents.json',
+    );
+    // F5F0E6 for light, 11161D for the dark appearance.
+    for (final part in ['0xF5', '0xF0', '0xE6', '0x11', '0x16', '0x1D']) {
+      expect(named, contains(part));
     }
+    expect(named, contains('"dark"'));
     expect(
-      File('android/app/src/main/res/values/colors.xml').readAsStringSync(),
-      contains('<color name="ic_launcher_background">#0B0F14</color>'),
+      read('ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json'),
+      contains('LaunchImageDark@3x.png'),
     );
-    // 0x0B / 255, 0x0F / 255, 0x14 / 255
-    expect(
-      File('ios/Runner/Base.lproj/LaunchScreen.storyboard').readAsStringSync(),
-      contains(
-        'red="0.043137254901960784" green="0.058823529411764705" '
-        'blue="0.078431372549019607"',
-      ),
-    );
+  });
+
+  test('iOS has a dark app icon', () {
+    final contents = File(
+      'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json',
+    ).readAsStringSync();
+    expect(contents, contains('Icon-App-Dark-1024x1024@1x.png'));
+    expect(contents, contains('"luminosity"'));
   });
 
   test('the Xcode project was not altered by the icon tool', () {

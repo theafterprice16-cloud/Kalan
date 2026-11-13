@@ -1,16 +1,20 @@
-"""Draws the Kalan mark (Gece & Nane) and writes its sources.
+"""Draws the Kalan mark (Mürekkep ve Safran) and writes its sources.
 
-The mark is the K logo: an off-white stem and arm, the lower leg split into
-three mint parts. Geometry was measured from the original artwork
-(2048 x 2048) and is kept here so the SVG and the PNGs match exactly.
+The mark is the K logo: an ink stem and arm, the lower leg split into three
+installment parts. The first two parts are saffron (spoken for), the last
+part is the "left" blue. Geometry was measured from the original artwork
+(2048 x 2048) and is kept here so the SVG and the PNGs match exactly; only
+the colors change between the light and the dark variant.
 
 Writes:
-  assets/brand/kalan_icon.svg           full icon (ink ground), source of truth
-  assets/brand/kalan_mark.svg           mark only, clear ground
-  assets/brand/icon_1024.png            input for flutter_launcher_icons
+  assets/brand/kalan_icon.svg, kalan_icon_dark.svg   full icon, source of truth
+  assets/brand/kalan_mark.svg, kalan_mark_dark.svg   mark only, clear ground
+  assets/brand/icon_1024.png            light icon, input for flutter_launcher_icons
+  assets/brand/icon_1024_dark.png       dark icon (iOS dark appearance)
   assets/brand/icon_foreground.png      Android adaptive foreground (safe zone)
-  launch marks for iOS and Android      on the #0B0F14 splash ground
+  launch marks for iOS and Android      light and dark (night) variants
   ic_stat_kalan (Android)               white notification icon
+  docs/kimlik/ikon-60px-*.png           60 x 60 readability check
 
 Then run:  dart run flutter_launcher_icons
 and revert its edit to ios/Runner.xcodeproj/project.pbxproj (the tool
@@ -22,10 +26,14 @@ import os
 
 from PIL import Image, ImageDraw
 
-# Gece & Nane tokens (docs/DESIGN_TOKENS.md).
-BG = '#0B0F14'     # bg (dark)
-TEXT = '#F2F5F7'   # text (dark): stem and arm
-MINT = '#3DDC97'   # mint: the three leg parts
+# Mürekkep ve Safran tokens (docs/DESIGN_TOKENS.md):
+# ground = bg, ink = text, spoken = chartCommitted, left = accent.
+PALETTES = {
+    'light': {'ground': '#F5F0E6', 'ink': '#1A2330',
+              'spoken': '#B87A0A', 'left': '#1D4E89'},
+    'dark': {'ground': '#11161D', 'ink': '#EFE9DD',
+             'spoken': '#C98F24', 'left': '#8FB8F2'},
+}
 
 SIZE = 2048
 RADIUS = 34  # corner rounding, in 2048 units
@@ -39,7 +47,13 @@ LEG = [
     [(1246, 1185), (1328, 1282), (1165, 1454), (1083, 1357)],
     [(1373, 1337), (1494, 1480), (1470, 1535), (1215, 1535)],
 ]
-SHAPES = [(STEM, TEXT), (ARM, TEXT)] + [(p, MINT) for p in LEG]
+
+
+def shapes(theme):
+    """(points, color) for each part of the mark in [theme]."""
+    p = PALETTES[theme]
+    return [(STEM, p['ink']), (ARM, p['ink']), (LEG[0], p['spoken']),
+            (LEG[1], p['spoken']), (LEG[2], p['left'])]
 
 
 def _toward(a, b, d):
@@ -82,12 +96,13 @@ def polygon(points, r=RADIUS, steps=12):
     return out
 
 
-def write_svg(path, ground):
+def write_svg(path, theme, ground):
     body = '\n'.join(
         f'  <path fill="{color}" d="{svg_path(points)}"/>'
-        for points, color in SHAPES
+        for points, color in shapes(theme)
     )
-    rect = f'  <rect width="{SIZE}" height="{SIZE}" fill="{BG}"/>\n' if ground else ''
+    bg = PALETTES[theme]['ground']
+    rect = f'  <rect width="{SIZE}" height="{SIZE}" fill="{bg}"/>\n' if ground else ''
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         f.write(
@@ -96,15 +111,16 @@ def write_svg(path, ground):
         )
 
 
-def render(px, ground=True, scale=1.0):
+def render(px, theme='light', ground=True, scale=1.0):
     """Renders the mark at [px]; [scale] shrinks it around the center."""
     ss = 4
     big = px * ss
-    img = Image.new('RGBA', (big, big), BG if ground else (0, 0, 0, 0))
+    fill = PALETTES[theme]['ground'] if ground else (0, 0, 0, 0)
+    img = Image.new('RGBA', (big, big), fill)
     draw = ImageDraw.Draw(img)
     k = big / SIZE * scale
     offset = big * (1 - scale) / 2
-    for points, color in SHAPES:
+    for points, color in shapes(theme):
         draw.polygon(
             [(x * k + offset, y * k + offset) for x, y in polygon(points)],
             fill=color,
@@ -115,7 +131,7 @@ def render(px, ground=True, scale=1.0):
 def render_silhouette(px):
     """Android status bar icon: the mark in white on a clear ground.
 
-    The system tints it; the accent colour (#3DDC97) is set in code.
+    The system tints it; the notification colour is a token, set in code.
     """
     ss = 4
     big = px * ss
@@ -125,7 +141,7 @@ def render_silhouette(px):
     # as Android's 24 dp guide asks (content within ~20 dp).
     k = big / 1280
     dx = dy = big / 2 - 1023.5 * k
-    for points, _ in SHAPES:
+    for points, _ in shapes('light'):
         draw.polygon(
             [(x * k + dx, y * k + dy) for x, y in polygon(points)],
             fill=(255, 255, 255, 255),
@@ -139,24 +155,35 @@ def save(img, path, opaque=False):
 
 
 def main():
-    write_svg('assets/brand/kalan_icon.svg', ground=True)
-    write_svg('assets/brand/kalan_mark.svg', ground=False)
-    save(render(1024), 'assets/brand/icon_1024.png', opaque=True)
+    for theme, suffix in (('light', ''), ('dark', '_dark')):
+        write_svg(f'assets/brand/kalan_icon{suffix}.svg', theme, ground=True)
+        write_svg(f'assets/brand/kalan_mark{suffix}.svg', theme, ground=False)
+        save(render(1024, theme), f'assets/brand/icon_1024{suffix}.png',
+             opaque=True)
     # flutter_launcher_icons insets the adaptive foreground by 16%, which
     # keeps the mark (about half the canvas) inside the visible safe zone.
     save(render(1024, ground=False), 'assets/brand/icon_foreground.png')
 
     launch = 'ios/Runner/Assets.xcassets/LaunchImage.imageset'
-    for suffix, px in (('', 128), ('@2x', 256), ('@3x', 384)):
-        save(render(px, ground=False), f'{launch}/LaunchImage{suffix}.png')
+    for theme, name in (('light', 'LaunchImage'), ('dark', 'LaunchImageDark')):
+        for suffix, px in (('', 128), ('@2x', 256), ('@3x', 384)):
+            save(render(px, theme, ground=False),
+                 f'{launch}/{name}{suffix}.png')
     save(render(384, ground=False),
          'android/app/src/main/res/drawable-nodpi/launch_mark.png')
+    save(render(384, 'dark', ground=False),
+         'android/app/src/main/res/drawable-night-nodpi/launch_mark.png')
 
     # Notification icon (24 dp), referenced as ic_stat_kalan.
     for folder, px in {'mdpi': 24, 'hdpi': 36, 'xhdpi': 48,
                        'xxhdpi': 72, 'xxxhdpi': 96}.items():
         save(render_silhouette(px),
              f'android/app/src/main/res/drawable-{folder}/ic_stat_kalan.png')
+
+    # Readability check: the full icon at 60 x 60 pixels.
+    for theme, name in (('light', 'acik'), ('dark', 'koyu')):
+        save(render(60, theme), f'docs/kimlik/ikon-60px-{name}.png',
+             opaque=True)
 
 
 if __name__ == '__main__':
