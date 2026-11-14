@@ -17,6 +17,7 @@ class HomeEntry {
     this.seq,
     this.installmentCount,
     this.recurringId,
+    this.isPayLater = false,
   });
 
   /// Null for an untitled "Pay later" plan: see [label].
@@ -31,6 +32,9 @@ class HomeEntry {
   final int? installmentCount;
 
   final int? recurringId;
+
+  /// One payment on a set day: shown with its type, never "1/1".
+  final bool isPayLater;
 
   bool get isRecurring => recurringId != null;
 
@@ -111,6 +115,7 @@ final homeViewProvider = Provider<HomeView?>((ref) {
         planId: p.plan.id,
         seq: pay.seq,
         installmentCount: p.plan.installmentCount,
+        isPayLater: p.isPayLater,
       );
       // Past due: only in its own section, never twice.
       if (isPastDue(dueDate: due, isPaid: isPaid, today: today)) {

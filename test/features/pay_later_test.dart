@@ -550,6 +550,9 @@ void main() {
       );
       expect(find.text('Sonra öde · 14 Ara'), findsOneWidget);
       expect(find.text('₺2.921'), findsOneWidget);
+      // One payment: its type, not "1/1".
+      expect(find.text('1/1'), findsNothing);
+      expect(find.text('Sonra öde'), findsOneWidget);
     });
   });
 }
