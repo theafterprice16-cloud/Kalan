@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/data/db/app_database.dart';
 
@@ -17,30 +16,54 @@ void main() {
   SourcesCompanion source(String name) =>
       SourcesCompanion.insert(name: name, kind: SourceKind.provider);
 
-  test('two connections to one file: no lock error, no lost write', () async {
-    final file = File('${dir.path}/kalan.sqlite');
-    final a = AppDatabase(NativeDatabase.createInBackground(file));
-    final b = AppDatabase(NativeDatabase.createInBackground(file));
-    // Open both (runs the migration once, then the pragmas on each).
-    await a.select(a.sources).get();
-    await b.select(b.sources).get();
-    final mode = await a.customSelect('PRAGMA journal_mode').getSingle();
-    expect(mode.data.values.single, 'wal');
+  test(
+    'app and two actions write at once: no lock error, no lost write',
+    () async {
+      // The production path: every isolate in the process talks to the one
+      // shared database (AppDatabase.openShared), so writers never meet at
+      // the SQLite level, however hard they write.
+      final path = '${dir.path}/kalan.sqlite';
+      final tmp = dir.path;
+      final name = 'kalan-load-${DateTime.now().microsecondsSinceEpoch}';
 
-    Future<void> writes(AppDatabase db, String who) async {
-      for (var i = 0; i < 40; i++) {
-        await db.transaction(() async {
-          await db.into(db.sources).insert(source('$who $i a'));
-          await db.into(db.sources).insert(source('$who $i b'));
-        });
+      Future<void> writes(AppDatabase db, String who) async {
+        for (var i = 0; i < 40; i++) {
+          await db.transaction(() async {
+            await db.into(db.sources).insert(source('$who $i a'));
+            await db.into(db.sources).insert(source('$who $i b'));
+          });
+        }
       }
-    }
 
-    await Future.wait([writes(a, 'app'), writes(b, 'action')]);
-    expect(await a.select(a.sources).get(), hasLength(160));
-    await a.close();
-    await b.close();
-  });
+      Future<void> inAnotherIsolate(String who) => Isolate.run(() async {
+        final db = AppDatabase(
+          AppDatabase.openShared(
+            name: name,
+            path: () async => path,
+            tempDirectory: () async => tmp,
+          ),
+        );
+        await writes(db, who);
+        await db.close();
+      });
+
+      final app = AppDatabase(
+        AppDatabase.openShared(
+          name: name,
+          path: () async => path,
+          tempDirectory: () async => tmp,
+        ),
+      );
+      await app.select(app.sources).get();
+      await Future.wait([
+        writes(app, 'app'),
+        inAnotherIsolate('paid'),
+        inAnotherIsolate('snooze'),
+      ]);
+      expect(await app.select(app.sources).get(), hasLength(240));
+      await app.close();
+    },
+  );
 
   test('shared across isolates: one server, the app sees the write', () async {
     final path = '${dir.path}/shared.sqlite';
