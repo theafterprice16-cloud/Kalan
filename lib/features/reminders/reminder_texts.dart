@@ -29,6 +29,10 @@ class L10nReminderTexts implements ReminderTexts {
   String _date(LocalDate date) =>
       DateFormat.MMMMEEEEd(l10n.localeName).format(date.toDateTime());
 
+  /// Day and month only ("14 Kasım", "November 14").
+  String _dayMonth(LocalDate date) =>
+      DateFormat.MMMMd(l10n.localeName).format(date.toDateTime());
+
   String _money(int minor) =>
       formatMoney(minor, currency, localeName: l10n.localeName);
 
@@ -43,7 +47,21 @@ class L10nReminderTexts implements ReminderTexts {
     final name = payments.first.name;
     final total = _money(payments.fold(0, (sum, p) => sum + p.amountMinor));
     final date = _date(dueDates.first);
+    final due = dueDates.first;
     final body = switch ((kind, dueDates.length > 1, showAmounts)) {
+      (ReminderKind.overdue, _, true) => l10n.reminderOverdue(
+        count,
+        _dayMonth(due),
+        '${due.month}',
+        name,
+        total,
+      ),
+      (ReminderKind.overdue, _, false) => l10n.reminderOverdueHidden(
+        count,
+        _dayMonth(due),
+        '${due.month}',
+        name,
+      ),
       (ReminderKind.onDay, _, true) => l10n.reminderToday(count, name, total),
       (ReminderKind.onDay, _, false) => l10n.reminderTodayHidden(count, name),
       (ReminderKind.ahead, false, true) => l10n.reminderAhead(

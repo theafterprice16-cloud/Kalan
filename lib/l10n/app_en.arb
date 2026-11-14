@@ -925,5 +925,110 @@
   "paidWhenOnDueHint": "Counted in that period.",
   "@paidWhenOnDueHint": {
     "description": "Muted line under 'On the due date': the amount moves back to its own pay period."
+  },
+  "reminderOverdue": "{count, plural, =1{1 payment from {month, select, other{{date}}} isn't marked paid yet: {name}, {total}} other{{count} payments aren't marked paid yet, {total} in total}}",
+  "@reminderOverdue": {
+    "description": "Repeat reminder after the due date, amounts shown. Not marked paid yet: the user may have paid and only not marked it, so it must not blame. Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "date": {
+        "type": "String",
+        "example": "November 14",
+        "description": "Due date, day and month (used when count is 1)"
+      },
+      "month": {
+        "type": "String",
+        "example": "11",
+        "description": "Month number 1-12 of date. The date is written inside a select on it, so languages whose date takes an ending chosen by the month (Turkish: 14 Kasım'daki, 9 Eylül'deki) can pick it; others just write {date} in the other branch."
+      },
+      "name": {
+        "type": "String",
+        "example": "Tabby",
+        "description": "Plan name (used when count is 1)"
+      },
+      "total": {
+        "type": "String",
+        "example": "₺400",
+        "description": "Formatted amount or total"
+      }
+    }
+  },
+  "reminderOverdueHidden": "{count, plural, =1{1 payment from {month, select, other{{date}}} isn't marked paid yet: {name}} other{{count} payments aren't marked paid yet}}",
+  "@reminderOverdueHidden": {
+    "description": "Same as reminderOverdue with amounts hidden. Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments"
+      },
+      "date": {
+        "type": "String",
+        "example": "November 14",
+        "description": "Due date, day and month (used when count is 1)"
+      },
+      "month": {
+        "type": "String",
+        "example": "11",
+        "description": "Month number 1-12 of date. The date is written inside a select on it, so languages whose date takes an ending chosen by the month (Turkish: 14 Kasım'daki, 9 Eylül'deki) can pick it; others just write {date} in the other branch."
+      },
+      "name": {
+        "type": "String",
+        "example": "Tabby",
+        "description": "Plan name (used when count is 1)"
+      }
+    }
+  },
+  "repeatReminders": "Repeat reminders",
+  "@repeatReminders": {
+    "description": "Settings and plan detail: row for repeat reminders (reminding again until marked paid). Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals."
+  },
+  "repeatModeOff": "Off",
+  "@repeatModeOff": {
+    "description": "Repeat reminders choice: no repeats (the default)."
+  },
+  "repeatModeEvening": "Once more in the evening",
+  "@repeatModeEvening": {
+    "description": "Repeat reminders choice: on the days with a reminder, one more at 8 PM."
+  },
+  "repeatModeDaily": "Every day",
+  "@repeatModeDaily": {
+    "description": "Repeat reminders choice: every day from the first reminder until marked paid, twice a day."
+  },
+  "repeatModeGeneral": "Default ({mode})",
+  "@repeatModeGeneral": {
+    "description": "Plan detail: repeat reminders follow Settings; shows the current global choice.",
+    "placeholders": {
+      "mode": {
+        "type": "String",
+        "example": "Off",
+        "description": "The global choice, e.g. Off"
+      }
+    }
+  },
+  "repeatRemindersHelp": "Reminds you again at calm intervals until you mark it paid. Stops at most 7 days after the due date.",
+  "@repeatRemindersHelp": {
+    "description": "Muted help under the repeat reminders row. Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals."
+  },
+  "repeatDailyHint": "At your reminder time and at {time}.",
+  "@repeatDailyHint": {
+    "description": "Muted line under repeat reminders when Every day is chosen.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "8:00 PM",
+        "description": "20:00 in the language's 12/24-hour format"
+      }
+    }
+  },
+  "repeatRemindersOn": "Repeat reminders on",
+  "@repeatRemindersOn": {
+    "description": "Screen reader label of the small repeat icon on a plan."
+  },
+  "debugRepeatTest": "Repeat test (3 notifications, 1 minute apart)",
+  "@debugRepeatTest": {
+    "description": "Debug builds only: three repeat reminders 1, 2 and 3 minutes later."
   }
 }

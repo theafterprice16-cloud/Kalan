@@ -12,6 +12,7 @@ import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/plan_draft.dart';
 import 'package:kalan/core/money/currency.dart';
+import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'package:kalan/data/db/app_database.dart';
 
 import 'generated/schema.dart';
@@ -262,6 +263,39 @@ void main() {
     await db.close();
   });
 
+  test('v6 -> current: repeat reminders off for everyone', () async {
+    final schema = await verifier.schemaAt(6);
+    seedCommon(schema);
+    schema.rawDatabase.execute(
+      'INSERT INTO reminder_snoozes (kind, fire_day, minute_of_day, refs) '
+      "VALUES (1, 20406, 1200, 'p1')",
+    );
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, db.schemaVersion);
+    final settings = await db.select(db.appSettings).getSingle();
+    expect(settings.repeatMode, ReminderRepeat.off);
+    final plan = await db.select(db.plans).getSingle();
+    expect(plan.repeatMode, equals(null));
+    final snooze = await db.select(db.reminderSnoozes).getSingle();
+    expect(snooze.refs, 'p1');
+    expect(snooze.fireDay, 20406);
+    expect(snooze.skipsDay, isFalse);
+    // Overdue reminders can be snoozed now.
+    await db
+        .into(db.reminderSnoozes)
+        .insert(
+          ReminderSnoozesCompanion.insert(
+            kind: 2,
+            fireDay: 20407,
+            minuteOfDay: 540,
+            refs: 'p1',
+            skipsDay: const Value(true),
+          ),
+        );
+    expect(await db.select(db.reminderSnoozes).get(), hasLength(2));
+    await db.close();
+  });
+
   test('the same snooze twice is stored once', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final entry = ReminderSnoozesCompanion.insert(
@@ -280,7 +314,7 @@ void main() {
           .into(db.reminderSnoozes)
           .insert(
             ReminderSnoozesCompanion.insert(
-              kind: 2,
+              kind: 3,
               fireDay: 20406,
               minuteOfDay: 540,
               refs: 'p1',

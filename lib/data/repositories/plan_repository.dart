@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../core/engine/engine.dart';
+import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 import '../db/app_database.dart';
 import '../models.dart';
 
@@ -172,6 +173,12 @@ class PlanRepository {
       reminderLeadDays: Value(leadDays),
     ),
   );
+
+  /// The plan's repeat reminders; null follows the global setting.
+  Future<void> setRepeatMode(int planId, ReminderRepeat? mode) =>
+      (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+        PlansCompanion(repeatMode: Value(mode)),
+      );
 
   /// "This plan is already underway", changed later. The first [count]
   /// payments of the plan's leading run (payments not marked paid in Kalan)

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/app.dart';
 import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/core/theme/theme_mode.dart';
@@ -505,6 +506,34 @@ void main() {
           await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
           await tester.tap(find.byKey(const ValueKey('save-plan')));
           await shoot(tester, '14-reminder-sheet-$lang-$theme');
+        });
+
+        testWidgets('repeat reminders choice, $lang', (tester) async {
+          await start(tester, locale: locale);
+          await openReminders(tester);
+          await tester.tap(find.byKey(const ValueKey('reminder-repeat')));
+          await shoot(tester, '27-repeat-choice-$lang-$theme');
+        });
+
+        testWidgets('plans list, repeat icon, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: (db) async {
+              await seedRich(db, incomeMinor: 4500000);
+              // One plan repeats every day; the global setting stays off.
+              final mont = await (db.select(
+                db.plans,
+              )..where((p) => p.title.equals('Mont'))).getSingle();
+              await (db.update(
+                db.plans,
+              )..where((p) => p.id.equals(mont.id))).write(
+                const PlansCompanion(repeatMode: Value(ReminderRepeat.daily)),
+              );
+            },
+          );
+          await openTab(tester, plansTab);
+          await shoot(tester, '28-plans-repeat-$lang-$theme');
         });
 
         testWidgets('plan reminder choice, $lang', (tester) async {

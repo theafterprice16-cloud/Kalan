@@ -10,6 +10,7 @@ extension ReminderSettingsRowX on SettingsRow {
     leadDays: reminderLeadDays,
     minuteOfDay: reminderMinute,
     showAmounts: !hideAmountsInNotifications,
+    repeatMode: repeatMode,
   );
 }
 
@@ -41,6 +42,9 @@ class ReminderSettingsStore {
       AppSettingsCompanion(reminderLeadDays: Value(days)),
     );
   }
+
+  Future<void> setRepeatMode(ReminderRepeat mode) =>
+      _settings.update(AppSettingsCompanion(repeatMode: Value(mode)));
 
   Future<void> setMinuteOfDay(int minute) =>
       _settings.update(AppSettingsCompanion(reminderMinute: Value(minute)));

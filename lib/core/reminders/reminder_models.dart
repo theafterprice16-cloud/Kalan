@@ -11,7 +11,27 @@ enum ReminderKind {
 
   /// On the due date itself.
   onDay,
+
+  /// After the due date, unpaid: repeat reminders only.
+  overdue,
 }
+
+/// Repeat reminders ("Israrlı hatırlatma"): how often an unpaid payment
+/// is reminded again. Only ever at the reminder time and at 20:00.
+enum ReminderRepeat {
+  /// Only the "ahead" and "on day" reminders (the default).
+  off,
+
+  /// The days with a reminder also get one at 20:00.
+  evening,
+
+  /// From the "ahead" day until paid, at most 7 days past the due date:
+  /// at the reminder time and at 20:00 every day.
+  daily,
+}
+
+/// How long repeats go on after the due date.
+const repeatDaysAfterDue = 7;
 
 /// "How many days before" choices offered in Settings and per plan.
 const leadDayChoices = [1, 2, 3, 5, 7];
@@ -70,6 +90,7 @@ class ReminderPayment {
     this.isPaid = false,
     this.choice = ReminderChoice.general,
     this.ref,
+    this.repeat,
   });
 
   final String name;
@@ -81,6 +102,9 @@ class ReminderPayment {
   /// Which stored payment this is, so a notification action can mark it.
   /// Without one the reminder carries no actions.
   final PaymentRef? ref;
+
+  /// The plan's own repeat mode; null follows the global setting.
+  final ReminderRepeat? repeat;
 }
 
 /// A stored payment a notification points at: a plan payment by id, or a
@@ -144,6 +168,7 @@ class ReminderSettings {
     this.leadDays = initialLeadDays,
     this.minuteOfDay = 9 * 60,
     this.showAmounts = true,
+    this.repeatMode = ReminderRepeat.off,
   });
 
   /// Master switch; off cancels every pending reminder.
@@ -157,6 +182,29 @@ class ReminderSettings {
 
   /// Amounts in notification text (off for lock-screen privacy).
   final bool showAmounts;
+
+  /// Global repeat mode; plans can choose their own.
+  final ReminderRepeat repeatMode;
+
+  /// A 20:00 reminder only when the reminder time is 18:00 or earlier
+  /// (as "Remind tonight"): never two reminders close together, never at
+  /// night.
+  bool get eveningAllowed => minuteOfDay <= latestMinuteForRemindTonight;
+}
+
+/// The repeat mode that actually runs for [payment]: its own or the
+/// global one; none when its reminders are off; "once more in the
+/// evening" does nothing when the reminder time is after 18:00.
+ReminderRepeat repeatModeFor(
+  ReminderPayment payment,
+  ReminderSettings settings,
+) {
+  if (payment.choice.off) return ReminderRepeat.off;
+  final mode = payment.repeat ?? settings.repeatMode;
+  if (mode == ReminderRepeat.evening && !settings.eveningAllowed) {
+    return ReminderRepeat.off;
+  }
+  return mode;
 }
 
 /// "Days before" for a payment that follows the global setting.
@@ -247,6 +295,11 @@ class ReminderButton {
 /// A "remind me later" the user chose from a notification, stored so a
 /// full reschedule keeps it. It fires once, with the text of the
 /// notification it came from ([kind]) and only a "paid" button.
+///
+/// With [skipsDay] it is the "Remind tomorrow" of a payment with repeat
+/// reminders: the repeats on the day before [fireDate] are skipped and
+/// the payment is reminded at [fireDate], [minuteOfDay] (the reminder
+/// time) if nothing else reminds it then. Repeats go on as usual after.
 class ReminderSnooze {
   const ReminderSnooze({
     required this.id,
@@ -254,6 +307,7 @@ class ReminderSnooze {
     required this.fireDate,
     required this.minuteOfDay,
     required this.refs,
+    this.skipsDay = false,
   });
 
   final int id;
@@ -263,6 +317,7 @@ class ReminderSnooze {
   final LocalDate fireDate;
   final int minuteOfDay;
   final List<PaymentRef> refs;
+  final bool skipsDay;
 }
 
 /// One notification to schedule.
@@ -312,8 +367,23 @@ class PlannedReminder {
 
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
 
-  static int idFor(LocalDate fireDate, ReminderKind kind) =>
-      fireDate.epochDay * ReminderKind.values.length + kind.index;
+  /// "Ahead" and "on day" at the reminder time: fire day × 2 + kind,
+  /// unchanged since the first reminders.
+  static int idFor(LocalDate fireDate, ReminderKind kind) {
+    assert(kind != ReminderKind.overdue, 'use idForRepeat');
+    return fireDate.epochDay * 2 + kind.index;
+  }
+
+  /// Repeat reminders that are not an [idFor] slot: the 20:00 ones of any
+  /// kind and the "overdue" ones at the reminder time. 2^29 + fire day ×
+  /// 4 + slot, between [idFor] ids and snoozed ones.
+  static int idForRepeat(
+    LocalDate fireDate,
+    ReminderKind kind, {
+    required bool evening,
+  }) => repeatIdBase + fireDate.epochDay * 4 + (evening ? kind.index : 3);
+
+  static const repeatIdBase = 1 << 29;
 
   /// Snoozed reminders: far from [idFor] (fire day × 2 + kind, about
   /// 40,000 today) and from the debug test notification.
@@ -333,11 +403,16 @@ class ReminderPayload {
     required this.minuteOfDay,
     required this.refs,
     this.snoozed = false,
+    this.repeating = false,
   });
 
   /// The text's kind; for a snoozed reminder, the kind it came from.
   final ReminderKind kind;
   final bool snoozed;
+
+  /// A payment in it has repeat reminders: "Remind tomorrow" then skips
+  /// the rest of today instead of adding a reminder.
+  final bool repeating;
   final LocalDate fireDate;
   final int minuteOfDay;
   final List<PaymentRef> refs;
@@ -351,6 +426,7 @@ class ReminderPayload {
     'd': fireDate.epochDay,
     'm': minuteOfDay,
     'r': [for (final r in refs) r.key],
+    if (repeating) 'x': true,
   });
 
   static ReminderPayload? decode(String? raw) {
@@ -363,7 +439,9 @@ class ReminderPayload {
       final day = map['d'];
       final minute = map['m'];
       final keys = map['r'];
+      final repeating = map['x'] ?? false;
       if (kind == null ||
+          repeating is! bool ||
           type is! String ||
           day is! int ||
           minute is! int ||
@@ -387,6 +465,7 @@ class ReminderPayload {
         fireDate: LocalDate.fromEpochDay(day),
         minuteOfDay: minute,
         refs: List.unmodifiable(refs),
+        repeating: repeating,
       );
     } on FormatException {
       return null;

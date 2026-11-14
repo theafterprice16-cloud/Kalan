@@ -22,6 +22,7 @@ class ReminderSnoozeRepository {
     required LocalDate fireDate,
     required int minuteOfDay,
     required List<PaymentRef> refs,
+    bool skipsDay = false,
   }) => _db
       .into(_db.reminderSnoozes)
       .insert(
@@ -30,6 +31,7 @@ class ReminderSnoozeRepository {
           fireDay: fireDate.epochDay,
           minuteOfDay: minuteOfDay,
           refs: refs.map((r) => r.key).join(','),
+          skipsDay: Value(skipsDay),
         ),
         mode: InsertMode.insertOrIgnore,
       );
@@ -50,6 +52,7 @@ class ReminderSnoozeRepository {
       fireDate: LocalDate.fromEpochDay(row.fireDay),
       minuteOfDay: row.minuteOfDay,
       refs: List.unmodifiable(refs.cast<PaymentRef>()),
+      skipsDay: row.skipsDay,
     );
   }
 }

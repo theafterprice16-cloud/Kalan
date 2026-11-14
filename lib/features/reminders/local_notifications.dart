@@ -23,6 +23,9 @@ abstract final class ReminderIds {
 
   /// The debug "test reminder with buttons".
   static const testReminder = 2147480001;
+
+  /// The debug "repeat test": three ids from here.
+  static const testRepeats = 2147480002;
 }
 
 /// Taps (and, should a platform send them here, buttons) on a

@@ -1178,4 +1178,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paidWhenOnDueHint => 'Counted in that period.';
+
+  @override
+  String reminderOverdue(
+    int count,
+    String date,
+    String month,
+    String name,
+    String total,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(month, {'other': '$date'});
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments aren\'t marked paid yet, $total in total',
+      one: '1 payment from $_temp0 isn\'t marked paid yet: $name, $total',
+    );
+    return '$_temp1';
+  }
+
+  @override
+  String reminderOverdueHidden(
+    int count,
+    String date,
+    String month,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(month, {'other': '$date'});
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments aren\'t marked paid yet',
+      one: '1 payment from $_temp0 isn\'t marked paid yet: $name',
+    );
+    return '$_temp1';
+  }
+
+  @override
+  String get repeatReminders => 'Repeat reminders';
+
+  @override
+  String get repeatModeOff => 'Off';
+
+  @override
+  String get repeatModeEvening => 'Once more in the evening';
+
+  @override
+  String get repeatModeDaily => 'Every day';
+
+  @override
+  String repeatModeGeneral(String mode) {
+    return 'Default ($mode)';
+  }
+
+  @override
+  String get repeatRemindersHelp =>
+      'Reminds you again at calm intervals until you mark it paid. Stops at most 7 days after the due date.';
+
+  @override
+  String repeatDailyHint(String time) {
+    return 'At your reminder time and at $time.';
+  }
+
+  @override
+  String get repeatRemindersOn => 'Repeat reminders on';
+
+  @override
+  String get debugRepeatTest => 'Repeat test (3 notifications, 1 minute apart)';
 }

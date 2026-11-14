@@ -16,6 +16,7 @@ import '../../data/db/app_database.dart';
 import 'local_notifications.dart';
 import 'reminder_providers.dart';
 import 'reminder_settings_store.dart';
+import 'repeat_mode_ui.dart';
 
 /// "1 day before" … "7 days before", for dialogs.
 List<(int, String)> leadDayOptions(BuildContext context) => [
@@ -49,6 +50,18 @@ class RemindersSection extends ConsumerWidget {
     );
     if (picked == null) return;
     await ref.read(reminderSettingsStoreProvider).setLeadDays(picked.value);
+  }
+
+  Future<void> _pickRepeat(BuildContext context, WidgetRef ref) async {
+    final picked = await showChoiceDialog<ReminderRepeat>(
+      context,
+      title: context.l10n.repeatReminders,
+      selected: settings.repeatMode,
+      note: context.l10n.repeatRemindersHelp,
+      options: repeatModeOptions(context),
+    );
+    if (picked == null) return;
+    await ref.read(reminderSettingsStoreProvider).setRepeatMode(picked.value);
   }
 
   Future<void> _pickTime(BuildContext context, WidgetRef ref) async {
@@ -146,6 +159,31 @@ class RemindersSection extends ConsumerWidget {
           trailing: const Icon(Icons.schedule),
           onTap: on ? () => _pickTime(context, ref) : null,
         ),
+        ListTile(
+          key: const ValueKey('reminder-repeat'),
+          enabled: on,
+          title: Text(l10n.repeatReminders),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                repeatModeLabel(context, reminders.repeatMode),
+                style: muted,
+              ),
+              const SizedBox(height: 4),
+              Text(l10n.repeatRemindersHelp, style: muted),
+              if (reminders.repeatMode == ReminderRepeat.daily)
+                Text(
+                  l10n.repeatDailyHint(eveningTime(context)),
+                  key: const ValueKey('repeat-daily-hint'),
+                  style: muted,
+                ),
+            ],
+          ),
+          isThreeLine: true,
+          trailing: const Icon(Icons.chevron_right),
+          onTap: on ? () => _pickRepeat(context, ref) : null,
+        ),
         SwitchListTile(
           key: const ValueKey('reminder-show-amount'),
           title: Text(l10n.reminderShowAmount),
@@ -175,6 +213,40 @@ class RemindersSection extends ConsumerWidget {
               );
               messenger.showSnackBar(
                 SnackBar(content: Text(l10n.testNotificationScheduled)),
+              );
+            },
+          ),
+        // Debug builds only: three repeat reminders a minute apart for the
+        // nearest unpaid payment; "Paid" on the first cancels the others.
+        // Real repeats are never minutes apart.
+        if (kDebugMode)
+          ListTile(
+            key: const ValueKey('test-repeats'),
+            leading: const Icon(Icons.repeat),
+            title: Text(l10n.debugRepeatTest),
+            onTap: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final start = tz.TZDateTime.now(tz.local);
+              final repeats = await ref
+                  .read(reminderSchedulerProvider)
+                  .testRepeats(
+                    firstId: ReminderIds.testRepeats,
+                    times: [
+                      for (var i = 1; i <= 3; i++)
+                        start.add(Duration(minutes: i)),
+                    ],
+                  );
+              for (final r in repeats) {
+                await gateway.showTestReminder(r);
+              }
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(
+                    repeats.isEmpty
+                        ? l10n.testReminderNoPayment
+                        : l10n.testNotificationScheduled,
+                  ),
+                ),
               );
             },
           ),

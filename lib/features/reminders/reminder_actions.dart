@@ -8,6 +8,7 @@ import '../../core/reminders/reminder_time.dart';
 import '../../data/repositories/plan_repository.dart';
 import '../../data/repositories/recurring_repository.dart';
 import '../../data/repositories/reminder_snooze_repository.dart';
+import '../../data/repositories/settings_repository.dart';
 import 'reminder_scheduler.dart';
 
 /// Button identifiers shared with the platform (Android action ids, iOS
@@ -150,6 +151,8 @@ class ReminderActionHandler {
     ReminderAction action,
     tz.TZDateTime now,
   ) async {
+    final skipDate = repeatSkipDate(data, action);
+    if (skipDate != null) return _skipRestOfDay(data, skipDate, now);
     final target = snoozeTarget(data, action);
     if (target == null) return ReminderActionOutcome.ignored;
     final fireAt = localWallClock(
@@ -163,6 +166,30 @@ class ReminderActionHandler {
       fireDate: target.fireDate,
       minuteOfDay: target.minuteOfDay,
       refs: data.refs,
+    );
+    return ReminderActionOutcome.snoozed;
+  }
+
+  /// "Remind tomorrow" with repeat reminders: no reminder for these
+  /// payments for the rest of the day it fired; the next one is on
+  /// [date] at the reminder time, and repeats go on from there.
+  Future<ReminderActionOutcome> _skipRestOfDay(
+    ReminderPayload data,
+    LocalDate date,
+    tz.TZDateTime now,
+  ) async {
+    final settings = await SettingsRepository(_scheduler.db).get();
+    if (settings == null) return ReminderActionOutcome.ignored;
+    final minute = settings.reminderMinute;
+    if (!localWallClock(date, minute, now.location).isAfter(now)) {
+      return ReminderActionOutcome.tooLate;
+    }
+    await ReminderSnoozeRepository(_scheduler.db).add(
+      kind: data.kind,
+      fireDate: date,
+      minuteOfDay: minute,
+      refs: data.refs,
+      skipsDay: true,
     );
     return ReminderActionOutcome.snoozed;
   }

@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
+import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 
 /// Provider ("sonra öde" service) or credit card.
 enum SourceKind { provider, card }
@@ -54,6 +55,9 @@ class Plans extends Table {
   IntColumn get reminderLeadDays => integer().nullable().check(
     reminderLeadDays.isNull() | reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
   )();
+
+  /// Repeat reminders (schema v7): null follows the global setting.
+  IntColumn get repeatMode => intEnum<ReminderRepeat>().nullable()();
 }
 
 @DataClassName('PaymentRow')
@@ -164,6 +168,10 @@ class AppSettings extends Table {
   BoolColumn get reminderPromptShown =>
       boolean().withDefault(const Constant(false))();
 
+  /// Repeat reminders (schema v7): off for everyone until chosen.
+  IntColumn get repeatMode =>
+      intEnum<ReminderRepeat>().withDefault(const Constant(0))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -175,8 +183,9 @@ class AppSettings extends Table {
 class ReminderSnoozes extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  /// The kind of the notification it came from: 0 ahead, 1 on the day.
-  IntColumn get kind => integer().check(kind.isIn(const [0, 1]))();
+  /// The kind of the notification it came from: 0 ahead, 1 on the day,
+  /// 2 overdue (schema v7).
+  IntColumn get kind => integer().check(kind.isIn(const [0, 1, 2]))();
 
   /// Local day and time it fires (epoch day, minutes after midnight).
   IntColumn get fireDay => integer()();
@@ -185,6 +194,10 @@ class ReminderSnoozes extends Table {
 
   /// The payments in it, as comma-separated keys ("p12,r3.20406").
   TextColumn get refs => text()();
+
+  /// "Remind tomorrow" with repeat reminders (schema v7): skips the rest
+  /// of the day before [fireDay] instead of adding a reminder.
+  BoolColumn get skipsDay => boolean().withDefault(const Constant(false))();
 
   /// The same button twice makes one snooze.
   @override

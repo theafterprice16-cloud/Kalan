@@ -13,12 +13,18 @@ const maxScheduledReminders = 60;
 ///
 /// Every unpaid payment whose plan has reminders on gets an "ahead"
 /// notification [leadDaysFor] days before its due date and an "on day"
-/// notification on it, at the chosen local time. Notifications of the
-/// same kind on the same day are merged into one. Each stored [snoozes]
-/// entry adds one notification with the payments in it that are still
-/// unpaid. Anything at or before [now] is skipped (a past "ahead" does
+/// notification on it, at the chosen local time. Repeat reminders
+/// ([repeatModeFor]) add more moments, only ever at that time and at
+/// 20:00 (see [reminderMoments]). Notifications at the same moment and of
+/// the same kind are merged into one. Each stored [snoozes] entry adds one
+/// notification with the payments in it that are still unpaid, or, for a
+/// "skip the rest of today" entry, moves that payment's repeats to the
+/// next day. Anything at or before [now] is skipped (a past "ahead" does
 /// not drop the "on day"). The [limit] soonest are returned, ordered by
-/// time; snoozed reminders count towards the limit like any other.
+/// time; repeats and snoozes count towards the limit like any other.
+///
+/// With repeats off and no "skip" entries the list is exactly what it was
+/// before repeat reminders existed.
 List<PlannedReminder> planReminders({
   required Iterable<ReminderPayment> payments,
   required ReminderSettings settings,
@@ -29,25 +35,39 @@ List<PlannedReminder> planReminders({
 }) {
   if (!settings.enabled) return const [];
   final location = now.location;
+  final skips = [
+    for (final s in snoozes)
+      if (s.skipsDay) s,
+  ];
 
-  final groups = <(LocalDate, ReminderKind), List<ReminderPayment>>{};
+  final groups = <ReminderMoment, List<ReminderPayment>>{};
   for (final p in payments) {
     if (p.isPaid || p.choice.off) continue;
-    final ahead = p.date.addDays(-leadDaysFor(p, settings));
-    groups.putIfAbsent((ahead, ReminderKind.ahead), () => []).add(p);
-    groups.putIfAbsent((p.date, ReminderKind.onDay), () => []).add(p);
+    for (final m in reminderMoments(
+      p,
+      settings,
+      skips: [
+        for (final s in skips)
+          if (p.ref != null && s.refs.contains(p.ref)) s,
+      ],
+    )) {
+      groups.putIfAbsent(m, () => []).add(p);
+    }
   }
 
   final planned = <PlannedReminder>[];
-  for (final MapEntry(key: (fireDate, kind), value: group) in groups.entries) {
-    final fireAt = localWallClock(fireDate, settings.minuteOfDay, location);
+  for (final MapEntry(key: m, value: group) in groups.entries) {
+    final fireAt = localWallClock(m.date, m.minuteOfDay, location);
     if (!fireAt.isAfter(now)) continue;
+    final evening = m.minuteOfDay != settings.minuteOfDay;
     planned.add(
       buildReminder(
-        id: PlannedReminder.idFor(fireDate, kind),
-        kind: kind,
-        fireDate: fireDate,
-        minuteOfDay: settings.minuteOfDay,
+        id: !evening && m.kind != ReminderKind.overdue
+            ? PlannedReminder.idFor(m.date, m.kind)
+            : PlannedReminder.idForRepeat(m.date, m.kind, evening: evening),
+        kind: m.kind,
+        fireDate: m.date,
+        minuteOfDay: m.minuteOfDay,
         payments: group,
         settings: settings,
         location: location,
@@ -58,11 +78,19 @@ List<PlannedReminder> planReminders({
 
   final byRef = _unpaidByRef(payments);
   for (final s in snoozes) {
+    if (s.skipsDay) continue;
     final fireAt = localWallClock(s.fireDate, s.minuteOfDay, location);
     if (!fireAt.isAfter(now)) continue;
+    // A payment already reminded at that very moment (repeats turned on
+    // after the snooze) is not reminded twice.
+    final already = {
+      for (final MapEntry(key: m, value: group) in groups.entries)
+        if (m.date == s.fireDate && m.minuteOfDay == s.minuteOfDay) ...group,
+    };
     final group = [
       for (final ref in s.refs)
-        if (byRef[ref] case final p? when !p.choice.off) p,
+        if (byRef[ref] case final p? when !p.choice.off && !already.contains(p))
+          p,
     ];
     if (group.isEmpty) continue;
     planned.add(
@@ -88,6 +116,64 @@ List<PlannedReminder> planReminders({
     return a.id.compareTo(b.id);
   });
   return planned.length > limit ? planned.sublist(0, limit) : planned;
+}
+
+/// A local day, a time on it and the kind of reminder due then.
+typedef ReminderMoment = ({LocalDate date, int minuteOfDay, ReminderKind kind});
+
+/// The kind of a reminder for a payment due on [due], fired on [day]:
+/// before the due date "ahead", on it "on day", after it "overdue".
+ReminderKind reminderKindOn(LocalDate day, LocalDate due) => day < due
+    ? ReminderKind.ahead
+    : day == due
+    ? ReminderKind.onDay
+    : ReminderKind.overdue;
+
+/// Every moment [payment] should be reminded at, past ones included:
+///
+/// - always "ahead" ([leadDaysFor] days before) and "on day", at the
+///   reminder time;
+/// - "once more in the evening": the same two days at 20:00 too;
+/// - "every day": each day from the "ahead" day to [repeatDaysAfterDue]
+///   days after the due date, at the reminder time and at 20:00;
+/// - 20:00 only when the reminder time is 18:00 or earlier;
+/// - a [skips] entry drops the moments on the day before its date and
+///   adds its date at the reminder time.
+///
+/// The kind follows the day ([reminderKindOn]).
+Set<ReminderMoment> reminderMoments(
+  ReminderPayment payment,
+  ReminderSettings settings, {
+  List<ReminderSnooze> skips = const [],
+}) {
+  final due = payment.date;
+  final ahead = due.addDays(-leadDaysFor(payment, settings));
+  final minute = settings.minuteOfDay;
+  ReminderMoment at(LocalDate day, int minute) =>
+      (date: day, minuteOfDay: minute, kind: reminderKindOn(day, due));
+
+  final moments = <ReminderMoment>{at(ahead, minute), at(due, minute)};
+  switch (repeatModeFor(payment, settings)) {
+    case ReminderRepeat.off:
+      break;
+    case ReminderRepeat.evening:
+      moments
+        ..add(at(ahead, remindTonightMinute))
+        ..add(at(due, remindTonightMinute));
+    case ReminderRepeat.daily:
+      final last = due.addDays(repeatDaysAfterDue);
+      for (var day = ahead; day <= last; day = day.addDays(1)) {
+        moments.add(at(day, minute));
+        if (settings.eveningAllowed) moments.add(at(day, remindTonightMinute));
+      }
+  }
+  for (final skip in skips) {
+    final skipped = skip.fireDate.addDays(-1);
+    moments
+      ..removeWhere((m) => m.date == skipped)
+      ..add(at(skip.fireDate, skip.minuteOfDay));
+  }
+  return moments;
 }
 
 /// One notification for [payments] (same kind, same fire day). Used by
@@ -120,12 +206,16 @@ PlannedReminder buildReminder({
     dueDates: dueDates,
     showAmounts: settings.showAmounts,
   );
+  final repeating = group.any(
+    (p) => repeatModeFor(p, settings) != ReminderRepeat.off,
+  );
   final actions = reminderActions(
     kind: kind,
     snoozed: snoozed,
     payments: group,
     fireDate: fireDate,
     minuteOfDay: minuteOfDay,
+    repeating: repeating,
   );
   return PlannedReminder(
     id: id,
@@ -148,6 +238,7 @@ PlannedReminder buildReminder({
             fireDate: fireDate,
             minuteOfDay: minuteOfDay,
             refs: List.unmodifiable([for (final p in group) p.ref!]),
+            repeating: repeating && !snoozed,
           ),
   );
 }
@@ -156,35 +247,56 @@ PlannedReminder buildReminder({
 ///
 /// - "Paid" for one payment, "All paid" for several; none at all when a
 ///   payment has no [PaymentRef];
-/// - "on day": also "Remind tonight" (20:00) when the reminder time is
-///   18:00 or earlier;
-/// - "ahead": also "Remind tomorrow" (same time) unless a payment in it is
-///   due the next day, when the "on day" reminder does that job;
-/// - a snoozed reminder only marks paid: it is never snoozed again.
+/// - a snoozed reminder only marks paid: it is never snoozed again;
+/// - with repeat reminders ([repeating], a payment in it repeats): "Remind
+///   tomorrow", which skips the rest of today's repeats, except on the
+///   last day of a payment's window ([repeatDaysAfterDue] days after its
+///   due date), when there is no tomorrow;
+/// - otherwise, "on day": "Remind tonight" (20:00) when the reminder time
+///   is 18:00 or earlier; "ahead": "Remind tomorrow" (same time) unless a
+///   payment in it is due the next day, when the "on day" reminder does
+///   that job.
 List<ReminderAction> reminderActions({
   required ReminderKind kind,
   required bool snoozed,
   required List<ReminderPayment> payments,
   required LocalDate fireDate,
   required int minuteOfDay,
+  bool repeating = false,
 }) {
   if (payments.isEmpty || payments.any((p) => p.ref == null)) return const [];
   final paid = payments.length == 1
       ? ReminderAction.paid
       : ReminderAction.allPaid;
   if (snoozed) return [paid];
+  if (repeating) {
+    final lastDay = payments.any(
+      (p) => fireDate >= p.date.addDays(repeatDaysAfterDue),
+    );
+    return lastDay ? [paid] : [paid, ReminderAction.remindTomorrow];
+  }
   return switch (kind) {
     ReminderKind.onDay when minuteOfDay <= latestMinuteForRemindTonight => [
       paid,
       ReminderAction.remindTonight,
     ],
-    ReminderKind.onDay => [paid],
+    ReminderKind.onDay || ReminderKind.overdue => [paid],
     ReminderKind.ahead
         when payments.any((p) => p.date == fireDate.addDays(1)) =>
       [paid],
     ReminderKind.ahead => [paid, ReminderAction.remindTomorrow],
   };
 }
+
+/// "Remind tomorrow" on a reminder with repeats: the rest of the day it
+/// fired is skipped and the payment is reminded on the returned day at
+/// the reminder time; the repeats go on from there. Null otherwise.
+LocalDate? repeatSkipDate(ReminderPayload payload, ReminderAction action) =>
+    !payload.snoozed &&
+        payload.repeating &&
+        action == ReminderAction.remindTomorrow
+    ? payload.fireDate.addDays(1)
+    : null;
 
 /// When a "remind later" button brings the notification back: "tonight"
 /// is 20:00 on the day it fired, "tomorrow" is the next day at the time
@@ -194,6 +306,8 @@ List<ReminderAction> reminderActions({
   ReminderAction action,
 ) {
   if (payload.snoozed) return null;
+  // With repeats, "Remind tomorrow" is a skip ([repeatSkipDate]).
+  if (payload.repeating) return null;
   return switch ((payload.kind, action)) {
     (ReminderKind.onDay, ReminderAction.remindTonight) => (
       fireDate: payload.fireDate,
