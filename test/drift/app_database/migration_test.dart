@@ -298,6 +298,39 @@ void main() {
     await db.close();
   });
 
+  test(
+    'v7 -> current: plans and payments untouched, no "Pay later" yet',
+    () async {
+      final schema = await verifier.schemaAt(7);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at) '
+        'VALUES (1, 2, 20435, 2500, 1700000000)',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      // The plans table is rebuilt (its source becomes optional): payments
+      // must not cascade away.
+      final payments = await db.select(db.payments).get();
+      expect(payments.map((p) => (p.seq, p.dueDay, p.amountMinor)), [
+        (1, 20405, 2500),
+        (2, 20435, 2500),
+      ]);
+      final plan = await db.select(db.plans).getSingle();
+      expect(plan.sourceId, 1);
+      expect(plan.kind, PlanKind.payIn4);
+      expect(plan.payLaterRule, equals(null));
+      expect(plan.payLaterValue, equals(null));
+      final settings = await db.select(db.appSettings).getSingle();
+      expect(settings.lastPayLaterRule, equals(null));
+      expect(settings.lastPayLaterValue, equals(null));
+      // Foreign keys are on again and hold.
+      final check = await db.customSelect('PRAGMA foreign_key_check').get();
+      expect(check, isEmpty);
+      await db.close();
+    },
+  );
+
   test('the same snooze twice is stored once', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final entry = ReminderSnoozesCompanion.insert(
@@ -335,7 +368,7 @@ void main() {
           SourcesCompanion.insert(name: 'Klarna', kind: SourceKind.provider),
         );
     PlansCompanion plan(int? days) => PlansCompanion.insert(
-      sourceId: sourceId,
+      sourceId: Value(sourceId),
       kind: PlanKind.payIn4,
       installmentCount: 4,
       origin: PlanOrigin.template,
@@ -361,7 +394,7 @@ void main() {
         .into(db.plans)
         .insert(
           PlansCompanion.insert(
-            sourceId: sourceId,
+            sourceId: Value(sourceId),
             kind: PlanKind.payIn4,
             installmentCount: 4,
             origin: PlanOrigin.template,
@@ -382,7 +415,7 @@ void main() {
           .into(db.plans)
           .insert(
             PlansCompanion.insert(
-              sourceId: 999,
+              sourceId: const Value(999),
               kind: PlanKind.monthly,
               installmentCount: 1,
               origin: PlanOrigin.manual,

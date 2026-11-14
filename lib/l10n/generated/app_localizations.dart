@@ -1740,6 +1740,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Repeat test (3 notifications, 1 minute apart)'**
   String get debugRepeatTest;
+
+  /// Plan type: one payment on a set day after the purchase. 'Pay later' is a general way of paying (buy now, pay once later), not a company or brand name.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay later'**
+  String get kindPayLater;
+
+  /// Muted line under the plan types when 'Pay later' is chosen. 'Pay later' is a general way of paying (buy now, pay once later), not a company or brand name.
+  ///
+  /// In en, this message translates to:
+  /// **'One payment, on a set day'**
+  String get kindPayLaterHint;
+
+  /// Pay later form: the amount to pay (required).
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get payLaterAmount;
+
+  /// Pay later form: where the purchase was made; may be left empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Store name (optional)'**
+  String get payLaterStore;
+
+  /// Pay later form: who it is paid to or with (provider or card), for information only.
+  ///
+  /// In en, this message translates to:
+  /// **'Source (optional)'**
+  String get payLaterSource;
+
+  /// Pay later form: title of the due date choices.
+  ///
+  /// In en, this message translates to:
+  /// **'When will you pay?'**
+  String get payLaterWhen;
+
+  /// Pay later choice chip: the due date is the purchase date plus this many days (14 or 30).
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String payLaterDaysChip(int days);
+
+  /// Pay later choice chip before a day is entered: a given day of the next month.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month on day …'**
+  String get payLaterNextMonthChip;
+
+  /// Pay later rule: the given day of the month after the purchase (the month's last day when shorter). Written without an ending on the number on purpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month on day {day}'**
+  String payLaterNextMonthDay(int day);
+
+  /// Pay later choice chip and field: the user types the number of days (1-180).
+  ///
+  /// In en, this message translates to:
+  /// **'Number of days'**
+  String get payLaterCustomDays;
+
+  /// Pay later field: the day of next month (1-31).
+  ///
+  /// In en, this message translates to:
+  /// **'Day of the month'**
+  String get payLaterDayOfMonth;
+
+  /// Pay later choice chip: the user picks the due date.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get payLaterPickDate;
+
+  /// Pay later: label of the picked due date field.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get payLaterDueDate;
+
+  /// Pay later form and plan detail: the day of the purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase date'**
+  String get payLaterPurchaseDate;
+
+  /// Pay later form: the purchase date when it is today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get payLaterToday;
+
+  /// Pay later: the due date line (form, plan list, plan detail). Calm, no exclamation.
+  ///
+  /// In en, this message translates to:
+  /// **'Due on {date}'**
+  String payLaterDueOn(String date);
+
+  /// Pay later: days until the due date, under the due date. Calm, no urgency.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{Due today} =1{In 1 day} other{In {days} days}}'**
+  String payLaterDaysLeft(int days);
+
+  /// Name of a Pay later plan saved without a store name, with its short due date. 'Pay later' is a general way of paying (buy now, pay once later), not a company or brand name.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay later · {date}'**
+  String payLaterAutoName(String date);
+
+  /// Plan detail: the rule that gave the due date, a number of days after the purchase.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day later} other{{days} days later}}'**
+  String payLaterRuleDays(int days);
+
+  /// Plan detail: the due date was picked by hand.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen date'**
+  String get payLaterRuleChosen;
+
+  /// Plan detail: the rule that gave the due date, e.g. 30 days later.
+  ///
+  /// In en, this message translates to:
+  /// **'When to pay: {rule}'**
+  String payLaterRuleLine(String rule);
+
+  /// Pay later form: validation of the number of days.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of days must be between 1 and 180.'**
+  String get errorPayLaterDays;
+
+  /// Pay later form: validation of the day of next month.
+  ///
+  /// In en, this message translates to:
+  /// **'Day must be between 1 and 31.'**
+  String get errorPayLaterDay;
+
+  /// Pay later plan detail: the optional source, for information only.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {name}'**
+  String payLaterSourceLine(String name);
 }
 
 class _AppLocalizationsDelegate

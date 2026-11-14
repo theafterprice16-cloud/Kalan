@@ -1,7 +1,16 @@
 import '../date/local_date.dart';
+import 'pay_later.dart';
 
 /// How a plan's payments were laid out. Stored with the plan.
-enum PlanKind { payIn4, monthly, card, manual }
+enum PlanKind {
+  payIn4,
+  monthly,
+  card,
+  manual,
+
+  /// "Pay later": one payment on a set day after the purchase.
+  payLater,
+}
 
 /// One payment of a draft plan. [seq] counts from the plan's first-ever
 /// payment, so a plan started midway can show "4/12".
@@ -42,6 +51,7 @@ class PlanDraft {
     this.deferMonths = 0,
     this.isCashAdvance = false,
     this.paidBeforeCount = 0,
+    this.payLaterRule,
   });
 
   final PlanKind kind;
@@ -63,6 +73,9 @@ class PlanDraft {
   /// paid and marked so; they are never overdue and never reminded.
   final int paidBeforeCount;
 
+  /// Only for "Pay later": how the due date was found.
+  final PayLaterRule? payLaterRule;
+
   /// The same draft with its first [count] payments paid before Kalan.
   PlanDraft withPaidBefore(int count) => PlanDraft(
     kind: kind,
@@ -72,6 +85,7 @@ class PlanDraft {
     deferMonths: deferMonths,
     isCashAdvance: isCashAdvance,
     paidBeforeCount: count,
+    payLaterRule: payLaterRule,
   );
 
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);

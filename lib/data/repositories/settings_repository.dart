@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/engine/pay_later.dart';
 import '../../core/money/currency.dart';
 import '../db/app_database.dart';
 
@@ -22,6 +23,18 @@ class SettingsRepository {
   Future<void> update(AppSettingsCompanion changes) => (_db.update(
     _db.appSettings,
   )..where((s) => s.id.equals(1))).write(changes);
+
+  /// Remembers the "Pay later" rule just used, offered next time. A
+  /// picked date is never remembered: the rule before it stays.
+  Future<void> rememberPayLaterRule(PayLaterRule rule) async {
+    if (rule.kind == PayLaterRuleKind.chosenDate) return;
+    await update(
+      AppSettingsCompanion(
+        lastPayLaterRule: Value(rule.kind),
+        lastPayLaterValue: Value(rule.value),
+      ),
+    );
+  }
 
   /// Switches the currency label. No conversion: shown amounts stay the
   /// same. When minor digits differ, every stored amount moves to the new

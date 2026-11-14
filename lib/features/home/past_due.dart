@@ -240,7 +240,7 @@ class PastDueRow extends ConsumerWidget {
         Expanded(
           child: Semantics(
             button: true,
-            label: l10n.pastDueRowSemantics(entry.name, amount, days),
+            label: l10n.pastDueRowSemantics(entry.label(l10n), amount, days),
             excludeSemantics: true,
             child: InkWell(
               onTap: () => context.push(Routes.plan(entry.planId!)),
@@ -250,14 +250,14 @@ class PastDueRow extends ConsumerWidget {
                   padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
                   child: Row(
                     children: [
-                      LetterBadge(entry.name),
+                      LetterBadge(entry.label(l10n)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              entry.name,
+                              entry.label(l10n),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.titleMedium,

@@ -13,6 +13,7 @@ String planKindLabel(BuildContext context, PlanRow plan) {
     PlanKind.monthly => l10n.kindMonthly,
     PlanKind.card => l10n.kindCard,
     PlanKind.manual => l10n.kindManual,
+    PlanKind.payLater => l10n.kindPayLater,
   };
 }
 

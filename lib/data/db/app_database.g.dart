@@ -506,9 +506,9 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
   late final GeneratedColumn<int> sourceId = GeneratedColumn<int>(
     'source_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.int,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES sources (id)',
     ),
@@ -642,6 +642,26 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         requiredDuringInsert: false,
       ).withConverter<ReminderRepeat?>($PlansTable.$converterrepeatModen);
   @override
+  late final GeneratedColumnWithTypeConverter<PayLaterRuleKind?, String>
+  payLaterRule = GeneratedColumn<String>(
+    'pay_later_rule',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<PayLaterRuleKind?>($PlansTable.$converterpayLaterRulen);
+  static const VerificationMeta _payLaterValueMeta = const VerificationMeta(
+    'payLaterValue',
+  );
+  @override
+  late final GeneratedColumn<int> payLaterValue = GeneratedColumn<int>(
+    'pay_later_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     sourceId,
@@ -656,6 +676,8 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     remindersEnabled,
     reminderLeadDays,
     repeatMode,
+    payLaterRule,
+    payLaterValue,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -677,8 +699,6 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         _sourceIdMeta,
         sourceId.isAcceptableOrUnknown(data['source_id']!, _sourceIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_sourceIdMeta);
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -748,6 +768,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         ),
       );
     }
+    if (data.containsKey('pay_later_value')) {
+      context.handle(
+        _payLaterValueMeta,
+        payLaterValue.isAcceptableOrUnknown(
+          data['pay_later_value']!,
+          _payLaterValueMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -764,7 +793,7 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
       sourceId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}source_id'],
-      )!,
+      ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -815,6 +844,16 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
           data['${effectivePrefix}repeat_mode'],
         ),
       ),
+      payLaterRule: $PlansTable.$converterpayLaterRulen.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}pay_later_rule'],
+        ),
+      ),
+      payLaterValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}pay_later_value'],
+      ),
     );
   }
 
@@ -831,11 +870,21 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
       const EnumIndexConverter<ReminderRepeat>(ReminderRepeat.values);
   static JsonTypeConverter2<ReminderRepeat?, int?, int?> $converterrepeatModen =
       JsonTypeConverter2.asNullable($converterrepeatMode);
+  static JsonTypeConverter2<PayLaterRuleKind, String, String>
+  $converterpayLaterRule = const EnumNameConverter<PayLaterRuleKind>(
+    PayLaterRuleKind.values,
+  );
+  static JsonTypeConverter2<PayLaterRuleKind?, String?, String?>
+  $converterpayLaterRulen = JsonTypeConverter2.asNullable(
+    $converterpayLaterRule,
+  );
 }
 
 class PlanRow extends DataClass implements Insertable<PlanRow> {
   final int id;
-  final int sourceId;
+
+  /// Optional only for "Pay later" plans (schema v8).
+  final int? sourceId;
   final String? title;
   final PlanKind kind;
   final int installmentCount;
@@ -852,9 +901,14 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
 
   /// Repeat reminders (schema v7): null follows the global setting.
   final ReminderRepeat? repeatMode;
+
+  /// "Pay later" (schema v8): the due date rule, so the date follows a
+  /// changed purchase date ([purchaseDay]). Null for other kinds.
+  final PayLaterRuleKind? payLaterRule;
+  final int? payLaterValue;
   const PlanRow({
     required this.id,
-    required this.sourceId,
+    this.sourceId,
     this.title,
     required this.kind,
     required this.installmentCount,
@@ -866,12 +920,16 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     required this.remindersEnabled,
     this.reminderLeadDays,
     this.repeatMode,
+    this.payLaterRule,
+    this.payLaterValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['source_id'] = Variable<int>(sourceId);
+    if (!nullToAbsent || sourceId != null) {
+      map['source_id'] = Variable<int>(sourceId);
+    }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
     }
@@ -899,13 +957,23 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         $PlansTable.$converterrepeatModen.toSql(repeatMode),
       );
     }
+    if (!nullToAbsent || payLaterRule != null) {
+      map['pay_later_rule'] = Variable<String>(
+        $PlansTable.$converterpayLaterRulen.toSql(payLaterRule),
+      );
+    }
+    if (!nullToAbsent || payLaterValue != null) {
+      map['pay_later_value'] = Variable<int>(payLaterValue);
+    }
     return map;
   }
 
   PlansCompanion toCompanion(bool nullToAbsent) {
     return PlansCompanion(
       id: Value(id),
-      sourceId: Value(sourceId),
+      sourceId: sourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceId),
       title: title == null && nullToAbsent
           ? const Value.absent()
           : Value(title),
@@ -925,6 +993,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       repeatMode: repeatMode == null && nullToAbsent
           ? const Value.absent()
           : Value(repeatMode),
+      payLaterRule: payLaterRule == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payLaterRule),
+      payLaterValue: payLaterValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(payLaterValue),
     );
   }
 
@@ -935,7 +1009,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PlanRow(
       id: serializer.fromJson<int>(json['id']),
-      sourceId: serializer.fromJson<int>(json['sourceId']),
+      sourceId: serializer.fromJson<int?>(json['sourceId']),
       title: serializer.fromJson<String?>(json['title']),
       kind: $PlansTable.$converterkind.fromJson(
         serializer.fromJson<String>(json['kind']),
@@ -953,6 +1027,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       repeatMode: $PlansTable.$converterrepeatModen.fromJson(
         serializer.fromJson<int?>(json['repeatMode']),
       ),
+      payLaterRule: $PlansTable.$converterpayLaterRulen.fromJson(
+        serializer.fromJson<String?>(json['payLaterRule']),
+      ),
+      payLaterValue: serializer.fromJson<int?>(json['payLaterValue']),
     );
   }
   @override
@@ -960,7 +1038,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'sourceId': serializer.toJson<int>(sourceId),
+      'sourceId': serializer.toJson<int?>(sourceId),
       'title': serializer.toJson<String?>(title),
       'kind': serializer.toJson<String>(
         $PlansTable.$converterkind.toJson(kind),
@@ -978,12 +1056,16 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       'repeatMode': serializer.toJson<int?>(
         $PlansTable.$converterrepeatModen.toJson(repeatMode),
       ),
+      'payLaterRule': serializer.toJson<String?>(
+        $PlansTable.$converterpayLaterRulen.toJson(payLaterRule),
+      ),
+      'payLaterValue': serializer.toJson<int?>(payLaterValue),
     };
   }
 
   PlanRow copyWith({
     int? id,
-    int? sourceId,
+    Value<int?> sourceId = const Value.absent(),
     Value<String?> title = const Value.absent(),
     PlanKind? kind,
     int? installmentCount,
@@ -995,9 +1077,11 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     bool? remindersEnabled,
     Value<int?> reminderLeadDays = const Value.absent(),
     Value<ReminderRepeat?> repeatMode = const Value.absent(),
+    Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
+    Value<int?> payLaterValue = const Value.absent(),
   }) => PlanRow(
     id: id ?? this.id,
-    sourceId: sourceId ?? this.sourceId,
+    sourceId: sourceId.present ? sourceId.value : this.sourceId,
     title: title.present ? title.value : this.title,
     kind: kind ?? this.kind,
     installmentCount: installmentCount ?? this.installmentCount,
@@ -1011,6 +1095,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         ? reminderLeadDays.value
         : this.reminderLeadDays,
     repeatMode: repeatMode.present ? repeatMode.value : this.repeatMode,
+    payLaterRule: payLaterRule.present ? payLaterRule.value : this.payLaterRule,
+    payLaterValue: payLaterValue.present
+        ? payLaterValue.value
+        : this.payLaterValue,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -1041,6 +1129,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       repeatMode: data.repeatMode.present
           ? data.repeatMode.value
           : this.repeatMode,
+      payLaterRule: data.payLaterRule.present
+          ? data.payLaterRule.value
+          : this.payLaterRule,
+      payLaterValue: data.payLaterValue.present
+          ? data.payLaterValue.value
+          : this.payLaterValue,
     );
   }
 
@@ -1059,7 +1153,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('createdAt: $createdAt, ')
           ..write('remindersEnabled: $remindersEnabled, ')
           ..write('reminderLeadDays: $reminderLeadDays, ')
-          ..write('repeatMode: $repeatMode')
+          ..write('repeatMode: $repeatMode, ')
+          ..write('payLaterRule: $payLaterRule, ')
+          ..write('payLaterValue: $payLaterValue')
           ..write(')'))
         .toString();
   }
@@ -1079,6 +1175,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     remindersEnabled,
     reminderLeadDays,
     repeatMode,
+    payLaterRule,
+    payLaterValue,
   );
   @override
   bool operator ==(Object other) =>
@@ -1096,12 +1194,14 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.createdAt == this.createdAt &&
           other.remindersEnabled == this.remindersEnabled &&
           other.reminderLeadDays == this.reminderLeadDays &&
-          other.repeatMode == this.repeatMode);
+          other.repeatMode == this.repeatMode &&
+          other.payLaterRule == this.payLaterRule &&
+          other.payLaterValue == this.payLaterValue);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<int> id;
-  final Value<int> sourceId;
+  final Value<int?> sourceId;
   final Value<String?> title;
   final Value<PlanKind> kind;
   final Value<int> installmentCount;
@@ -1113,6 +1213,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<bool> remindersEnabled;
   final Value<int?> reminderLeadDays;
   final Value<ReminderRepeat?> repeatMode;
+  final Value<PayLaterRuleKind?> payLaterRule;
+  final Value<int?> payLaterValue;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1127,10 +1229,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.remindersEnabled = const Value.absent(),
     this.reminderLeadDays = const Value.absent(),
     this.repeatMode = const Value.absent(),
+    this.payLaterRule = const Value.absent(),
+    this.payLaterValue = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
-    required int sourceId,
+    this.sourceId = const Value.absent(),
     this.title = const Value.absent(),
     required PlanKind kind,
     required int installmentCount,
@@ -1142,8 +1246,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.remindersEnabled = const Value.absent(),
     this.reminderLeadDays = const Value.absent(),
     this.repeatMode = const Value.absent(),
-  }) : sourceId = Value(sourceId),
-       kind = Value(kind),
+    this.payLaterRule = const Value.absent(),
+    this.payLaterValue = const Value.absent(),
+  }) : kind = Value(kind),
        installmentCount = Value(installmentCount),
        origin = Value(origin);
   static Insertable<PlanRow> custom({
@@ -1160,6 +1265,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<bool>? remindersEnabled,
     Expression<int>? reminderLeadDays,
     Expression<int>? repeatMode,
+    Expression<String>? payLaterRule,
+    Expression<int>? payLaterValue,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1175,12 +1282,14 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       if (remindersEnabled != null) 'reminders_enabled': remindersEnabled,
       if (reminderLeadDays != null) 'reminder_lead_days': reminderLeadDays,
       if (repeatMode != null) 'repeat_mode': repeatMode,
+      if (payLaterRule != null) 'pay_later_rule': payLaterRule,
+      if (payLaterValue != null) 'pay_later_value': payLaterValue,
     });
   }
 
   PlansCompanion copyWith({
     Value<int>? id,
-    Value<int>? sourceId,
+    Value<int?>? sourceId,
     Value<String?>? title,
     Value<PlanKind>? kind,
     Value<int>? installmentCount,
@@ -1192,6 +1301,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<bool>? remindersEnabled,
     Value<int?>? reminderLeadDays,
     Value<ReminderRepeat?>? repeatMode,
+    Value<PayLaterRuleKind?>? payLaterRule,
+    Value<int?>? payLaterValue,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -1207,6 +1318,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       remindersEnabled: remindersEnabled ?? this.remindersEnabled,
       reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
       repeatMode: repeatMode ?? this.repeatMode,
+      payLaterRule: payLaterRule ?? this.payLaterRule,
+      payLaterValue: payLaterValue ?? this.payLaterValue,
     );
   }
 
@@ -1258,6 +1371,14 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
         $PlansTable.$converterrepeatModen.toSql(repeatMode.value),
       );
     }
+    if (payLaterRule.present) {
+      map['pay_later_rule'] = Variable<String>(
+        $PlansTable.$converterpayLaterRulen.toSql(payLaterRule.value),
+      );
+    }
+    if (payLaterValue.present) {
+      map['pay_later_value'] = Variable<int>(payLaterValue.value);
+    }
     return map;
   }
 
@@ -1276,7 +1397,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('createdAt: $createdAt, ')
           ..write('remindersEnabled: $remindersEnabled, ')
           ..write('reminderLeadDays: $reminderLeadDays, ')
-          ..write('repeatMode: $repeatMode')
+          ..write('repeatMode: $repeatMode, ')
+          ..write('payLaterRule: $payLaterRule, ')
+          ..write('payLaterValue: $payLaterValue')
           ..write(')'))
         .toString();
   }
@@ -2965,6 +3088,29 @@ class $AppSettingsTable extends AppSettings
         defaultValue: const Constant(0),
       ).withConverter<ReminderRepeat>($AppSettingsTable.$converterrepeatMode);
   @override
+  late final GeneratedColumnWithTypeConverter<PayLaterRuleKind?, String>
+  lastPayLaterRule =
+      GeneratedColumn<String>(
+        'last_pay_later_rule',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<PayLaterRuleKind?>(
+        $AppSettingsTable.$converterlastPayLaterRulen,
+      );
+  static const VerificationMeta _lastPayLaterValueMeta = const VerificationMeta(
+    'lastPayLaterValue',
+  );
+  @override
+  late final GeneratedColumn<int> lastPayLaterValue = GeneratedColumn<int>(
+    'last_pay_later_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     currencyCode,
@@ -2981,6 +3127,8 @@ class $AppSettingsTable extends AppSettings
     hideAmountsInNotifications,
     reminderPromptShown,
     repeatMode,
+    lastPayLaterRule,
+    lastPayLaterValue,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3098,6 +3246,15 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('last_pay_later_value')) {
+      context.handle(
+        _lastPayLaterValueMeta,
+        lastPayLaterValue.isAcceptableOrUnknown(
+          data['last_pay_later_value']!,
+          _lastPayLaterValueMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3171,6 +3328,16 @@ class $AppSettingsTable extends AppSettings
           data['${effectivePrefix}repeat_mode'],
         )!,
       ),
+      lastPayLaterRule: $AppSettingsTable.$converterlastPayLaterRulen.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}last_pay_later_rule'],
+        ),
+      ),
+      lastPayLaterValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_pay_later_value'],
+      ),
     );
   }
 
@@ -3185,6 +3352,14 @@ class $AppSettingsTable extends AppSettings
   );
   static JsonTypeConverter2<ReminderRepeat, int, int> $converterrepeatMode =
       const EnumIndexConverter<ReminderRepeat>(ReminderRepeat.values);
+  static JsonTypeConverter2<PayLaterRuleKind, String, String>
+  $converterlastPayLaterRule = const EnumNameConverter<PayLaterRuleKind>(
+    PayLaterRuleKind.values,
+  );
+  static JsonTypeConverter2<PayLaterRuleKind?, String?, String?>
+  $converterlastPayLaterRulen = JsonTypeConverter2.asNullable(
+    $converterlastPayLaterRule,
+  );
 }
 
 class SettingsRow extends DataClass implements Insertable<SettingsRow> {
@@ -3221,6 +3396,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
 
   /// Repeat reminders (schema v7): off for everyone until chosen.
   final ReminderRepeat repeatMode;
+
+  /// The "Pay later" rule used last (schema v8), offered next time. A
+  /// picked date is never stored here. Null until first used: 30 days.
+  final PayLaterRuleKind? lastPayLaterRule;
+  final int? lastPayLaterValue;
   const SettingsRow({
     required this.id,
     required this.currencyCode,
@@ -3237,6 +3417,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     required this.hideAmountsInNotifications,
     required this.reminderPromptShown,
     required this.repeatMode,
+    this.lastPayLaterRule,
+    this.lastPayLaterValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3276,6 +3458,14 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         $AppSettingsTable.$converterrepeatMode.toSql(repeatMode),
       );
     }
+    if (!nullToAbsent || lastPayLaterRule != null) {
+      map['last_pay_later_rule'] = Variable<String>(
+        $AppSettingsTable.$converterlastPayLaterRulen.toSql(lastPayLaterRule),
+      );
+    }
+    if (!nullToAbsent || lastPayLaterValue != null) {
+      map['last_pay_later_value'] = Variable<int>(lastPayLaterValue);
+    }
     return map;
   }
 
@@ -3306,6 +3496,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       hideAmountsInNotifications: Value(hideAmountsInNotifications),
       reminderPromptShown: Value(reminderPromptShown),
       repeatMode: Value(repeatMode),
+      lastPayLaterRule: lastPayLaterRule == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPayLaterRule),
+      lastPayLaterValue: lastPayLaterValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastPayLaterValue),
     );
   }
 
@@ -3340,6 +3536,10 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       repeatMode: $AppSettingsTable.$converterrepeatMode.fromJson(
         serializer.fromJson<int>(json['repeatMode']),
       ),
+      lastPayLaterRule: $AppSettingsTable.$converterlastPayLaterRulen.fromJson(
+        serializer.fromJson<String?>(json['lastPayLaterRule']),
+      ),
+      lastPayLaterValue: serializer.fromJson<int?>(json['lastPayLaterValue']),
     );
   }
   @override
@@ -3367,6 +3567,10 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'repeatMode': serializer.toJson<int>(
         $AppSettingsTable.$converterrepeatMode.toJson(repeatMode),
       ),
+      'lastPayLaterRule': serializer.toJson<String?>(
+        $AppSettingsTable.$converterlastPayLaterRulen.toJson(lastPayLaterRule),
+      ),
+      'lastPayLaterValue': serializer.toJson<int?>(lastPayLaterValue),
     };
   }
 
@@ -3386,6 +3590,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     bool? hideAmountsInNotifications,
     bool? reminderPromptShown,
     ReminderRepeat? repeatMode,
+    Value<PayLaterRuleKind?> lastPayLaterRule = const Value.absent(),
+    Value<int?> lastPayLaterValue = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     currencyCode: currencyCode ?? this.currencyCode,
@@ -3407,6 +3613,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         hideAmountsInNotifications ?? this.hideAmountsInNotifications,
     reminderPromptShown: reminderPromptShown ?? this.reminderPromptShown,
     repeatMode: repeatMode ?? this.repeatMode,
+    lastPayLaterRule: lastPayLaterRule.present
+        ? lastPayLaterRule.value
+        : this.lastPayLaterRule,
+    lastPayLaterValue: lastPayLaterValue.present
+        ? lastPayLaterValue.value
+        : this.lastPayLaterValue,
   );
   SettingsRow copyWithCompanion(AppSettingsCompanion data) {
     return SettingsRow(
@@ -3449,6 +3661,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       repeatMode: data.repeatMode.present
           ? data.repeatMode.value
           : this.repeatMode,
+      lastPayLaterRule: data.lastPayLaterRule.present
+          ? data.lastPayLaterRule.value
+          : this.lastPayLaterRule,
+      lastPayLaterValue: data.lastPayLaterValue.present
+          ? data.lastPayLaterValue.value
+          : this.lastPayLaterValue,
     );
   }
 
@@ -3469,7 +3687,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('reminderMinute: $reminderMinute, ')
           ..write('hideAmountsInNotifications: $hideAmountsInNotifications, ')
           ..write('reminderPromptShown: $reminderPromptShown, ')
-          ..write('repeatMode: $repeatMode')
+          ..write('repeatMode: $repeatMode, ')
+          ..write('lastPayLaterRule: $lastPayLaterRule, ')
+          ..write('lastPayLaterValue: $lastPayLaterValue')
           ..write(')'))
         .toString();
   }
@@ -3491,6 +3711,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     hideAmountsInNotifications,
     reminderPromptShown,
     repeatMode,
+    lastPayLaterRule,
+    lastPayLaterValue,
   );
   @override
   bool operator ==(Object other) =>
@@ -3510,7 +3732,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.reminderMinute == this.reminderMinute &&
           other.hideAmountsInNotifications == this.hideAmountsInNotifications &&
           other.reminderPromptShown == this.reminderPromptShown &&
-          other.repeatMode == this.repeatMode);
+          other.repeatMode == this.repeatMode &&
+          other.lastPayLaterRule == this.lastPayLaterRule &&
+          other.lastPayLaterValue == this.lastPayLaterValue);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -3529,6 +3753,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<bool> hideAmountsInNotifications;
   final Value<bool> reminderPromptShown;
   final Value<ReminderRepeat> repeatMode;
+  final Value<PayLaterRuleKind?> lastPayLaterRule;
+  final Value<int?> lastPayLaterValue;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
@@ -3545,6 +3771,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.hideAmountsInNotifications = const Value.absent(),
     this.reminderPromptShown = const Value.absent(),
     this.repeatMode = const Value.absent(),
+    this.lastPayLaterRule = const Value.absent(),
+    this.lastPayLaterValue = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -3562,6 +3790,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.hideAmountsInNotifications = const Value.absent(),
     this.reminderPromptShown = const Value.absent(),
     this.repeatMode = const Value.absent(),
+    this.lastPayLaterRule = const Value.absent(),
+    this.lastPayLaterValue = const Value.absent(),
   }) : currencyCode = Value(currencyCode),
        payFrequency = Value(payFrequency);
   static Insertable<SettingsRow> custom({
@@ -3580,6 +3810,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<bool>? hideAmountsInNotifications,
     Expression<bool>? reminderPromptShown,
     Expression<int>? repeatMode,
+    Expression<String>? lastPayLaterRule,
+    Expression<int>? lastPayLaterValue,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3600,6 +3832,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (reminderPromptShown != null)
         'reminder_prompt_shown': reminderPromptShown,
       if (repeatMode != null) 'repeat_mode': repeatMode,
+      if (lastPayLaterRule != null) 'last_pay_later_rule': lastPayLaterRule,
+      if (lastPayLaterValue != null) 'last_pay_later_value': lastPayLaterValue,
     });
   }
 
@@ -3619,6 +3853,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<bool>? hideAmountsInNotifications,
     Value<bool>? reminderPromptShown,
     Value<ReminderRepeat>? repeatMode,
+    Value<PayLaterRuleKind?>? lastPayLaterRule,
+    Value<int?>? lastPayLaterValue,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -3637,6 +3873,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           hideAmountsInNotifications ?? this.hideAmountsInNotifications,
       reminderPromptShown: reminderPromptShown ?? this.reminderPromptShown,
       repeatMode: repeatMode ?? this.repeatMode,
+      lastPayLaterRule: lastPayLaterRule ?? this.lastPayLaterRule,
+      lastPayLaterValue: lastPayLaterValue ?? this.lastPayLaterValue,
     );
   }
 
@@ -3694,6 +3932,16 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
         $AppSettingsTable.$converterrepeatMode.toSql(repeatMode.value),
       );
     }
+    if (lastPayLaterRule.present) {
+      map['last_pay_later_rule'] = Variable<String>(
+        $AppSettingsTable.$converterlastPayLaterRulen.toSql(
+          lastPayLaterRule.value,
+        ),
+      );
+    }
+    if (lastPayLaterValue.present) {
+      map['last_pay_later_value'] = Variable<int>(lastPayLaterValue.value);
+    }
     return map;
   }
 
@@ -3714,7 +3962,9 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('reminderMinute: $reminderMinute, ')
           ..write('hideAmountsInNotifications: $hideAmountsInNotifications, ')
           ..write('reminderPromptShown: $reminderPromptShown, ')
-          ..write('repeatMode: $repeatMode')
+          ..write('repeatMode: $repeatMode, ')
+          ..write('lastPayLaterRule: $lastPayLaterRule, ')
+          ..write('lastPayLaterValue: $lastPayLaterValue')
           ..write(')'))
         .toString();
   }
@@ -4526,7 +4776,7 @@ typedef $$SourcesTableProcessedTableManager =
     >;
 typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
-  required int sourceId,
+  Value<int?> sourceId,
   Value<String?> title,
   required PlanKind kind,
   required int installmentCount,
@@ -4538,10 +4788,12 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<bool> remindersEnabled,
   Value<int?> reminderLeadDays,
   Value<ReminderRepeat?> repeatMode,
+  Value<PayLaterRuleKind?> payLaterRule,
+  Value<int?> payLaterValue,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
-  Value<int> sourceId,
+  Value<int?> sourceId,
   Value<String?> title,
   Value<PlanKind> kind,
   Value<int> installmentCount,
@@ -4553,6 +4805,8 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<bool> remindersEnabled,
   Value<int?> reminderLeadDays,
   Value<ReminderRepeat?> repeatMode,
+  Value<PayLaterRuleKind?> payLaterRule,
+  Value<int?> payLaterValue,
 });
 
 final class $$PlansTableReferences
@@ -4562,9 +4816,9 @@ final class $$PlansTableReferences
   static $SourcesTable _sourceIdTable(_$AppDatabase db) =>
       db.sources.createAlias('plans__source_id__sources__id');
 
-  $$SourcesTableProcessedTableManager get sourceId {
-    final $_column = $_itemColumn<int>('source_id')!;
-
+  $$SourcesTableProcessedTableManager? get sourceId {
+    final $_column = $_itemColumn<int>('source_id');
+    if ($_column == null) return null;
     final manager = $$SourcesTableTableManager(
       $_db,
       $_db.sources,
@@ -4664,6 +4918,17 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
   get repeatMode => $composableBuilder(
     column: $table.repeatMode,
     builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<PayLaterRuleKind?, PayLaterRuleKind, String>
+  get payLaterRule => $composableBuilder(
+    column: $table.payLaterRule,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get payLaterValue => $composableBuilder(
+    column: $table.payLaterValue,
+    builder: (column) => ColumnFilters(column),
   );
 
   $$SourcesTableFilterComposer get sourceId {
@@ -4784,6 +5049,16 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get payLaterRule => $composableBuilder(
+    column: $table.payLaterRule,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get payLaterValue => $composableBuilder(
+    column: $table.payLaterValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -4868,6 +5143,17 @@ class $$PlansTableAnnotationComposer
         builder: (column) => column,
       );
 
+  GeneratedColumnWithTypeConverter<PayLaterRuleKind?, String>
+  get payLaterRule => $composableBuilder(
+    column: $table.payLaterRule,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get payLaterValue => $composableBuilder(
+    column: $table.payLaterValue,
+    builder: (column) => column,
+  );
+
   $$SourcesTableAnnotationComposer get sourceId {
     final $$SourcesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -4946,7 +5232,7 @@ class $$PlansTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<int> sourceId = const Value.absent(),
+                Value<int?> sourceId = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<PlanKind> kind = const Value.absent(),
                 Value<int> installmentCount = const Value.absent(),
@@ -4958,6 +5244,8 @@ class $$PlansTableTableManager
                 Value<bool> remindersEnabled = const Value.absent(),
                 Value<int?> reminderLeadDays = const Value.absent(),
                 Value<ReminderRepeat?> repeatMode = const Value.absent(),
+                Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
+                Value<int?> payLaterValue = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -4972,11 +5260,13 @@ class $$PlansTableTableManager
                 remindersEnabled: remindersEnabled,
                 reminderLeadDays: reminderLeadDays,
                 repeatMode: repeatMode,
+                payLaterRule: payLaterRule,
+                payLaterValue: payLaterValue,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required int sourceId,
+                Value<int?> sourceId = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 required PlanKind kind,
                 required int installmentCount,
@@ -4988,6 +5278,8 @@ class $$PlansTableTableManager
                 Value<bool> remindersEnabled = const Value.absent(),
                 Value<int?> reminderLeadDays = const Value.absent(),
                 Value<ReminderRepeat?> repeatMode = const Value.absent(),
+                Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
+                Value<int?> payLaterValue = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -5002,6 +5294,8 @@ class $$PlansTableTableManager
                 remindersEnabled: remindersEnabled,
                 reminderLeadDays: reminderLeadDays,
                 repeatMode: repeatMode,
+                payLaterRule: payLaterRule,
+                payLaterValue: payLaterValue,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -6202,6 +6496,8 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<bool> hideAmountsInNotifications,
       Value<bool> reminderPromptShown,
       Value<ReminderRepeat> repeatMode,
+      Value<PayLaterRuleKind?> lastPayLaterRule,
+      Value<int?> lastPayLaterValue,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -6220,6 +6516,8 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<bool> hideAmountsInNotifications,
       Value<bool> reminderPromptShown,
       Value<ReminderRepeat> repeatMode,
+      Value<PayLaterRuleKind?> lastPayLaterRule,
+      Value<int?> lastPayLaterValue,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -6307,6 +6605,17 @@ class $$AppSettingsTableFilterComposer
     column: $table.repeatMode,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<PayLaterRuleKind?, PayLaterRuleKind, String>
+  get lastPayLaterRule => $composableBuilder(
+    column: $table.lastPayLaterRule,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get lastPayLaterValue => $composableBuilder(
+    column: $table.lastPayLaterValue,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$AppSettingsTableOrderingComposer
@@ -6392,6 +6701,16 @@ class $$AppSettingsTableOrderingComposer
     column: $table.repeatMode,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get lastPayLaterRule => $composableBuilder(
+    column: $table.lastPayLaterRule,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastPayLaterValue => $composableBuilder(
+    column: $table.lastPayLaterValue,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -6473,6 +6792,17 @@ class $$AppSettingsTableAnnotationComposer
         column: $table.repeatMode,
         builder: (column) => column,
       );
+
+  GeneratedColumnWithTypeConverter<PayLaterRuleKind?, String>
+  get lastPayLaterRule => $composableBuilder(
+    column: $table.lastPayLaterRule,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get lastPayLaterValue => $composableBuilder(
+    column: $table.lastPayLaterValue,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -6521,6 +6851,9 @@ class $$AppSettingsTableTableManager
                 Value<bool> hideAmountsInNotifications = const Value.absent(),
                 Value<bool> reminderPromptShown = const Value.absent(),
                 Value<ReminderRepeat> repeatMode = const Value.absent(),
+                Value<PayLaterRuleKind?> lastPayLaterRule =
+                    const Value.absent(),
+                Value<int?> lastPayLaterValue = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 currencyCode: currencyCode,
@@ -6537,6 +6870,8 @@ class $$AppSettingsTableTableManager
                 hideAmountsInNotifications: hideAmountsInNotifications,
                 reminderPromptShown: reminderPromptShown,
                 repeatMode: repeatMode,
+                lastPayLaterRule: lastPayLaterRule,
+                lastPayLaterValue: lastPayLaterValue,
               ),
           createCompanionCallback:
               ({
@@ -6555,6 +6890,9 @@ class $$AppSettingsTableTableManager
                 Value<bool> hideAmountsInNotifications = const Value.absent(),
                 Value<bool> reminderPromptShown = const Value.absent(),
                 Value<ReminderRepeat> repeatMode = const Value.absent(),
+                Value<PayLaterRuleKind?> lastPayLaterRule =
+                    const Value.absent(),
+                Value<int?> lastPayLaterValue = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 currencyCode: currencyCode,
@@ -6571,6 +6909,8 @@ class $$AppSettingsTableTableManager
                 hideAmountsInNotifications: hideAmountsInNotifications,
                 reminderPromptShown: reminderPromptShown,
                 repeatMode: repeatMode,
+                lastPayLaterRule: lastPayLaterRule,
+                lastPayLaterValue: lastPayLaterValue,
               ),
           withReferenceMapper: (p0) => p0
               .map(

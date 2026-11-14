@@ -15,7 +15,10 @@ class PlanRepository {
   JoinedSelectStatement<HasResultSet, dynamic> _allQuery() =>
       _db.select(_db.payments).join([
         innerJoin(_db.plans, _db.plans.id.equalsExp(_db.payments.planId)),
-        innerJoin(_db.sources, _db.sources.id.equalsExp(_db.plans.sourceId)),
+        leftOuterJoin(
+          _db.sources,
+          _db.sources.id.equalsExp(_db.plans.sourceId),
+        ),
       ])..orderBy([
         OrderingTerm.asc(_db.plans.id),
         OrderingTerm.asc(_db.payments.seq),
@@ -30,7 +33,7 @@ class PlanRepository {
         plan.id,
         () => PlanWithPayments(
           plan: plan,
-          source: row.readTable(_db.sources),
+          source: row.readTableOrNull(_db.sources),
           payments: payments.putIfAbsent(plan.id, () => []),
         ),
       );
@@ -65,7 +68,7 @@ class PlanRepository {
   /// [PlanDraft.paidBeforeCount] payments are stored as paid before Kalan.
   Future<int> saveDraft(
     PlanDraft draft, {
-    required int sourceId,
+    required int? sourceId,
     required PlanOrigin origin,
     String? title,
     DateTime? now,
@@ -76,7 +79,7 @@ class PlanRepository {
         .into(_db.plans)
         .insert(
           PlansCompanion.insert(
-            sourceId: sourceId,
+            sourceId: Value(sourceId),
             title: Value((trimmed?.isEmpty ?? true) ? null : trimmed),
             kind: draft.kind,
             installmentCount: draft.installmentCount,
@@ -84,6 +87,8 @@ class PlanRepository {
             deferMonths: Value(draft.deferMonths),
             isCashAdvance: Value(draft.isCashAdvance),
             origin: origin,
+            payLaterRule: Value(draft.payLaterRule?.kind),
+            payLaterValue: Value(draft.payLaterRule?.value),
           ),
         );
     await _db.batch((b) {
@@ -173,6 +178,49 @@ class PlanRepository {
       reminderLeadDays: Value(leadDays),
     ),
   );
+
+  /// Changes a "Pay later" plan: its name and source always; amount,
+  /// purchase date and rule only while its payment is unpaid (a paid one
+  /// is never changed). The due date follows the rule from the purchase
+  /// date; a chosen date stays [chosenDate].
+  Future<void> editPayLater(
+    int planId, {
+    required String? title,
+    required int? sourceId,
+    required int amountMinor,
+    required LocalDate purchaseDate,
+    required PayLaterRule rule,
+    LocalDate? chosenDate,
+  }) => _db.transaction(() async {
+    final payment = await (_db.select(
+      _db.payments,
+    )..where((p) => p.planId.equals(planId))).getSingle();
+    final trimmed = title?.trim();
+    final paid = payment.isPaid;
+    await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+      PlansCompanion(
+        title: Value((trimmed?.isEmpty ?? true) ? null : trimmed),
+        sourceId: Value(sourceId),
+        purchaseDay: paid ? const Value.absent() : Value(purchaseDate.epochDay),
+        payLaterRule: paid ? const Value.absent() : Value(rule.kind),
+        payLaterValue: paid ? const Value.absent() : Value(rule.value),
+      ),
+    );
+    if (paid) return;
+    final due = payLaterDueDate(
+      purchase: purchaseDate,
+      rule: rule,
+      chosen: chosenDate ?? LocalDate.fromEpochDay(payment.dueDay),
+    );
+    await (_db.update(
+      _db.payments,
+    )..where((p) => p.id.equals(payment.id))).write(
+      PaymentsCompanion(
+        amountMinor: Value(amountMinor),
+        dueDay: Value(due.epochDay),
+      ),
+    );
+  });
 
   /// The plan's repeat reminders; null follows the global setting.
   Future<void> setRepeatMode(int planId, ReminderRepeat? mode) =>

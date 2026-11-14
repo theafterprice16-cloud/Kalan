@@ -11,6 +11,8 @@ import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
+import 'add_plan_screen.dart' show findSourceByName;
+import 'pay_later_form.dart';
 
 /// "This plan is already underway", changed after the plan was added: the
 /// same switch and fields as on the add screen, filled in. Payments marked
@@ -64,11 +66,11 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   UnderwayPattern? _pattern(PlanWithPayments plan) => switch (plan.plan.kind) {
     PlanKind.monthly => const MonthlyPattern(),
     PlanKind.payIn4 => const PayIn4Pattern(),
-    PlanKind.card => switch (plan.source.cardTerms) {
+    PlanKind.card => switch (plan.source?.cardTerms) {
       final terms? => CardPattern(terms),
       null => null,
     },
-    PlanKind.manual => null,
+    PlanKind.manual || PlanKind.payLater => null,
   };
 
   /// The count can change where new payments have a date rule: monthly
@@ -190,6 +192,8 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
             : const Center(child: CircularProgressIndicator()),
       );
     }
+    // "Pay later": its own short form, no "underway".
+    if (plan.isPayLater) return _PayLaterEdit(plan: plan);
     _load(plan);
     final max = maxPaidBeforeOf(plan.payments);
     final payIn4 = _isPayIn4(plan);
@@ -288,6 +292,120 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
             FilledButton(
               key: const ValueKey('save-plan-edit'),
               onPressed: _saving ? null : () => _save(plan),
+              child: Text(l10n.actionSave),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Editing a "Pay later" plan: amount, name, purchase date, rule and
+/// source. The due date follows the rule from the purchase date; a picked
+/// date stays. A paid plan changes only its name and source.
+class _PayLaterEdit extends ConsumerStatefulWidget {
+  const _PayLaterEdit({required this.plan});
+
+  final PlanWithPayments plan;
+
+  @override
+  ConsumerState<_PayLaterEdit> createState() => _PayLaterEditState();
+}
+
+class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
+  final _formKey = GlobalKey<FormState>();
+  late final PayLaterInput _input;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final plan = widget.plan;
+    final payment = plan.payments.first;
+    _input = PayLaterInput(
+      purchaseDate: plan.purchaseDate ?? payment.date,
+      rule: plan.payLaterRule ?? const PayLaterRule.chosenDate(),
+      chosenDate: payment.date,
+    );
+    _input.store.text = plan.plan.title ?? '';
+    _input.source.text = plan.source?.name ?? '';
+    for (final c in _input.controllers) {
+      c.addListener(_refresh);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _input.amount.text = ref.moneyInput(context, payment.amountMinor);
+    });
+  }
+
+  void _refresh() => setState(() {});
+
+  @override
+  void dispose() {
+    _input.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    final plan = widget.plan;
+    final paid = plan.payments.first.isPaid;
+    final amount = paid
+        ? plan.payments.first.amountMinor
+        : ref.parseMoney(context, _input.amount.text);
+    final rule = _input.rule;
+    if (amount == null || rule == null) return;
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final tabs = ref.read(tabMessengersProvider);
+    final l10n = context.l10n;
+    setState(() => _saving = true);
+    final name = _input.source.text.trim();
+    final sources = ref.read(sourcesProvider).value ?? const <SourceRow>[];
+    final sourceId = name.isEmpty
+        ? null
+        : findSourceByName(sources, name)?.id ??
+              await ref
+                  .read(sourceRepositoryProvider)
+                  .findOrCreateProvider(name);
+    await ref
+        .read(planRepositoryProvider)
+        .editPayLater(
+          plan.plan.id,
+          title: _input.store.text,
+          sourceId: sourceId,
+          amountMinor: amount,
+          purchaseDate: _input.purchaseDate,
+          rule: rule,
+          chosenDate: _input.chosenDate,
+        );
+    router.popWithMessage(
+      SnackBar(content: Text(l10n.planUpdated)),
+      fallback: messenger,
+      tabs: tabs,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.planEdit)),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          children: [
+            PayLaterFields(
+              input: _input,
+              onChanged: _refresh,
+              locked: widget.plan.payments.first.isPaid,
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              key: const ValueKey('save-plan-edit'),
+              onPressed: _saving ? null : _save,
               child: Text(l10n.actionSave),
             ),
           ],
