@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/engine/engine.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 /// One row on the home screen: a plan payment or a recurring occurrence.
 class HomeEntry {
@@ -17,7 +19,8 @@ class HomeEntry {
     this.recurringId,
   });
 
-  final String name;
+  /// Null for an untitled "Pay later" plan: see [label].
+  final String? name;
   final LocalDate date;
   final int amountMinor;
   final bool isPaid;
@@ -30,6 +33,10 @@ class HomeEntry {
   final int? recurringId;
 
   bool get isRecurring => recurringId != null;
+
+  /// The name to show: [name], or "Pay later · Dec 14" in [l10n]'s
+  /// language for an untitled "Pay later" plan.
+  String label(AppLocalizations l10n) => name ?? payLaterAutoName(l10n, date);
 }
 
 class HomeView {
@@ -60,7 +67,9 @@ class HomeView {
 
 int _byDateThenName(HomeEntry a, HomeEntry b) {
   final c = a.date.compareTo(b.date);
-  return c != 0 ? c : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  return c != 0
+      ? c
+      : (a.name ?? '').toLowerCase().compareTo((b.name ?? '').toLowerCase());
 }
 
 /// Null while data loads or before onboarding.
@@ -94,7 +103,7 @@ final homeViewProvider = Provider<HomeView?>((ref) {
       counted.add(DatedAmount(countsOn, pay.amountMinor));
       if (pay.paidBeforeKalan) continue;
       final entry = HomeEntry(
-        name: p.displayName,
+        name: p.ownName,
         date: due,
         amountMinor: pay.amountMinor,
         isPaid: isPaid,

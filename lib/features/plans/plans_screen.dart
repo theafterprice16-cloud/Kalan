@@ -9,6 +9,7 @@ import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/models.dart';
 import '../reminders/repeat_mode_ui.dart';
+import 'pay_later_form.dart';
 import 'plan_labels.dart';
 
 /// Open plans, recurring payments and the archive of finished plans.
@@ -105,7 +106,7 @@ class _PlanList extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
-                  LetterBadge(p.displayName),
+                  LetterBadge(context.planName(p)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -115,7 +116,7 @@ class _PlanList extends ConsumerWidget {
                           children: [
                             Flexible(
                               child: Text(
-                                p.displayName,
+                                context.planName(p),
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ),
@@ -132,12 +133,21 @@ class _PlanList extends ConsumerWidget {
                               planKindLabel(context, p.plan),
                               style: secondary,
                             ),
-                            PlanProgress(
-                              paid: p.paidCount,
-                              total: p.plan.installmentCount,
-                              style: secondary,
-                            ),
-                            if (p.nextUnpaid != null)
+                            if (p.isPayLater)
+                              // One payment: the due date and days left,
+                              // never "0/1".
+                              PayLaterDueLine(
+                                due: p.payments.first.date,
+                                showDaysLeft: p.isOpen,
+                                short: true,
+                              )
+                            else
+                              PlanProgress(
+                                paid: p.paidCount,
+                                total: p.plan.installmentCount,
+                                style: secondary,
+                              ),
+                            if (p.nextUnpaid != null && !p.isPayLater)
                               Text(
                                 l10n.planNext(
                                   context.shortDate(p.nextUnpaid!.date),

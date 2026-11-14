@@ -98,13 +98,16 @@ class PaymentTile extends ConsumerWidget {
                 padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
                 child: Row(
                   children: [
-                    LetterBadge(entry.name),
+                    LetterBadge(entry.label(l10n)),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(entry.name, style: theme.textTheme.titleMedium),
+                          Text(
+                            entry.label(l10n),
+                            style: theme.textTheme.titleMedium,
+                          ),
                           const SizedBox(height: 2),
                           Wrap(spacing: 12, runSpacing: 2, children: details),
                         ],

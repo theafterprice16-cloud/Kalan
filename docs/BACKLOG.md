@@ -24,6 +24,8 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 
 - ~~**Israrlı hatırlatma**~~ Tamamlandı (14 Kasım 2026): "Kapalı" (varsayılan), "Akşam bir kez daha", "Her gün"; genel, plan ve sabit ödeme bazında; yalnızca bildirim saatinde ve 20:00'de, son günden en çok 7 gün sonrasına kadar; son günden sonra yargısız "henüz işaretlenmedi" metni; "Ödendi" bütün tekrarları durdurur, "Yarın hatırlat" yalnızca o günü atlar; listede ve ayrıntıda tekrar ikonu. Sonraya: elle/otomatik ayrımı gelince yardımcı metinler (9. madde).
 
+- ~~**"Sonra öde" tek ödemeli plan türü**~~ Tamamlandı (14 Kasım 2026): plan eklemede beşinci tür; tutar yaz, kaydet; 14 gün / 30 gün / Gelecek ayın N. günü / Gün sayısı / Tarih seç; son kullanılan kural hatırlanır; mağaza adı ve kaynak isteğe bağlı, adsız kayıt "Sonra öde · 14 Ara"; 4 plan sınırına sayılır; bildirim, gecikenler, bildirimden "ödendi" ve ısrarlı hatırlatmayla çalışır. Sonraya: sağlayıcı şablonları (25. madde), fatura numarası ve not (40. madde).
+
 ## Notlar
 
 - Tutar gösteren her yeni yer (bildirim, widget, dışa aktarma) `formatMoney` kullanır; dışa aktarma ham tam sayı tutarı ve para birimi kodunu yazar.

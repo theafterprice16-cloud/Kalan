@@ -19,6 +19,7 @@ import '../onboarding/pay_form.dart';
 import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
 import '../reminders/repeat_mode_ui.dart';
+import 'pay_later_form.dart';
 import 'plan_labels.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -77,7 +78,7 @@ class PlanDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(plan.displayName),
+        title: Text(context.planName(plan)),
         actions: [
           if (plan.startsAtFirstPayment)
             IconButton(
@@ -106,7 +107,9 @@ class PlanDetailScreen extends ConsumerWidget {
                   children: [
                     Row(
                       children: [
-                        LetterBadge(plan.source.name),
+                        LetterBadge(
+                          plan.source?.name ?? context.planName(plan),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -116,7 +119,9 @@ class PlanDetailScreen extends ConsumerWidget {
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      plan.source.name,
+                                      plan.isPayLater
+                                          ? context.planName(plan)
+                                          : plan.source!.name,
                                       style: theme.textTheme.titleMedium,
                                     ),
                                   ),
@@ -152,10 +157,12 @@ class PlanDetailScreen extends ConsumerWidget {
                       spacing: 16,
                       runSpacing: 4,
                       children: [
-                        PlanProgress(
-                          paid: plan.paidCount,
-                          total: plan.plan.installmentCount,
-                        ),
+                        // One payment: no "0/1"; the due date below.
+                        if (!plan.isPayLater)
+                          PlanProgress(
+                            paid: plan.paidCount,
+                            total: plan.plan.installmentCount,
+                          ),
                         Text(
                           l10n.planTotal(ref.money(context, plan.totalMinor)),
                         ),
@@ -169,6 +176,10 @@ class PlanDetailScreen extends ConsumerWidget {
                           ),
                       ],
                     ),
+                    if (plan.isPayLater) ...[
+                      const SizedBox(height: 8),
+                      PayLaterSummary(plan: plan),
+                    ],
                     if (midwayCount > 0) ...[
                       const SizedBox(height: 8),
                       Text(
@@ -293,22 +304,26 @@ class _PaymentRow extends ConsumerWidget {
       today: today,
     );
     return InkWell(
-      onTap: () => _edit(context, ref),
+      // "Pay later": amount and dates change together, on the edit screen.
+      onTap: plan.isPayLater
+          ? () => context.push(Routes.planEdit(plan.plan.id))
+          : () => _edit(context, ref),
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 4, 4),
         child: Row(
           children: [
-            SizedBox(
-              width: 56,
-              child: Text(
-                l10n.progressLabel(payment.seq, plan.plan.installmentCount),
-                style: secondary?.copyWith(fontFeatures: AmountText.tabular),
-                semanticsLabel: l10n.progressSemantics(
-                  payment.seq,
-                  plan.plan.installmentCount,
+            if (!plan.isPayLater)
+              SizedBox(
+                width: 56,
+                child: Text(
+                  l10n.progressLabel(payment.seq, plan.plan.installmentCount),
+                  style: secondary?.copyWith(fontFeatures: AmountText.tabular),
+                  semanticsLabel: l10n.progressSemantics(
+                    payment.seq,
+                    plan.plan.installmentCount,
+                  ),
                 ),
               ),
-            ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

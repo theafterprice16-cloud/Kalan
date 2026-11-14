@@ -38,6 +38,12 @@ Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedik�
 - "Bu plan zaten sürüyor": geçmiş taksitler gerçek ödeme kaydıdır (`payments.paidBeforeKalan`, ödenmiş). Tek tek listelenmez, tarihleri gösterilmez, gecikmiş sayılmaz, bildirim almaz; dönem toplamına normal ödenmiş ödeme gibi girer.
 - Geriye tarih yalnızca motorun `underwayDates` fonksiyonuyla (ileri yön kuralıyla tutarlı). Düzenleme, uygulamada "ödendi" işaretlenen ödemelere asla dokunmaz.
 
+## Sonra öde
+
+- `PlanKind.payLater`: tek ödeme; son ödeme günü yalnızca `payLaterDueDate` ile (motorun ay sonu kuralı, hafta sonu kaydırması yok). Plan kuralı saklar; düzenlemede tarih kurala göre yeniden hesaplanır, "Tarih seç" korunur. Son kullanılan kural genel ayarda.
+- Mağaza adı ve kaynak isteğe bağlı (`plans.source_id` boş olabilir). Ad yoksa ekran ve bildirimde `planNameIn` / `context.planName` ("Sonra öde · 14 Ara"); `displayName` ekranda kullanılmaz.
+- Türe özel bildirim, gecikme ya da dönem kodu yazılmaz; ödeme genel yollardan geçer.
+
 ## Günü geçenler
 
 - Bir ödemenin hangi dönemin toplamına girdiği yalnızca motordaki `countingDate` ile belirlenir: ödenmemiş ve günü geçmiş → bu dönem; "Bugün" ile ödenmiş → ödendiği gün (`payments.paidOnDay`); diğer her şey → son ödeme günü. Başka yerde bu kural yazılmaz.

@@ -6,11 +6,27 @@ import 'package:material_ui/material_ui.dart';
 import '../core/date/local_date.dart';
 import '../core/money/currency.dart';
 import '../core/money/money_format.dart';
+import '../data/models.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'providers.dart';
 
+/// "Pay later · Dec 14": the name of a "Pay later" plan saved without
+/// one, from its due date, in [l10n]'s language (it follows a language
+/// change; nothing is stored).
+String payLaterAutoName(AppLocalizations l10n, LocalDate due) =>
+    l10n.payLaterAutoName(
+      DateFormat.MMMd(l10n.localeName).format(due.toDateTime()),
+    );
+
+/// A plan's name in [l10n]'s language: its own name, or the automatic one.
+String planNameIn(AppLocalizations l10n, PlanWithPayments plan) =>
+    plan.ownName ?? payLaterAutoName(l10n, plan.payments.first.date);
+
 extension L10nX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
+
+  /// A plan's name, or "Pay later · Dec 14" for an untitled one.
+  String planName(PlanWithPayments plan) => planNameIn(l10n, plan);
   String get localeName => AppLocalizations.of(this).localeName;
 
   /// "14 Kas" / "Nov 14".

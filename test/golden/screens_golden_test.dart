@@ -81,7 +81,7 @@ Future<void> seedRich(AppDatabase db, {required int incomeMinor}) async {
       .into(db.plans)
       .insert(
         PlansCompanion.insert(
-          sourceId: card,
+          sourceId: Value(card),
           title: const Value('Telefon'),
           kind: PlanKind.card,
           installmentCount: 6,
@@ -453,6 +453,82 @@ void main() {
           await start(tester, locale: locale, underway: true);
           await openTab(tester, plansTab);
           await shoot(tester, '21-underway-plans-$lang-$theme');
+        });
+      }
+
+      // "Pay later" in both languages (today: 20 November 2026).
+      for (final (lang, locale, plansTab, addPlan, payLater, nextMonth, auto)
+          in [
+            (
+              'tr',
+              const Locale('tr', 'TR'),
+              'Planlar',
+              'Plan ekle',
+              'Sonra öde',
+              'Gelecek ayın …',
+              'Sonra öde · 20 Ara',
+            ),
+            (
+              'en',
+              const Locale('en', 'US'),
+              'Plans',
+              'Add plan',
+              'Pay later',
+              'Next month on day …',
+              'Pay later · Dec 20',
+            ),
+          ]) {
+        Future<void> openForm(WidgetTester tester) async {
+          await start(tester, locale: locale);
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, payLater));
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byKey(const ValueKey('total')), '79');
+          await tester.pumpAndSettle();
+        }
+
+        Future<void> withPayLater(AppDatabase db) async {
+          await seedRich(db, incomeMinor: 4500000);
+          await PlanRepository(db).saveDraft(
+            PlanCalculator.payLater(
+              purchaseDate: testToday,
+              rule: defaultPayLaterRule,
+              totalMinor: 7900,
+            ),
+            sourceId: null,
+            origin: PlanOrigin.template,
+          );
+        }
+
+        testWidgets('pay later form, $lang', (tester) async {
+          await openForm(tester);
+          await shoot(tester, '29-pay-later-form-$lang-$theme');
+        });
+
+        testWidgets('pay later, next month, $lang', (tester) async {
+          await openForm(tester);
+          await tester.tap(find.widgetWithText(ChoiceChip, nextMonth));
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const ValueKey('pay-later-number')),
+            '27',
+          );
+          FocusManager.instance.primaryFocus?.unfocus();
+          await shoot(tester, '30-pay-later-next-month-$lang-$theme');
+        });
+
+        testWidgets('plans list, pay later, $lang', (tester) async {
+          await start(tester, locale: locale, seed: withPayLater);
+          await openTab(tester, plansTab);
+          await shoot(tester, '31-plans-pay-later-$lang-$theme');
+        });
+
+        testWidgets('pay later detail, $lang', (tester) async {
+          await start(tester, locale: locale, seed: withPayLater);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text(auto));
+          await shoot(tester, '32-pay-later-detail-$lang-$theme');
         });
       }
 

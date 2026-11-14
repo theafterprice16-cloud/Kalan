@@ -14,10 +14,12 @@ import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
 import '../reminders/reminder_prompt.dart';
+import 'pay_later_form.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
-/// four fields. Any of them can be "already underway".
-enum AddMode { payIn4, monthly, card, manual }
+/// four fields. Any of them can be "already underway". "Pay later" is one
+/// payment: its own short form, never "underway".
+enum AddMode { payIn4, monthly, card, manual, payLater }
 
 /// Provider names suggested as plain text. No logos.
 const providerSuggestions = [
@@ -77,6 +79,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   bool _cashAdvance = false;
   bool _saving = false;
 
+  /// The "Pay later" form; it starts with the rule used last.
+  late final PayLaterInput _payLater;
+
   @override
   void initState() {
     super.initState();
@@ -86,6 +91,13 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     _purchaseDate = today;
     _nextDate = today;
     for (final c in [_source, _total, _count, _paid, _step, _defer]) {
+      c.addListener(_refresh);
+    }
+    _payLater = PayLaterInput(
+      purchaseDate: today,
+      rule: lastPayLaterRuleOf(ref.read(settingsProvider).value),
+    );
+    for (final c in _payLater.controllers) {
       c.addListener(_refresh);
     }
   }
@@ -98,6 +110,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       c.dispose();
     }
     _sourceFocus.dispose();
+    _payLater.dispose();
     super.dispose();
   }
 
@@ -128,6 +141,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   /// The draft for the current inputs, or null while incomplete.
   PlanDraft? _buildDraft() {
     try {
+      if (_mode == AddMode.payLater) return _payLaterDraft();
       final total = _amount(_total);
       if (total == null) return null;
       final count = _mode == AddMode.payIn4 ? 4 : _int(_count);
@@ -180,6 +194,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           ),
           null => null,
         },
+        AddMode.payLater => null,
       };
       if (draft == null || !_underway) return draft;
       final paid = _int(_paid);
@@ -187,6 +202,26 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     } on InvalidPlanInput {
       return null;
     }
+  }
+
+  PlanDraft? _payLaterDraft() {
+    final total = _amount(_payLater.amount);
+    final rule = _payLater.rule;
+    if (total == null || total < 1 || rule == null) return null;
+    if (_payLater.dueDate == null) return null;
+    return PlanCalculator.payLater(
+      purchaseDate: _payLater.purchaseDate,
+      rule: rule,
+      totalMinor: total,
+      chosenDate: _payLater.chosenDate,
+    );
+  }
+
+  /// "Pay later": saving needs only a valid amount (the rule has a
+  /// default, the purchase date is today, the rest is optional).
+  bool get _payLaterAmountValid {
+    final total = _amount(_payLater.amount);
+    return total != null && total >= 1;
   }
 
   Future<void> _save() async {
@@ -199,15 +234,20 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     final router = GoRouter.of(context);
     if (!_canAdd) return;
     setState(() => _saving = true);
-    final int sourceId;
+    final int? sourceId;
+    final payLater = _mode == AddMode.payLater;
+    final sourceName = payLater ? _payLater.source.text : _source.text;
     if (_mode == AddMode.card) {
       sourceId = _cardId!;
+    } else if (payLater && sourceName.trim().isEmpty) {
+      // A "Pay later" source is optional, for information only.
+      sourceId = null;
     } else {
       sourceId =
-          findSourceByName(_sources, _source.text)?.id ??
+          findSourceByName(_sources, sourceName)?.id ??
           await ref
               .read(sourceRepositoryProvider)
-              .findOrCreateProvider(_source.text);
+              .findOrCreateProvider(sourceName);
     }
     await ref
         .read(planRepositoryProvider)
@@ -217,8 +257,13 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           origin: _mode == AddMode.manual
               ? PlanOrigin.manual
               : PlanOrigin.template,
-          title: _title.text,
+          title: payLater ? _payLater.store.text : _title.text,
         );
+    if (payLater) {
+      await ref
+          .read(settingsRepositoryProvider)
+          .rememberPayLaterRule(draft.payLaterRule!);
+    }
     if (mounted) await askForRemindersIfNeeded(context, ref);
     router.popWithMessage(
       SnackBar(content: Text(l10n.planSaved)),
@@ -308,22 +353,41 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                       (AddMode.monthly, l10n.kindMonthly),
                       (AddMode.card, l10n.kindCard),
                       (AddMode.manual, l10n.kindManual),
+                      (AddMode.payLater, l10n.kindPayLater),
                     ],
                     onSelected: (m) => setState(() {
                       _mode = m;
                       _suggestNextDate();
                     }),
                   ),
+                  if (_mode == AddMode.payLater) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.kindPayLaterHint,
+                      key: const ValueKey('pay-later-hint'),
+                      style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(color: context.colors.textMuted),
+                    ),
+                  ],
                   const SizedBox(height: 16),
-                  ..._fields(context),
-                  const SizedBox(height: 8),
-                  _details(context),
-                  const SizedBox(height: 8),
-                  _Preview(draft: _buildDraft()),
+                  if (_mode == AddMode.payLater)
+                    // One payment: the due date line is the preview.
+                    PayLaterFields(input: _payLater, onChanged: _refresh)
+                  else ...[
+                    ..._fields(context),
+                    const SizedBox(height: 8),
+                    _details(context),
+                    const SizedBox(height: 8),
+                    _Preview(draft: _buildDraft()),
+                  ],
                   const SizedBox(height: 16),
                   FilledButton(
                     key: const ValueKey('save-plan'),
-                    onPressed: _saving ? null : _save,
+                    onPressed:
+                        _saving ||
+                            (_mode == AddMode.payLater && !_payLaterAmountValid)
+                        ? null
+                        : _save,
                     child: Text(l10n.actionSave),
                   ),
                 ],
@@ -371,7 +435,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       onChanged: (d) => setState(() => onChanged(d)),
     );
 
-    final source = _SourceField(
+    final source = SourceNameField(
       controller: _source,
       focusNode: _sourceFocus,
       sources: ref.watch(sourcesProvider).value ?? const [],
@@ -465,6 +529,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                 const ValueKey('purchase-date'),
               ),
         ];
+      case AddMode.payLater:
+        return const [];
       case AddMode.manual:
         return [
           source,
@@ -620,18 +686,23 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 }
 
 /// Free-text source with plain-text suggestions.
-class _SourceField extends StatelessWidget {
-  const _SourceField({
+class SourceNameField extends StatelessWidget {
+  const SourceNameField({
     required this.controller,
     required this.focusNode,
     required this.sources,
     required this.validator,
+    super.key,
+    this.label,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final List<SourceRow> sources;
   final FormFieldValidator<String> validator;
+
+  /// Defaults to "Source".
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -657,7 +728,7 @@ class _SourceField extends StatelessWidget {
             focusNode: focusNode,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(
-              labelText: l10n.fieldSource,
+              labelText: label ?? l10n.fieldSource,
               hintText: l10n.fieldSourceHint,
             ),
             validator: validator,

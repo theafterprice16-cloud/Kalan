@@ -1,4 +1,5 @@
 import '../date/local_date.dart';
+import 'pay_later.dart';
 import 'plan_draft.dart';
 import 'schedule.dart';
 import 'split.dart';
@@ -92,6 +93,29 @@ abstract final class PlanCalculator {
         ),
         splitEvenly(totalMinor, count),
       ),
+    );
+  }
+
+  /// "Pay later": one payment of [totalMinor] on the due date [rule] gives
+  /// for [purchaseDate] ([chosenDate] for a picked date).
+  static PlanDraft payLater({
+    required LocalDate purchaseDate,
+    required PayLaterRule rule,
+    required int totalMinor,
+    LocalDate? chosenDate,
+  }) {
+    _checkTotal(totalMinor, 1);
+    final due = payLaterDueDate(
+      purchase: purchaseDate,
+      rule: rule,
+      chosen: chosenDate,
+    );
+    return PlanDraft(
+      kind: PlanKind.payLater,
+      installmentCount: 1,
+      payments: [DraftPayment(seq: 1, date: due, amountMinor: totalMinor)],
+      purchaseDate: purchaseDate,
+      payLaterRule: rule,
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
@@ -49,7 +50,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -122,6 +123,25 @@ class AppDatabase extends _$AppDatabase {
             schema.reminderSnoozes,
             newColumns: [schema.reminderSnoozes.skipsDay],
           ),
+        );
+      },
+      // v8: "Pay later" plans. Their source is optional (the column
+      // becomes nullable; every existing plan keeps its source) and they
+      // store their due date rule. The last used rule is a setting.
+      from7To8: (m, schema) async {
+        await m.alterTable(
+          TableMigration(
+            schema.plans,
+            newColumns: [schema.plans.payLaterRule, schema.plans.payLaterValue],
+          ),
+        );
+        await m.addColumn(
+          schema.appSettings,
+          schema.appSettings.lastPayLaterRule,
+        );
+        await m.addColumn(
+          schema.appSettings,
+          schema.appSettings.lastPayLaterValue,
         );
       },
     ),

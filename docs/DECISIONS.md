@@ -221,3 +221,23 @@ Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sah
 | 9. madde | Otomatik çekim / elle ödeme ayrımı repoda yok; bu yüzden "Elle ödediğin planlarda önerilir" ve "Bu plan otomatik çekiliyor" yardımcı metinleri eklenmedi. |
 | Debug | Yalnızca debug derlemede (`kDebugMode`) "Israrlı deneme (1'er dakika arayla 3 bildirim)": ödenmemiş en yakın ödemenin bugünkü tekrar bildirimi 1, 2 ve 3 dakika sonra. "Ödendi" yeniden kurmayı tetiklediği için kalan ikisi iptal olur. Gerçek kurallarda dakikalık tekrar yok. |
 
+## Sonra öde (14 Kasım 2026)
+
+Ürün sahibiyle netleşen kararlar: tür adı "Sonra öde" / "Pay later"; açık kayıt 4 açık plan sınırına sayılır, ödenip arşive gidince düşer (mevcut `canAddPlan`, yeni kural yok); varsayılan süre son kullanılan kural, ilk seferde 30 gün; mağaza adı isteğe bağlı, boşsa veritabanına ad yazılmaz ve dile göre otomatik etiket gösterilir; ücretsiz.
+
+| Konu | Karar |
+|---|---|
+| Tür | `PlanKind.payLater`: tek ödeme, tutarı planın tutarı, tarihi son ödeme günü. Mevcut plan ekleme ekranında beşinci tür; ayrı ekran, liste ya da ana ekran bölümü yok. |
+| Süre kuralları | `PayLaterRule` (saf Dart, `lib/core/engine/pay_later.dart`): "14 gün" ve "30 gün" (alışveriş + N gün), "Gün sayısı" (1–180), "Gelecek ayın N. günü" (1–31; o ay kısaysa ayın son günü), "Tarih seç". Tek fonksiyon `payLaterDueDate`; ay sonu ve artık yıl kuralı motorun `LocalDate.addMonths` / `LocalDate.clamped` yardımcılarıyla aynı, kod kopyası yok. Yalnızca tarih, saat yok. |
+| Hafta sonu | Kaydırma yapılmaz: tarihi sağlayıcı belirler, Kalan değil. Kart seçilse bile hesap kesim günü ya da kart taksidi hesabı uygulanmaz. |
+| Kural saklama | Plan kuralı saklar (`plans.pay_later_rule`, `pay_later_value`) ve alışveriş tarihini (`purchase_day`). Düzenlemede alışveriş tarihi ya da kural değişince son ödeme günü yeniden hesaplanır; "Tarih seç"te seçilen tarih korunur. Ödenmiş planda yalnızca ad ve kaynak değişir; tutar ve tarih değişmez (ödenmiş ödemelere dokunulmaz). |
+| Son kullanılan | Genel ayar (`app_settings.last_pay_later_rule`, `last_pay_later_value`): tür + N ("gün sayısı 45", "gelecek ayın 27'si"). "Tarih seç" hatırlanmaz; önceki hatırlanan kural kalır. Boşken 30 gün. |
+| Türkçe çip metni | "Gelecek ayın {day}'i" yerine ek gerektirmeyen "Gelecek ayın {day}. günü"; sayı girilmeden önce "Gelecek ayın …". İngilizcede sıra eki olmadan "Next month on day {day}" (ICU'da sıra sayısı eki yok). |
+| Ad | Mağaza adı `plans.title`'a yazılır; boşsa hiçbir ad yazılmaz. Ekranda ve bildirimde ad yoksa "Sonra öde · 14 Ara" / "Pay later · Dec 14" (kısa tarih intl'den, `planNameIn` / `context.planName`): dil değişince etiket de değişir. Kaynak seçilse bile ad yoksa otomatik etiket gösterilir. |
+| Kaynak | Mevcut form kaynağı zorunlu tutuyor; "Sonra öde"de isteğe bağlı (prompt kararı). Bunun için `plans.source_id` boş olabilir hâle geldi (şema v8, tablo yeniden kuruldu; mevcut planların kaynağı aynen korunur, ödemeler silinmez — testli). Kaynak yalnızca bilgi amaçlı. |
+| Form | Sırayla: Tutar (zorunlu), Mağaza adı (isteğe bağlı), "Ne zaman ödeyeceksin?" çipleri (son kullanılan seçili), gerekiyorsa sayı alanı (sayı klavyesi), anlık son ödeme günü (`text`) ve kalan gün (`textMuted`), alışveriş tarihi ("Bugün"), kaynak. Kaydet yalnızca tutar geçerliyken etkin; en az etkileşim: tür, tutar, kaydet. "Bu plan zaten sürüyor" bu türde yok; ödeme önizleme kartı yerine son ödeme günü satırı onay adımıdır. Sınıra ulaşan ücretsiz kullanıcıda mevcut mesaj aynen görünür. |
+| Gösterim | Listede ve ayrıntıda "3/10" ilerlemesi yok; "Son ödeme günü: 14 Aralık" (`text`) ve "30 gün sonra" (`textMuted`; geçmişse mevcut "x gün önce"). Ayrıntıda alışveriş tarihi, son ödeme günü, kural ("30 gün sonra" / "Gelecek ayın 27. günü" / "Seçilen tarih") ve varsa kaynak. Ödeme satırına dokununca tek ödeme düzenleme penceresi değil, planın düzenleme ekranı açılır (tutar ve tarih birlikte değişir). Ana ekranda diğer ödemelerle aynı listede. |
+| Diğer maddeler | Türe özel kod yok: ödeme genel ödeme yolundan geçtiği için dönem toplamı (`countingDate`), bildirimler (önceden/gününde, aynı günde birleşme), Günü geçenler, bildirimden "Ödendi" ve ısrarlı hatırlatma kendiliğinden çalışır (testli). Kapanma mevcut kural: ödenince arşiv ("Biten"); "ödendi" geri alınınca plan yeniden açılır. Tek genel değişiklik: ad yoksa otomatik etiket (yukarıda). |
+| Renk | Seçili tür ve çip mevcut seçim stilindedir (onay işareti, `text` mürekkep; DESIGN_TOKENS: accent yalnızca "kalan"). Prompt accent diyordu; bağlayıcı belge kazandı. `late` kullanılmadı. |
+| Mevcut veriler | Mevcut planların ödemeleri, tutarları ve kalan değeri değişmez; motor testleri değiştirilmeden geçer. |
+

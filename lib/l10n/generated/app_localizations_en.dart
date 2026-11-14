@@ -1245,4 +1245,131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get debugRepeatTest => 'Repeat test (3 notifications, 1 minute apart)';
+
+  @override
+  String get kindPayLater => 'Pay later';
+
+  @override
+  String get kindPayLaterHint => 'One payment, on a set day';
+
+  @override
+  String get payLaterAmount => 'Amount';
+
+  @override
+  String get payLaterStore => 'Store name (optional)';
+
+  @override
+  String get payLaterSource => 'Source (optional)';
+
+  @override
+  String get payLaterWhen => 'When will you pay?';
+
+  @override
+  String payLaterDaysChip(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payLaterNextMonthChip => 'Next month on day …';
+
+  @override
+  String payLaterNextMonthDay(int day) {
+    final intl.NumberFormat dayNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String dayString = dayNumberFormat.format(day);
+
+    return 'Next month on day $dayString';
+  }
+
+  @override
+  String get payLaterCustomDays => 'Number of days';
+
+  @override
+  String get payLaterDayOfMonth => 'Day of the month';
+
+  @override
+  String get payLaterPickDate => 'Pick a date';
+
+  @override
+  String get payLaterDueDate => 'Due date';
+
+  @override
+  String get payLaterPurchaseDate => 'Purchase date';
+
+  @override
+  String get payLaterToday => 'Today';
+
+  @override
+  String payLaterDueOn(String date) {
+    return 'Due on $date';
+  }
+
+  @override
+  String payLaterDaysLeft(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'In $daysString days',
+      one: 'In 1 day',
+      zero: 'Due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payLaterAutoName(String date) {
+    return 'Pay later · $date';
+  }
+
+  @override
+  String payLaterRuleDays(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString days later',
+      one: '1 day later',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payLaterRuleChosen => 'Chosen date';
+
+  @override
+  String payLaterRuleLine(String rule) {
+    return 'When to pay: $rule';
+  }
+
+  @override
+  String get errorPayLaterDays => 'Number of days must be between 1 and 180.';
+
+  @override
+  String get errorPayLaterDay => 'Day must be between 1 and 31.';
+
+  @override
+  String payLaterSourceLine(String name) {
+    return 'Source: $name';
+  }
 }

@@ -1262,4 +1262,131 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get debugRepeatTest =>
       'Israrlı deneme (1\'er dakika arayla 3 bildirim)';
+
+  @override
+  String get kindPayLater => 'Sonra öde';
+
+  @override
+  String get kindPayLaterHint => 'Tek ödeme, belli bir günde';
+
+  @override
+  String get payLaterAmount => 'Tutar';
+
+  @override
+  String get payLaterStore => 'Mağaza adı (isteğe bağlı)';
+
+  @override
+  String get payLaterSource => 'Kaynak (isteğe bağlı)';
+
+  @override
+  String get payLaterWhen => 'Ne zaman ödeyeceksin?';
+
+  @override
+  String payLaterDaysChip(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString gün',
+      one: '1 gün',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payLaterNextMonthChip => 'Gelecek ayın …';
+
+  @override
+  String payLaterNextMonthDay(int day) {
+    final intl.NumberFormat dayNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String dayString = dayNumberFormat.format(day);
+
+    return 'Gelecek ayın $dayString. günü';
+  }
+
+  @override
+  String get payLaterCustomDays => 'Gün sayısı';
+
+  @override
+  String get payLaterDayOfMonth => 'Ayın günü';
+
+  @override
+  String get payLaterPickDate => 'Tarih seç';
+
+  @override
+  String get payLaterDueDate => 'Son ödeme günü';
+
+  @override
+  String get payLaterPurchaseDate => 'Alışveriş tarihi';
+
+  @override
+  String get payLaterToday => 'Bugün';
+
+  @override
+  String payLaterDueOn(String date) {
+    return 'Son ödeme günü: $date';
+  }
+
+  @override
+  String payLaterDaysLeft(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString gün sonra',
+      one: '1 gün sonra',
+      zero: 'Ödeme günü bugün',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String payLaterAutoName(String date) {
+    return 'Sonra öde · $date';
+  }
+
+  @override
+  String payLaterRuleDays(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString gün sonra',
+      one: '1 gün sonra',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get payLaterRuleChosen => 'Seçilen tarih';
+
+  @override
+  String payLaterRuleLine(String rule) {
+    return 'Ne zaman: $rule';
+  }
+
+  @override
+  String get errorPayLaterDays => 'Gün sayısı 1 ile 180 arasında olmalı.';
+
+  @override
+  String get errorPayLaterDay => 'Gün 1 ile 31 arasında olmalı.';
+
+  @override
+  String payLaterSourceLine(String name) {
+    return 'Kaynak: $name';
+  }
 }

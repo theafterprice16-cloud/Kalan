@@ -1030,5 +1030,149 @@
   "debugRepeatTest": "Repeat test (3 notifications, 1 minute apart)",
   "@debugRepeatTest": {
     "description": "Debug builds only: three repeat reminders 1, 2 and 3 minutes later."
+  },
+  "kindPayLater": "Pay later",
+  "@kindPayLater": {
+    "description": "Plan type: one payment on a set day after the purchase. 'Pay later' is a general way of paying (buy now, pay once later), not a company or brand name."
+  },
+  "kindPayLaterHint": "One payment, on a set day",
+  "@kindPayLaterHint": {
+    "description": "Muted line under the plan types when 'Pay later' is chosen. 'Pay later' is a general way of paying (buy now, pay once later), not a company or brand name."
+  },
+  "payLaterAmount": "Amount",
+  "@payLaterAmount": {
+    "description": "Pay later form: the amount to pay (required)."
+  },
+  "payLaterStore": "Store name (optional)",
+  "@payLaterStore": {
+    "description": "Pay later form: where the purchase was made; may be left empty."
+  },
+  "payLaterSource": "Source (optional)",
+  "@payLaterSource": {
+    "description": "Pay later form: who it is paid to or with (provider or card), for information only."
+  },
+  "payLaterWhen": "When will you pay?",
+  "@payLaterWhen": {
+    "description": "Pay later form: title of the due date choices."
+  },
+  "payLaterDaysChip": "{days, plural, =1{1 day} other{{days} days}}",
+  "@payLaterDaysChip": {
+    "description": "Pay later choice chip: the due date is the purchase date plus this many days (14 or 30).",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "payLaterNextMonthChip": "Next month on day …",
+  "@payLaterNextMonthChip": {
+    "description": "Pay later choice chip before a day is entered: a given day of the next month."
+  },
+  "payLaterNextMonthDay": "Next month on day {day}",
+  "@payLaterNextMonthDay": {
+    "description": "Pay later rule: the given day of the month after the purchase (the month's last day when shorter). Written without an ending on the number on purpose.",
+    "placeholders": {
+      "day": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "payLaterCustomDays": "Number of days",
+  "@payLaterCustomDays": {
+    "description": "Pay later choice chip and field: the user types the number of days (1-180)."
+  },
+  "payLaterDayOfMonth": "Day of the month",
+  "@payLaterDayOfMonth": {
+    "description": "Pay later field: the day of next month (1-31)."
+  },
+  "payLaterPickDate": "Pick a date",
+  "@payLaterPickDate": {
+    "description": "Pay later choice chip: the user picks the due date."
+  },
+  "payLaterDueDate": "Due date",
+  "@payLaterDueDate": {
+    "description": "Pay later: label of the picked due date field."
+  },
+  "payLaterPurchaseDate": "Purchase date",
+  "@payLaterPurchaseDate": {
+    "description": "Pay later form and plan detail: the day of the purchase."
+  },
+  "payLaterToday": "Today",
+  "@payLaterToday": {
+    "description": "Pay later form: the purchase date when it is today."
+  },
+  "payLaterDueOn": "Due on {date}",
+  "@payLaterDueOn": {
+    "description": "Pay later: the due date line (form, plan list, plan detail). Calm, no exclamation.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "December 14, 2026"
+      }
+    }
+  },
+  "payLaterDaysLeft": "{days, plural, =0{Due today} =1{In 1 day} other{In {days} days}}",
+  "@payLaterDaysLeft": {
+    "description": "Pay later: days until the due date, under the due date. Calm, no urgency.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "payLaterAutoName": "Pay later · {date}",
+  "@payLaterAutoName": {
+    "description": "Name of a Pay later plan saved without a store name, with its short due date. 'Pay later' is a general way of paying (buy now, pay once later), not a company or brand name.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Dec 14"
+      }
+    }
+  },
+  "payLaterRuleDays": "{days, plural, =1{1 day later} other{{days} days later}}",
+  "@payLaterRuleDays": {
+    "description": "Plan detail: the rule that gave the due date, a number of days after the purchase.",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "payLaterRuleChosen": "Chosen date",
+  "@payLaterRuleChosen": {
+    "description": "Plan detail: the due date was picked by hand."
+  },
+  "payLaterRuleLine": "When to pay: {rule}",
+  "@payLaterRuleLine": {
+    "description": "Plan detail: the rule that gave the due date, e.g. 30 days later.",
+    "placeholders": {
+      "rule": {
+        "type": "String",
+        "example": "30 days later"
+      }
+    }
+  },
+  "errorPayLaterDays": "Number of days must be between 1 and 180.",
+  "@errorPayLaterDays": {
+    "description": "Pay later form: validation of the number of days."
+  },
+  "errorPayLaterDay": "Day must be between 1 and 31.",
+  "@errorPayLaterDay": {
+    "description": "Pay later form: validation of the day of next month."
+  },
+  "payLaterSourceLine": "Source: {name}",
+  "@payLaterSourceLine": {
+    "description": "Pay later plan detail: the optional source, for information only.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Klarna"
+      }
+    }
   }
 }

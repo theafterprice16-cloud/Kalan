@@ -54,12 +54,35 @@ class PlanWithPayments {
   });
 
   final PlanRow plan;
-  final SourceRow source;
+
+  /// Null only for a "Pay later" plan saved without one.
+  final SourceRow? source;
   final List<PaymentRow> payments;
 
-  /// The plan's title, or its source's name when untitled.
-  String get displayName =>
-      (plan.title?.trim().isNotEmpty ?? false) ? plan.title! : source.name;
+  /// The plan's own name: its title, or its source's name when untitled.
+  /// Null for an untitled "Pay later" plan: screens and notifications show
+  /// a label in the app language instead ("Pay later · Dec 14", see
+  /// `planNameIn`), so it follows a language change.
+  String? get ownName {
+    final title = plan.title?.trim();
+    if (title != null && title.isNotEmpty) return title;
+    if (isPayLater) return null;
+    return source?.name ?? '';
+  }
+
+  /// [ownName], empty for an untitled "Pay later" plan. Screens and
+  /// notifications use `planNameIn` / `context.planName` instead.
+  String get displayName => ownName ?? '';
+
+  bool get isPayLater => plan.kind == PlanKind.payLater;
+
+  /// "Pay later": how the due date was found (null for other kinds).
+  PayLaterRule? get payLaterRule =>
+      PayLaterRule.from(plan.payLaterRule, plan.payLaterValue);
+
+  LocalDate? get purchaseDate => plan.purchaseDay == null
+      ? null
+      : LocalDate.fromEpochDay(plan.purchaseDay!);
 
   /// A plan is open while any payment is unpaid; then it moves to the
   /// archive.
@@ -123,3 +146,11 @@ class RecurringWithMarks {
         endDate: end,
       );
 }
+
+/// The "Pay later" rule to offer: the last one used, or 30 days.
+PayLaterRule lastPayLaterRuleOf(SettingsRow? settings) =>
+    PayLaterRule.from(
+      settings?.lastPayLaterRule,
+      settings?.lastPayLaterValue,
+    ) ??
+    defaultPayLaterRule;

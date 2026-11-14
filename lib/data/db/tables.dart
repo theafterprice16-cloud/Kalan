@@ -3,6 +3,7 @@
 
 import 'package:drift/drift.dart';
 
+import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
@@ -36,7 +37,9 @@ class Sources extends Table {
 @DataClassName('PlanRow')
 class Plans extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get sourceId => integer().references(Sources, #id)();
+
+  /// Optional only for "Pay later" plans (schema v8).
+  IntColumn get sourceId => integer().nullable().references(Sources, #id)();
   TextColumn get title => text().nullable().withLength(max: 80)();
   TextColumn get kind => textEnum<PlanKind>()();
   IntColumn get installmentCount =>
@@ -58,6 +61,11 @@ class Plans extends Table {
 
   /// Repeat reminders (schema v7): null follows the global setting.
   IntColumn get repeatMode => intEnum<ReminderRepeat>().nullable()();
+
+  /// "Pay later" (schema v8): the due date rule, so the date follows a
+  /// changed purchase date ([purchaseDay]). Null for other kinds.
+  TextColumn get payLaterRule => textEnum<PayLaterRuleKind>().nullable()();
+  IntColumn get payLaterValue => integer().nullable()();
 }
 
 @DataClassName('PaymentRow')
@@ -174,6 +182,11 @@ class AppSettings extends Table {
   /// Repeat reminders (schema v7): off for everyone until chosen.
   IntColumn get repeatMode =>
       intEnum<ReminderRepeat>().withDefault(const Constant(0))();
+
+  /// The "Pay later" rule used last (schema v8), offered next time. A
+  /// picked date is never stored here. Null until first used: 30 days.
+  TextColumn get lastPayLaterRule => textEnum<PayLaterRuleKind>().nullable()();
+  IntColumn get lastPayLaterValue => integer().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

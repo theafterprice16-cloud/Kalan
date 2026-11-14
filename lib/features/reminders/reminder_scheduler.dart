@@ -2,6 +2,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:material_ui/material_ui.dart' show Locale;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../app/format.dart' show planNameIn;
 import '../../core/date/local_date.dart';
 import '../../core/money/currency.dart';
 import '../../core/reminders/reminder_models.dart';
@@ -159,13 +160,17 @@ class ReminderScheduler {
     final local = tz.TZDateTime.from(now(), location());
     final today = LocalDate(local.year, local.month, local.day);
 
+    final l10n = lookupAppLocalizations(localeFor(settings));
+    // Month and weekday names, also in a background isolate.
+    await initializeDateFormatting(l10n.localeName);
+
     // Dates are the effective due dates the engine stored: the same day
     // the screens show (card statement and weekend shift applied).
     final payments = <ReminderPayment>[
       for (final p in await PlanRepository(db).all())
         for (final pay in p.payments)
           ReminderPayment(
-            name: p.displayName,
+            name: planNameIn(l10n, p),
             date: LocalDate.fromEpochDay(pay.dueDay),
             amountMinor: pay.amountMinor,
             isPaid: pay.paidAt != null,
@@ -195,9 +200,6 @@ class ReminderScheduler {
           ),
     ];
 
-    final l10n = lookupAppLocalizations(localeFor(settings));
-    // Month and weekday names, also in a background isolate.
-    await initializeDateFormatting(l10n.localeName);
     return (
       settings: settings.reminderSettings,
       now: local,
