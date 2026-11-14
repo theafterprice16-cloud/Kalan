@@ -53,6 +53,8 @@ class PaymentTile extends ConsumerWidget {
       Text(date, style: secondary),
       if (entry.isRecurring)
         Text(l10n.recurringTag, style: secondary)
+      else if (entry.isPayLater)
+        Text(l10n.kindPayLater, style: secondary)
       else
         Text(
           l10n.progressLabel(entry.seq!, entry.installmentCount!),
