@@ -18,6 +18,7 @@ import '../home/past_due.dart';
 import '../onboarding/pay_form.dart';
 import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
+import '../reminders/repeat_mode_ui.dart';
 import 'plan_labels.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -111,9 +112,22 @@ class PlanDetailScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                plan.source.name,
-                                style: theme.textTheme.titleMedium,
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      plan.source.name,
+                                      style: theme.textTheme.titleMedium,
+                                    ),
+                                  ),
+                                  if (planRepeats(
+                                    plan.plan,
+                                    ref.watch(globalRepeatModeProvider),
+                                  )) ...[
+                                    const SizedBox(width: 6),
+                                    const RepeatIcon(),
+                                  ],
+                                ],
                               ),
                               Text(
                                 planKindLabel(context, plan.plan),
@@ -204,6 +218,20 @@ class PlanDetailScreen extends ConsumerWidget {
             ),
           for (final p in plan.listedPayments)
             _PaymentRow(plan: plan, payment: p),
+          // Below the payments, so they stay at the top of the screen.
+          const Divider(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: RepeatChoiceTile(
+              value: plan.plan.repeatMode,
+              enabled: plan.plan.remindersEnabled,
+              onChanged: (mode) => unawaited(
+                ref
+                    .read(planRepositoryProvider)
+                    .setRepeatMode(plan.plan.id, mode),
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -1663,6 +1663,83 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Counted in that period.'**
   String get paidWhenOnDueHint;
+
+  /// Repeat reminder after the due date, amounts shown. Not marked paid yet: the user may have paid and only not marked it, so it must not blame. Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment from {month, select, other{{date}}} isn\'t marked paid yet: {name}, {total}} other{{count} payments aren\'t marked paid yet, {total} in total}}'**
+  String reminderOverdue(
+    int count,
+    String date,
+    String month,
+    String name,
+    String total,
+  );
+
+  /// Same as reminderOverdue with amounts hidden. Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment from {month, select, other{{date}}} isn\'t marked paid yet: {name}} other{{count} payments aren\'t marked paid yet}}'**
+  String reminderOverdueHidden(
+    int count,
+    String date,
+    String month,
+    String name,
+  );
+
+  /// Settings and plan detail: row for repeat reminders (reminding again until marked paid). Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat reminders'**
+  String get repeatReminders;
+
+  /// Repeat reminders choice: no repeats (the default).
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get repeatModeOff;
+
+  /// Repeat reminders choice: on the days with a reminder, one more at 8 PM.
+  ///
+  /// In en, this message translates to:
+  /// **'Once more in the evening'**
+  String get repeatModeEvening;
+
+  /// Repeat reminders choice: every day from the first reminder until marked paid, twice a day.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day'**
+  String get repeatModeDaily;
+
+  /// Plan detail: repeat reminders follow Settings; shows the current global choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Default ({mode})'**
+  String repeatModeGeneral(String mode);
+
+  /// Muted help under the repeat reminders row. Repeated reminders keep exactly the tone of the first one: calm, no blame, no urgency, no exclamation marks or capitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminds you again at calm intervals until you mark it paid. Stops at most 7 days after the due date.'**
+  String get repeatRemindersHelp;
+
+  /// Muted line under repeat reminders when Every day is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'At your reminder time and at {time}.'**
+  String repeatDailyHint(String time);
+
+  /// Screen reader label of the small repeat icon on a plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat reminders on'**
+  String get repeatRemindersOn;
+
+  /// Debug builds only: three repeat reminders 1, 2 and 3 minutes later.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat test (3 notifications, 1 minute apart)'**
+  String get debugRepeatTest;
 }
 
 class _AppLocalizationsDelegate

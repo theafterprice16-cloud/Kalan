@@ -4,6 +4,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
+import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'app_database.steps.dart';
 import 'tables.dart';
 
@@ -48,7 +49,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -105,6 +106,23 @@ class AppDatabase extends _$AppDatabase {
       // v6: "remind later" chosen from a notification. Starts empty.
       from5To6: (m, schema) async {
         await m.createTable(schema.reminderSnoozes);
+      },
+      // v7: repeat reminders. Everyone starts with them off (global) and
+      // every plan follows the global setting; snoozes can be "skip the
+      // rest of today" and can come from an overdue reminder.
+      from6To7: (m, schema) async {
+        await m.addColumn(schema.appSettings, schema.appSettings.repeatMode);
+        await m.addColumn(schema.plans, schema.plans.repeatMode);
+        await m.addColumn(
+          schema.recurringPayments,
+          schema.recurringPayments.repeatMode,
+        );
+        await m.alterTable(
+          TableMigration(
+            schema.reminderSnoozes,
+            newColumns: [schema.reminderSnoozes.skipsDay],
+          ),
+        );
       },
     ),
     beforeOpen: (details) async {

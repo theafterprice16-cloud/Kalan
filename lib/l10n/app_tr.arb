@@ -260,5 +260,16 @@
   "paidWhenToday": "Bugün",
   "paidWhenTodayHint": "Bu dönemin hesabında kalır.",
   "paidWhenOnDue": "Gününde, {date}",
-  "paidWhenOnDueHint": "Ödeme o döneme yazılır."
+  "paidWhenOnDueHint": "Ödeme o döneme yazılır.",
+  "reminderOverdue": "{count, plural, =1{{month, select, 1{{date}'taki} 2{{date}'taki} 3{{date}'taki} 4{{date}'daki} 5{{date}'taki} 6{{date}'daki} 7{{date}'daki} 8{{date}'taki} 9{{date}'deki} 10{{date}'deki} 11{{date}'daki} 12{{date}'taki} other{{date}}} 1 ödeme henüz işaretlenmedi: {name}, {total}} other{{count} ödeme henüz işaretlenmedi, toplam {total}}}",
+  "reminderOverdueHidden": "{count, plural, =1{{month, select, 1{{date}'taki} 2{{date}'taki} 3{{date}'taki} 4{{date}'daki} 5{{date}'taki} 6{{date}'daki} 7{{date}'daki} 8{{date}'taki} 9{{date}'deki} 10{{date}'deki} 11{{date}'daki} 12{{date}'taki} other{{date}}} 1 ödeme henüz işaretlenmedi: {name}} other{{count} ödeme henüz işaretlenmedi}}",
+  "repeatReminders": "Israrlı hatırlatma",
+  "repeatModeOff": "Kapalı",
+  "repeatModeEvening": "Akşam bir kez daha",
+  "repeatModeDaily": "Her gün",
+  "repeatModeGeneral": "Genel ayar ({mode})",
+  "repeatRemindersHelp": "Ödendi diyene kadar sakin aralıklarla yeniden hatırlatır. Son günden en fazla 7 gün sonrasına kadar sürer.",
+  "repeatDailyHint": "Senin bildirim saatinde ve akşam {time}'de.",
+  "repeatRemindersOn": "Israrlı hatırlatma açık",
+  "debugRepeatTest": "Israrlı deneme (1'er dakika arayla 3 bildirim)"
 }

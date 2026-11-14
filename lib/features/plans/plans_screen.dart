@@ -8,6 +8,7 @@ import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/models.dart';
+import '../reminders/repeat_mode_ui.dart';
 import 'plan_labels.dart';
 
 /// Open plans, recurring payments and the archive of finished plans.
@@ -91,6 +92,7 @@ class _PlanList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (plans.isEmpty) return Center(child: EmptyState(empty));
     final l10n = context.l10n;
+    final global = ref.watch(globalRepeatModeProvider);
     final secondary = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: context.colors.textMuted);
     return ListView(
@@ -109,9 +111,19 @@ class _PlanList extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          p.displayName,
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                p.displayName,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ),
+                            if (p.isOpen && planRepeats(p.plan, global)) ...[
+                              const SizedBox(width: 6),
+                              const RepeatIcon(),
+                            ],
+                          ],
                         ),
                         Wrap(
                           spacing: 12,
@@ -167,6 +179,7 @@ class _RecurringList extends ConsumerWidget {
     final l10n = context.l10n;
     if (items.isEmpty) return Center(child: EmptyState(l10n.recurringEmpty));
     final today = ref.watch(todayProvider);
+    final global = ref.watch(globalRepeatModeProvider);
     final secondary = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: context.colors.textMuted);
     return ListView(
@@ -191,9 +204,21 @@ class _RecurringList extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              r.item.name,
-                              style: Theme.of(context).textTheme.titleMedium,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    r.item.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  ),
+                                ),
+                                if (recurringRepeats(r.item, global)) ...[
+                                  const SizedBox(width: 6),
+                                  const RepeatIcon(),
+                                ],
+                              ],
                             ),
                             Wrap(
                               spacing: 12,

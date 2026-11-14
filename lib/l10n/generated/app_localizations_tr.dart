@@ -1166,4 +1166,100 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get paidWhenOnDueHint => 'Ödeme o döneme yazılır.';
+
+  @override
+  String reminderOverdue(
+    int count,
+    String date,
+    String month,
+    String name,
+    String total,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': '$date\'taki',
+      '2': '$date\'taki',
+      '3': '$date\'taki',
+      '4': '$date\'daki',
+      '5': '$date\'taki',
+      '6': '$date\'daki',
+      '7': '$date\'daki',
+      '8': '$date\'taki',
+      '9': '$date\'deki',
+      '10': '$date\'deki',
+      '11': '$date\'daki',
+      '12': '$date\'taki',
+      'other': '$date',
+    });
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ödeme henüz işaretlenmedi, toplam $total',
+      one: '$_temp0 1 ödeme henüz işaretlenmedi: $name, $total',
+    );
+    return '$_temp1';
+  }
+
+  @override
+  String reminderOverdueHidden(
+    int count,
+    String date,
+    String month,
+    String name,
+  ) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': '$date\'taki',
+      '2': '$date\'taki',
+      '3': '$date\'taki',
+      '4': '$date\'daki',
+      '5': '$date\'taki',
+      '6': '$date\'daki',
+      '7': '$date\'daki',
+      '8': '$date\'taki',
+      '9': '$date\'deki',
+      '10': '$date\'deki',
+      '11': '$date\'daki',
+      '12': '$date\'taki',
+      'other': '$date',
+    });
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ödeme henüz işaretlenmedi',
+      one: '$_temp0 1 ödeme henüz işaretlenmedi: $name',
+    );
+    return '$_temp1';
+  }
+
+  @override
+  String get repeatReminders => 'Israrlı hatırlatma';
+
+  @override
+  String get repeatModeOff => 'Kapalı';
+
+  @override
+  String get repeatModeEvening => 'Akşam bir kez daha';
+
+  @override
+  String get repeatModeDaily => 'Her gün';
+
+  @override
+  String repeatModeGeneral(String mode) {
+    return 'Genel ayar ($mode)';
+  }
+
+  @override
+  String get repeatRemindersHelp =>
+      'Ödendi diyene kadar sakin aralıklarla yeniden hatırlatır. Son günden en fazla 7 gün sonrasına kadar sürer.';
+
+  @override
+  String repeatDailyHint(String time) {
+    return 'Senin bildirim saatinde ve akşam $time\'de.';
+  }
+
+  @override
+  String get repeatRemindersOn => 'Israrlı hatırlatma açık';
+
+  @override
+  String get debugRepeatTest =>
+      'Israrlı deneme (1\'er dakika arayla 3 bildirim)';
 }

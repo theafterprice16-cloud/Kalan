@@ -78,7 +78,52 @@ class ReminderScheduler {
     required tz.TZDateTime fireAt,
   }) async {
     final input = await _input();
-    if (input == null) return null;
+    final group = input == null ? null : _nearestUnpaid(input);
+    if (input == null || group == null) return null;
+    return buildReminder(
+      id: id,
+      kind: ReminderKind.onDay,
+      fireDate: group.first.date,
+      minuteOfDay: input.settings.minuteOfDay,
+      payments: group,
+      settings: input.settings,
+      location: input.now.location,
+      texts: input.texts,
+      fireAt: fireAt,
+    );
+  }
+
+  /// Debug builds: the repeat reminder the nearest unpaid payment would
+  /// get today (its kind follows today: ahead, on the day or overdue),
+  /// once for each of [times], with ids from [firstId]. Empty when nothing
+  /// is unpaid. Real repeats are never minutes apart; this only shows
+  /// that "Paid" stops the rest.
+  Future<List<PlannedReminder>> testRepeats({
+    required int firstId,
+    required List<tz.TZDateTime> times,
+  }) async {
+    final input = await _input();
+    final group = input == null ? null : _nearestUnpaid(input);
+    if (input == null || group == null) return const [];
+    return [
+      for (final (i, fireAt) in times.indexed)
+        buildReminder(
+          id: firstId + i,
+          kind: reminderKindOn(input.today, group.first.date),
+          fireDate: input.today,
+          minuteOfDay: input.settings.minuteOfDay,
+          payments: group,
+          settings: input.settings,
+          location: input.now.location,
+          texts: input.texts,
+          fireAt: fireAt,
+        ),
+    ];
+  }
+
+  /// The unpaid payments due on the nearest day (today or later first,
+  /// else the latest past one); null when nothing is unpaid.
+  List<ReminderPayment>? _nearestUnpaid(_Input input) {
     final unpaid = [
       for (final p in input.payments)
         if (!p.isPaid) p,
@@ -94,21 +139,10 @@ class ReminderScheduler {
       };
       if (better) pick = p.date;
     }
-    final settings = input.settings;
-    return buildReminder(
-      id: id,
-      kind: ReminderKind.onDay,
-      fireDate: pick!,
-      minuteOfDay: settings.minuteOfDay,
-      payments: [
-        for (final p in unpaid)
-          if (p.date == pick) p,
-      ],
-      settings: settings,
-      location: input.now.location,
-      texts: input.texts,
-      fireAt: fireAt,
-    );
+    return [
+      for (final p in unpaid)
+        if (p.date == pick) p,
+    ];
   }
 
   List<PlannedReminder> _plan(_Input input) => planReminders(
@@ -140,6 +174,7 @@ class ReminderScheduler {
               leadDays: p.plan.reminderLeadDays,
             ),
             ref: PlanPaymentRef(pay.id),
+            repeat: p.plan.repeatMode,
           ),
       for (final r in await RecurringRepository(db).all())
         for (final date in r.occurrences(
@@ -156,6 +191,7 @@ class ReminderScheduler {
               leadDays: r.item.reminderLeadDays,
             ),
             ref: RecurringRef(r.item.id, date),
+            repeat: r.item.repeatMode,
           ),
     ];
 

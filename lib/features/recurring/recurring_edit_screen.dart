@@ -17,6 +17,7 @@ import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
 import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
+import '../reminders/repeat_mode_ui.dart';
 
 /// Rent, bills, subscriptions. No categories.
 class RecurringEditScreen extends ConsumerStatefulWidget {
@@ -35,6 +36,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
   final _amount = TextEditingController();
   Recurrence _recurrence = Recurrence.monthly;
   ReminderChoice _reminders = ReminderChoice.general;
+  ReminderRepeat? _repeat;
   late LocalDate _start;
   LocalDate? _end;
   RecurringPaymentRow? _existing;
@@ -68,6 +70,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
         enabled: r.remindersEnabled,
         leadDays: r.reminderLeadDays,
       );
+      _repeat = r.repeatMode;
       _loaded = true;
     });
   }
@@ -101,6 +104,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           endDay: Value(_end?.epochDay),
           remindersEnabled: Value(reminders),
           reminderLeadDays: Value(leadDays),
+          repeatMode: Value(_repeat),
         ),
       );
     } else {
@@ -113,6 +117,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           endDay: Value(_end?.epochDay),
           remindersEnabled: reminders,
           reminderLeadDays: Value(leadDays),
+          repeatMode: Value(_repeat),
         ),
       );
     }
@@ -234,6 +239,11 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                   ReminderChoiceTile(
                     value: _reminders,
                     onChanged: (v) => setState(() => _reminders = v),
+                  ),
+                  RepeatChoiceTile(
+                    value: _repeat,
+                    enabled: !_reminders.off,
+                    onChanged: (v) => setState(() => _repeat = v),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
