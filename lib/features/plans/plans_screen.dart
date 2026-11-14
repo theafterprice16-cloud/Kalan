@@ -179,6 +179,7 @@ class _RecurringList extends ConsumerWidget {
     final l10n = context.l10n;
     if (items.isEmpty) return Center(child: EmptyState(l10n.recurringEmpty));
     final today = ref.watch(todayProvider);
+    final global = ref.watch(globalRepeatModeProvider);
     final secondary = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: context.colors.textMuted);
     return ListView(
@@ -203,9 +204,21 @@ class _RecurringList extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              r.item.name,
-                              style: Theme.of(context).textTheme.titleMedium,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    r.item.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  ),
+                                ),
+                                if (recurringRepeats(r.item, global)) ...[
+                                  const SizedBox(width: 6),
+                                  const RepeatIcon(),
+                                ],
+                              ],
                             ),
                             Wrap(
                               spacing: 12,

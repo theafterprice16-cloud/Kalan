@@ -1515,7 +1515,7 @@ final class Schema7 extends i0.VersionedSchema {
     ),
     alias: null,
   );
-  late final Shape7 recurringPayments = Shape7(
+  late final Shape13 recurringPayments = Shape13(
     source: i0.VersionedTable(
       entityName: 'recurring_payments',
       withoutRowId: false,
@@ -1531,6 +1531,7 @@ final class Schema7 extends i0.VersionedSchema {
         _column_6,
         _column_14,
         _column_43,
+        _column_51,
       ],
       attachedDatabase: database,
     ),
@@ -1547,7 +1548,7 @@ final class Schema7 extends i0.VersionedSchema {
     ),
     alias: null,
   );
-  late final Shape13 appSettings = Shape13(
+  late final Shape14 appSettings = Shape14(
     source: i0.VersionedTable(
       entityName: 'app_settings',
       withoutRowId: false,
@@ -1574,7 +1575,7 @@ final class Schema7 extends i0.VersionedSchema {
     ),
     alias: null,
   );
-  late final Shape14 reminderSnoozes = Shape14(
+  late final Shape15 reminderSnoozes = Shape15(
     source: i0.VersionedTable(
       entityName: 'reminder_snoozes',
       withoutRowId: false,
@@ -1641,6 +1642,30 @@ class Shape13 extends i0.VersionedTable {
   Shape13({required super.source, required super.alias}) : super.aliased();
   i1.GeneratedColumn<int> get id =>
       columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get amountMinor =>
+      columnsByName['amount_minor']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get recurrence =>
+      columnsByName['recurrence']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get startDay =>
+      columnsByName['start_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get endDay =>
+      columnsByName['end_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get remindersEnabled =>
+      columnsByName['reminders_enabled']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get reminderLeadDays =>
+      columnsByName['reminder_lead_days']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get repeatMode =>
+      columnsByName['repeat_mode']! as i1.GeneratedColumn<int>;
+}
+
+class Shape14 extends i0.VersionedTable {
+  Shape14({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<String> get currencyCode =>
       columnsByName['currency_code']! as i1.GeneratedColumn<String>;
   i1.GeneratedColumn<String> get localeCode =>
@@ -1682,8 +1707,8 @@ i1.GeneratedColumn<int> _column_52(String aliasedName) =>
       defaultValue: const i1.CustomExpression('0'),
     );
 
-class Shape14 extends i0.VersionedTable {
-  Shape14({required super.source, required super.alias}) : super.aliased();
+class Shape15 extends i0.VersionedTable {
+  Shape15({required super.source, required super.alias}) : super.aliased();
   i1.GeneratedColumn<int> get id =>
       columnsByName['id']! as i1.GeneratedColumn<int>;
   i1.GeneratedColumn<int> get kind =>

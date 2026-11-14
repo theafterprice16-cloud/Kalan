@@ -191,6 +191,7 @@ class ReminderScheduler {
               leadDays: r.item.reminderLeadDays,
             ),
             ref: RecurringRef(r.item.id, date),
+            repeat: r.item.repeatMode,
           ),
     ];
 

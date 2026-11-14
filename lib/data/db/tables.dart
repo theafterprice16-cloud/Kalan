@@ -107,6 +107,9 @@ class RecurringPayments extends Table {
   IntColumn get reminderLeadDays => integer().nullable().check(
     reminderLeadDays.isNull() | reminderLeadDays.isIn(const [1, 2, 3, 5, 7]),
   )();
+
+  /// Repeat reminders, as on [Plans] (schema v7).
+  IntColumn get repeatMode => intEnum<ReminderRepeat>().nullable()();
 }
 
 /// "Paid" marks for individual occurrences of a recurring payment.

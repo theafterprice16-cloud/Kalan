@@ -35,6 +35,10 @@ final globalRepeatModeProvider = Provider<ReminderRepeat>(
 bool planRepeats(PlanRow plan, ReminderRepeat global) =>
     plan.remindersEnabled && (plan.repeatMode ?? global) != ReminderRepeat.off;
 
+/// The same for a recurring payment.
+bool recurringRepeats(RecurringPaymentRow item, ReminderRepeat global) =>
+    item.remindersEnabled && (item.repeatMode ?? global) != ReminderRepeat.off;
+
 /// "20:00" (or "8:00 PM") in the language's clock.
 String eveningTime(BuildContext context) =>
     MaterialLocalizations.of(context).formatTimeOfDay(

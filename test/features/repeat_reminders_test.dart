@@ -236,6 +236,36 @@ void main() {
       expect(gateway.pending, isEmpty);
     });
 
+    test('recurring payment: its own choice, overdue text', () async {
+      final rent = await seedRent(db); // 1st of every month, ₺15.000
+      await scheduler.rescheduleAll();
+      expect(gateway.pending.any((r) => r.fireAt.hour == 20), isFalse);
+      final row = await (db.select(
+        db.recurringPayments,
+      )..where((r) => r.id.equals(rent))).getSingle();
+      await (db.update(
+        db.recurringPayments,
+      )..where((r) => r.id.equals(rent))).write(
+        const RecurringPaymentsCompanion(
+          repeatMode: Value(ReminderRepeat.daily),
+        ),
+      );
+      expect(row.repeatMode, equals(null));
+      await scheduler.rescheduleAll();
+      final evening = gateway.pending.where((r) => r.fireAt.hour == 20);
+      expect(evening, isNotEmpty);
+      expect(evening.first.payments.single.name, 'Kira');
+      // 2 Dec: the 1 December rent is overdue.
+      final overdue = gateway.pending.firstWhere(
+        (r) => r.kind == ReminderKind.overdue,
+      );
+      expect(overdue.fireDate, d(12, 2));
+      expect(
+        overdue.body,
+        "1 Aralık'taki 1 ödeme henüz işaretlenmedi: Kira, ₺15.000",
+      );
+    });
+
     test('reminder time 19:30: no 20:00, once a day', () async {
       await setGlobal(db, ReminderRepeat.daily, minute: 19 * 60 + 30);
       await seedOne(db, 'Tabby', d(11, 26));
@@ -396,6 +426,47 @@ void main() {
       await scrollTo(tester, tile);
       expect(tester.widget<ListTile>(tile).enabled, isFalse);
       semantics.dispose();
+    });
+
+    testWidgets('recurring payment: repeat choice saved with it', (
+      tester,
+    ) async {
+      late int rent;
+      final db = await pumpApp(
+        tester,
+        seed: (db) async {
+          await seedSettings(db);
+          rent = await seedRent(db);
+        },
+      );
+      await openTab(tester, 'Planlar');
+      await tester.tap(find.text('Sabit'));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.repeat), findsNothing);
+      await tester.tap(find.text('Kira'));
+      await tester.pumpAndSettle();
+      final tile = find.byKey(const ValueKey('item-repeat'));
+      await scrollTo(tester, tile);
+      expect(
+        find.descendant(of: tile, matching: find.text('Genel ayar (Kapalı)')),
+        findsOneWidget,
+      );
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Akşam bir kez daha'));
+      await tester.pumpAndSettle();
+      await scrollTo(tester, find.byKey(const ValueKey('save-recurring')));
+      await tester.tap(find.byKey(const ValueKey('save-recurring')));
+      await tester.pumpAndSettle();
+      final row = await tester.runAsync(
+        () => (db.select(
+          db.recurringPayments,
+        )..where((r) => r.id.equals(rent))).getSingle(),
+      );
+      expect(row!.repeatMode, ReminderRepeat.evening);
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.repeat), findsOneWidget);
     });
 
     testWidgets('English labels', (tester) async {

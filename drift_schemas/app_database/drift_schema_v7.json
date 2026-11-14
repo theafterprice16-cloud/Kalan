@@ -383,8 +383,8 @@
             "default_client_dart": null,
             "dsl_features": [],
             "type_converter": {
-              "dart_expr": "const EnumIndexConverter<RepeatMode>(RepeatMode.values)",
-              "dart_type_name": "RepeatMode"
+              "dart_expr": "const EnumIndexConverter<ReminderRepeat>(ReminderRepeat.values)",
+              "dart_type_name": "ReminderRepeat"
             }
           }
         ],
@@ -710,6 +710,20 @@
                 }
               }
             ]
+          },
+          {
+            "name": "repeat_mode",
+            "getter_name": "repeatMode",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const EnumIndexConverter<ReminderRepeat>(ReminderRepeat.values)",
+              "dart_type_name": "ReminderRepeat"
+            }
           }
         ],
         "is_virtual": false,
@@ -1001,8 +1015,8 @@
             "default_client_dart": null,
             "dsl_features": [],
             "type_converter": {
-              "dart_expr": "const EnumIndexConverter<RepeatMode>(RepeatMode.values)",
-              "dart_type_name": "RepeatMode"
+              "dart_expr": "const EnumIndexConverter<ReminderRepeat>(ReminderRepeat.values)",
+              "dart_type_name": "ReminderRepeat"
             }
           }
         ],
@@ -1192,7 +1206,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"recurring_payments\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"name\" TEXT NOT NULL, \"amount_minor\" INTEGER NOT NULL CHECK(\"amount_minor\" >= 1), \"recurrence\" TEXT NOT NULL, \"start_day\" INTEGER NOT NULL, \"end_day\" INTEGER NULL, \"created_at\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"reminders_enabled\" INTEGER NOT NULL DEFAULT 1 CHECK (\"reminders_enabled\" IN (0, 1)), \"reminder_lead_days\" INTEGER NULL CHECK(\"reminder_lead_days\" IS NULL OR \"reminder_lead_days\" IN (1, 2, 3, 5, 7)));"
+          "sql": "CREATE TABLE IF NOT EXISTS \"recurring_payments\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"name\" TEXT NOT NULL, \"amount_minor\" INTEGER NOT NULL CHECK(\"amount_minor\" >= 1), \"recurrence\" TEXT NOT NULL, \"start_day\" INTEGER NOT NULL, \"end_day\" INTEGER NULL, \"created_at\" INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)), \"reminders_enabled\" INTEGER NOT NULL DEFAULT 1 CHECK (\"reminders_enabled\" IN (0, 1)), \"reminder_lead_days\" INTEGER NULL CHECK(\"reminder_lead_days\" IS NULL OR \"reminder_lead_days\" IN (1, 2, 3, 5, 7)), \"repeat_mode\" INTEGER NULL);"
         }
       ]
     },

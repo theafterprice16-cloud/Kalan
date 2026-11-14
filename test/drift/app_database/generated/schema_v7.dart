@@ -1572,6 +1572,14 @@ class RecurringPayments extends Table
     requiredDuringInsert: false,
     $customConstraints: 'NULL CHECK (reminder_lead_days IS NULL OR reminder_lead_days IN (1, 2, 3, 5, 7))',
   );
+  late final GeneratedColumn<int> repeatMode = GeneratedColumn<int>(
+    'repeat_mode',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1583,6 +1591,7 @@ class RecurringPayments extends Table
     createdAt,
     remindersEnabled,
     reminderLeadDays,
+    repeatMode,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1631,6 +1640,10 @@ class RecurringPayments extends Table
         DriftSqlType.int,
         data['${effectivePrefix}reminder_lead_days'],
       ),
+      repeatMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}repeat_mode'],
+      ),
     );
   }
 
@@ -1654,6 +1667,7 @@ class RecurringPaymentsData extends DataClass
   final int createdAt;
   final int remindersEnabled;
   final int? reminderLeadDays;
+  final int? repeatMode;
   const RecurringPaymentsData({
     required this.id,
     required this.name,
@@ -1664,6 +1678,7 @@ class RecurringPaymentsData extends DataClass
     required this.createdAt,
     required this.remindersEnabled,
     this.reminderLeadDays,
+    this.repeatMode,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1680,6 +1695,9 @@ class RecurringPaymentsData extends DataClass
     map['reminders_enabled'] = Variable<int>(remindersEnabled);
     if (!nullToAbsent || reminderLeadDays != null) {
       map['reminder_lead_days'] = Variable<int>(reminderLeadDays);
+    }
+    if (!nullToAbsent || repeatMode != null) {
+      map['repeat_mode'] = Variable<int>(repeatMode);
     }
     return map;
   }
@@ -1699,6 +1717,9 @@ class RecurringPaymentsData extends DataClass
       reminderLeadDays: reminderLeadDays == null && nullToAbsent
           ? const Value.absent()
           : Value(reminderLeadDays),
+      repeatMode: repeatMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repeatMode),
     );
   }
 
@@ -1717,6 +1738,7 @@ class RecurringPaymentsData extends DataClass
       createdAt: serializer.fromJson<int>(json['createdAt']),
       remindersEnabled: serializer.fromJson<int>(json['remindersEnabled']),
       reminderLeadDays: serializer.fromJson<int?>(json['reminderLeadDays']),
+      repeatMode: serializer.fromJson<int?>(json['repeatMode']),
     );
   }
   @override
@@ -1732,6 +1754,7 @@ class RecurringPaymentsData extends DataClass
       'createdAt': serializer.toJson<int>(createdAt),
       'remindersEnabled': serializer.toJson<int>(remindersEnabled),
       'reminderLeadDays': serializer.toJson<int?>(reminderLeadDays),
+      'repeatMode': serializer.toJson<int?>(repeatMode),
     };
   }
 
@@ -1745,6 +1768,7 @@ class RecurringPaymentsData extends DataClass
     int? createdAt,
     int? remindersEnabled,
     Value<int?> reminderLeadDays = const Value.absent(),
+    Value<int?> repeatMode = const Value.absent(),
   }) => RecurringPaymentsData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1757,6 +1781,7 @@ class RecurringPaymentsData extends DataClass
     reminderLeadDays: reminderLeadDays.present
         ? reminderLeadDays.value
         : this.reminderLeadDays,
+    repeatMode: repeatMode.present ? repeatMode.value : this.repeatMode,
   );
   RecurringPaymentsData copyWithCompanion(RecurringPaymentsCompanion data) {
     return RecurringPaymentsData(
@@ -1777,6 +1802,9 @@ class RecurringPaymentsData extends DataClass
       reminderLeadDays: data.reminderLeadDays.present
           ? data.reminderLeadDays.value
           : this.reminderLeadDays,
+      repeatMode: data.repeatMode.present
+          ? data.repeatMode.value
+          : this.repeatMode,
     );
   }
 
@@ -1791,7 +1819,8 @@ class RecurringPaymentsData extends DataClass
           ..write('endDay: $endDay, ')
           ..write('createdAt: $createdAt, ')
           ..write('remindersEnabled: $remindersEnabled, ')
-          ..write('reminderLeadDays: $reminderLeadDays')
+          ..write('reminderLeadDays: $reminderLeadDays, ')
+          ..write('repeatMode: $repeatMode')
           ..write(')'))
         .toString();
   }
@@ -1807,6 +1836,7 @@ class RecurringPaymentsData extends DataClass
     createdAt,
     remindersEnabled,
     reminderLeadDays,
+    repeatMode,
   );
   @override
   bool operator ==(Object other) =>
@@ -1820,7 +1850,8 @@ class RecurringPaymentsData extends DataClass
           other.endDay == this.endDay &&
           other.createdAt == this.createdAt &&
           other.remindersEnabled == this.remindersEnabled &&
-          other.reminderLeadDays == this.reminderLeadDays);
+          other.reminderLeadDays == this.reminderLeadDays &&
+          other.repeatMode == this.repeatMode);
 }
 
 class RecurringPaymentsCompanion
@@ -1834,6 +1865,7 @@ class RecurringPaymentsCompanion
   final Value<int> createdAt;
   final Value<int> remindersEnabled;
   final Value<int?> reminderLeadDays;
+  final Value<int?> repeatMode;
   const RecurringPaymentsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1844,6 +1876,7 @@ class RecurringPaymentsCompanion
     this.createdAt = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
     this.reminderLeadDays = const Value.absent(),
+    this.repeatMode = const Value.absent(),
   });
   RecurringPaymentsCompanion.insert({
     this.id = const Value.absent(),
@@ -1855,6 +1888,7 @@ class RecurringPaymentsCompanion
     this.createdAt = const Value.absent(),
     this.remindersEnabled = const Value.absent(),
     this.reminderLeadDays = const Value.absent(),
+    this.repeatMode = const Value.absent(),
   }) : name = Value(name),
        amountMinor = Value(amountMinor),
        recurrence = Value(recurrence),
@@ -1869,6 +1903,7 @@ class RecurringPaymentsCompanion
     Expression<int>? createdAt,
     Expression<int>? remindersEnabled,
     Expression<int>? reminderLeadDays,
+    Expression<int>? repeatMode,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1880,6 +1915,7 @@ class RecurringPaymentsCompanion
       if (createdAt != null) 'created_at': createdAt,
       if (remindersEnabled != null) 'reminders_enabled': remindersEnabled,
       if (reminderLeadDays != null) 'reminder_lead_days': reminderLeadDays,
+      if (repeatMode != null) 'repeat_mode': repeatMode,
     });
   }
 
@@ -1893,6 +1929,7 @@ class RecurringPaymentsCompanion
     Value<int>? createdAt,
     Value<int>? remindersEnabled,
     Value<int?>? reminderLeadDays,
+    Value<int?>? repeatMode,
   }) {
     return RecurringPaymentsCompanion(
       id: id ?? this.id,
@@ -1904,6 +1941,7 @@ class RecurringPaymentsCompanion
       createdAt: createdAt ?? this.createdAt,
       remindersEnabled: remindersEnabled ?? this.remindersEnabled,
       reminderLeadDays: reminderLeadDays ?? this.reminderLeadDays,
+      repeatMode: repeatMode ?? this.repeatMode,
     );
   }
 
@@ -1937,6 +1975,9 @@ class RecurringPaymentsCompanion
     if (reminderLeadDays.present) {
       map['reminder_lead_days'] = Variable<int>(reminderLeadDays.value);
     }
+    if (repeatMode.present) {
+      map['repeat_mode'] = Variable<int>(repeatMode.value);
+    }
     return map;
   }
 
@@ -1951,7 +1992,8 @@ class RecurringPaymentsCompanion
           ..write('endDay: $endDay, ')
           ..write('createdAt: $createdAt, ')
           ..write('remindersEnabled: $remindersEnabled, ')
-          ..write('reminderLeadDays: $reminderLeadDays')
+          ..write('reminderLeadDays: $reminderLeadDays, ')
+          ..write('repeatMode: $repeatMode')
           ..write(')'))
         .toString();
   }

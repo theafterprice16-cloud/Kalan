@@ -113,6 +113,10 @@ class AppDatabase extends _$AppDatabase {
       from6To7: (m, schema) async {
         await m.addColumn(schema.appSettings, schema.appSettings.repeatMode);
         await m.addColumn(schema.plans, schema.plans.repeatMode);
+        await m.addColumn(
+          schema.recurringPayments,
+          schema.recurringPayments.repeatMode,
+        );
         await m.alterTable(
           TableMigration(
             schema.reminderSnoozes,

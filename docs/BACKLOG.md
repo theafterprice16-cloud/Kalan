@@ -22,7 +22,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 
 - ~~**Bildirimden "ödendi" işaretleme**~~ Tamamlandı (13 Kasım 2026): "önceden" ve "gününde" bildirimlerinde "Ödendi" (birleşik bildirimde "Hepsi ödendi"), "Akşam hatırlat" (20:00) ve "Yarın hatırlat"; uygulama açılmadan, arka planda; ertelemeler veritabanında saklanır ve yeniden kurmada kaybolmaz; iOS'ta işaretleme için telefon kilidi açılır. Sonraya: widget'tan işaretleme.
 
-- ~~**Israrlı hatırlatma**~~ Tamamlandı (14 Kasım 2026): "Kapalı" (varsayılan), "Akşam bir kez daha", "Her gün"; genel ve plan bazında; yalnızca bildirim saatinde ve 20:00'de, son günden en çok 7 gün sonrasına kadar; son günden sonra yargısız "henüz işaretlenmedi" metni; "Ödendi" bütün tekrarları durdurur, "Yarın hatırlat" yalnızca o günü atlar; listede ve ayrıntıda tekrar ikonu. Sonraya: elle/otomatik ayrımı gelince yardımcı metinler (9. madde).
+- ~~**Israrlı hatırlatma**~~ Tamamlandı (14 Kasım 2026): "Kapalı" (varsayılan), "Akşam bir kez daha", "Her gün"; genel, plan ve sabit ödeme bazında; yalnızca bildirim saatinde ve 20:00'de, son günden en çok 7 gün sonrasına kadar; son günden sonra yargısız "henüz işaretlenmedi" metni; "Ödendi" bütün tekrarları durdurur, "Yarın hatırlat" yalnızca o günü atlar; listede ve ayrıntıda tekrar ikonu. Sonraya: elle/otomatik ayrımı gelince yardımcı metinler (9. madde).
 
 ## Notlar
 

@@ -276,6 +276,8 @@ void main() {
     expect(settings.repeatMode, ReminderRepeat.off);
     final plan = await db.select(db.plans).getSingle();
     expect(plan.repeatMode, equals(null));
+    final rent = await db.select(db.recurringPayments).getSingle();
+    expect(rent.repeatMode, equals(null));
     final snooze = await db.select(db.reminderSnoozes).getSingle();
     expect(snooze.refs, 'p1');
     expect(snooze.fireDay, 20406);
