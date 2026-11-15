@@ -241,3 +241,10 @@ Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sah
 | Renk | Seçili tür ve çip mevcut seçim stilindedir (onay işareti, `text` mürekkep; DESIGN_TOKENS: accent yalnızca "kalan"). Prompt accent diyordu; bağlayıcı belge kazandı. `late` kullanılmadı. |
 | Mevcut veriler | Mevcut planların ödemeleri, tutarları ve kalan değeri değişmez; motor testleri değiştirilmeden geçer. |
 
+
+## Kaynak öncelik sırası ve geliştirme düzeni (16 Kasım 2026)
+
+| Konu | Karar |
+|---|---|
+| Kaynak öncelik sırası | Ürün sahibinin 15 Kasım 2026 kararı: 1) bu dosya, 2) `docs/kalan-birlesik.html` içindeki ürün sahibi kararları, 3) aynı dosyadaki Yol Haritası (ürün, özellik, tasarım, dil, para birimi) ve Fiyatlandırma (fiyat, mağaza, maliyet), 4) `docs/kimlik/kalan-uygulama-dosyasi.html` yalnızca ilke, ses tonu ve kimlik için. `docs/BACKLOG.md` eski sıralamadır; 7. madde (bulut AI) Karar 3 ile, 8. madde (aylık/yıllık Pro) Karar 2 ile geçersizdir. |
+| Geliştirme düzeni | İşler `kalan-gelistirme` skill'iyle yapılır: arama ve test Haiku, ana oturum ve bağımsız parçalar Sonnet, büyük ya da riskli işin planı, riskli diff incelemesi ve iki denemede çözülmeyen hata Opus (`.claude/agents/`). Ürün kuralları `kalan-palet`, `kalan-urun-kurallari`, `kalan-yerellestirme` skill'lerinde. İlerleme `docs/ILERLEME.md`'de tutulur. |

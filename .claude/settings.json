@@ -1,0 +1,25 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(python3 .claude/skills/kalan-gelistirme/scripts/kalan_kaynak.py *)",
+      "Bash(flutter analyze *)",
+      "Bash(dart run build_runner *)",
+      "Bash(flutter gen-l10n *)",
+      "Bash(flutter pub get *)",
+      "Bash(flutter test *)",
+      "Bash(dart format *)",
+      "Bash(dart analyze *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)"
+    ],
+    "deny": [
+      "Read(/build/**)",
+      "Read(/.dart_tool/**)",
+      "Read(/ios/Pods/**)"
+    ]
+  }
+}
