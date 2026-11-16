@@ -198,4 +198,119 @@ void main() {
       );
     });
   });
+
+  group('payment interval', () {
+    test('Marta: every 30 days from 1 Aug, two payments in August', () {
+      final dates = PaymentInterval.every30Days.datesFrom(d('2027-08-01'), 3);
+      expect(dates, ds(['2027-08-01', '2027-08-31', '2027-09-30']));
+      expect(monthsWithSeveral(dates), [(year: 2027, month: 8, count: 2)]);
+    });
+
+    final cases = <(PaymentInterval, String, int, List<String>)>[
+      // Same day each month: the 31st on the month's last day, no drift.
+      (
+        PaymentInterval.sameDay,
+        '2027-01-31',
+        4,
+        ['2027-01-31', '2027-02-28', '2027-03-31', '2027-04-30'],
+      ),
+      // Leap year.
+      (
+        PaymentInterval.sameDay,
+        '2028-01-31',
+        3,
+        ['2028-01-31', '2028-02-29', '2028-03-31'],
+      ),
+      (
+        PaymentInterval.sameDay,
+        '2026-12-15',
+        3,
+        ['2026-12-15', '2027-01-15', '2027-02-15'],
+      ),
+      (
+        PaymentInterval.every30Days,
+        '2027-01-31',
+        3,
+        ['2027-01-31', '2027-03-02', '2027-04-01'],
+      ),
+      (
+        PaymentInterval.biweekly,
+        '2026-12-25',
+        3,
+        ['2026-12-25', '2027-01-08', '2027-01-22'],
+      ),
+      (
+        PaymentInterval.weekly,
+        '2028-02-22',
+        3,
+        ['2028-02-22', '2028-02-29', '2028-03-07'],
+      ),
+      (
+        const PaymentInterval.everyDays(10),
+        '2026-11-25',
+        3,
+        ['2026-11-25', '2026-12-05', '2026-12-15'],
+      ),
+      (
+        const PaymentInterval.everyDays(365),
+        '2027-03-01',
+        2,
+        ['2027-03-01', '2028-02-29'],
+      ),
+    ];
+    for (final (interval, first, count, expected) in cases) {
+      test('$interval from $first', () {
+        expect(interval.datesFrom(d(first), count), ds(expected));
+      });
+    }
+
+    test('presets match the old schedules', () {
+      final first = d('2026-11-20');
+      expect(PaymentInterval.biweekly.datesFrom(first, 4), payIn4Dates(first));
+      expect(PaymentInterval.sameDay.datesFrom(first, 12), [
+        for (var i = 0; i < 12; i++) first.addMonths(i),
+      ]);
+    });
+
+    test('dateAt goes backwards with the same rule', () {
+      expect(
+        PaymentInterval.sameDay.dateAt(d('2027-03-31'), -1),
+        d('2027-02-28'),
+      );
+      expect(
+        PaymentInterval.every30Days.dateAt(d('2027-08-31'), -1),
+        d('2027-08-01'),
+      );
+    });
+
+    test('valid day counts are 1-365', () {
+      expect(const PaymentInterval.everyDays(0).isValid, isFalse);
+      expect(const PaymentInterval.everyDays(1).isValid, isTrue);
+      expect(const PaymentInterval.everyDays(365).isValid, isTrue);
+      expect(const PaymentInterval.everyDays(366).isValid, isFalse);
+      expect(PaymentInterval.sameDay.isValid, isTrue);
+    });
+
+    test('stored days round-trip; equal by days', () {
+      expect(PaymentInterval.fromDays(null), PaymentInterval.sameDay);
+      expect(PaymentInterval.fromDays(14), PaymentInterval.biweekly);
+      expect(PaymentInterval.fromDays(9).days, 9);
+      expect(const PaymentInterval.everyDays(30), PaymentInterval.every30Days);
+      expect(PaymentInterval.sameDay == PaymentInterval.weekly, isFalse);
+    });
+
+    test('months with more than one payment, in date order', () {
+      final weekly = PaymentInterval.weekly.datesFrom(d('2026-12-22'), 4);
+      expect(monthsWithSeveral(weekly), [
+        (year: 2026, month: 12, count: 2),
+        (year: 2027, month: 1, count: 2),
+      ]);
+      expect(
+        monthsWithSeveral(
+          PaymentInterval.sameDay.datesFrom(d('2027-01-31'), 12),
+        ),
+        isEmpty,
+      );
+    });
+  });
 }

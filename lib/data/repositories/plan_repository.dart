@@ -89,6 +89,7 @@ class PlanRepository {
             origin: origin,
             payLaterRule: Value(draft.payLaterRule?.kind),
             payLaterValue: Value(draft.payLaterRule?.value),
+            intervalDays: Value(draft.interval?.days),
           ),
         );
     await _db.batch((b) {
@@ -350,25 +351,55 @@ class PlanRepository {
     }
   });
 
-  /// The plan edit screen's save: the installment count and "already
-  /// underway" together, in the order that keeps both valid.
+  /// The plan edit screen's save: the installment count, "already
+  /// underway" and the payment interval together, in the order that keeps
+  /// them valid.
+  ///
+  /// A new [interval] ("Monthly installments", "Pay in 4") is stored and
+  /// redates the payments not paid in Kalan and not edited by hand, from
+  /// the anchor: payment number `paidBefore + 1` at [nextDate] or where it
+  /// is now. [pattern] must already follow [interval].
   Future<ResizeRejection?> editPlan(
     int planId, {
     required int count,
     required int paidBefore,
     LocalDate? nextDate,
     UnderwayPattern? pattern,
+    PaymentInterval? interval,
   }) => _db
       .transaction(() async {
         final current = await (_db.select(
           _db.plans,
         )..where((p) => p.id.equals(planId))).getSingle();
-        Future<void> underway() => setPaidBefore(
-          planId,
-          count: paidBefore,
-          nextDate: nextDate,
-          pattern: nextDate == null ? null : pattern,
-        );
+        final hasInterval =
+            current.kind == PlanKind.monthly || current.kind == PlanKind.payIn4;
+        final newInterval =
+            hasInterval &&
+            interval != null &&
+            interval != PaymentInterval.fromDays(current.intervalDays);
+        if (newInterval) {
+          if (!interval.isValid) throw ArgumentError.value(interval);
+          await (_db.update(_db.plans)..where((p) => p.id.equals(planId)))
+              .write(PlansCompanion(intervalDays: Value(interval.days)));
+        }
+        Future<void> underway() async {
+          var anchor = nextDate;
+          if (anchor == null && newInterval) {
+            final rows =
+                await (_db.select(_db.payments)
+                      ..where((p) => p.planId.equals(planId))
+                      ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
+                    .get();
+            anchor = rows[paidBefore].date;
+          }
+          await setPaidBefore(
+            planId,
+            count: paidBefore,
+            nextDate: anchor,
+            pattern: anchor == null ? null : pattern,
+          );
+        }
+
         if (count >= current.installmentCount) {
           final rejected = await resize(planId, count: count, pattern: pattern);
           if (rejected != null) return rejected;

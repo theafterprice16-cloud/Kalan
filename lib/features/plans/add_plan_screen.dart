@@ -14,6 +14,7 @@ import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
 import '../reminders/reminder_prompt.dart';
+import 'interval_field.dart';
 import 'pay_later_form.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
@@ -82,6 +83,16 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   /// The "Pay later" form; it starts with the rule used last.
   late final PayLaterInput _payLater;
 
+  /// Payment interval, kept per type: each starts with its own default.
+  final _payIn4Interval = IntervalInput(PaymentInterval.biweekly);
+  final _monthlyInterval = IntervalInput(PaymentInterval.sameDay);
+
+  IntervalInput? get _intervalInput => switch (_mode) {
+    AddMode.payIn4 => _payIn4Interval,
+    AddMode.monthly => _monthlyInterval,
+    _ => null,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -111,6 +122,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     }
     _sourceFocus.dispose();
     _payLater.dispose();
+    _payIn4Interval.dispose();
+    _monthlyInterval.dispose();
     super.dispose();
   }
 
@@ -146,6 +159,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       if (total == null) return null;
       final count = _mode == AddMode.payIn4 ? 4 : _int(_count);
       if (count == null) return null;
+      final interval = _intervalInput?.interval;
+      if (_intervalInput != null && interval == null) return null;
       if (_underway && _mode != AddMode.manual) {
         final paid = _mode == AddMode.payIn4 ? _paidPayIn4 : _int(_paid);
         if (paid == null) return null;
@@ -161,17 +176,20 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           nextDate: _nextDate,
           terms: _mode == AddMode.card ? _cardTerms : null,
           isCashAdvance: _cashAdvance,
+          interval: interval,
         );
       }
       final draft = switch (_mode) {
         AddMode.payIn4 => PlanCalculator.payIn4(
           firstDate: _firstDate,
           totalMinor: total,
+          interval: interval!,
         ),
         AddMode.monthly => PlanCalculator.monthly(
           firstDate: _firstDate,
           totalMinor: total,
           count: count,
+          interval: interval!,
         ),
         AddMode.card => switch (_cardTerms) {
           final terms? => PlanCalculator.card(
@@ -495,10 +513,25 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       ],
     );
     final dateField = !_underway || _mode == AddMode.manual ? null : nextDate;
+    // Below the date: the dates before and after it follow this choice.
+    final interval = switch (_intervalInput) {
+      final input? => IntervalField(input: input, onChanged: _refresh),
+      null => null,
+    };
 
     switch (_mode) {
       case AddMode.payIn4:
-        return [source, gap, total, gap, underway, gap, dateField ?? firstDate];
+        return [
+          source,
+          gap,
+          total,
+          gap,
+          underway,
+          gap,
+          dateField ?? firstDate,
+          gap,
+          interval!,
+        ];
       case AddMode.monthly:
         return [
           source,
@@ -510,6 +543,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           underway,
           gap,
           dateField ?? firstDate,
+          gap,
+          interval!,
         ];
       case AddMode.card:
         return [
@@ -825,6 +860,27 @@ class _Preview extends ConsumerWidget {
                       ),
                     ),
                     key: const ValueKey('preview-paid-before'),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: context.colors.textMuted,
+                    ),
+                  ),
+                ),
+              if (monthsWithSeveral(listed.map((p) => p.date)) case final months
+                  when months.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    l10n.previewSameMonth(
+                      months
+                          .map(
+                            (m) => l10n.previewSameMonthItem(
+                              context.monthYear(m.year, m.month),
+                              m.count,
+                            ),
+                          )
+                          .join(l10n.previewMonthSeparator),
+                    ),
+                    key: const ValueKey('preview-same-month'),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: context.colors.textMuted,
                     ),

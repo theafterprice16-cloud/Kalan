@@ -111,6 +111,71 @@ void main() {
     }
   });
 
+  group('payment interval', () {
+    // Going forward from the first date gives the same list.
+    final cases = <(PaymentInterval, LocalDate, int, int)>[
+      (PaymentInterval.every30Days, d(2027, 8, 31), 1, 3),
+      (PaymentInterval.every30Days, d(2027, 3, 2), 4, 6),
+      (PaymentInterval.weekly, d(2026, 12, 1), 2, 8),
+      (const PaymentInterval.everyDays(10), d(2027, 1, 5), 3, 5),
+      (PaymentInterval.biweekly, d(2026, 11, 20), 3, 4),
+      (PaymentInterval.sameDay, d(2027, 3, 31), 2, 6),
+    ];
+    for (final (interval, next, paid, total) in cases) {
+      test('$interval: $next, $paid of $total', () {
+        final back = underwayDates(
+          nextDate: next,
+          paidCount: paid,
+          totalCount: total,
+          pattern: IntervalPattern(interval),
+        );
+        expect(back[paid], next);
+        expect(interval.datesFrom(back.first, total), back);
+      });
+    }
+
+    test('Marta underway: 1 of 3 paid, next 31 Aug, every 30 days', () {
+      final draft = underwayPlan(
+        kind: PlanKind.monthly,
+        totalMinor: 30000,
+        count: 3,
+        paidCount: 1,
+        nextDate: d(2027, 8, 31),
+        interval: PaymentInterval.every30Days,
+      );
+      expect(draft.payments.map((p) => p.date), [
+        d(2027, 8, 1),
+        d(2027, 8, 31),
+        d(2027, 9, 30),
+      ]);
+      expect(draft.interval, PaymentInterval.every30Days);
+    });
+
+    test('Pay in 4 underway defaults to every 14 days', () {
+      final draft = underwayPlan(
+        kind: PlanKind.payIn4,
+        totalMinor: 40000,
+        count: 4,
+        paidCount: 1,
+        nextDate: d(2026, 11, 20),
+      );
+      expect(draft.interval, PaymentInterval.biweekly);
+      expect(draft.payments.first.date, d(2026, 11, 6));
+    });
+
+    test('an invalid day count is refused', () {
+      expect(
+        () => underwayDates(
+          nextDate: d(2027, 1, 1),
+          paidCount: 1,
+          totalCount: 3,
+          pattern: const IntervalPattern(PaymentInterval.everyDays(0)),
+        ),
+        throwsA(isA<InvalidPlanInput>()),
+      );
+    });
+  });
+
   group('card: the card cycle backwards', () {
     // terms, next, paid, total, expected
     final cases = <(CardTerms, LocalDate, int, int, List<LocalDate>)>[

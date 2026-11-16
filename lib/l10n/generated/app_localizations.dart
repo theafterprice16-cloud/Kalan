@@ -1884,6 +1884,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Source: {name}'**
   String payLaterSourceLine(String name);
+
+  /// Add/edit plan: how often the installments repeat (Monthly installments, Pay in 4).
+  ///
+  /// In en, this message translates to:
+  /// **'Payment interval'**
+  String get fieldPaymentInterval;
+
+  /// Payment interval choice: the same day of every month (31st falls on the month's last day in short months).
+  ///
+  /// In en, this message translates to:
+  /// **'Same day each month'**
+  String get intervalSameDay;
+
+  /// Payment interval choice: every 30 days.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 30 days'**
+  String get intervalEvery30Days;
+
+  /// Payment interval choice: every 14 days.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 2 weeks'**
+  String get intervalBiweekly;
+
+  /// Payment interval choice: every 7 days.
+  ///
+  /// In en, this message translates to:
+  /// **'Every week'**
+  String get intervalWeekly;
+
+  /// Payment interval choice: every N days, N typed in a field below. Not 'Custom', which is a plan type.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get intervalCustom;
+
+  /// Number field shown when the 'Other' payment interval is chosen (1-365).
+  ///
+  /// In en, this message translates to:
+  /// **'Days between payments'**
+  String get fieldIntervalDays;
+
+  /// Plan preview: calm note listing months that hold two or more payments.
+  ///
+  /// In en, this message translates to:
+  /// **'Months with more than one payment: {months}.'**
+  String previewSameMonth(String months);
+
+  /// One month in previewSameMonth: month name with year, and how many payments fall in it.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} ({count})'**
+  String previewSameMonthItem(String month, int count);
+
+  /// Separator between months in previewSameMonth.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get previewMonthSeparator;
+
+  /// Plan edit: note below the payment interval choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Only unpaid installments get new dates.'**
+  String get intervalEditHint;
 }
 
 class _AppLocalizationsDelegate

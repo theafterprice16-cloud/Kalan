@@ -1174,5 +1174,64 @@
         "example": "Klarna"
       }
     }
+  },
+  "fieldPaymentInterval": "Payment interval",
+  "@fieldPaymentInterval": {
+    "description": "Add/edit plan: how often the installments repeat (Monthly installments, Pay in 4)."
+  },
+  "intervalSameDay": "Same day each month",
+  "@intervalSameDay": {
+    "description": "Payment interval choice: the same day of every month (31st falls on the month's last day in short months)."
+  },
+  "intervalEvery30Days": "Every 30 days",
+  "@intervalEvery30Days": {
+    "description": "Payment interval choice: every 30 days."
+  },
+  "intervalBiweekly": "Every 2 weeks",
+  "@intervalBiweekly": {
+    "description": "Payment interval choice: every 14 days."
+  },
+  "intervalWeekly": "Every week",
+  "@intervalWeekly": {
+    "description": "Payment interval choice: every 7 days."
+  },
+  "intervalCustom": "Other",
+  "@intervalCustom": {
+    "description": "Payment interval choice: every N days, N typed in a field below. Not 'Custom', which is a plan type."
+  },
+  "fieldIntervalDays": "Days between payments",
+  "@fieldIntervalDays": {
+    "description": "Number field shown when the 'Other' payment interval is chosen (1-365)."
+  },
+  "previewSameMonth": "Months with more than one payment: {months}.",
+  "@previewSameMonth": {
+    "description": "Plan preview: calm note listing months that hold two or more payments.",
+    "placeholders": {
+      "months": {
+        "type": "String",
+        "example": "August 2027 (2), October 2027 (2)"
+      }
+    }
+  },
+  "previewSameMonthItem": "{month} ({count})",
+  "@previewSameMonthItem": {
+    "description": "One month in previewSameMonth: month name with year, and how many payments fall in it.",
+    "placeholders": {
+      "month": {
+        "type": "String",
+        "example": "August 2027"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "previewMonthSeparator": ", ",
+  "@previewMonthSeparator": {
+    "description": "Separator between months in previewSameMonth."
+  },
+  "intervalEditHint": "Only unpaid installments get new dates.",
+  "@intervalEditHint": {
+    "description": "Plan edit: note below the payment interval choice."
   }
 }

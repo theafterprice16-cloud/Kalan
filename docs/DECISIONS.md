@@ -242,6 +242,22 @@ Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sah
 | Mevcut veriler | Mevcut planların ödemeleri, tutarları ve kalan değeri değişmez; motor testleri değiştirilmeden geçer. |
 
 
+## Ödeme aralığı (16 Kasım 2026)
+
+Ürün sahibiyle netleşen kararlar (Yol Haritası 7, açık sorular): "4 ödemeli plan" ayrı tür olarak kalır, 4 ödeme sabittir, ama aralığı seçilebilir (varsayılan iki haftada bir); "Aylık taksit"te varsayılan her ayın aynı günü. Ayın 31'inde başlayan aylık planda kısa aylarda ayın son günü. "Özel (N günde bir)" ilk sürümde var. Aralık seçimi plan ekleme ekranında görünür, tarihin altında.
+
+| Konu | Karar |
+|---|---|
+| Seçenekler | Her ayın aynı günü · 30 günde bir · İki haftada bir · Haftada bir · Özel (N günde bir, 1–365). Yalnızca "Aylık taksit" ve "4 ödemeli plan" türlerinde. Kart taksidi ekstreye bağlı kalır; "Elle giriş" kendi "Aralık / Birim" alanlarıyla aynen kalır; "Sonra öde" tek ödemedir. |
+| Motor | Saf `PaymentInterval` (`lib/core/engine/schedule.dart`): `null` gün = her ayın aynı günü (motorun ay sonu kuralı: 31 Oca, 28 Şub, 31 Mar; kayma yok), aksi hâlde N günde bir (`addDays`). Tarihler tek fonksiyondan (`PaymentInterval.dateAt`); ileri yön, geriye tarih (`IntervalPattern`, `underwayDates`) ve taksit sayısını artırma aynı kuralı kullanır. Dönem ve kalan hesabına dokunulmadı; yalnızca taksit tarihleri üretilir. |
+| Hafta sonu | Bu türlerde hafta sonu kaydırması yoktu ve eklenmedi (tarihi sağlayıcı belirler, "Sonra öde" kararı gibi). Kartın hafta sonu kaydırması değişmedi. |
+| Yirmi saniye kuralı | "Aylık taksit"te aralık seçimi beşinci öğedir: ürün sahibi kararıyla istisna. Yazı alanı değil, hazır seçili gelen bir seçimdir; dokunmadan geçilebilir. "Özel" seçilince tek sayı alanı açılır. |
+| Önizleme | Aynı aya birden çok ödeme düşerse önizlemede sakin bir satır: "Aynı aya düşen ödemeler: Ağustos 2027 (2)." (`textMuted`, uyarı rengi yok). Her ayın aynı günü seçiliyken bu satır çıkmaz (iki ödeme aynı aya düşmez). |
+| Saklama | `plans.interval_days` (şema v9): boş = her ayın aynı günü, 1–365 = N günde bir. Diğer türlerde boş ve kullanılmaz. Göç: mevcut 4 ödemeli planlara 14 yazılır; mevcut aylık planlar boş kalır (zaten her ayın aynı günü). Tarihler ve tutarlar değişmez (testli). |
+| Aralığı değiştirme | Plan düzenleme ekranında aynı seçim. Değişince yalnızca ödenmemiş ve elle düzeltilmemiş taksitlerin tarihi yeniden hesaplanır; uygulamada "ödendi" işaretlenmiş ödemelere dokunulmaz. Çapa: "Bu plan zaten sürüyor" açıksa sıradaki ödeme (ya da girilen sıradaki ödeme tarihi), değilse ilk ödeme; tarihi yerinde kalır, diğerleri yeni aralıkla ondan hesaplanır (`underwayDates`). Bu, planın baştan o aralıkla eklenmiş hâliyle aynı listeyi verir. Kaynak dışı ödenmiş taksitlerin (gösterilmeyen) tarihleri de aynı kurala uyar. |
+| Renk | Seçim mevcut `ChoiceField` stilindedir (Sonra öde kararıyla aynı gerekçe: accent yalnızca "kalan"). Yeni renk yok. |
+| Tür adı | "Aylık taksit" adı değiştirilmedi (mevcut çevirilere dokunulmaz); aralık seçimi altında görünür. |
+
 ## Kaynak öncelik sırası ve geliştirme düzeni (16 Kasım 2026)
 
 | Konu | Karar |

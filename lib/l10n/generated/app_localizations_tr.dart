@@ -1389,4 +1389,42 @@ class AppLocalizationsTr extends AppLocalizations {
   String payLaterSourceLine(String name) {
     return 'Kaynak: $name';
   }
+
+  @override
+  String get fieldPaymentInterval => 'Ödeme aralığı';
+
+  @override
+  String get intervalSameDay => 'Her ayın aynı günü';
+
+  @override
+  String get intervalEvery30Days => '30 günde bir';
+
+  @override
+  String get intervalBiweekly => 'İki haftada bir';
+
+  @override
+  String get intervalWeekly => 'Haftada bir';
+
+  @override
+  String get intervalCustom => 'Özel';
+
+  @override
+  String get fieldIntervalDays => 'Kaç günde bir';
+
+  @override
+  String previewSameMonth(String months) {
+    return 'Aynı aya düşen ödemeler: $months.';
+  }
+
+  @override
+  String previewSameMonthItem(String month, int count) {
+    return '$month ($count)';
+  }
+
+  @override
+  String get previewMonthSeparator => ', ';
+
+  @override
+  String get intervalEditHint =>
+      'Yalnızca ödenmemiş taksitlerin tarihi değişir.';
 }

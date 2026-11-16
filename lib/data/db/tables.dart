@@ -66,6 +66,12 @@ class Plans extends Table {
   /// changed purchase date ([purchaseDay]). Null for other kinds.
   TextColumn get payLaterRule => textEnum<PayLaterRuleKind>().nullable()();
   IntColumn get payLaterValue => integer().nullable()();
+
+  /// "Monthly installments" and "Pay in 4" (schema v9): every N days
+  /// (1-365); null is the same day each month. Unused by other kinds.
+  IntColumn get intervalDays => integer().nullable().check(
+    intervalDays.isNull() | intervalDays.isBetweenValues(1, 365),
+  )();
 }
 
 @DataClassName('PaymentRow')

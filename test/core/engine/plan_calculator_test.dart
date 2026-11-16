@@ -39,6 +39,58 @@ void main() {
     expectTotalPreserved(draft, 100000);
   });
 
+  test('monthly and Pay in 4 keep their chosen interval', () {
+    final monthly = PlanCalculator.monthly(
+      firstDate: d('2027-08-01'),
+      totalMinor: 30001,
+      count: 3,
+      interval: PaymentInterval.every30Days,
+    );
+    expect(monthly.interval, PaymentInterval.every30Days);
+    expect(monthly.payments.map((p) => (p.date, p.amountMinor)), [
+      (d('2027-08-01'), 10001),
+      (d('2027-08-31'), 10000),
+      (d('2027-09-30'), 10000),
+    ]);
+    final payIn4 = PlanCalculator.payIn4(
+      firstDate: d('2027-01-31'),
+      totalMinor: 40000,
+      interval: PaymentInterval.sameDay,
+    );
+    expect(payIn4.installmentCount, 4);
+    expect(payIn4.payments.map((p) => p.date), [
+      d('2027-01-31'),
+      d('2027-02-28'),
+      d('2027-03-31'),
+      d('2027-04-30'),
+    ]);
+    // Defaults: same day each month; Pay in 4 every two weeks.
+    expect(
+      PlanCalculator.monthly(
+        firstDate: d('2027-01-01'),
+        totalMinor: 300,
+        count: 3,
+      ).interval,
+      PaymentInterval.sameDay,
+    );
+    expect(
+      PlanCalculator.payIn4(
+        firstDate: d('2027-01-01'),
+        totalMinor: 400,
+      ).interval,
+      PaymentInterval.biweekly,
+    );
+    expect(
+      () => PlanCalculator.monthly(
+        firstDate: d('2027-01-01'),
+        totalMinor: 300,
+        count: 3,
+        interval: const PaymentInterval.everyDays(400),
+      ),
+      throwsA(isA<InvalidPlanInput>()),
+    );
+  });
+
   test('card plan keeps purchase details', () {
     final draft = PlanCalculator.card(
       purchaseDate: d('2026-11-26'),

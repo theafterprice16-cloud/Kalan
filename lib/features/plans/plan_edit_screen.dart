@@ -12,6 +12,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import 'add_plan_screen.dart' show findSourceByName;
+import 'interval_field.dart';
 import 'pay_later_form.dart';
 
 /// "This plan is already underway", changed after the plan was added: the
@@ -38,10 +39,14 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   bool _nextDateTouched = false;
   bool _saving = false;
 
+  /// "Monthly installments" and "Pay in 4": the payment interval.
+  IntervalInput? _interval;
+
   @override
   void dispose() {
     _paid.dispose();
     _count.dispose();
+    _interval?.dispose();
     super.dispose();
   }
 
@@ -54,6 +59,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     _paid.text = '$initial';
     _count.text = '${plan.plan.installmentCount}';
     _paidPayIn4 = initial.clamp(1, 3);
+    if (plan.interval case final interval?) _interval = IntervalInput(interval);
   }
 
   bool _isPayIn4(PlanWithPayments plan) => plan.plan.kind == PlanKind.payIn4;
@@ -63,9 +69,13 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
 
   /// How the dates repeat, or null when the plan has no fixed pattern
   /// (manual entry, a card without its days): no next date field then.
+  /// Monthly and Pay in 4 follow the interval as chosen on this screen.
   UnderwayPattern? _pattern(PlanWithPayments plan) => switch (plan.plan.kind) {
-    PlanKind.monthly => const MonthlyPattern(),
-    PlanKind.payIn4 => const PayIn4Pattern(),
+    PlanKind.monthly || PlanKind.payIn4 => switch (_interval?.interval ??
+        plan.interval) {
+      final interval? => IntervalPattern(interval),
+      null => null,
+    },
     PlanKind.card => switch (plan.source?.cardTerms) {
       final terms? => CardPattern(terms),
       null => null,
@@ -160,6 +170,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
           paidBefore: count,
           nextDate: moveDates ? _nextDate : null,
           pattern: pattern,
+          interval: _interval?.interval,
         );
     if (rejected != null) {
       // What is left cannot be split that finely; say so under the field.
@@ -288,6 +299,16 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                 ],
               ),
             ),
+            if (_interval case final interval?) ...[
+              gap,
+              IntervalField(input: interval, onChanged: () => setState(() {})),
+              const SizedBox(height: 8),
+              Text(
+                l10n.intervalEditHint,
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: context.colors.textMuted),
+              ),
+            ],
             gap,
             FilledButton(
               key: const ValueKey('save-plan-edit'),

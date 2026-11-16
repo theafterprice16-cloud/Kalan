@@ -50,7 +50,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -142,6 +142,15 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(
           schema.appSettings,
           schema.appSettings.lastPayLaterValue,
+        );
+      },
+      // v9: payment interval. Existing monthly plans stay "same day each
+      // month" (empty); existing Pay in 4 plans were every 14 days. No
+      // date or amount changes.
+      from8To9: (m, schema) async {
+        await m.addColumn(schema.plans, schema.plans.intervalDays);
+        await customStatement(
+          "UPDATE plans SET interval_days = 14 WHERE kind = 'payIn4'",
         );
       },
     ),
