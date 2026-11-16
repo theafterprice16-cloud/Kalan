@@ -11,6 +11,21 @@ Amaç, kullanıcıyı bir kez ve topluca sorgulamak, sonra işi kesintisiz bitir
   - Koddan cevaplanabilenler (gerekirse `kalan-kesif` ile bakılır)
 - `kalan-mimar` planında "kullanıcıya sorulacak" diye gelen kararlar da bu turda sorulur. Plan, sorular sorulmadan önce alınmalıdır; bu yüzden Büyük işte sıra şöyledir: plan → tek soru turu → uygulama.
 - İş ortasında yeni bir ürün belirsizliği çıkarsa yalnızca o kısım için tek bir çağrı yapılır. Teknik belirsizlik sorulmaz: en az riskli seçim yapılır ve rapora yazılır.
+- Ekranda görünecek tercihler (bir öğenin yeri, iki yerleşimden hangisi, görünen metin) ürün kararıdır ve sorulur. Mevcut ekranlarda aynı iş için bir desen varsa o uygulanır, sorulmaz.
+
+## Kime soruyorsun
+
+Ürün sahibi yazılımcı değildir. Soru ve seçenekler, uygulamayı yalnızca kullanan birinin anlayacağı dilde yazılır: kod adı (`PlanKind`, `splitEvenly`), dosya adı ve teknik terim yoktur. Seçeneğin açıklaması, kullanıcının ekranda ne göreceğini ya da ne yaşayacağını anlatır.
+
+Yerleşim sorularında her seçeneğe `preview` alanıyla küçük bir metin çizimi eklenir:
+
+```
+Plan ekle
+[ Toplam | Taksit ]
+Taksit tutarı   [ 850      ]
+Taksit sayısı   [ 9        ]
+Toplam 7.650 TL · hesaplandı
+```
 
 ## Nasıl
 

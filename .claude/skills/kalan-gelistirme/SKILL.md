@@ -11,6 +11,14 @@ Görev: $ARGUMENTS
 
 Bu talimatlar oturum boyunca geçerlidir. Sen yöneticisin: işi sınıflar, doğru modele devreder, ürün sorularını bir kez sorar, sonuna kadar götürürsün.
 
+## 0. Ürün sahibi kimdir
+
+Ürün sahibi yazılımcı değildir. Kodu okumaz, diff'e ya da `dosya:satır` referansına bakmaz. Uygulamayı simülatörde ya da telefonda kullanarak kontrol eder. Bunun sonuçları:
+
+- Ona giden her metin (soru, ara mesaj, rapor) sade Türkçedir. Kod, diff ve komut çıktısı göstermezsin. Teknik bir terim kaçınılmazsa ilk geçtiği yerde yarım cümleyle açıklarsın.
+- "Kurala göre doğru ama ekranda uyumsuz" bir sonucu o yakalayamaz; sen yakalarsın (E'deki görsel uyum kontrolü). Testlerin yeşil olması ekranın iyi göründüğü anlamına gelmez.
+- Bir şeyi "garip", "uyumsuz", "olmamış" diye tarif ederse teknik ayrıntı isteme. Ekran görüntülerine ve koda bakıp sorunu kendin bul, gerekirse ne gördüğünü sade bir soruyla netleştir.
+
 ## 1. Değişmez öncelikler
 
 1. **Doğruluk tasarruftan önce gelir.** Tasarruf için asla: testi ya da `flutter analyze`'ı atlama, dosyayı görmeden düzenleme, ürün kararını tahmin etme, para/tarih/migration kodunu Haiku'ya yazdırma.
@@ -72,6 +80,8 @@ Madde numarası verildiyse şeridini `references/model-secimi.md` tablosundan al
 - 4'ten fazla soru varsa en fazla 2 çağrı yap.
 - Cevapları hemen `docs/DECISIONS.md`'ye tarihli olarak yaz; aynı soruyu bir daha sorma.
 - Teknik ayrıntıyı sorma: en az riskli seçimi yap, devam et ve rapora "Kararlar" başlığıyla yaz.
+- Ekranda görünecek tercihler teknik ayrıntı değil, ürün kararıdır ve sorulur: bir öğenin yeri, iki yerleşimden hangisi, varsayılan seçim, ekranda görünen metin. Mevcut ekranlarda karşılığı olan bir desen varsa onu uygula ve sorma.
+- Soru ve seçenekler sade dilde yazılır; kod adı, dosya adı, teknik terim olmaz. Yerleşim sorularında seçeneklere `preview` ile küçük bir metin çizimi ekle.
 - Asla "plan uygun mu?", "devam edeyim mi?" diye sorma. Ayrıntılar: `references/soru-sorma.md`.
 
 **E. Uygula.** Planı ve cevapları izle. Küçük adımlarla ilerle. Her anlamlı adımdan sonra yalnızca ilgili testleri ve analizi çalıştır:
@@ -81,6 +91,13 @@ Madde numarası verildiyse şeridini `references/model-secimi.md` tablosundan al
 - Kırmızı testle sonraki adıma geçme.
 - Projede bağlı bir Flutter/Dart skill'i ya da MCP'si oturumda görünüyorsa (örneğin analiz ve test araçları) kullanabilirsin; hangisi olduğunu varsayma. Görünmüyorsa ya da hata veriyorsa `flutter` ve `dart` komutlarını kullan.
 - `flutter` bulunamazsa (DURUM: ORTAM) Flutter'ı kendin kurmaya çalışma. Kodu yazmaya devam et, ama raporun en başına "Testler çalıştırılamadı: Flutter kurulu değil" yaz, "İş kaydedildi" satırını yazma ve kullanıcıya `tool/bulut-kurulum.sh` içeriğinin claude.ai/code ortam ayarlarındaki Setup script kutusunda olması gerektiğini söyle.
+
+**Görsel uyum kontrolü.** Arayüze (ekran, form, metin, bileşen) dokunduysan bitirmeden önce zorunludur:
+- Yeni ya da değişen her ekran `test/golden/screens_golden_test.dart`'ta açık ve koyu temada bulunur. `flutter test test/golden --update-goldens` ile `screenshots/` yenilenir.
+- Değişen görüntüleri Read ile kendin aç ve en az iki komşu ekranın görüntüsüyle karşılaştır (örneğin plan ekleme için `04-add-plan` ile `06-plan-detail`). Bakılacaklar: boşluk ve hizalar; yazı boyutu ve kalınlığı; düğme, alan ve kart biçimi; renk tokenı; metnin tonu ve uzunluğu (TR ve EN); taşan ya da kesilen metin; koyu temada okunabilirlik; 48x48 dokunma hedefi.
+- Yeni görsel bileşen icat etme. Önce `lib/core/design` ve mevcut ekranlardaki karşılığını kullan. Gerçekten yeni bir bileşen gerekiyorsa nedenini rapora yaz.
+- Ölçüt kendi zevkin değil, mevcut ekranlara benzerliktir. Uyumsuzluk bulursan düzelt, görüntüyü yenile ve yeniden bak.
+- Flutter yoksa görüntü üretilemez. Raporda "Görsel kontrol yapılamadı" yaz ve "Telefonda dene" listesine ekranın genel görünüşünü kontrol etme maddesi ekle.
 
 **F. Hata döngüsünü kır.** Aynı hata iki denemede düzelmezse üçüncü kez deneme. Hata özeti ve dosya yollarıyla `kalan-mimar`'dan kök neden iste.
 
@@ -92,7 +109,14 @@ Madde numarası verildiyse şeridini `references/model-secimi.md` tablosundan al
 - `docs/ILERLEME.md`'yi güncelle; dosya yoksa oluştur. Biten maddeyi tarihle "Tamamlanan" listesine ekle. İş yarım kaldıysa "Yarım kalan" başlığına neyin bittiğini, neyin kaldığını ve ilgili dosyaları 3-5 satırla yaz. `/clear` sonrası tek hafıza budur.
 - Bu iki dosyayı da commit'e kat.
 - Bulut oturumundaysan (claude.ai/code) çalıştığın dalı push'la. Yeni oturum repoyu main'den baştan kopyalar: main'e birleşmemiş iş ve `docs/ILERLEME.md` orada görünmez. Push ya da birleştirme olmadıysa "İş kaydedildi" yazma; nedenini, dal adını ve varsa PR'ı rapora yaz.
-- Türkçe kısa rapor yaz: yapılanlar, Kararlar, test sonucu, kapsam dışı gözlemler, kullanıcının elle bakması gerekenler.
+- Raporu iki bölümle yaz:
+  1. **Ürün sahibine** (sohbette ve PR açıklamasının başında; sade Türkçe, kod ve dosya adı yok):
+     - *Ne değişti:* kullanıcının gözünden 2-3 cümle.
+     - *Telefonda dene:* numaralı, somut adımlar: neye basacak, ne yazacak, ne görmeli. Bir olağan durum ve en az bir sınır durumu (örneğin bölünmeyen tutar, uzun metin, koyu tema, İngilizce).
+     - *Ekranlar:* değişen ekran görüntülerinin PR'da nerede olduğu ("PR'da Files changed sekmesinde `screenshots/` altındaki resimler; eski ve yeni yan yana görünür").
+     - *Kararlar:* senin seçtiklerin, sade dille ve her biri bir satır.
+     - *Senin kararın gerekenler:* varsa.
+  2. **Teknik not** (yalnızca PR açıklamasında, kısa): değişen dosyalar, test ve CI durumu, migration, kapsam dışı gözlemler.
 - Testler yeşil, push yapıldı ve iş main'e ulaştıysa (PR birleştirildiyse) en sona tek satır ekle: "İş kaydedildi; sonraki işe geçmeden `/clear` yapabilirsin." İş yarımsa bunun yerine neyin eksik kaldığını yaz.
 
 ## 4. Token disiplini (akışı bozmayan, belgelenmiş yöntemler)
@@ -100,6 +124,6 @@ Madde numarası verildiyse şeridini `references/model-secimi.md` tablosundan al
 - **Okuma:** Grep ile satırı bul, Read'i `offset/limit` ile oku. Değişmemiş dosyayı ikinci kez okuma. `build/`, `.dart_tool/`, `ios/Pods/` ve üretilmiş `*.g.dart` / `*.freezed.dart` dosyalarını gerekmedikçe açma.
 - **Komut çıktısı:** Uzun çıktılı komutları `kalan-kontrol` çalıştırsın. Kendin çalıştırıyorsan çıktıyı sınırla (`| tail -n 40`).
 - **Büyük tablolar:** Para birimleri ve ülke notları gibi büyük tabloları yalnızca betikle ve yalnızca gerektiğinde al.
-- **Yazım:** Kodu sohbete yapıştırma, dosyaya yaz. Kullanıcıya kod göstermek yerine `dosya:satır` referansı ver. Ara anlatım yapma, raporu kısa tut.
+- **Yazım:** Kodu sohbete yapıştırma, dosyaya yaz. Ürün sahibine kod da `dosya:satır` da gösterme; dosya referansları yalnızca PR'ın teknik notunda olur. Ara anlatım yapma, raporu kısa tut.
 - **Ana oturumda yapılmayanlar:** Model ya da effort değiştirmeyi önerme. Ajan takımı ya da büyük paralel dağıtım kurma; bunlar token kullanımını katlar.
 - **Kullanıcının yapabildikleri:** `/clear`, doğal molada `/compact`, yanlış yolu `/rewind` ile geri almak, hızlı yan soru için `/btw`. Bunları raporda yalnızca gerçekten işe yarayacaksa ve tek satırla öner.
