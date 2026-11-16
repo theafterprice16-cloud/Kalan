@@ -213,11 +213,51 @@ void main() {
     expect(fieldText(tester, 'installment'), '333,33');
     expect(computedLine(tester), 'Toplam ₺999,99 · hesaplandı');
 
-    // Nothing to work out without a count: the field starts empty.
+    // Nothing to work out without a count: what was typed stays.
     await type(tester, 'count', '');
     await chooseEntry(tester, 'Toplam');
-    expect(fieldText(tester, 'total'), '');
+    expect(fieldText(tester, 'total'), '1000');
     expect(fieldText(tester, 'count'), '');
+  });
+
+  testWidgets('only looking at the other amount changes nothing', (
+    tester,
+  ) async {
+    await pump(tester);
+    await openAddPlan(tester);
+    await chooseMode(tester, 'Aylık taksit');
+    await type(tester, 'total', '1000');
+    await type(tester, 'count', '3');
+    await chooseEntry(tester, 'Taksit');
+    expect(fieldText(tester, 'installment'), '333,33');
+    await chooseEntry(tester, 'Toplam');
+    expect(fieldText(tester, 'total'), '1000');
+    expect(
+      computedLine(tester),
+      'İlk taksit ₺333,34, diğer 2 taksit ₺333,33 · hesaplandı',
+    );
+
+    // Without a count, both fields keep what was typed.
+    await type(tester, 'count', '');
+    await chooseEntry(tester, 'Taksit');
+    await chooseEntry(tester, 'Toplam');
+    expect(fieldText(tester, 'total'), '1000');
+
+    // A changed count is worked out again on the way back.
+    await type(tester, 'count', '3');
+    await chooseEntry(tester, 'Taksit');
+    await type(tester, 'count', '4');
+    await chooseEntry(tester, 'Toplam');
+    expect(fieldText(tester, 'total'), '1333,32');
+  });
+
+  testWidgets('one payment: nothing to work out', (tester) async {
+    await pump(tester);
+    await openAddPlan(tester);
+    await chooseMode(tester, 'Aylık taksit');
+    await type(tester, 'total', '500');
+    await type(tester, 'count', '1');
+    expect(find.byKey(const ValueKey('amount-computed')), findsNothing);
   });
 
   testWidgets('Pay in 4: only the installment, always 4', (tester) async {
@@ -280,8 +320,9 @@ void main() {
     await chooseMode(tester, 'Aylık taksit');
     await type(tester, 'source', 'Telefon');
     await chooseEntry(tester, 'Taksit');
-    await type(tester, 'installment', '9999999999999');
-    await type(tester, 'count', '120');
+    // 14 digits in total: more than the total field takes.
+    await type(tester, 'installment', '9000000000000');
+    await type(tester, 'count', '9');
     expect(find.byKey(const ValueKey('amount-computed')), findsNothing);
     await save(tester);
     await scrollUp(tester, find.byKey(const ValueKey('installment')));

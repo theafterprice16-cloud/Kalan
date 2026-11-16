@@ -172,6 +172,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           return totalFromInstallment(
             installmentMinor: installment,
             count: count,
+            maxTotalMinor: ref.maxAmountMinor,
           );
         } on InvalidPlanInput {
           return null;
@@ -179,18 +180,42 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     }
   }
 
+  /// The last value written by [_switchEntry]: into which field, the
+  /// text, and the count it was worked out with.
+  ({AmountEntry entry, String text, int? count})? _carried;
+
   /// Switches between typing the total and one installment. The count
   /// stays; the amount field gets the value worked out from the other
   /// one (an uneven total gives its equal share, rounded down).
+  ///
+  /// Nothing typed is lost: a field is left as it is when nothing can be
+  /// worked out, or when the user only looked at the other one (same
+  /// carried text, same count) and came back.
   void _switchEntry(AmountEntry entry) {
     if (entry == _entry) return;
     final count = _countValue;
-    final carried = switch (entry) {
-      AmountEntry.installment => _splitOf(_amount(_total), count)?.others,
-      AmountEntry.total => _totalValue,
-    };
+    final source = _entry == AmountEntry.total ? _total : _installment;
     final target = entry == AmountEntry.total ? _total : _installment;
-    target.text = carried == null ? '' : ref.moneyInput(context, carried);
+    final carried = _carried;
+    final onlyLooked =
+        carried != null &&
+        carried.entry == _entry &&
+        carried.text == source.text &&
+        carried.count == count;
+    if (!onlyLooked) {
+      final value = switch (entry) {
+        AmountEntry.installment => _splitOf(_amount(_total), count)?.others,
+        AmountEntry.total => _totalValue,
+      };
+      if (value != null) {
+        target.text = ref.moneyInput(context, value);
+      } else if (source.text.trim().isEmpty) {
+        target.clear();
+      }
+    }
+    _carried = onlyLooked
+        ? null
+        : (entry: entry, text: target.text, count: count);
     setState(() => _entry = entry);
   }
 
@@ -699,6 +724,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   String? _computedLine(BuildContext context) {
     final l10n = context.l10n;
     final count = _countValue;
+    // One payment: the installment is the total; nothing to work out.
+    if (count == 1) return null;
     switch (_entry) {
       case AmountEntry.total:
         final split = _splitOf(_amount(_total), count);

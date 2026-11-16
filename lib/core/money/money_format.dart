@@ -61,6 +61,19 @@ final _rtl = RegExp('[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]');
 NumberSymbols _symbols(String localeName) =>
     NumberFormat.decimalPattern(localeName).symbols;
 
+/// The most digits an amount field takes before the decimal separator.
+const maxWholeDigits = 13;
+
+/// The largest amount an amount field takes in [currency], in minor units
+/// ([maxWholeDigits] nines and a full fraction).
+int maxTypedAmountMinor(Currency currency) {
+  var whole = 1;
+  for (var i = 0; i < maxWholeDigits; i++) {
+    whole *= 10;
+  }
+  return whole * currency.minorPerMajor - 1;
+}
+
 /// Plain number for an input field: no grouping, the language's decimal
 /// separator, minor digits only when non-zero.
 String formatMinorForInput(
@@ -158,7 +171,7 @@ int? parseAmount(
   }
 
   if (wholeDigits.isEmpty && fractionText.isEmpty) return null;
-  if (wholeDigits.length > 13) return null;
+  if (wholeDigits.length > maxWholeDigits) return null;
   final whole = wholeDigits.isEmpty ? 0 : int.parse(wholeDigits);
   final fraction = fractionText.isEmpty
       ? 0

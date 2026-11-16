@@ -14,14 +14,22 @@ const maxEntryTotalMinor = 9007199254740991;
 /// is left over: every installment is the same.
 ///
 /// Throws [InvalidPlanInput] for a count outside 1-[PlanCalculator.maxInstallments],
-/// an installment under one minor unit, or a total above
-/// [maxEntryTotalMinor].
-int totalFromInstallment({required int installmentMinor, required int count}) {
+/// an installment under one minor unit, or a total above [maxTotalMinor]
+/// (the largest total the total field would take; never above
+/// [maxEntryTotalMinor]).
+int totalFromInstallment({
+  required int installmentMinor,
+  required int count,
+  int maxTotalMinor = maxEntryTotalMinor,
+}) {
   if (count < 1 || count > PlanCalculator.maxInstallments) {
     throw const InvalidPlanInput('count');
   }
   if (installmentMinor < 1) throw const InvalidPlanInput('installment');
-  if (installmentMinor > maxEntryTotalMinor ~/ count) {
+  final limit = maxTotalMinor < maxEntryTotalMinor
+      ? maxTotalMinor
+      : maxEntryTotalMinor;
+  if (installmentMinor > limit ~/ count) {
     throw const InvalidPlanInput('total');
   }
   return installmentMinor * count;

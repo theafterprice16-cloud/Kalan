@@ -45,6 +45,34 @@ void main() {
       });
     }
 
+    test('a lower limit, such as the total field\'s, is kept', () {
+      expect(
+        totalFromInstallment(
+          installmentMinor: 300,
+          count: 3,
+          maxTotalMinor: 900,
+        ),
+        900,
+      );
+      expect(
+        () => totalFromInstallment(
+          installmentMinor: 301,
+          count: 3,
+          maxTotalMinor: 900,
+        ),
+        throwsA(isA<InvalidPlanInput>()),
+      );
+      // Never above the exact-integer limit, whatever is passed.
+      expect(
+        () => totalFromInstallment(
+          installmentMinor: maxEntryTotalMinor ~/ 2 + 1,
+          count: 2,
+          maxTotalMinor: maxEntryTotalMinor * 4,
+        ),
+        throwsA(isA<InvalidPlanInput>()),
+      );
+    });
+
     test('the largest total that fits is accepted', () {
       const count = 7;
       const installment = maxEntryTotalMinor ~/ count;
