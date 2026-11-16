@@ -359,7 +359,8 @@ class PlanRepository {
   /// new [interval] is stored and redates the payments after the anchor
   /// that are unpaid and not edited by hand. The anchor is the first
   /// unpaid payment not edited by hand from number `paidBefore + 1` on; it
-  /// keeps its date, so no payment moves into the past. With [nextDate],
+  /// keeps its date, so no unpaid payment moves into the past; payments
+  /// paid before Kalan follow the new rule backwards. With [nextDate],
   /// payment number `paidBefore + 1` moves there and the rest follow it
   /// ([setPaidBefore]). Other kinds use [pattern] and ignore [interval].
   Future<ResizeRejection?> editPlan(
@@ -428,7 +429,8 @@ class PlanRepository {
       );
 
   /// [setPaidBefore], then, for a new interval without a new next date,
-  /// the payments after the anchor (see [editPlan]) follow [pattern].
+  /// the payments after the anchor (see [editPlan]) and the ones paid
+  /// before Kalan follow [pattern] from the anchor.
   Future<void> _underwayAndInterval(
     int planId, {
     required int paidBefore,
@@ -460,9 +462,14 @@ class PlanRepository {
       totalCount: rows.length,
       pattern: pattern,
     );
-    for (var i = anchor + 1; i < rows.length; i++) {
+    // Payments paid before Kalan follow the plan's rule backwards
+    // ([underwayDates]); payments marked paid in Kalan never move.
+    bool moves(int i) =>
+        i > anchor && free(rows[i]) ||
+        i < paidBefore && rows[i].paidBeforeKalan && !rows[i].isEdited;
+    for (var i = 0; i < rows.length; i++) {
       final r = rows[i];
-      if (!free(r) || r.dueDay == dates[i].epochDay) continue;
+      if (!moves(i) || r.dueDay == dates[i].epochDay) continue;
       await (_db.update(_db.payments)..where((p) => p.id.equals(r.id))).write(
         PaymentsCompanion(dueDay: Value(dates[i].epochDay)),
       );

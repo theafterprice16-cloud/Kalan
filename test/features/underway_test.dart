@@ -479,12 +479,13 @@ void main() {
       await tester.pumpAndSettle();
       await tapKey(tester, 'save-plan-edit');
       final rows = await paymentsOf(db);
-      // Paid ones stay; the 5th (5 Jan, first unpaid) keeps its date and
-      // the rest follow it.
+      // The 5th (5 Jan, first unpaid) keeps its date; the rest follow it,
+      // the 3 paid before Kalan backwards. The 4th (marked paid in Kalan)
+      // stays.
       expect(rows.map((r) => r.date), [
-        LocalDate(2026, 9, 5),
-        LocalDate(2026, 10, 5),
-        LocalDate(2026, 11, 5),
+        LocalDate(2026, 9, 7),
+        LocalDate(2026, 10, 7),
+        LocalDate(2026, 11, 6),
         LocalDate(2026, 12, 5),
         LocalDate(2027, 1, 5),
         LocalDate(2027, 2, 4),

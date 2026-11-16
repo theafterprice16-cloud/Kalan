@@ -158,10 +158,11 @@ void main() {
         interval: PaymentInterval.weekly,
       );
       final r = await rows(id);
-      // Paid before Kalan: paid, so their (hidden) dates stay.
+      // Paid before Kalan: their (hidden) dates follow the new rule back
+      // from the next payment, as when the plan was added.
       expect(r.map((p) => p.date), [
-        d(2026, 11, 3),
         d(2026, 11, 17),
+        d(2026, 11, 24),
         d(2026, 12, 1),
         d(2026, 12, 8),
         d(2026, 12, 15),
