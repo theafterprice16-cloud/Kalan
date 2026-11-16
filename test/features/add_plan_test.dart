@@ -52,6 +52,20 @@ void main() {
       expect(visibleInputCount(tester), count, reason: label);
       expect(visibleInputCount(tester), lessThanOrEqualTo(4));
     }
+    // Typing one installment instead of the total adds no field.
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const ValueKey('amount-entry')),
+        matching: find.text('Taksit'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final MapEntry(key: label, value: count) in expected.entries) {
+      await tester.tap(find.widgetWithText(ChoiceChip, label));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('installment')), findsOneWidget);
+      expect(visibleInputCount(tester), count, reason: label);
+    }
   });
 
   testWidgets('pay in 4: draft preview, then save to home', (tester) async {

@@ -1950,6 +1950,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only unpaid installments get new dates.'**
   String get intervalEditHint;
+
+  /// Add plan: screen reader label of the choice between typing the total and typing one installment.
+  ///
+  /// In en, this message translates to:
+  /// **'Which amount do you know?'**
+  String get amountEntryLabel;
+
+  /// Add plan: choice to type the plan's total amount. Short: one of two segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get amountEntryTotal;
+
+  /// Add plan: choice to type one installment's amount. Short: one of two segments.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment'**
+  String get amountEntryInstallment;
+
+  /// Add plan: amount field label when the user types one installment.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment amount'**
+  String get fieldInstallmentAmount;
+
+  /// Add plan, below the total: each installment, worked out by the app. Calm note, no warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment {amount} · calculated'**
+  String amountComputedInstallment(String amount);
+
+  /// Add plan, below the total, when it does not divide evenly: the first installment carries the leftover minor units.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{First installment {first}, the other one {others} · calculated} other{First installment {first}, the other {count} {others} each · calculated}}'**
+  String amountComputedSplit(int count, String first, String others);
+
+  /// Add plan, below the installment amount: the plan's total, worked out by the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {amount} · calculated'**
+  String amountComputedTotal(String amount);
 }
 
 class _AppLocalizationsDelegate

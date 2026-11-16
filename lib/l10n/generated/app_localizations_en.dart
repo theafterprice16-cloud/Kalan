@@ -1409,4 +1409,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get intervalEditHint => 'Only unpaid installments get new dates.';
+
+  @override
+  String get amountEntryLabel => 'Which amount do you know?';
+
+  @override
+  String get amountEntryTotal => 'Total';
+
+  @override
+  String get amountEntryInstallment => 'Installment';
+
+  @override
+  String get fieldInstallmentAmount => 'Installment amount';
+
+  @override
+  String amountComputedInstallment(String amount) {
+    return 'Installment $amount · calculated';
+  }
+
+  @override
+  String amountComputedSplit(int count, String first, String others) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'First installment $first, the other $countString $others each · calculated',
+      one: 'First installment $first, the other one $others · calculated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String amountComputedTotal(String amount) {
+    return 'Total $amount · calculated';
+  }
 }

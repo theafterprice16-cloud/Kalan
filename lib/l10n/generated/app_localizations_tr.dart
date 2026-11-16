@@ -1427,4 +1427,41 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get intervalEditHint =>
       'Yalnızca ödenmemiş taksitlerin tarihi değişir.';
+
+  @override
+  String get amountEntryLabel => 'Hangi tutarı biliyorsun?';
+
+  @override
+  String get amountEntryTotal => 'Toplam';
+
+  @override
+  String get amountEntryInstallment => 'Taksit';
+
+  @override
+  String get fieldInstallmentAmount => 'Taksit tutarı';
+
+  @override
+  String amountComputedInstallment(String amount) {
+    return 'Taksit $amount · hesaplandı';
+  }
+
+  @override
+  String amountComputedSplit(int count, String first, String others) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'İlk taksit $first, diğer $countString taksit $others · hesaplandı',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String amountComputedTotal(String amount) {
+    return 'Toplam $amount · hesaplandı';
+  }
 }
