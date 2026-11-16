@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/data/db/app_database.dart';
@@ -43,6 +44,35 @@ Future<int> seedCardPlan(AppDatabase db, {PaymentMethod? method}) async {
 }
 
 void main() {
+  test(
+    "only a card plan's own card counts as where it is taken from",
+    () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      addTearDown(db.close);
+      final card = await seedCard(db);
+      final repo = PlanRepository(db);
+      // A Pay in 4 plan whose source name matched a card.
+      await repo.saveDraft(
+        PlanCalculator.payIn4(firstDate: testToday, totalMinor: 40000),
+        sourceId: card,
+        origin: PlanOrigin.template,
+        paymentMethod: PaymentMethod.automatic,
+      );
+      await seedCardPlan(db, method: PaymentMethod.automatic);
+      final plans = await repo.all();
+      final payIn4 = plans.firstWhere((p) => p.plan.kind == PlanKind.payIn4);
+      final cardPlan = plans.firstWhere((p) => p.plan.kind == PlanKind.card);
+      expect((payIn4.ownCardId, payIn4.chargeSourceId), (null, null));
+      expect(cardPlan.ownCardId, cardPlan.source!.id);
+      expect(cardPlan.chargeSourceId, cardPlan.source!.id);
+      await repo.setPaymentMethod(cardPlan.plan.id, PaymentMethod.manual);
+      final manual = (await repo.all()).firstWhere(
+        (p) => p.plan.kind == PlanKind.card,
+      );
+      expect(manual.chargeSourceId, equals(null));
+    },
+  );
+
   group('add plan', () {
     testWidgets('a card plan is taken automatically from its card; the '
         'choice stays inside "More details"', (tester) async {

@@ -440,7 +440,10 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
         .setPaymentMethod(
           plan.plan.id,
           _method,
-          chargeSourceId: _chargeSourceId,
+          chargeSourceId: storedChargeSourceId(
+            _chargeSourceId,
+            widget.plan.ownCardId,
+          ),
         );
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),

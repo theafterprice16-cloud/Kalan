@@ -519,6 +519,43 @@ void main() {
       }
     });
 
+    test('repeats and snoozes: same moments and buttons, the note kept', () {
+      const settings = ReminderSettings(repeatMode: ReminderRepeat.evening);
+      ReminderPayment p(PaymentMethod? method) => ReminderPayment(
+        name: 'Zip',
+        date: d(11, 14),
+        amountMinor: 85000,
+        ref: const PlanPaymentRef(7),
+        method: method,
+      );
+      final snooze = ReminderSnooze(
+        id: 1,
+        kind: ReminderKind.onDay,
+        fireDate: d(11, 15),
+        minuteOfDay: 600,
+        refs: const [PlanPaymentRef(7)],
+      );
+      List<PlannedReminder> run(PaymentMethod? method) => planReminders(
+        payments: [p(method)],
+        settings: settings,
+        now: at(d(11, 10), 20),
+        texts: texts(),
+        snoozes: [snooze],
+      );
+      final unset = run(null);
+      final auto = run(PaymentMethod.automatic);
+      Object shape(PlannedReminder r) =>
+          (r.id, r.fireAt, r.kind, '${r.buttons}', r.isSnoozed);
+      expect(auto.map(shape).toList(), unset.map(shape).toList());
+      expect(auto.where((r) => r.isSnoozed), hasLength(1));
+      for (var i = 0; i < auto.length; i++) {
+        expect(
+          auto[i].body,
+          '${unset[i].body}. Otomatik çekilir; tutar hesabında bulunsun.',
+        );
+      }
+    });
+
     test('reminderMethodOf: shared method for ahead and on day only', () {
       final a = pay(d(11, 14), method: auto);
       final m = pay(d(11, 14), method: manual);

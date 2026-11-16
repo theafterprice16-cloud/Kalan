@@ -76,8 +76,12 @@ class PlanWithPayments {
 
   bool get isPayLater => plan.kind == PlanKind.payLater;
 
-  /// The card a card plan belongs to; null for other plans.
-  int? get ownCardId => source != null && source!.isCard ? source!.id : null;
+  /// The card a card plan belongs to; null for other kinds, even when
+  /// their source happens to be a card.
+  int? get ownCardId =>
+      plan.kind == PlanKind.card && source != null && source!.isCard
+      ? source!.id
+      : null;
 
   /// Where an automatic payment is taken from: the chosen source, or a
   /// card plan's own card. Null when the plan is not automatic or nothing

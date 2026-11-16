@@ -63,7 +63,13 @@ class ReminderChoiceTile extends ConsumerWidget {
         final days = await showChoiceDialog<int>(
           context,
           title: l10n.planReminderCustom,
-          selected: value.leadDays ?? generalDays,
+          // A manual plan's general day (the global one + 1) may not be one
+          // of the choices; then the global one is marked.
+          selected:
+              value.leadDays ??
+              (leadDayChoices.contains(generalDays)
+                  ? generalDays
+                  : generalDays - 1),
           options: leadDayOptions(context),
         );
         if (days != null) onChanged(ReminderChoice.days(days.value));
