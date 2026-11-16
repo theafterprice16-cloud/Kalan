@@ -3,11 +3,13 @@ import 'package:material_ui/material_ui.dart' show Locale;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/format.dart' show planNameIn;
+import '../../app/providers.dart' show payScheduleOf;
 import '../../core/date/local_date.dart';
 import '../../core/money/currency.dart';
 import '../../core/reminders/reminder_models.dart';
 import '../../core/reminders/reminder_planner.dart';
 import '../../data/db/app_database.dart';
+import '../../data/period_totals.dart';
 import '../../data/repositories/plan_repository.dart';
 import '../../data/repositories/recurring_repository.dart';
 import '../../data/repositories/reminder_snooze_repository.dart';
@@ -43,7 +45,8 @@ class ReminderScheduler {
   /// App language for notification text (settings override or device).
   final Locale Function(SettingsRow settings) localeFor;
 
-  /// The reminders that would be scheduled right now.
+  /// The payment reminders that would be scheduled right now (the payday
+  /// summary: [buildPaydaySummary]).
   Future<List<PlannedReminder>> build() async {
     final input = await _input();
     if (input == null) return const [];
@@ -68,7 +71,30 @@ class ReminderScheduler {
         now: input.now,
       ),
     );
-    await gateway.replaceAll(_plan(input));
+    await gateway.replaceAll(
+      withPaydaySummary(
+        _plan(input),
+        payday: input.payday,
+        settings: input.settings,
+        now: input.now,
+        texts: input.texts,
+      ),
+    );
+  }
+
+  /// The next payday summary that would be scheduled (null when it is
+  /// off or reminders are off), without the payment reminders.
+  Future<PlannedReminder?> buildPaydaySummary() async {
+    final input = await _input();
+    if (input == null) return null;
+    final list = withPaydaySummary(
+      const [],
+      payday: input.payday,
+      settings: input.settings,
+      now: input.now,
+      texts: input.texts,
+    );
+    return list.isEmpty ? null : list.single;
   }
 
   /// Debug builds: the "on the day" reminder of the nearest unpaid payment
@@ -166,8 +192,10 @@ class ReminderScheduler {
 
     // Dates are the effective due dates the engine stored: the same day
     // the screens show (card statement and weekend shift applied).
+    final plans = await PlanRepository(db).all();
+    final recurring = await RecurringRepository(db).all();
     final payments = <ReminderPayment>[
-      for (final p in await PlanRepository(db).all())
+      for (final p in plans)
         for (final pay in p.payments)
           ReminderPayment(
             name: planNameIn(l10n, p),
@@ -182,7 +210,7 @@ class ReminderScheduler {
             repeat: p.plan.repeatMode,
             method: p.plan.paymentMethod,
           ),
-      for (final r in await RecurringRepository(db).all())
+      for (final r in recurring)
         for (final date in r.occurrences(
           today,
           today.addDays(_recurringHorizonDays),
@@ -201,8 +229,29 @@ class ReminderScheduler {
           ),
     ];
 
+    // The next payday's summary, as the home screen will show it that
+    // morning: the same calculation, seen from the period's first day.
+    final period = nextPaydayPeriod(
+      payScheduleOf(settings),
+      local,
+      settings.reminderMinute,
+    );
+    final summary = periodSummaryOn(
+      plans: plans,
+      recurring: recurring,
+      period: period,
+      today: period.start,
+      incomeMinor: settings.netIncomeMinor,
+    );
+
     return (
       settings: settings.reminderSettings,
+      payday: PaydaySummary(
+        date: period.start,
+        paymentCount: summary.itemCount,
+        totalMinor: summary.spokenForMinor,
+        leftMinor: summary.leftMinor,
+      ),
       now: local,
       today: today,
       payments: payments,
@@ -217,6 +266,7 @@ class ReminderScheduler {
 
 typedef _Input = ({
   ReminderSettings settings,
+  PaydaySummary payday,
   tz.TZDateTime now,
   LocalDate today,
   List<ReminderPayment> payments,

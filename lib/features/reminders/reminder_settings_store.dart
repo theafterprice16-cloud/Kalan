@@ -11,6 +11,7 @@ extension ReminderSettingsRowX on SettingsRow {
     minuteOfDay: reminderMinute,
     showAmounts: !hideAmountsInNotifications,
     repeatMode: repeatMode,
+    paydaySummary: paydaySummaryEnabled,
   );
 }
 
@@ -45,6 +46,9 @@ class ReminderSettingsStore {
 
   Future<void> setRepeatMode(ReminderRepeat mode) =>
       _settings.update(AppSettingsCompanion(repeatMode: Value(mode)));
+
+  Future<void> setPaydaySummary(bool on) =>
+      _settings.update(AppSettingsCompanion(paydaySummaryEnabled: Value(on)));
 
   Future<void> setMinuteOfDay(int minute) =>
       _settings.update(AppSettingsCompanion(reminderMinute: Value(minute)));

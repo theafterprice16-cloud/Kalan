@@ -327,5 +327,11 @@
   "paymentMethodManualHint": "Hatırlatma bir gün daha erken gelir; ödemeye vaktin kalır.",
   "chargeSourceLabel": "Çekildiği yer",
   "chargeSourceNone": "Seçilmedi",
-  "paymentMethodFrom": "{method} · {source}"
+  "paymentMethodFrom": "{method} · {source}",
+  "reminderPayday": "{count, plural, =0{Yeni dönem başladı. Bu dönem ödeme yok.} =1{Yeni dönem başladı. Bu dönem 1 ödeme, toplam {total}.} other{Yeni dönem başladı. Bu dönem {count} ödeme, toplam {total}.}}",
+  "reminderPaydayHidden": "{count, plural, =0{Yeni dönem başladı. Bu dönem ödeme yok.} =1{Yeni dönem başladı. Bu dönem 1 ödeme var.} other{Yeni dönem başladı. Bu dönem {count} ödeme var.}}",
+  "reminderPaydayLeft": "{body} Kalan {left}.",
+  "reminderPaydayShort": "{body} Bu dönem {amount} eksik görünüyor.",
+  "reminderPaydayToggle": "Maaş günü özeti",
+  "reminderPaydayToggleHint": "Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalan."
 }

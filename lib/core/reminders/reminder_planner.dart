@@ -1,6 +1,7 @@
 import 'package:timezone/timezone.dart' as tz;
 
 import '../date/local_date.dart';
+import '../engine/pay_period.dart';
 import 'reminder_models.dart';
 import 'reminder_time.dart';
 
@@ -25,6 +26,9 @@ const maxScheduledReminders = 60;
 ///
 /// With repeats off and no "skip" entries the list is exactly what it was
 /// before repeat reminders existed.
+///
+/// Payment reminders only; the payday summary is added by
+/// [withPaydaySummary].
 List<PlannedReminder> planReminders({
   required Iterable<ReminderPayment> payments,
   required ReminderSettings settings,
@@ -116,6 +120,83 @@ List<PlannedReminder> planReminders({
     return a.id.compareTo(b.id);
   });
   return planned.length > limit ? planned.sublist(0, limit) : planned;
+}
+
+/// The payment reminders [planned] ([planReminders]) with the payday
+/// summary for [payday] added in time order: its own notification, never
+/// merged, not touching the others. Only with reminders and the summary
+/// on, when it is still ahead of [now] and the payment reminders leave
+/// room under [limit]: they keep priority.
+List<PlannedReminder> withPaydaySummary(
+  List<PlannedReminder> planned, {
+  required PaydaySummary? payday,
+  required ReminderSettings settings,
+  required tz.TZDateTime now,
+  required ReminderTexts texts,
+  int limit = maxScheduledReminders,
+}) {
+  if (payday == null ||
+      !settings.enabled ||
+      !settings.paydaySummary ||
+      planned.length >= limit) {
+    return planned;
+  }
+  final summary = paydayReminder(
+    payday,
+    settings: settings,
+    location: now.location,
+    texts: texts,
+  );
+  if (!summary.fireAt.isAfter(now)) return planned;
+  // After every payment reminder at the same moment.
+  final at = planned.indexWhere((r) => r.fireAt.isAfter(summary.fireAt));
+  return List.unmodifiable([
+    ...planned.take(at < 0 ? planned.length : at),
+    summary,
+    if (at >= 0) ...planned.skip(at),
+  ]);
+}
+
+/// The pay period whose payday summary comes next: the current one when
+/// today is its first day and the reminder time has not passed yet,
+/// otherwise the one after it. The payday is the schedule's own day, never
+/// moved off a weekend.
+PayPeriod nextPaydayPeriod(
+  PaySchedule schedule,
+  tz.TZDateTime now,
+  int minuteOfDay,
+) {
+  final today = LocalDate(now.year, now.month, now.day);
+  final current = schedule.periodContaining(today);
+  final fireAt = localWallClock(current.start, minuteOfDay, now.location);
+  return current.start == today && fireAt.isAfter(now)
+      ? current
+      : schedule.next(current);
+}
+
+/// The payday summary notification for [summary]: on its day at the
+/// reminder time, no buttons; a tap opens the home screen.
+PlannedReminder paydayReminder(
+  PaydaySummary summary, {
+  required ReminderSettings settings,
+  required tz.Location location,
+  required ReminderTexts texts,
+  tz.TZDateTime? fireAt,
+}) {
+  final text = texts.payday(summary, showAmounts: settings.showAmounts);
+  return PlannedReminder(
+    id: PlannedReminder.idForPayday(summary.date),
+    kind: ReminderKind.onDay,
+    isPaydaySummary: true,
+    fireDate: summary.date,
+    fireAt:
+        fireAt ?? localWallClock(summary.date, settings.minuteOfDay, location),
+    payments: const [],
+    dueDates: const [],
+    title: texts.title,
+    body: text.body,
+    expandedBody: text.expanded,
+  );
 }
 
 /// A local day, a time on it and the kind of reminder due then.

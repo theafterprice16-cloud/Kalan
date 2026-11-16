@@ -22,7 +22,22 @@ class FakeNotificationGateway implements NotificationGateway {
   int openSettingsCalls = 0;
   String? testBody;
   PlannedReminder? testReminder;
-  List<PlannedReminder> pending = const [];
+
+  /// Everything handed over in the last [replaceAll].
+  List<PlannedReminder> all = const [];
+
+  /// The payment reminders in [all] (the payday summary is in [paydays]),
+  /// so payment reminder tests see the same list with or without it.
+  List<PlannedReminder> get pending => [
+    for (final r in all)
+      if (!r.isPaydaySummary) r,
+  ];
+
+  /// The payday summary, when one is scheduled.
+  List<PlannedReminder> get paydays => [
+    for (final r in all)
+      if (r.isPaydaySummary) r,
+  ];
 
   List<String> get bodies => [for (final n in pending) n.body];
 
@@ -39,7 +54,7 @@ class FakeNotificationGateway implements NotificationGateway {
   @override
   Future<void> replaceAll(List<PlannedReminder> reminders) async {
     replaceCalls++;
-    pending = List.of(reminders);
+    all = List.of(reminders);
   }
 
   @override

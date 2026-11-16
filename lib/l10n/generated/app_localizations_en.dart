@@ -1512,4 +1512,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String paymentMethodFrom(String method, String source) {
     return '$method · $source';
   }
+
+  @override
+  String reminderPayday(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'A new pay period has started. $count payments this period, $total in total.',
+      one:
+          'A new pay period has started. 1 payment this period, $total in total.',
+      zero: 'A new pay period has started. No payments this period.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderPaydayHidden(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'A new pay period has started. $count payments this period.',
+      one: 'A new pay period has started. 1 payment this period.',
+      zero: 'A new pay period has started. No payments this period.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderPaydayLeft(String body, String left) {
+    return '$body $left left.';
+  }
+
+  @override
+  String reminderPaydayShort(String body, String amount) {
+    return '$body This period looks $amount short.';
+  }
+
+  @override
+  String get reminderPaydayToggle => 'Payday summary';
+
+  @override
+  String get reminderPaydayToggleHint =>
+      'On payday, at your reminder time: this period\'s payments, total and what\'s left.';
 }
