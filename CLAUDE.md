@@ -133,7 +133,7 @@ test/                 lib/ yapısını izler
 ## Model seçimi, limit ve oturum düzeni
 
 - Ürün sahibi yazılımcı değildir: kodu okumaz, uygulamayı telefonda deneyerek kontrol eder. Ona sade Türkçeyle, kod ve dosya adı olmadan yaz; arayüz değişikliğinde golden görüntülerine kendin bakıp mevcut ekranlarla uyumu kontrol et (ayrıntı `kalan-gelistirme` skill'inde).
-- Her geliştirme işi `kalan-gelistirme` skill'iyle yapılır (`/kalan-gelistirme <madde no ya da iş>`). Skill işi Haiku, Sonnet ve Opus alt ajanlarına (`.claude/agents/`) böler; ana oturum Sonnet'tir (`.claude/settings.json`).
+- Her geliştirme işi `kalan-gelistirme` skill'iyle yapılır (`/kalan-gelistirme <madde no ya da iş>`). Skill işi Haiku, Sonnet ve Opus alt ajanlarına (`.claude/agents/`) böler; ana oturum Opus'tur (`.claude/settings.json`; ürün sahibi kodu okumadığı için). Limit daralınca küçük ve kuralları net işlerde Sonnet seçilebilir.
 - Ürün kuralı ayrıntıları repodaki skill'lerde: renk `kalan-palet`, metin, ses tonu, terimler ve Pro `kalan-urun-kurallari`, çeviri ve para biçimi `kalan-yerellestirme`. `kalan-brif-prompt` yalnızca açıkça prompt istenince kullanılır.
 - Hafıza diskte: biten maddeler ve yarım kalan iş `docs/ILERLEME.md`, kararlar `docs/DECISIONS.md`. Her işin sonunda ikisi güncellenir ve işle birlikte main'e ulaşır.
 - Kullanıcı her işten sonra `/clear` yapar ya da yeni oturum açar. "Kaldığımız yerden devam" denirse önce `docs/ILERLEME.md` oku ve `git log --oneline -10` çalıştır; tahmin yürütme.

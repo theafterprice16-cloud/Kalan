@@ -21,7 +21,7 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 ## Sıradaki
 
-- 10. (madde listesine bak: `kalan_kaynak.py liste`)
+- 10. Maaş günü özeti bildirimi
 
 ## Yarım kalan
 
