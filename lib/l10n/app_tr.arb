@@ -333,5 +333,5 @@
   "reminderPaydayLeft": "{body} Kalan {left}.",
   "reminderPaydayShort": "{body} Bu dönem {amount} eksik görünüyor.",
   "reminderPaydayToggle": "Maaş günü özeti",
-  "reminderPaydayToggleHint": "Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalan."
+  "reminderPaydayToggleHint": "Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalanı."
 }

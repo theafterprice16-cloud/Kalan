@@ -64,7 +64,7 @@ void main() {
     expect(
       find.text(
         'Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı '
-        've kalan.',
+        've kalanı.',
       ),
       findsOneWidget,
     );

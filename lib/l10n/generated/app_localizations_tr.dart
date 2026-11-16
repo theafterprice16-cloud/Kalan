@@ -1569,5 +1569,5 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get reminderPaydayToggleHint =>
-      'Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalan.';
+      'Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalanı.';
 }
