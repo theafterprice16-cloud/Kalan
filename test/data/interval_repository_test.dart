@@ -77,7 +77,7 @@ void main() {
   });
 
   group('changing the interval', () {
-    test('redates only unpaid, unedited payments, from the first', () async {
+    test('redates unpaid, unedited payments after the first unpaid', () async {
       // 6 monthly from 31 Jan 2027: the 1st paid in Kalan, the 4th edited.
       final id = await save(
         PlanCalculator.monthly(
@@ -108,11 +108,11 @@ void main() {
       r = await rows(id);
       expect(r.map((p) => p.date), [
         d(2027, 1, 31), // paid in Kalan: kept
-        d(2027, 3, 2),
-        d(2027, 4, 1),
+        d(2027, 2, 28), // the anchor: first unpaid, keeps its date
+        d(2027, 3, 30),
         d(2027, 4, 25), // edited by hand: kept
-        d(2027, 5, 31),
-        d(2027, 6, 30),
+        d(2027, 5, 29),
+        d(2027, 6, 28),
       ]);
       expect(r.map((p) => p.amountMinor), List.filled(6, 10000));
       expect(r[0].isPaid, isTrue);
@@ -158,9 +158,10 @@ void main() {
         interval: PaymentInterval.weekly,
       );
       final r = await rows(id);
+      // Paid before Kalan: paid, so their (hidden) dates stay.
       expect(r.map((p) => p.date), [
+        d(2026, 11, 3),
         d(2026, 11, 17),
-        d(2026, 11, 24),
         d(2026, 12, 1),
         d(2026, 12, 8),
         d(2026, 12, 15),
@@ -219,6 +220,81 @@ void main() {
         d(2027, 4, 4),
       ]);
       expect((await plan(id)).interval, PaymentInterval.sameDay);
+    });
+
+    test('paid ones at the start: nothing moves into the past', () async {
+      // 15 Jan - 15 Jun, the first 3 marked paid; now weekly.
+      final id = await save(
+        PlanCalculator.monthly(
+          firstDate: d(2027, 1, 15),
+          totalMinor: 60000,
+          count: 6,
+        ),
+      );
+      for (final p in (await rows(id)).take(3)) {
+        await plans.setPaid(p.id, paid: true, now: now);
+      }
+      await plans.editPlan(
+        id,
+        count: 6,
+        paidBefore: 0,
+        interval: PaymentInterval.weekly,
+      );
+      expect((await rows(id)).map((p) => p.date), [
+        d(2027, 1, 15),
+        d(2027, 2, 15),
+        d(2027, 3, 15),
+        d(2027, 4, 15),
+        d(2027, 4, 22),
+        d(2027, 4, 29),
+      ]);
+    });
+
+    test('a rejected change stores nothing, the interval too', () async {
+      // 6 payments of 1 minor unit cannot become 7.
+      final id = await save(
+        PlanCalculator.monthly(
+          firstDate: d(2027, 1, 15),
+          totalMinor: 6,
+          count: 6,
+        ),
+      );
+      final before = (await rows(id)).map((p) => p.dueDay).toList();
+      expect(
+        await plans.editPlan(
+          id,
+          count: 7,
+          paidBefore: 0,
+          interval: PaymentInterval.weekly,
+        ),
+        ResizeRejection.cannotSplit,
+      );
+      expect((await rows(id)).map((p) => p.dueDay), before);
+      expect((await plan(id)).plan.intervalDays, null);
+      expect((await plan(id)).plan.installmentCount, 6);
+    });
+
+    test('the interval sets the dates, whatever pattern is passed', () async {
+      final id = await save(
+        PlanCalculator.monthly(
+          firstDate: d(2027, 1, 15),
+          totalMinor: 30000,
+          count: 3,
+        ),
+      );
+      await plans.editPlan(
+        id,
+        count: 4,
+        paidBefore: 0,
+        pattern: const MonthlyPattern(),
+        interval: PaymentInterval.weekly,
+      );
+      expect((await rows(id)).map((p) => p.date), [
+        d(2027, 1, 15),
+        d(2027, 1, 22),
+        d(2027, 1, 29),
+        d(2027, 2, 5),
+      ]);
     });
 
     test('ignored for kinds without an interval', () async {

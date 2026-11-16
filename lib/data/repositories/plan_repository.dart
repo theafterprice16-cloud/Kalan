@@ -353,12 +353,15 @@ class PlanRepository {
 
   /// The plan edit screen's save: the installment count, "already
   /// underway" and the payment interval together, in the order that keeps
-  /// them valid.
+  /// them valid. Nothing is stored when the change is rejected.
   ///
-  /// A new [interval] ("Monthly installments", "Pay in 4") is stored and
-  /// redates the payments not paid in Kalan and not edited by hand, from
-  /// the anchor: payment number `paidBefore + 1` at [nextDate] or where it
-  /// is now. [pattern] must already follow [interval].
+  /// "Monthly installments" and "Pay in 4" follow their own interval: a
+  /// new [interval] is stored and redates the payments after the anchor
+  /// that are unpaid and not edited by hand. The anchor is the first
+  /// unpaid payment not edited by hand from number `paidBefore + 1` on; it
+  /// keeps its date, so no payment moves into the past. With [nextDate],
+  /// payment number `paidBefore + 1` moves there and the rest follow it
+  /// ([setPaidBefore]). Other kinds use [pattern] and ignore [interval].
   Future<ResizeRejection?> editPlan(
     int planId, {
     required int count,
@@ -367,47 +370,55 @@ class PlanRepository {
     UnderwayPattern? pattern,
     PaymentInterval? interval,
   }) => _db
-      .transaction(() async {
+      .transaction<ResizeRejection?>(() async {
+        if (paidBefore < 0 || paidBefore >= count) {
+          throw ArgumentError.value(paidBefore, 'paidBefore');
+        }
         final current = await (_db.select(
           _db.plans,
         )..where((p) => p.id.equals(planId))).getSingle();
         final hasInterval =
             current.kind == PlanKind.monthly || current.kind == PlanKind.payIn4;
-        final newInterval =
-            hasInterval &&
-            interval != null &&
-            interval != PaymentInterval.fromDays(current.intervalDays);
-        if (newInterval) {
-          if (!interval.isValid) throw ArgumentError.value(interval);
-          await (_db.update(_db.plans)..where((p) => p.id.equals(planId)))
-              .write(PlansCompanion(intervalDays: Value(interval.days)));
+        final stored = PaymentInterval.fromDays(current.intervalDays);
+        final chosen = hasInterval ? interval ?? stored : null;
+        if (chosen != null && !chosen.isValid) {
+          throw ArgumentError.value(interval, 'interval');
         }
-        Future<void> underway() async {
-          var anchor = nextDate;
-          if (anchor == null && newInterval) {
-            final rows =
-                await (_db.select(_db.payments)
-                      ..where((p) => p.planId.equals(planId))
-                      ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
-                    .get();
-            anchor = rows[paidBefore].date;
-          }
-          await setPaidBefore(
-            planId,
-            count: paidBefore,
-            nextDate: anchor,
-            pattern: anchor == null ? null : pattern,
-          );
-        }
+        final newInterval = chosen != null && chosen != stored;
+        final datePattern = chosen != null ? IntervalPattern(chosen) : pattern;
 
         if (count >= current.installmentCount) {
-          final rejected = await resize(planId, count: count, pattern: pattern);
-          if (rejected != null) return rejected;
-          await underway();
-        } else {
-          await underway();
-          final rejected = await resize(planId, count: count, pattern: pattern);
+          final rejected = await resize(
+            planId,
+            count: count,
+            pattern: datePattern,
+          );
           if (rejected != null) throw _Rollback(rejected);
+          await _underwayAndInterval(
+            planId,
+            paidBefore: paidBefore,
+            nextDate: nextDate,
+            pattern: datePattern,
+            redate: newInterval,
+          );
+        } else {
+          await _underwayAndInterval(
+            planId,
+            paidBefore: paidBefore,
+            nextDate: nextDate,
+            pattern: datePattern,
+            redate: newInterval,
+          );
+          final rejected = await resize(
+            planId,
+            count: count,
+            pattern: datePattern,
+          );
+          if (rejected != null) throw _Rollback(rejected);
+        }
+        if (newInterval) {
+          await (_db.update(_db.plans)..where((p) => p.id.equals(planId)))
+              .write(PlansCompanion(intervalDays: Value(chosen.days)));
         }
         return null;
       })
@@ -415,6 +426,48 @@ class PlanRepository {
         (Object e) => (e as _Rollback).reason,
         test: (e) => e is _Rollback,
       );
+
+  /// [setPaidBefore], then, for a new interval without a new next date,
+  /// the payments after the anchor (see [editPlan]) follow [pattern].
+  Future<void> _underwayAndInterval(
+    int planId, {
+    required int paidBefore,
+    required LocalDate? nextDate,
+    required UnderwayPattern? pattern,
+    required bool redate,
+  }) async {
+    await setPaidBefore(
+      planId,
+      count: paidBefore,
+      nextDate: nextDate,
+      pattern: nextDate == null ? null : pattern,
+    );
+    if (!redate || nextDate != null || pattern == null) return;
+    final rows =
+        await (_db.select(_db.payments)
+              ..where((p) => p.planId.equals(planId))
+              ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
+            .get();
+    bool free(PaymentRow r) => !r.isPaid && !r.isEdited;
+    var anchor = paidBefore;
+    while (anchor < rows.length && !free(rows[anchor])) {
+      anchor++;
+    }
+    if (anchor >= rows.length) return;
+    final dates = underwayDates(
+      nextDate: rows[anchor].date,
+      paidCount: anchor,
+      totalCount: rows.length,
+      pattern: pattern,
+    );
+    for (var i = anchor + 1; i < rows.length; i++) {
+      final r = rows[i];
+      if (!free(r) || r.dueDay == dates[i].epochDay) continue;
+      await (_db.update(_db.payments)..where((p) => p.id.equals(r.id))).write(
+        PaymentsCompanion(dueDay: Value(dates[i].epochDay)),
+      );
+    }
+  }
 
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();
