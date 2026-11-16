@@ -3308,6 +3308,20 @@ class $AppSettingsTable extends AppSettings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   ).withConverter<AmountEntry?>($AppSettingsTable.$converterlastAmountEntryn);
+  static const VerificationMeta _paydaySummaryEnabledMeta =
+      const VerificationMeta('paydaySummaryEnabled');
+  @override
+  late final GeneratedColumn<bool> paydaySummaryEnabled = GeneratedColumn<bool>(
+    'payday_summary_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("payday_summary_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3328,6 +3342,7 @@ class $AppSettingsTable extends AppSettings
     lastPayLaterRule,
     lastPayLaterValue,
     lastAmountEntry,
+    paydaySummaryEnabled,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3454,6 +3469,15 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('payday_summary_enabled')) {
+      context.handle(
+        _paydaySummaryEnabledMeta,
+        paydaySummaryEnabled.isAcceptableOrUnknown(
+          data['payday_summary_enabled']!,
+          _paydaySummaryEnabledMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3543,6 +3567,10 @@ class $AppSettingsTable extends AppSettings
           data['${effectivePrefix}last_amount_entry'],
         ),
       ),
+      paydaySummaryEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}payday_summary_enabled'],
+      )!,
     );
   }
 
@@ -3619,6 +3647,10 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// (schema v10): the total or one installment. Null until a plan is
   /// saved: the total, as before.
   final AmountEntry? lastAmountEntry;
+
+  /// Payday summary notification (schema v12): on for everyone until
+  /// turned off, existing users included.
+  final bool paydaySummaryEnabled;
   const SettingsRow({
     required this.id,
     required this.currencyCode,
@@ -3638,6 +3670,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     this.lastPayLaterRule,
     this.lastPayLaterValue,
     this.lastAmountEntry,
+    required this.paydaySummaryEnabled,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3690,6 +3723,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         $AppSettingsTable.$converterlastAmountEntryn.toSql(lastAmountEntry),
       );
     }
+    map['payday_summary_enabled'] = Variable<bool>(paydaySummaryEnabled);
     return map;
   }
 
@@ -3729,6 +3763,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       lastAmountEntry: lastAmountEntry == null && nullToAbsent
           ? const Value.absent()
           : Value(lastAmountEntry),
+      paydaySummaryEnabled: Value(paydaySummaryEnabled),
     );
   }
 
@@ -3770,6 +3805,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       lastAmountEntry: $AppSettingsTable.$converterlastAmountEntryn.fromJson(
         serializer.fromJson<String?>(json['lastAmountEntry']),
       ),
+      paydaySummaryEnabled: serializer.fromJson<bool>(
+        json['paydaySummaryEnabled'],
+      ),
     );
   }
   @override
@@ -3804,6 +3842,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       'lastAmountEntry': serializer.toJson<String?>(
         $AppSettingsTable.$converterlastAmountEntryn.toJson(lastAmountEntry),
       ),
+      'paydaySummaryEnabled': serializer.toJson<bool>(paydaySummaryEnabled),
     };
   }
 
@@ -3826,6 +3865,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     Value<PayLaterRuleKind?> lastPayLaterRule = const Value.absent(),
     Value<int?> lastPayLaterValue = const Value.absent(),
     Value<AmountEntry?> lastAmountEntry = const Value.absent(),
+    bool? paydaySummaryEnabled,
   }) => SettingsRow(
     id: id ?? this.id,
     currencyCode: currencyCode ?? this.currencyCode,
@@ -3856,6 +3896,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     lastAmountEntry: lastAmountEntry.present
         ? lastAmountEntry.value
         : this.lastAmountEntry,
+    paydaySummaryEnabled: paydaySummaryEnabled ?? this.paydaySummaryEnabled,
   );
   SettingsRow copyWithCompanion(AppSettingsCompanion data) {
     return SettingsRow(
@@ -3907,6 +3948,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       lastAmountEntry: data.lastAmountEntry.present
           ? data.lastAmountEntry.value
           : this.lastAmountEntry,
+      paydaySummaryEnabled: data.paydaySummaryEnabled.present
+          ? data.paydaySummaryEnabled.value
+          : this.paydaySummaryEnabled,
     );
   }
 
@@ -3930,7 +3974,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('repeatMode: $repeatMode, ')
           ..write('lastPayLaterRule: $lastPayLaterRule, ')
           ..write('lastPayLaterValue: $lastPayLaterValue, ')
-          ..write('lastAmountEntry: $lastAmountEntry')
+          ..write('lastAmountEntry: $lastAmountEntry, ')
+          ..write('paydaySummaryEnabled: $paydaySummaryEnabled')
           ..write(')'))
         .toString();
   }
@@ -3955,6 +4000,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     lastPayLaterRule,
     lastPayLaterValue,
     lastAmountEntry,
+    paydaySummaryEnabled,
   );
   @override
   bool operator ==(Object other) =>
@@ -3977,7 +4023,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.repeatMode == this.repeatMode &&
           other.lastPayLaterRule == this.lastPayLaterRule &&
           other.lastPayLaterValue == this.lastPayLaterValue &&
-          other.lastAmountEntry == this.lastAmountEntry);
+          other.lastAmountEntry == this.lastAmountEntry &&
+          other.paydaySummaryEnabled == this.paydaySummaryEnabled);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -3999,6 +4046,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<PayLaterRuleKind?> lastPayLaterRule;
   final Value<int?> lastPayLaterValue;
   final Value<AmountEntry?> lastAmountEntry;
+  final Value<bool> paydaySummaryEnabled;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
@@ -4018,6 +4066,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.lastPayLaterRule = const Value.absent(),
     this.lastPayLaterValue = const Value.absent(),
     this.lastAmountEntry = const Value.absent(),
+    this.paydaySummaryEnabled = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -4038,6 +4087,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.lastPayLaterRule = const Value.absent(),
     this.lastPayLaterValue = const Value.absent(),
     this.lastAmountEntry = const Value.absent(),
+    this.paydaySummaryEnabled = const Value.absent(),
   }) : currencyCode = Value(currencyCode),
        payFrequency = Value(payFrequency);
   static Insertable<SettingsRow> custom({
@@ -4059,6 +4109,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<String>? lastPayLaterRule,
     Expression<int>? lastPayLaterValue,
     Expression<String>? lastAmountEntry,
+    Expression<bool>? paydaySummaryEnabled,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -4082,6 +4133,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (lastPayLaterRule != null) 'last_pay_later_rule': lastPayLaterRule,
       if (lastPayLaterValue != null) 'last_pay_later_value': lastPayLaterValue,
       if (lastAmountEntry != null) 'last_amount_entry': lastAmountEntry,
+      if (paydaySummaryEnabled != null)
+        'payday_summary_enabled': paydaySummaryEnabled,
     });
   }
 
@@ -4104,6 +4157,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<PayLaterRuleKind?>? lastPayLaterRule,
     Value<int?>? lastPayLaterValue,
     Value<AmountEntry?>? lastAmountEntry,
+    Value<bool>? paydaySummaryEnabled,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -4125,6 +4179,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       lastPayLaterRule: lastPayLaterRule ?? this.lastPayLaterRule,
       lastPayLaterValue: lastPayLaterValue ?? this.lastPayLaterValue,
       lastAmountEntry: lastAmountEntry ?? this.lastAmountEntry,
+      paydaySummaryEnabled: paydaySummaryEnabled ?? this.paydaySummaryEnabled,
     );
   }
 
@@ -4199,6 +4254,11 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
         ),
       );
     }
+    if (paydaySummaryEnabled.present) {
+      map['payday_summary_enabled'] = Variable<bool>(
+        paydaySummaryEnabled.value,
+      );
+    }
     return map;
   }
 
@@ -4222,7 +4282,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('repeatMode: $repeatMode, ')
           ..write('lastPayLaterRule: $lastPayLaterRule, ')
           ..write('lastPayLaterValue: $lastPayLaterValue, ')
-          ..write('lastAmountEntry: $lastAmountEntry')
+          ..write('lastAmountEntry: $lastAmountEntry, ')
+          ..write('paydaySummaryEnabled: $paydaySummaryEnabled')
           ..write(')'))
         .toString();
   }
@@ -6830,6 +6891,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<PayLaterRuleKind?> lastPayLaterRule,
       Value<int?> lastPayLaterValue,
       Value<AmountEntry?> lastAmountEntry,
+      Value<bool> paydaySummaryEnabled,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -6851,6 +6913,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<PayLaterRuleKind?> lastPayLaterRule,
       Value<int?> lastPayLaterValue,
       Value<AmountEntry?> lastAmountEntry,
+      Value<bool> paydaySummaryEnabled,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -6955,6 +7018,11 @@ class $$AppSettingsTableFilterComposer
     column: $table.lastAmountEntry,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
+
+  ColumnFilters<bool> get paydaySummaryEnabled => $composableBuilder(
+    column: $table.paydaySummaryEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$AppSettingsTableOrderingComposer
@@ -7055,6 +7123,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.lastAmountEntry,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get paydaySummaryEnabled => $composableBuilder(
+    column: $table.paydaySummaryEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -7153,6 +7226,11 @@ class $$AppSettingsTableAnnotationComposer
         column: $table.lastAmountEntry,
         builder: (column) => column,
       );
+
+  GeneratedColumn<bool> get paydaySummaryEnabled => $composableBuilder(
+    column: $table.paydaySummaryEnabled,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -7205,6 +7283,7 @@ class $$AppSettingsTableTableManager
                     const Value.absent(),
                 Value<int?> lastPayLaterValue = const Value.absent(),
                 Value<AmountEntry?> lastAmountEntry = const Value.absent(),
+                Value<bool> paydaySummaryEnabled = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 currencyCode: currencyCode,
@@ -7224,6 +7303,7 @@ class $$AppSettingsTableTableManager
                 lastPayLaterRule: lastPayLaterRule,
                 lastPayLaterValue: lastPayLaterValue,
                 lastAmountEntry: lastAmountEntry,
+                paydaySummaryEnabled: paydaySummaryEnabled,
               ),
           createCompanionCallback:
               ({
@@ -7246,6 +7326,7 @@ class $$AppSettingsTableTableManager
                     const Value.absent(),
                 Value<int?> lastPayLaterValue = const Value.absent(),
                 Value<AmountEntry?> lastAmountEntry = const Value.absent(),
+                Value<bool> paydaySummaryEnabled = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 currencyCode: currencyCode,
@@ -7265,6 +7346,7 @@ class $$AppSettingsTableTableManager
                 lastPayLaterRule: lastPayLaterRule,
                 lastPayLaterValue: lastPayLaterValue,
                 lastAmountEntry: lastAmountEntry,
+                paydaySummaryEnabled: paydaySummaryEnabled,
               ),
           withReferenceMapper: (p0) => p0
               .map(

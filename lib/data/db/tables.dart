@@ -214,6 +214,11 @@ class AppSettings extends Table {
   /// saved: the total, as before.
   TextColumn get lastAmountEntry => textEnum<AmountEntry>().nullable()();
 
+  /// Payday summary notification (schema v12): on for everyone until
+  /// turned off, existing users included.
+  BoolColumn get paydaySummaryEnabled =>
+      boolean().withDefault(const Constant(true))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
