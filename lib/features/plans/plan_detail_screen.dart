@@ -20,6 +20,7 @@ import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
 import '../reminders/repeat_mode_ui.dart';
 import 'pay_later_form.dart';
+import 'payment_method_ui.dart';
 import 'plan_labels.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
@@ -195,6 +196,7 @@ class PlanDetailScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
             child: ReminderChoiceTile(
+              method: plan.plan.paymentMethod,
               value: reminderChoiceOf(
                 enabled: plan.plan.remindersEnabled,
                 leadDays: plan.plan.reminderLeadDays,
@@ -231,6 +233,10 @@ class PlanDetailScreen extends ConsumerWidget {
             _PaymentRow(plan: plan, payment: p),
           // Below the payments, so they stay at the top of the screen.
           const Divider(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: PaymentMethodTile(plan: plan),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: RepeatChoiceTile(

@@ -473,18 +473,18 @@ void main() {
       expect(
         r[0].body,
         '14 Kasım Cuma günü 1 ödeme var: Market, ₺850. '
-        'Ödemeyi yapmayı unutma.',
+        'Bu ödemeyi sen yapıyorsun.',
       );
       expect(
         r[1].body,
-        'Bugün 1 ödeme var: Market, ₺850. Ödemeyi yapmayı unutma.',
+        'Bugün 1 ödeme var: Market, ₺850. Bu ödemeyi sen yapıyorsun.',
       );
       final en = plan([
         pay(d(11, 14), name: 'Market', method: manual),
       ], lang: 'en');
       expect(
         en[1].body,
-        '1 payment today: Market, ₺850. Remember to make the payment.',
+        '1 payment today: Market, ₺850. You make this payment yourself.',
       );
     });
 
@@ -507,7 +507,7 @@ void main() {
       ]);
       expect(
         same.last.body,
-        'Bugün 2 ödeme var, toplam ₺2.450. Ödemeleri yapmayı unutma.',
+        'Bugün 2 ödeme var, toplam ₺2.450. Bu ödemeleri sen yapıyorsun.',
       );
       for (final other in [auto, null]) {
         final mixed = plan([

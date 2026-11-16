@@ -2020,7 +2020,7 @@ abstract class AppLocalizations {
   /// Sentence after a reminder for payments the user pays themselves.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{Remember to make the payment.} other{Remember to make the payments.}}'**
+  /// **'{count, plural, =1{You make this payment yourself.} other{You make these payments yourself.}}'**
   String reminderNoteManual(int count);
 
   /// Plan field: how the plan's payments are paid.

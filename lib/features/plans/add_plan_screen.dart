@@ -16,6 +16,7 @@ import '../../entitlement/entitlement.dart';
 import '../reminders/reminder_prompt.dart';
 import 'interval_field.dart';
 import 'pay_later_form.dart';
+import 'payment_method_ui.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
 /// four fields. Any of them can be "already underway". "Pay later" is one
@@ -91,6 +92,23 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   int? _cardId;
   bool _cashAdvance = false;
   bool _saving = false;
+
+  /// The payment method once chosen; until then a card plan is taken
+  /// automatically and every other plan is "not set" ([_paymentMethod]).
+  PaymentMethod? _method;
+  bool _methodTouched = false;
+
+  /// Where an automatic payment is taken from; null is "not chosen" (a
+  /// card plan: its own card).
+  int? _chargeSourceId;
+
+  PaymentMethod? get _paymentMethod => _methodTouched
+      ? _method
+      : _mode == AddMode.card
+      ? PaymentMethod.automatic
+      : null;
+
+  int? get _ownCardId => _mode == AddMode.card ? _cardId : null;
 
   /// The "Pay later" form; it starts with the rule used last.
   late final PayLaterInput _payLater;
@@ -393,6 +411,11 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               ? PlanOrigin.manual
               : PlanOrigin.template,
           title: payLater ? _payLater.store.text : _title.text,
+          paymentMethod: _paymentMethod,
+          chargeSourceId: storedChargeSourceId(
+            _chargeSourceId ?? _ownCardId,
+            _ownCardId,
+          ),
         );
     final settings = ref.read(settingsRepositoryProvider);
     if (payLater) {
@@ -525,9 +548,12 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                   ],
                   const SizedBox(height: 16),
                   if (_mode == AddMode.payLater)
-                    // One payment: the due date line is the preview.
-                    PayLaterFields(input: _payLater, onChanged: _refresh)
-                  else ...[
+                  // One payment: the due date line is the preview.
+                  ...[
+                    PayLaterFields(input: _payLater, onChanged: _refresh),
+                    const SizedBox(height: 8),
+                    _details(context),
+                  ] else ...[
                     ..._fields(context),
                     const SizedBox(height: 8),
                     _details(context),
@@ -872,15 +898,17 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       tilePadding: EdgeInsets.zero,
       childrenPadding: const EdgeInsets.only(bottom: 8),
       children: [
-        TextFormField(
-          key: const ValueKey('title'),
-          controller: _title,
-          maxLength: 80,
-          decoration: InputDecoration(
-            labelText: l10n.fieldTitle,
-            hintText: l10n.fieldTitleHint,
+        // "Pay later" has its own store name field.
+        if (_mode != AddMode.payLater)
+          TextFormField(
+            key: const ValueKey('title'),
+            controller: _title,
+            maxLength: 80,
+            decoration: InputDecoration(
+              labelText: l10n.fieldTitle,
+              hintText: l10n.fieldTitleHint,
+            ),
           ),
-        ),
         if (_mode == AddMode.card) ...[
           const SizedBox(height: 8),
           // A plan already underway has no purchase date to defer from.
@@ -904,6 +932,17 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             onChanged: (v) => setState(() => _cashAdvance = v),
           ),
         ],
+        const SizedBox(height: 8),
+        PaymentMethodFields(
+          method: _paymentMethod,
+          chargeSourceId: _chargeSourceId,
+          ownCardId: _ownCardId,
+          onMethodChanged: (m) => setState(() {
+            _method = m;
+            _methodTouched = true;
+          }),
+          onChargeSourceChanged: (id) => setState(() => _chargeSourceId = id),
+        ),
       ],
     );
   }
