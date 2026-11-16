@@ -259,6 +259,20 @@ Bu bölüm aynı günün ilk hatırlatma kararlarının yerini alır. Ürün sah
 | Eski planlar | 13 Kasım 2026 öncesi (şema v4 öncesi) yalnızca kalan taksitleriyle eklenmiş planların düzenleme ekranı yok (`startsAtFirstPayment`); onlarda aralık değiştirilemez. Bu yol artık uygulamada üretilmiyor; uygulama yayımlanmadığı için gerçek veride beklenmiyor. Açmak, eksik geçmiş taksitlerle "zaten sürüyor" mantığını yeniden yazmayı gerektirir; değiştirilmedi. |
 | Tür adı | "Aylık taksit" adı değiştirilmedi (mevcut çevirilere dokunulmaz); aralık seçimi altında görünür. |
 
+## Toplam ya da taksit tutarıyla giriş (16 Kasım 2026)
+
+Yol Haritası 8. Açık sorular ürün sahibinin iş tanımında cevaplandı: bölme artığı ilk taksitte kalır (mevcut `splitEvenly`, değişmedi); varsayılan giriş yolu son kullanılan, hiç kullanılmamışsa "Toplam".
+
+| Konu | Karar |
+|---|---|
+| Kapsam | Çok ödemeli bütün türlerde (4 ödemeli plan, aylık taksit, kart taksidi, elle giriş), "Bu plan zaten sürüyor" açıkken de. "Sonra öde" tek ödeme olduğu için değişmedi. Plan düzenleme ekranına eklenmedi. |
+| Seçici | Tutar alanının hemen üstünde parçalı düğme (`SegmentedButton`): "Toplam" / "Taksit". Alan sayısı artmaz: tek tutar alanı, etiketi yola göre "Toplam tutar" ya da "Taksit tutarı". 4 ödemeli planda sayı sabit 4, taksit yolunda yalnızca taksit tutarı girilir. Seçili parçada onay işareti var (durum yalnızca renkle anlatılmaz). Renk tema varsayılanı (`secondaryContainer` = `surfaceRaised`); accent kullanılmadı, yeni renk yok. |
+| Hesaplanan satır | Tutar alanının altında, her tuşta güncellenir, `textMuted` ve "· hesaplandı" notuyla. Toplam yolunda "Taksit ₺2.000 · hesaplandı"; bölünmüyorsa "İlk taksit ₺333,34, diğer 2 taksit ₺333,33 · hesaplandı". Taksit yolunda "Toplam ₺7.650 · hesaplandı". Değerler eksik ya da geçersizken satır görünmez. |
+| Motor | Draft her zaman toplamla kurulur: taksit yolunda toplam = taksit × sayı (`totalFromInstallment`, `lib/core/engine/amount_entry.dart`), sonra mevcut `PlanCalculator` / `underwayPlan` / `markPaidBefore` yolları. İkinci hesap yolu yok. Özet `installmentSplit` doğrudan `splitEvenly` sonucundan okunur. Birime özel kod yok: küçük birimde tam sayı bölme, JPY'de artığı tam yen, KWD'de fils olarak dağıtır (tablo testli). |
+| Sınırlar | Sayı 1–120 (`maxInstallments`), taksit en az 1 küçük birim. Çarpım 2^53−1'i (`maxEntryTotalMinor`, web dahil her platformda kesin tam sayı) aşarsa reddedilir; hata metni mevcut tutar hatası ("Tutarı rakamla yaz, örneğin 1250,50."). Toplam yolunun sınırları değişmedi. |
+| Yol değişimi | Taksit sayısı korunur. Toplam → Taksit: eşit pay (artıksız taban) yazılır; toplam bölünmüyorsa yeni toplam "hesaplandı" notuyla görünür (1.000 / 3 → 333,33, toplam 999,99). Taksit → Toplam: taksit × sayı yazılır. Hesaplanamıyorsa (sayı yok ya da geçersiz) hedef alan boş açılır; öbür yolun alanı yazılanı korur. |
+| Hatırlama | `app_settings.last_amount_entry` (şema v10, boş = Toplam). Çok ödemeli plan kaydedildiğinde yazılır; "Sonra öde" kaydı dokunmaz. Göç: mevcut kullanıcılar boş başlar, yani ekran bugünkü gibi "Toplam" ile açılır. Yedek biçimi henüz yok; bu ayar ileride yedeğe girerse adıyla saklanır (`total` / `installment`). |
+
 ## Kaynak öncelik sırası ve geliştirme düzeni (16 Kasım 2026)
 
 | Konu | Karar |
