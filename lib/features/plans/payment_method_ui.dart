@@ -14,7 +14,7 @@ import '../../l10n/generated/app_localizations.dart';
 /// The icon of a payment method; always shown with its word (on screen or
 /// as the screen reader label), never alone.
 IconData paymentMethodIcon(PaymentMethod method) => switch (method) {
-  PaymentMethod.automatic => Icons.autorenew,
+  PaymentMethod.automatic => Icons.account_balance_outlined,
   PaymentMethod.manual => Icons.front_hand_outlined,
 };
 
