@@ -2004,6 +2004,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The total gets too large. Lower the installment or the number of payments.'**
   String get errorTotalTooLarge;
+
+  /// Notification body with a sentence for the payment method after it (ahead and on-day reminders whose payments share one method).
+  ///
+  /// In en, this message translates to:
+  /// **'{body}. {note}'**
+  String reminderWithNote(String body, String note);
+
+  /// Sentence after a reminder for payments taken automatically. Calm, no exclamation.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{It\'s taken automatically; keep the amount in your account.} other{They\'re taken automatically; keep the amount in your account.}}'**
+  String reminderNoteAutomatic(int count);
+
+  /// Sentence after a reminder for payments the user pays themselves.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Remember to make the payment.} other{Remember to make the payments.}}'**
+  String reminderNoteManual(int count);
+
+  /// Plan field: how the plan's payments are paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment method'**
+  String get paymentMethodLabel;
+
+  /// Payment method: taken from a card or account automatically. Also the screen reader label of its icon on home.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken automatically'**
+  String get paymentMethodAutomatic;
+
+  /// Payment method: the user goes and pays (store, transfer, ATM). Also the screen reader label of its icon on home.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid manually'**
+  String get paymentMethodManual;
+
+  /// Payment method not chosen: reminders as before.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get paymentMethodNotSet;
+
+  /// Under the payment method choice when 'Taken automatically' is selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders tell you to keep the amount in your account.'**
+  String get paymentMethodAutomaticHint;
+
+  /// Under the payment method choice when 'You pay it' is selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders come a day earlier, so there\'s time to go and pay.'**
+  String get paymentMethodManualHint;
+
+  /// Optional: the source or card an automatic payment is taken from.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken from'**
+  String get chargeSourceLabel;
+
+  /// 'Taken from' left empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not chosen'**
+  String get chargeSourceNone;
+
+  /// Plan details: the payment method and where it is taken from.
+  ///
+  /// In en, this message translates to:
+  /// **'{method} · {source}'**
+  String paymentMethodFrom(String method, String source);
 }
 
 class _AppLocalizationsDelegate

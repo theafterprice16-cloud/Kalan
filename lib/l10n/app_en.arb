@@ -1296,5 +1296,87 @@
   "errorTotalTooLarge": "The total gets too large. Lower the installment or the number of payments.",
   "@errorTotalTooLarge": {
     "description": "Add plan, installment amount field: installment times the count is more than the app takes."
+  },
+  "reminderWithNote": "{body}. {note}",
+  "@reminderWithNote": {
+    "description": "Notification body with a sentence for the payment method after it (ahead and on-day reminders whose payments share one method).",
+    "placeholders": {
+      "body": {
+        "type": "String",
+        "example": "1 payment on Friday, November 14: Zip, ¥12,000",
+        "description": "The body as without a payment method"
+      },
+      "note": {
+        "type": "String",
+        "example": "It's taken automatically; keep the amount in your account.",
+        "description": "reminderNoteAutomatic or reminderNoteManual"
+      }
+    }
+  },
+  "reminderNoteAutomatic": "{count, plural, =1{It's taken automatically; keep the amount in your account.} other{They're taken automatically; keep the amount in your account.}}",
+  "@reminderNoteAutomatic": {
+    "description": "Sentence after a reminder for payments taken automatically. Calm, no exclamation.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments in the notification"
+      }
+    }
+  },
+  "reminderNoteManual": "{count, plural, =1{Remember to make the payment.} other{Remember to make the payments.}}",
+  "@reminderNoteManual": {
+    "description": "Sentence after a reminder for payments the user pays themselves.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Number of payments in the notification"
+      }
+    }
+  },
+  "paymentMethodLabel": "Payment method",
+  "@paymentMethodLabel": {
+    "description": "Plan field: how the plan's payments are paid."
+  },
+  "paymentMethodAutomatic": "Taken automatically",
+  "@paymentMethodAutomatic": {
+    "description": "Payment method: taken from a card or account automatically. Also the screen reader label of its icon on home."
+  },
+  "paymentMethodManual": "Paid manually",
+  "@paymentMethodManual": {
+    "description": "Payment method: the user goes and pays (store, transfer, ATM). Also the screen reader label of its icon on home."
+  },
+  "paymentMethodNotSet": "Not set",
+  "@paymentMethodNotSet": {
+    "description": "Payment method not chosen: reminders as before."
+  },
+  "paymentMethodAutomaticHint": "Reminders tell you to keep the amount in your account.",
+  "@paymentMethodAutomaticHint": {
+    "description": "Under the payment method choice when 'Taken automatically' is selected."
+  },
+  "paymentMethodManualHint": "Reminders come a day earlier, so there's time to go and pay.",
+  "@paymentMethodManualHint": {
+    "description": "Under the payment method choice when 'You pay it' is selected."
+  },
+  "chargeSourceLabel": "Taken from",
+  "@chargeSourceLabel": {
+    "description": "Optional: the source or card an automatic payment is taken from."
+  },
+  "chargeSourceNone": "Not chosen",
+  "@chargeSourceNone": {
+    "description": "'Taken from' left empty."
+  },
+  "paymentMethodFrom": "{method} · {source}",
+  "@paymentMethodFrom": {
+    "description": "Plan details: the payment method and where it is taken from.",
+    "placeholders": {
+      "method": {
+        "type": "String",
+        "example": "Taken automatically"
+      },
+      "source": {
+        "type": "String",
+        "example": "Bonus"
+      }
+    }
   }
 }

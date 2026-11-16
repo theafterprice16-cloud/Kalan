@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../date/local_date.dart';
+import '../engine/payment_method.dart';
+
+export '../engine/payment_method.dart' show PaymentMethod;
 
 /// The two notifications every payment gets.
 enum ReminderKind {
@@ -91,6 +94,7 @@ class ReminderPayment {
     this.choice = ReminderChoice.general,
     this.ref,
     this.repeat,
+    this.method,
   });
 
   final String name;
@@ -105,6 +109,10 @@ class ReminderPayment {
 
   /// The plan's own repeat mode; null follows the global setting.
   final ReminderRepeat? repeat;
+
+  /// How the plan is paid; null is "not set" (recurring payments too):
+  /// the reminders are exactly as before payment methods existed.
+  final PaymentMethod? method;
 }
 
 /// A stored payment a notification points at: a plan payment by id, or a
@@ -207,16 +215,23 @@ ReminderRepeat repeatModeFor(
   return mode;
 }
 
-/// "Days before" for a payment that follows the global setting.
+/// "Days before" for a plan paid by [method] that follows the global
+/// setting. The one place that decides it (screens show it too):
 ///
-/// The one place that decides it: when manual and automatic payments get
-/// their own defaults (backlog), only this function changes.
-int defaultLeadDaysFor(ReminderPayment payment, ReminderSettings settings) =>
-    settings.leadDays;
+/// - automatic and not set: the global setting;
+/// - manual: one day earlier, to leave time to go and pay.
+///
+/// A plan's own choice (off, a different day) always wins ([leadDaysFor]).
+int defaultLeadDaysFor(PaymentMethod? method, ReminderSettings settings) =>
+    switch (method) {
+      PaymentMethod.manual => settings.leadDays + 1,
+      PaymentMethod.automatic || null => settings.leadDays,
+    };
 
 /// "Days before" that applies to [payment].
 int leadDaysFor(ReminderPayment payment, ReminderSettings settings) {
-  final days = payment.choice.leadDays ?? defaultLeadDaysFor(payment, settings);
+  final days =
+      payment.choice.leadDays ?? defaultLeadDaysFor(payment.method, settings);
   // Never on the due day itself: that is the on-day reminder.
   return days < 1 ? 1 : days;
 }
@@ -232,12 +247,29 @@ abstract interface class ReminderTexts {
 
   /// Text for [payments] due on [dueDates] (one date unless an "ahead"
   /// notification gathers payments with different lead days).
+  ///
+  /// With a [method] ([reminderMethodOf]) the text says what that method
+  /// needs: the money in the account, or going to pay. Null: the text as
+  /// before payment methods existed.
   ReminderText describe({
     required ReminderKind kind,
     required List<ReminderPayment> payments,
     required List<LocalDate> dueDates,
     required bool showAmounts,
+    PaymentMethod? method,
   });
+}
+
+/// The payment method a notification's text speaks for: the one every
+/// payment in it shares, only for "ahead" and "on day". Null (the text as
+/// before) when they differ, when one is not set, and for overdue ones.
+PaymentMethod? reminderMethodOf(
+  ReminderKind kind,
+  List<ReminderPayment> payments,
+) {
+  if (kind == ReminderKind.overdue || payments.isEmpty) return null;
+  final method = payments.first.method;
+  return payments.every((p) => p.method == method) ? method : null;
 }
 
 /// The short body and the expanded body (body plus the names).

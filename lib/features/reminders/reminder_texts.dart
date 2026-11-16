@@ -42,13 +42,14 @@ class L10nReminderTexts implements ReminderTexts {
     required List<ReminderPayment> payments,
     required List<LocalDate> dueDates,
     required bool showAmounts,
+    PaymentMethod? method,
   }) {
     final count = payments.length;
     final name = payments.first.name;
     final total = _money(payments.fold(0, (sum, p) => sum + p.amountMinor));
     final date = _date(dueDates.first);
     final due = dueDates.first;
-    final body = switch ((kind, dueDates.length > 1, showAmounts)) {
+    var body = switch ((kind, dueDates.length > 1, showAmounts)) {
       (ReminderKind.overdue, _, true) => l10n.reminderOverdue(
         count,
         _dayMonth(due),
@@ -85,6 +86,12 @@ class L10nReminderTexts implements ReminderTexts {
         date,
       ),
     };
+    final note = switch (method) {
+      PaymentMethod.automatic => l10n.reminderNoteAutomatic(count),
+      PaymentMethod.manual => l10n.reminderNoteManual(count),
+      null => null,
+    };
+    if (note != null) body = l10n.reminderWithNote(body, note);
     final expanded = count == 1
         ? body
         : l10n.reminderExpanded(
