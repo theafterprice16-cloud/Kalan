@@ -326,8 +326,59 @@ void main() {
     expect(find.byKey(const ValueKey('amount-computed')), findsNothing);
     await save(tester);
     await scrollUp(tester, find.byKey(const ValueKey('installment')));
-    expect(find.textContaining('1250,50'), findsOneWidget);
+    expect(
+      find.text(
+        'Toplam çok büyük oluyor. Taksiti ya da taksit sayısını küçült.',
+      ),
+      findsOneWidget,
+    );
     expect(await db.select(db.plans).get(), isEmpty);
+  });
+
+  testWidgets('an amount with too many digits is called too large', (
+    tester,
+  ) async {
+    await pump(tester);
+    await openAddPlan(tester);
+    await chooseMode(tester, 'Aylık taksit');
+    await type(tester, 'total', '12345678901234');
+    await type(tester, 'count', '3');
+    await save(tester);
+    await scrollUp(tester, find.byKey(const ValueKey('total')));
+    expect(find.text('Bu tutar çok büyük.'), findsOneWidget);
+    // A badly written amount still gets the example.
+    await type(tester, 'total', '12.34.5');
+    await save(tester);
+    await scrollUp(tester, find.byKey(const ValueKey('total')));
+    expect(find.text('Tutarı rakamla yaz, örneğin 1250,50.'), findsOneWidget);
+  });
+
+  testWidgets('switching while typing keeps the keyboard on the amount', (
+    tester,
+  ) async {
+    await pump(tester);
+    await openAddPlan(tester);
+    await chooseMode(tester, 'Aylık taksit');
+    await type(tester, 'count', '6');
+    await tester.tap(find.byKey(const ValueKey('total')));
+    await tester.enterText(find.byKey(const ValueKey('total')), '12000');
+    await tester.pumpAndSettle();
+    bool focused(String key) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.byKey(ValueKey(key)),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .focusNode
+        .hasFocus;
+    expect(focused('total'), isTrue);
+    await tester.tap(segment('Taksit'));
+    await tester.pumpAndSettle();
+    expect(focused('installment'), isTrue);
+    await tester.tap(segment('Toplam'));
+    await tester.pumpAndSettle();
+    expect(focused('total'), isTrue);
   });
 
   testWidgets('"Pay later" has no choice: one payment, as before', (

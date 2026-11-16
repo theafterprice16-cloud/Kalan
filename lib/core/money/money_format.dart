@@ -128,7 +128,25 @@ int? parseAmount(
   String input,
   Currency currency, {
   required String localeName,
-}) {
+}) => _parseAmount(input, currency, localeName, maxWholeDigits);
+
+/// Whether [input] is a well-formed amount with more than
+/// [maxWholeDigits] digits before the decimal separator: wrong only in
+/// size, so it gets a "too large" message instead of an example.
+bool amountTooLarge(
+  String input,
+  Currency currency, {
+  required String localeName,
+}) =>
+    parseAmount(input, currency, localeName: localeName) == null &&
+    _parseAmount(input, currency, localeName, 18) != null;
+
+int? _parseAmount(
+  String input,
+  Currency currency,
+  String localeName,
+  int maxWhole,
+) {
   if (input.contains('-')) return null;
   // Symbols may hold separators ("B/.", "د.ك"); drop them first.
   var text = input;
@@ -171,7 +189,7 @@ int? parseAmount(
   }
 
   if (wholeDigits.isEmpty && fractionText.isEmpty) return null;
-  if (wholeDigits.length > maxWholeDigits) return null;
+  if (wholeDigits.length > maxWhole) return null;
   final whole = wholeDigits.isEmpty ? 0 : int.parse(wholeDigits);
   final fraction = fractionText.isEmpty
       ? 0

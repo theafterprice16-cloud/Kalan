@@ -148,7 +148,7 @@ class PayLaterFields extends ConsumerWidget {
             final amount = v == null ? null : ref.parseMoney(context, v);
             if (v == null || v.trim().isEmpty) return l10n.errorRequired;
             return amount == null || amount < 1
-                ? ref.amountError(context)
+                ? ref.amountError(context, v)
                 : null;
           },
         ),

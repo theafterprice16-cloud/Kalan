@@ -1447,4 +1447,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String amountComputedTotal(String amount) {
     return 'Total $amount · calculated';
   }
+
+  @override
+  String get errorAmountTooLarge => 'This amount is too large.';
+
+  @override
+  String get errorTotalTooLarge =>
+      'The total gets too large. Lower the installment or the number of payments.';
 }

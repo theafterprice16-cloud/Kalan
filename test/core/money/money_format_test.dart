@@ -109,6 +109,21 @@ void main() {
         expect(parseAmount(input(max + 1), currency, localeName: 'tr'), null);
       });
     }
+
+    test('only a well-formed amount that is too long is "too large"', () {
+      final tr = Currency.fromCode('TRY');
+      final jpy = Currency.fromCode('JPY');
+      bool tooLarge(String s, Currency c) =>
+          amountTooLarge(s, c, localeName: 'tr');
+      expect(tooLarge('12345678901234', tr), isTrue);
+      expect(tooLarge('12.345.678.901.234,50', tr), isTrue);
+      expect(tooLarge('1234567890123', tr), isFalse);
+      expect(tooLarge('1250,50', tr), isFalse);
+      expect(tooLarge('12.34.5', tr), isFalse);
+      expect(tooLarge('12345678901234,567', tr), isFalse);
+      expect(tooLarge('12345678901234,5', jpy), isFalse);
+      expect(tooLarge('abc', tr), isFalse);
+    });
   });
 
   group('registry', () {

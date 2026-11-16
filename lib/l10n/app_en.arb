@@ -1288,5 +1288,13 @@
         "description": "Formatted total amount"
       }
     }
+  },
+  "errorAmountTooLarge": "This amount is too large.",
+  "@errorAmountTooLarge": {
+    "description": "Amount field error: a well-formed amount with more digits than the app takes."
+  },
+  "errorTotalTooLarge": "The total gets too large. Lower the installment or the number of payments.",
+  "@errorTotalTooLarge": {
+    "description": "Add plan, installment amount field: installment times the count is more than the app takes."
   }
 }
