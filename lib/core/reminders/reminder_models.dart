@@ -177,6 +177,7 @@ class ReminderSettings {
     this.minuteOfDay = 9 * 60,
     this.showAmounts = true,
     this.repeatMode = ReminderRepeat.off,
+    this.paydaySummary = true,
   });
 
   /// Master switch; off cancels every pending reminder.
@@ -193,6 +194,10 @@ class ReminderSettings {
 
   /// Global repeat mode; plans can choose their own.
   final ReminderRepeat repeatMode;
+
+  /// The payday summary notification ([PaydaySummary]); the master switch
+  /// [enabled] turns it off too.
+  final bool paydaySummary;
 
   /// A 20:00 reminder only when the reminder time is 18:00 or earlier
   /// (as "Remind tonight"): never two reminders close together, never at
@@ -258,6 +263,10 @@ abstract interface class ReminderTexts {
     required bool showAmounts,
     PaymentMethod? method,
   });
+
+  /// Text of the payday summary. Without [showAmounts] only the number of
+  /// payments.
+  ReminderText payday(PaydaySummary summary, {required bool showAmounts});
 }
 
 /// The payment method a notification's text speaks for: the one every
@@ -270,6 +279,41 @@ PaymentMethod? reminderMethodOf(
   if (kind == ReminderKind.overdue || payments.isEmpty) return null;
   final method = payments.first.method;
   return payments.every((p) => p.method == method) ? method : null;
+}
+
+/// What the home screen will show for the pay period starting on [date],
+/// worked out by the same calculation, as seen that morning. Only known
+/// payments; [leftMinor] is null without an income.
+class PaydaySummary {
+  const PaydaySummary({
+    required this.date,
+    required this.paymentCount,
+    required this.totalMinor,
+    this.leftMinor,
+  });
+
+  /// The first day of the period (the payday, never moved).
+  final LocalDate date;
+  final int paymentCount;
+  final int totalMinor;
+
+  /// Income minus [totalMinor]; negative when the period is short.
+  final int? leftMinor;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PaydaySummary &&
+      other.date == date &&
+      other.paymentCount == paymentCount &&
+      other.totalMinor == totalMinor &&
+      other.leftMinor == leftMinor;
+
+  @override
+  int get hashCode => Object.hash(date, paymentCount, totalMinor, leftMinor);
+
+  @override
+  String toString() =>
+      'PaydaySummary($date, $paymentCount, $totalMinor, $leftMinor)';
 }
 
 /// The short body and the expanded body (body plus the names).
@@ -367,6 +411,7 @@ class PlannedReminder {
     this.payload = reminderPayload,
     this.buttons = const [],
     this.data,
+    this.isPaydaySummary = false,
   });
 
   /// Stable per fire day and kind, so rescheduling replaces a reminder
@@ -397,6 +442,11 @@ class PlannedReminder {
 
   bool get isSnoozed => data?.snoozed ?? false;
 
+  /// The payday summary ([paydayReminder]): no payments, no buttons, its
+  /// own id; [kind] is "on day" (its day is the payday). Never merged
+  /// with payment reminders.
+  final bool isPaydaySummary;
+
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
 
   /// "Ahead" and "on day" at the reminder time: fire day × 2 + kind,
@@ -422,6 +472,12 @@ class PlannedReminder {
   static int idForSnooze(int snoozeId) => snoozeIdBase + snoozeId;
 
   static const snoozeIdBase = 1 << 30;
+
+  /// The payday summary: 3 × 2^28 + its day, between repeat ids (2^29 +
+  /// day × 4 + slot) and snoozed ones (2^30 + snooze id).
+  static int idForPayday(LocalDate date) => paydayIdBase + date.epochDay;
+
+  static const paydayIdBase = 3 << 28;
 }
 
 /// What a notification's buttons act on, carried in its payload: the

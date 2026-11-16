@@ -506,6 +506,28 @@ void main() {
     },
   );
 
+  test('v11 -> current: payday summary on, settings and plans kept', () async {
+    final schema = await verifier.schemaAt(11);
+    seedCommon(
+      schema,
+      settingsExtra: ', reminders_enabled, reminder_minute, net_income_minor',
+      values: ', 0, 600, 2075000',
+    );
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, db.schemaVersion);
+    final settings = await db.select(db.appSettings).getSingle();
+    expect(settings.paydaySummaryEnabled, isTrue);
+    expect(settings.remindersEnabled, isFalse);
+    expect(settings.reminderMinute, 600);
+    expect(settings.netIncomeMinor, 2075000);
+    expect(settings.payDay, 15);
+    final payments = await db.select(db.payments).get();
+    expect(payments.map((p) => (p.seq, p.dueDay, p.amountMinor)), [
+      (1, 20405, 2500),
+    ]);
+    await db.close();
+  });
+
   test('the amount entry is stored by name', () async {
     final db = AppDatabase(NativeDatabase.memory());
     await db

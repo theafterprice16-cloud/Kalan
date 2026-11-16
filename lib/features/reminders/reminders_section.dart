@@ -185,6 +185,17 @@ class RemindersSection extends ConsumerWidget {
           onTap: on ? () => _pickRepeat(context, ref) : null,
         ),
         SwitchListTile(
+          key: const ValueKey('payday-summary'),
+          title: Text(l10n.reminderPaydayToggle),
+          subtitle: Text(l10n.reminderPaydayToggleHint, style: muted),
+          value: reminders.paydaySummary,
+          onChanged: on
+              ? (v) => unawaited(
+                  ref.read(reminderSettingsStoreProvider).setPaydaySummary(v),
+                )
+              : null,
+        ),
+        SwitchListTile(
           key: const ValueKey('reminder-show-amount'),
           title: Text(l10n.reminderShowAmount),
           value: privacy.showAmountsInNotifications(settings),

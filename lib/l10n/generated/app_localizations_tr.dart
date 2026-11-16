@@ -1529,4 +1529,45 @@ class AppLocalizationsTr extends AppLocalizations {
   String paymentMethodFrom(String method, String source) {
     return '$method · $source';
   }
+
+  @override
+  String reminderPayday(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Yeni dönem başladı. Bu dönem $count ödeme, toplam $total.',
+      one: 'Yeni dönem başladı. Bu dönem 1 ödeme, toplam $total.',
+      zero: 'Yeni dönem başladı. Bu dönem ödeme yok.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderPaydayHidden(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Yeni dönem başladı. Bu dönem $count ödeme var.',
+      one: 'Yeni dönem başladı. Bu dönem 1 ödeme var.',
+      zero: 'Yeni dönem başladı. Bu dönem ödeme yok.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderPaydayLeft(String body, String left) {
+    return '$body Kalan $left.';
+  }
+
+  @override
+  String reminderPaydayShort(String body, String amount) {
+    return '$body Bu dönem $amount eksik görünüyor.';
+  }
+
+  @override
+  String get reminderPaydayToggle => 'Maaş günü özeti';
+
+  @override
+  String get reminderPaydayToggleHint =>
+      'Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalanı.';
 }

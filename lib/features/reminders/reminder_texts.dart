@@ -100,4 +100,21 @@ class L10nReminderTexts implements ReminderTexts {
           );
     return ReminderText(body: body, expanded: expanded);
   }
+
+  @override
+  ReminderText payday(PaydaySummary summary, {required bool showAmounts}) {
+    final count = summary.paymentCount;
+    if (!showAmounts) {
+      final body = l10n.reminderPaydayHidden(count);
+      return ReminderText(body: body, expanded: body);
+    }
+    var body = l10n.reminderPayday(count, _money(summary.totalMinor));
+    final left = summary.leftMinor;
+    if (left != null) {
+      body = left < 0
+          ? l10n.reminderPaydayShort(body, _money(-left))
+          : l10n.reminderPaydayLeft(body, _money(left));
+    }
+    return ReminderText(body: body, expanded: body);
+  }
 }

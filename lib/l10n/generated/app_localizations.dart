@@ -2076,6 +2076,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{method} · {source}'**
   String paymentMethodFrom(String method, String source);
+
+  /// Payday summary notification on the first day of a pay period. Numbers only, no advice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{A new pay period has started. No payments this period.} =1{A new pay period has started. 1 payment this period, {total} in total.} other{A new pay period has started. {count} payments this period, {total} in total.}}'**
+  String reminderPayday(int count, String total);
+
+  /// reminderPayday with amounts hidden in notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{A new pay period has started. No payments this period.} =1{A new pay period has started. 1 payment this period.} other{A new pay period has started. {count} payments this period.}}'**
+  String reminderPaydayHidden(int count);
+
+  /// Payday summary with an income: what is left after the period's payments.
+  ///
+  /// In en, this message translates to:
+  /// **'{body} {left} left.'**
+  String reminderPaydayLeft(String body, String left);
+
+  /// Payday summary when the payments are more than the income. Calm, no warning words.
+  ///
+  /// In en, this message translates to:
+  /// **'{body} This period looks {amount} short.'**
+  String reminderPaydayShort(String body, String amount);
+
+  /// Settings switch: one notification on payday with the period's payments.
+  ///
+  /// In en, this message translates to:
+  /// **'Payday summary'**
+  String get reminderPaydayToggle;
+
+  /// Under the payday summary switch.
+  ///
+  /// In en, this message translates to:
+  /// **'On payday, at your reminder time: this period\'s payments, total and what\'s left.'**
+  String get reminderPaydayToggleHint;
 }
 
 class _AppLocalizationsDelegate

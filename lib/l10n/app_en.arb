@@ -1378,5 +1378,67 @@
         "example": "Bonus"
       }
     }
+  },
+  "reminderPayday": "{count, plural, =0{A new pay period has started. No payments this period.} =1{A new pay period has started. 1 payment this period, {total} in total.} other{A new pay period has started. {count} payments this period, {total} in total.}}",
+  "@reminderPayday": {
+    "description": "Payday summary notification on the first day of a pay period. Numbers only, no advice.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Payments counted in the period (home screen's number)"
+      },
+      "total": {
+        "type": "String",
+        "example": "₺8,300",
+        "description": "Formatted total spoken for"
+      }
+    }
+  },
+  "reminderPaydayHidden": "{count, plural, =0{A new pay period has started. No payments this period.} =1{A new pay period has started. 1 payment this period.} other{A new pay period has started. {count} payments this period.}}",
+  "@reminderPaydayHidden": {
+    "description": "reminderPayday with amounts hidden in notifications.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Payments counted in the period (home screen's number)"
+      }
+    }
+  },
+  "reminderPaydayLeft": "{body} {left} left.",
+  "@reminderPaydayLeft": {
+    "description": "Payday summary with an income: what is left after the period's payments.",
+    "placeholders": {
+      "body": {
+        "type": "String",
+        "example": "A new pay period has started. 6 payments this period, ₺8,300 in total."
+      },
+      "left": {
+        "type": "String",
+        "example": "₺12,450"
+      }
+    }
+  },
+  "reminderPaydayShort": "{body} This period looks {amount} short.",
+  "@reminderPaydayShort": {
+    "description": "Payday summary when the payments are more than the income. Calm, no warning words.",
+    "placeholders": {
+      "body": {
+        "type": "String",
+        "example": "A new pay period has started. 4 payments this period, ₺9,200 in total."
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺1,200",
+        "description": "How much is missing, without a minus sign"
+      }
+    }
+  },
+  "reminderPaydayToggle": "Payday summary",
+  "@reminderPaydayToggle": {
+    "description": "Settings switch: one notification on payday with the period's payments."
+  },
+  "reminderPaydayToggleHint": "On payday, at your reminder time: this period's payments, total and what's left.",
+  "@reminderPaydayToggleHint": {
+    "description": "Under the payday summary switch."
   }
 }

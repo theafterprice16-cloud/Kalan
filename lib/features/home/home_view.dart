@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/engine/engine.dart';
+import '../../data/period_totals.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 /// One row on the home screen: a plan payment or a recurring occurrence.
@@ -95,8 +96,8 @@ final homeViewProvider = Provider<HomeView?>((ref) {
   // Every plan payment counts on [countingDate]: past-due ones in this
   // period, payments paid "today" from the past-due list on that day,
   // everything else on its due date. Paid before Kalan: counted like any
-  // paid payment, never listed (and, being paid, never past due).
-  final counted = <DatedAmount>[];
+  // paid payment, never listed (and, being paid, never past due). The
+  // total comes from [periodSummaryOn], as for the payday summary.
   for (final p in plans) {
     for (final pay in p.payments) {
       final due = LocalDate.fromEpochDay(pay.dueDay);
@@ -109,7 +110,6 @@ final homeViewProvider = Provider<HomeView?>((ref) {
             : LocalDate.fromEpochDay(pay.paidOnDay!),
         today: today,
       );
-      counted.add(DatedAmount(countsOn, pay.amountMinor));
       if (pay.paidBeforeKalan) continue;
       final entry = HomeEntry(
         name: p.ownName,
@@ -141,16 +141,17 @@ final homeViewProvider = Provider<HomeView?>((ref) {
         recurringId: r.item.id,
       );
       entries.add(entry);
-      counted.add(DatedAmount(date, entry.amountMinor));
     }
   }
   entries.sort(_byDateThenName);
   pastDue.sort(_byDateThenName);
 
   return HomeView(
-    summary: summarizePeriod(
+    summary: periodSummaryOn(
+      plans: plans,
+      recurring: recurring,
       period: period,
-      items: counted,
+      today: today,
       incomeMinor: settings.netIncomeMinor,
       tightThresholdMinor: settings.tightThresholdMinor,
     ),

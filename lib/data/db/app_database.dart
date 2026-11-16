@@ -52,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -172,6 +172,14 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(schema.plans, schema.plans.chargeSourceId);
         await customStatement(
           "UPDATE plans SET payment_method = 'automatic' WHERE kind = 'card'",
+        );
+      },
+      // v12: the payday summary notification, on for everyone (the
+      // column's default fills the existing settings row).
+      from11To12: (m, schema) async {
+        await m.addColumn(
+          schema.appSettings,
+          schema.appSettings.paydaySummaryEnabled,
         );
       },
     ),
