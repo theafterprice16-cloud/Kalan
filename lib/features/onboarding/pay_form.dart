@@ -179,11 +179,14 @@ class OptionalAmountField extends ConsumerWidget {
       ),
       validator: (text) {
         if (text == null || text.trim().isEmpty) return null;
-        return parseAmount(text, c, localeName: context.localeName) == null
-            ? context.l10n.errorAmountInvalid(
+        if (parseAmount(text, c, localeName: context.localeName) != null) {
+          return null;
+        }
+        return amountTooLarge(text, c, localeName: context.localeName)
+            ? context.l10n.errorAmountTooLarge
+            : context.l10n.errorAmountInvalid(
                 amountInputExample(c, localeName: context.localeName),
-              )
-            : null;
+              );
       },
     );
   }
@@ -218,7 +221,7 @@ class AmountField extends ConsumerWidget {
           return context.l10n.errorRequired;
         }
         final v = ref.parseMoney(context, text);
-        return v == null || v < 1 ? ref.amountError(context) : null;
+        return v == null || v < 1 ? ref.amountError(context, text) : null;
       },
     );
   }

@@ -71,9 +71,15 @@ extension MoneyRefX on WidgetRef {
       formatMinorForInput(minor, currency, localeName: context.localeName);
 
   /// Validation message with an example in the current currency.
-  String amountError(BuildContext context) => context.l10n.errorAmountInvalid(
-    amountInputExample(currency, localeName: context.localeName),
-  );
+  /// With the typed [text], a well-formed amount that is only too long
+  /// gets "too large" instead.
+  String amountError(BuildContext context, [String? text]) =>
+      text != null &&
+          amountTooLarge(text, currency, localeName: context.localeName)
+      ? context.l10n.errorAmountTooLarge
+      : context.l10n.errorAmountInvalid(
+          amountInputExample(currency, localeName: context.localeName),
+        );
 
   /// No decimal key for currencies without minor digits.
   TextInputType get amountKeyboard =>

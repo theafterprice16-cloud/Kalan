@@ -313,5 +313,7 @@
   "fieldInstallmentAmount": "Taksit tutarı",
   "amountComputedInstallment": "Taksit {amount} · hesaplandı",
   "amountComputedSplit": "{count, plural, other{İlk taksit {first}, diğer {count} taksit {others} · hesaplandı}}",
-  "amountComputedTotal": "Toplam {amount} · hesaplandı"
+  "amountComputedTotal": "Toplam {amount} · hesaplandı",
+  "errorAmountTooLarge": "Bu tutar çok büyük.",
+  "errorTotalTooLarge": "Toplam çok büyük oluyor. Taksiti ya da taksit sayısını küçült."
 }

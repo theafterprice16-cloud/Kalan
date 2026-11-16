@@ -1992,6 +1992,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Total {amount} · calculated'**
   String amountComputedTotal(String amount);
+
+  /// Amount field error: a well-formed amount with more digits than the app takes.
+  ///
+  /// In en, this message translates to:
+  /// **'This amount is too large.'**
+  String get errorAmountTooLarge;
+
+  /// Add plan, installment amount field: installment times the count is more than the app takes.
+  ///
+  /// In en, this message translates to:
+  /// **'The total gets too large. Lower the installment or the number of payments.'**
+  String get errorTotalTooLarge;
 }
 
 class _AppLocalizationsDelegate

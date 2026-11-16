@@ -58,6 +58,11 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   /// One installment, typed instead of the total ([AmountEntry.installment]).
   final _installment = TextEditingController();
+
+  /// Focus of the two amount fields: switching between them keeps the
+  /// keyboard open.
+  final _totalFocus = FocusNode();
+  final _installmentFocus = FocusNode();
   final _count = TextEditingController();
   final _paid = TextEditingController();
   final _step = TextEditingController(text: '1');
@@ -146,6 +151,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       c.dispose();
     }
     _sourceFocus.dispose();
+    _totalFocus.dispose();
+    _installmentFocus.dispose();
     _payLater.dispose();
     _payIn4Interval.dispose();
     _monthlyInterval.dispose();
@@ -216,7 +223,18 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     _carried = onlyLooked
         ? null
         : (entry: entry, text: target.text, count: count);
+    final typing =
+        (_entry == AmountEntry.total ? _totalFocus : _installmentFocus)
+            .hasFocus;
     setState(() => _entry = entry);
+    if (typing) {
+      // The new field is built in the next frame; the keyboard stays.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        (entry == AmountEntry.total ? _totalFocus : _installmentFocus)
+            .requestFocus();
+      });
+    }
   }
 
   /// How [total] is shared over [count] installments, or null.
@@ -432,7 +450,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   String? _totalValidator(String? v) {
     if (v == null || v.trim().isEmpty) return context.l10n.errorRequired;
     final total = ref.parseMoney(context, v);
-    if (total == null || total < 1) return ref.amountError(context);
+    if (total == null || total < 1) return ref.amountError(context, v);
     final count = _countValue;
     if (count != null && count > 0 && total < count) {
       return context.l10n.errorTotalTooSmall;
@@ -443,7 +461,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   String? _installmentValidator(String? v) {
     if (v == null || v.trim().isEmpty) return context.l10n.errorRequired;
     final installment = ref.parseMoney(context, v);
-    if (installment == null || installment < 1) return ref.amountError(context);
+    if (installment == null || installment < 1) {
+      return ref.amountError(context, v);
+    }
     // Only a total too large to keep is refused here; a wrong count has
     // its own message.
     final count = _countValue;
@@ -451,7 +471,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
         count >= 1 &&
         count <= PlanCalculator.maxInstallments &&
         _totalValue == null) {
-      return ref.amountError(context);
+      return context.l10n.errorTotalTooLarge;
     }
     return null;
   }
@@ -533,23 +553,28 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   List<Widget> _fields(BuildContext context) {
     final l10n = context.l10n;
     const gap = SizedBox(height: 16);
-    Widget amount(TextEditingController c, String label, Key key) =>
-        TextFormField(
-          key: key,
-          controller: c,
-          keyboardType: ref.amountKeyboard,
-          inputFormatters: ref.amountFormatters(context),
-          decoration: InputDecoration(labelText: label),
-          validator: c == _total
-              ? _totalValidator
-              : c == _installment
-              ? _installmentValidator
-              : (v) =>
-                    _required(v) ??
-                    ((ref.parseMoney(context, v!) ?? 0) < 1
-                        ? ref.amountError(context)
-                        : null),
-        );
+    Widget amount(
+      TextEditingController c,
+      String label,
+      Key key, {
+      FocusNode? focusNode,
+    }) => TextFormField(
+      key: key,
+      controller: c,
+      focusNode: focusNode,
+      keyboardType: ref.amountKeyboard,
+      inputFormatters: ref.amountFormatters(context),
+      decoration: InputDecoration(labelText: label),
+      validator: c == _total
+          ? _totalValidator
+          : c == _installment
+          ? _installmentValidator
+          : (v) =>
+                _required(v) ??
+                ((ref.parseMoney(context, v!) ?? 0) < 1
+                    ? ref.amountError(context, v)
+                    : null),
+    );
     Widget count(TextEditingController c, String label, Key key) =>
         TextFormField(
           key: key,
@@ -587,11 +612,13 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           _total,
           l10n.fieldTotal,
           const ValueKey('total'),
+          focusNode: _totalFocus,
         ),
         AmountEntry.installment => amount(
           _installment,
           l10n.fieldInstallmentAmount,
           const ValueKey('installment'),
+          focusNode: _installmentFocus,
         ),
       },
       computed: _computedLine(context),

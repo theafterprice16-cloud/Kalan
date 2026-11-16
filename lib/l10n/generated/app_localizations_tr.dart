@@ -1464,4 +1464,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String amountComputedTotal(String amount) {
     return 'Toplam $amount · hesaplandı';
   }
+
+  @override
+  String get errorAmountTooLarge => 'Bu tutar çok büyük.';
+
+  @override
+  String get errorTotalTooLarge =>
+      'Toplam çok büyük oluyor. Taksiti ya da taksit sayısını küçült.';
 }
