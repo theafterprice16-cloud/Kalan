@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../core/engine/amount_entry.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/money/currency.dart';
 import '../db/app_database.dart';
@@ -35,6 +36,11 @@ class SettingsRepository {
       ),
     );
   }
+
+  /// Remembers which amount was typed for the plan just added (total or
+  /// installment); the add form opens with it next time.
+  Future<void> rememberAmountEntry(AmountEntry entry) =>
+      update(AppSettingsCompanion(lastAmountEntry: Value(entry)));
 
   /// Switches the currency label. No conversion: shown amounts stay the
   /// same. When minor digits differ, every stored amount moves to the new

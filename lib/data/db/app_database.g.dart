@@ -3171,6 +3171,15 @@ class $AppSettingsTable extends AppSettings
     requiredDuringInsert: false,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<AmountEntry?, String>
+  lastAmountEntry = GeneratedColumn<String>(
+    'last_amount_entry',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<AmountEntry?>($AppSettingsTable.$converterlastAmountEntryn);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     currencyCode,
@@ -3189,6 +3198,7 @@ class $AppSettingsTable extends AppSettings
     repeatMode,
     lastPayLaterRule,
     lastPayLaterValue,
+    lastAmountEntry,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3398,6 +3408,12 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.int,
         data['${effectivePrefix}last_pay_later_value'],
       ),
+      lastAmountEntry: $AppSettingsTable.$converterlastAmountEntryn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}last_amount_entry'],
+        ),
+      ),
     );
   }
 
@@ -3419,6 +3435,14 @@ class $AppSettingsTable extends AppSettings
   static JsonTypeConverter2<PayLaterRuleKind?, String?, String?>
   $converterlastPayLaterRulen = JsonTypeConverter2.asNullable(
     $converterlastPayLaterRule,
+  );
+  static JsonTypeConverter2<AmountEntry, String, String>
+  $converterlastAmountEntry = const EnumNameConverter<AmountEntry>(
+    AmountEntry.values,
+  );
+  static JsonTypeConverter2<AmountEntry?, String?, String?>
+  $converterlastAmountEntryn = JsonTypeConverter2.asNullable(
+    $converterlastAmountEntry,
   );
 }
 
@@ -3461,6 +3485,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// picked date is never stored here. Null until first used: 30 days.
   final PayLaterRuleKind? lastPayLaterRule;
   final int? lastPayLaterValue;
+
+  /// The amount typed last when adding a plan with several payments
+  /// (schema v10): the total or one installment. Null until a plan is
+  /// saved: the total, as before.
+  final AmountEntry? lastAmountEntry;
   const SettingsRow({
     required this.id,
     required this.currencyCode,
@@ -3479,6 +3508,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     required this.repeatMode,
     this.lastPayLaterRule,
     this.lastPayLaterValue,
+    this.lastAmountEntry,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3526,6 +3556,11 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     if (!nullToAbsent || lastPayLaterValue != null) {
       map['last_pay_later_value'] = Variable<int>(lastPayLaterValue);
     }
+    if (!nullToAbsent || lastAmountEntry != null) {
+      map['last_amount_entry'] = Variable<String>(
+        $AppSettingsTable.$converterlastAmountEntryn.toSql(lastAmountEntry),
+      );
+    }
     return map;
   }
 
@@ -3562,6 +3597,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       lastPayLaterValue: lastPayLaterValue == null && nullToAbsent
           ? const Value.absent()
           : Value(lastPayLaterValue),
+      lastAmountEntry: lastAmountEntry == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAmountEntry),
     );
   }
 
@@ -3600,6 +3638,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         serializer.fromJson<String?>(json['lastPayLaterRule']),
       ),
       lastPayLaterValue: serializer.fromJson<int?>(json['lastPayLaterValue']),
+      lastAmountEntry: $AppSettingsTable.$converterlastAmountEntryn.fromJson(
+        serializer.fromJson<String?>(json['lastAmountEntry']),
+      ),
     );
   }
   @override
@@ -3631,6 +3672,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         $AppSettingsTable.$converterlastPayLaterRulen.toJson(lastPayLaterRule),
       ),
       'lastPayLaterValue': serializer.toJson<int?>(lastPayLaterValue),
+      'lastAmountEntry': serializer.toJson<String?>(
+        $AppSettingsTable.$converterlastAmountEntryn.toJson(lastAmountEntry),
+      ),
     };
   }
 
@@ -3652,6 +3696,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     ReminderRepeat? repeatMode,
     Value<PayLaterRuleKind?> lastPayLaterRule = const Value.absent(),
     Value<int?> lastPayLaterValue = const Value.absent(),
+    Value<AmountEntry?> lastAmountEntry = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     currencyCode: currencyCode ?? this.currencyCode,
@@ -3679,6 +3724,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     lastPayLaterValue: lastPayLaterValue.present
         ? lastPayLaterValue.value
         : this.lastPayLaterValue,
+    lastAmountEntry: lastAmountEntry.present
+        ? lastAmountEntry.value
+        : this.lastAmountEntry,
   );
   SettingsRow copyWithCompanion(AppSettingsCompanion data) {
     return SettingsRow(
@@ -3727,6 +3775,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       lastPayLaterValue: data.lastPayLaterValue.present
           ? data.lastPayLaterValue.value
           : this.lastPayLaterValue,
+      lastAmountEntry: data.lastAmountEntry.present
+          ? data.lastAmountEntry.value
+          : this.lastAmountEntry,
     );
   }
 
@@ -3749,7 +3800,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('reminderPromptShown: $reminderPromptShown, ')
           ..write('repeatMode: $repeatMode, ')
           ..write('lastPayLaterRule: $lastPayLaterRule, ')
-          ..write('lastPayLaterValue: $lastPayLaterValue')
+          ..write('lastPayLaterValue: $lastPayLaterValue, ')
+          ..write('lastAmountEntry: $lastAmountEntry')
           ..write(')'))
         .toString();
   }
@@ -3773,6 +3825,7 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     repeatMode,
     lastPayLaterRule,
     lastPayLaterValue,
+    lastAmountEntry,
   );
   @override
   bool operator ==(Object other) =>
@@ -3794,7 +3847,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.reminderPromptShown == this.reminderPromptShown &&
           other.repeatMode == this.repeatMode &&
           other.lastPayLaterRule == this.lastPayLaterRule &&
-          other.lastPayLaterValue == this.lastPayLaterValue);
+          other.lastPayLaterValue == this.lastPayLaterValue &&
+          other.lastAmountEntry == this.lastAmountEntry);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -3815,6 +3869,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<ReminderRepeat> repeatMode;
   final Value<PayLaterRuleKind?> lastPayLaterRule;
   final Value<int?> lastPayLaterValue;
+  final Value<AmountEntry?> lastAmountEntry;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
@@ -3833,6 +3888,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.repeatMode = const Value.absent(),
     this.lastPayLaterRule = const Value.absent(),
     this.lastPayLaterValue = const Value.absent(),
+    this.lastAmountEntry = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -3852,6 +3908,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.repeatMode = const Value.absent(),
     this.lastPayLaterRule = const Value.absent(),
     this.lastPayLaterValue = const Value.absent(),
+    this.lastAmountEntry = const Value.absent(),
   }) : currencyCode = Value(currencyCode),
        payFrequency = Value(payFrequency);
   static Insertable<SettingsRow> custom({
@@ -3872,6 +3929,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<int>? repeatMode,
     Expression<String>? lastPayLaterRule,
     Expression<int>? lastPayLaterValue,
+    Expression<String>? lastAmountEntry,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3894,6 +3952,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (repeatMode != null) 'repeat_mode': repeatMode,
       if (lastPayLaterRule != null) 'last_pay_later_rule': lastPayLaterRule,
       if (lastPayLaterValue != null) 'last_pay_later_value': lastPayLaterValue,
+      if (lastAmountEntry != null) 'last_amount_entry': lastAmountEntry,
     });
   }
 
@@ -3915,6 +3974,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<ReminderRepeat>? repeatMode,
     Value<PayLaterRuleKind?>? lastPayLaterRule,
     Value<int?>? lastPayLaterValue,
+    Value<AmountEntry?>? lastAmountEntry,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -3935,6 +3995,7 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       repeatMode: repeatMode ?? this.repeatMode,
       lastPayLaterRule: lastPayLaterRule ?? this.lastPayLaterRule,
       lastPayLaterValue: lastPayLaterValue ?? this.lastPayLaterValue,
+      lastAmountEntry: lastAmountEntry ?? this.lastAmountEntry,
     );
   }
 
@@ -4002,6 +4063,13 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     if (lastPayLaterValue.present) {
       map['last_pay_later_value'] = Variable<int>(lastPayLaterValue.value);
     }
+    if (lastAmountEntry.present) {
+      map['last_amount_entry'] = Variable<String>(
+        $AppSettingsTable.$converterlastAmountEntryn.toSql(
+          lastAmountEntry.value,
+        ),
+      );
+    }
     return map;
   }
 
@@ -4024,7 +4092,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('reminderPromptShown: $reminderPromptShown, ')
           ..write('repeatMode: $repeatMode, ')
           ..write('lastPayLaterRule: $lastPayLaterRule, ')
-          ..write('lastPayLaterValue: $lastPayLaterValue')
+          ..write('lastPayLaterValue: $lastPayLaterValue, ')
+          ..write('lastAmountEntry: $lastAmountEntry')
           ..write(')'))
         .toString();
   }
@@ -6579,6 +6648,7 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<ReminderRepeat> repeatMode,
       Value<PayLaterRuleKind?> lastPayLaterRule,
       Value<int?> lastPayLaterValue,
+      Value<AmountEntry?> lastAmountEntry,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -6599,6 +6669,7 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<ReminderRepeat> repeatMode,
       Value<PayLaterRuleKind?> lastPayLaterRule,
       Value<int?> lastPayLaterValue,
+      Value<AmountEntry?> lastAmountEntry,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -6697,6 +6768,12 @@ class $$AppSettingsTableFilterComposer
     column: $table.lastPayLaterValue,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<AmountEntry?, AmountEntry, String>
+  get lastAmountEntry => $composableBuilder(
+    column: $table.lastAmountEntry,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $$AppSettingsTableOrderingComposer
@@ -6792,6 +6869,11 @@ class $$AppSettingsTableOrderingComposer
     column: $table.lastPayLaterValue,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get lastAmountEntry => $composableBuilder(
+    column: $table.lastAmountEntry,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -6884,6 +6966,12 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.lastPayLaterValue,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<AmountEntry?, String> get lastAmountEntry =>
+      $composableBuilder(
+        column: $table.lastAmountEntry,
+        builder: (column) => column,
+      );
 }
 
 class $$AppSettingsTableTableManager
@@ -6935,6 +7023,7 @@ class $$AppSettingsTableTableManager
                 Value<PayLaterRuleKind?> lastPayLaterRule =
                     const Value.absent(),
                 Value<int?> lastPayLaterValue = const Value.absent(),
+                Value<AmountEntry?> lastAmountEntry = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 currencyCode: currencyCode,
@@ -6953,6 +7042,7 @@ class $$AppSettingsTableTableManager
                 repeatMode: repeatMode,
                 lastPayLaterRule: lastPayLaterRule,
                 lastPayLaterValue: lastPayLaterValue,
+                lastAmountEntry: lastAmountEntry,
               ),
           createCompanionCallback:
               ({
@@ -6974,6 +7064,7 @@ class $$AppSettingsTableTableManager
                 Value<PayLaterRuleKind?> lastPayLaterRule =
                     const Value.absent(),
                 Value<int?> lastPayLaterValue = const Value.absent(),
+                Value<AmountEntry?> lastAmountEntry = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 currencyCode: currencyCode,
@@ -6992,6 +7083,7 @@ class $$AppSettingsTableTableManager
                 repeatMode: repeatMode,
                 lastPayLaterRule: lastPayLaterRule,
                 lastPayLaterValue: lastPayLaterValue,
+                lastAmountEntry: lastAmountEntry,
               ),
           withReferenceMapper: (p0) => p0
               .map(

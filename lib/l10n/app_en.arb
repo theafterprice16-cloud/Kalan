@@ -1233,5 +1233,60 @@
   "intervalEditHint": "Only unpaid installments get new dates.",
   "@intervalEditHint": {
     "description": "Plan edit: note below the payment interval choice."
+  },
+  "amountEntryLabel": "Which amount do you know?",
+  "@amountEntryLabel": {
+    "description": "Add plan: screen reader label of the choice between typing the total and typing one installment."
+  },
+  "amountEntryTotal": "Total",
+  "@amountEntryTotal": {
+    "description": "Add plan: choice to type the plan's total amount. Short: one of two segments."
+  },
+  "amountEntryInstallment": "Installment",
+  "@amountEntryInstallment": {
+    "description": "Add plan: choice to type one installment's amount. Short: one of two segments."
+  },
+  "fieldInstallmentAmount": "Installment amount",
+  "@fieldInstallmentAmount": {
+    "description": "Add plan: amount field label when the user types one installment."
+  },
+  "amountComputedInstallment": "Installment {amount} · calculated",
+  "@amountComputedInstallment": {
+    "description": "Add plan, below the total: each installment, worked out by the app. Calm note, no warning.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Formatted amount of one installment"
+      }
+    }
+  },
+  "amountComputedSplit": "{count, plural, =1{First installment {first}, the other one {others} · calculated} other{First installment {first}, the other {count} {others} each · calculated}}",
+  "@amountComputedSplit": {
+    "description": "Add plan, below the total, when it does not divide evenly: the first installment carries the leftover minor units.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Number of installments after the first"
+      },
+      "first": {
+        "type": "String",
+        "description": "Formatted amount of the first installment"
+      },
+      "others": {
+        "type": "String",
+        "description": "Formatted amount of each other installment"
+      }
+    }
+  },
+  "amountComputedTotal": "Total {amount} · calculated",
+  "@amountComputedTotal": {
+    "description": "Add plan, below the installment amount: the plan's total, worked out by the app.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "description": "Formatted total amount"
+      }
+    }
   }
 }

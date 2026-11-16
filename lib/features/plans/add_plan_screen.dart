@@ -55,6 +55,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   final _source = TextEditingController();
   final _sourceFocus = FocusNode();
   final _total = TextEditingController();
+
+  /// One installment, typed instead of the total ([AmountEntry.installment]).
+  final _installment = TextEditingController();
   final _count = TextEditingController();
   final _paid = TextEditingController();
   final _step = TextEditingController(text: '1');
@@ -62,6 +65,10 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   final _title = TextEditingController();
 
   AddMode _mode = AddMode.payIn4;
+
+  /// The amount typed for plans with several payments; it starts with the
+  /// one used last (the total until a plan is saved).
+  late AmountEntry _entry;
   late LocalDate _firstDate;
   late LocalDate _purchaseDate;
   late LocalDate _nextDate;
@@ -101,9 +108,18 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     _firstDate = today;
     _purchaseDate = today;
     _nextDate = today;
-    for (final c in [_source, _total, _count, _paid, _step, _defer]) {
+    for (final c in [
+      _source,
+      _total,
+      _installment,
+      _count,
+      _paid,
+      _step,
+      _defer,
+    ]) {
       c.addListener(_refresh);
     }
+    _entry = lastAmountEntryOf(ref.read(settingsProvider).value);
     _payLater = PayLaterInput(
       purchaseDate: today,
       rule: lastPayLaterRuleOf(ref.read(settingsProvider).value),
@@ -117,7 +133,16 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   @override
   void dispose() {
-    for (final c in [_source, _total, _count, _paid, _step, _defer, _title]) {
+    for (final c in [
+      _source,
+      _total,
+      _installment,
+      _count,
+      _paid,
+      _step,
+      _defer,
+      _title,
+    ]) {
       c.dispose();
     }
     _sourceFocus.dispose();
@@ -129,6 +154,80 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   int? _int(TextEditingController c) => int.tryParse(c.text.trim());
   int? _amount(TextEditingController c) => ref.parseMoney(context, c.text);
+
+  /// The payment count: always 4 for Pay in 4.
+  int? get _countValue => _mode == AddMode.payIn4 ? 4 : _int(_count);
+
+  /// The plan's total: typed, or one installment times the count. Null
+  /// while incomplete or invalid.
+  int? get _totalValue {
+    switch (_entry) {
+      case AmountEntry.total:
+        return _amount(_total);
+      case AmountEntry.installment:
+        final installment = _amount(_installment);
+        final count = _countValue;
+        if (installment == null || count == null) return null;
+        try {
+          return totalFromInstallment(
+            installmentMinor: installment,
+            count: count,
+            maxTotalMinor: ref.maxAmountMinor,
+          );
+        } on InvalidPlanInput {
+          return null;
+        }
+    }
+  }
+
+  /// The last value written by [_switchEntry]: into which field, the
+  /// text, and the count it was worked out with.
+  ({AmountEntry entry, String text, int? count})? _carried;
+
+  /// Switches between typing the total and one installment. The count
+  /// stays; the amount field gets the value worked out from the other
+  /// one (an uneven total gives its equal share, rounded down).
+  ///
+  /// Nothing typed is lost: a field is left as it is when nothing can be
+  /// worked out, or when the user only looked at the other one (same
+  /// carried text, same count) and came back.
+  void _switchEntry(AmountEntry entry) {
+    if (entry == _entry) return;
+    final count = _countValue;
+    final source = _entry == AmountEntry.total ? _total : _installment;
+    final target = entry == AmountEntry.total ? _total : _installment;
+    final carried = _carried;
+    final onlyLooked =
+        carried != null &&
+        carried.entry == _entry &&
+        carried.text == source.text &&
+        carried.count == count;
+    if (!onlyLooked) {
+      final value = switch (entry) {
+        AmountEntry.installment => _splitOf(_amount(_total), count)?.others,
+        AmountEntry.total => _totalValue,
+      };
+      if (value != null) {
+        target.text = ref.moneyInput(context, value);
+      } else if (source.text.trim().isEmpty) {
+        target.clear();
+      }
+    }
+    _carried = onlyLooked
+        ? null
+        : (entry: entry, text: target.text, count: count);
+    setState(() => _entry = entry);
+  }
+
+  /// How [total] is shared over [count] installments, or null.
+  InstallmentSplit? _splitOf(int? total, int? count) {
+    if (total == null || count == null) return null;
+    try {
+      return installmentSplit(totalMinor: total, count: count);
+    } on InvalidPlanInput {
+      return null;
+    }
+  }
 
   List<SourceRow> get _sources => ref.read(sourcesProvider).value ?? const [];
 
@@ -155,9 +254,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   PlanDraft? _buildDraft() {
     try {
       if (_mode == AddMode.payLater) return _payLaterDraft();
-      final total = _amount(_total);
+      final total = _totalValue;
       if (total == null) return null;
-      final count = _mode == AddMode.payIn4 ? 4 : _int(_count);
+      final count = _countValue;
       if (count == null) return null;
       final interval = _intervalInput?.interval;
       if (_intervalInput != null && interval == null) return null;
@@ -277,10 +376,11 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               : PlanOrigin.template,
           title: payLater ? _payLater.store.text : _title.text,
         );
+    final settings = ref.read(settingsRepositoryProvider);
     if (payLater) {
-      await ref
-          .read(settingsRepositoryProvider)
-          .rememberPayLaterRule(draft.payLaterRule!);
+      await settings.rememberPayLaterRule(draft.payLaterRule!);
+    } else {
+      await settings.rememberAmountEntry(_entry);
     }
     if (mounted) await askForRemindersIfNeeded(context, ref);
     router.popWithMessage(
@@ -333,9 +433,25 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     if (v == null || v.trim().isEmpty) return context.l10n.errorRequired;
     final total = ref.parseMoney(context, v);
     if (total == null || total < 1) return ref.amountError(context);
-    final count = _mode == AddMode.payIn4 ? 4 : _int(_count);
+    final count = _countValue;
     if (count != null && count > 0 && total < count) {
       return context.l10n.errorTotalTooSmall;
+    }
+    return null;
+  }
+
+  String? _installmentValidator(String? v) {
+    if (v == null || v.trim().isEmpty) return context.l10n.errorRequired;
+    final installment = ref.parseMoney(context, v);
+    if (installment == null || installment < 1) return ref.amountError(context);
+    // Only a total too large to keep is refused here; a wrong count has
+    // its own message.
+    final count = _countValue;
+    if (count != null &&
+        count >= 1 &&
+        count <= PlanCalculator.maxInstallments &&
+        _totalValue == null) {
+      return ref.amountError(context);
     }
     return null;
   }
@@ -426,6 +542,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           decoration: InputDecoration(labelText: label),
           validator: c == _total
               ? _totalValidator
+              : c == _installment
+              ? _installmentValidator
               : (v) =>
                     _required(v) ??
                     ((ref.parseMoney(context, v!) ?? 0) < 1
@@ -459,7 +577,25 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       sources: ref.watch(sourcesProvider).value ?? const [],
       validator: (v) => _required(v) == null ? null : l10n.errorNameRequired,
     );
-    final total = amount(_total, l10n.fieldTotal, const ValueKey('total'));
+    // The total, or one installment: a choice above one amount field and
+    // a line below it with the other value, worked out. Still one field.
+    final total = _AmountEntrySection(
+      entry: _entry,
+      onChanged: _switchEntry,
+      field: switch (_entry) {
+        AmountEntry.total => amount(
+          _total,
+          l10n.fieldTotal,
+          const ValueKey('total'),
+        ),
+        AmountEntry.installment => amount(
+          _installment,
+          l10n.fieldInstallmentAmount,
+          const ValueKey('installment'),
+        ),
+      },
+      computed: _computedLine(context),
+    );
     final payments = count(
       _count,
       _underway ? l10n.fieldTotalInstallments : l10n.fieldCount,
@@ -580,6 +716,32 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           gap,
           _interval(context),
         ];
+    }
+  }
+
+  /// The value worked out from the typed amount and the count, or null
+  /// while they are incomplete.
+  String? _computedLine(BuildContext context) {
+    final l10n = context.l10n;
+    final count = _countValue;
+    // One payment: the installment is the total; nothing to work out.
+    if (count == 1) return null;
+    switch (_entry) {
+      case AmountEntry.total:
+        final split = _splitOf(_amount(_total), count);
+        if (split == null) return null;
+        return split.isEven
+            ? l10n.amountComputedInstallment(ref.money(context, split.first))
+            : l10n.amountComputedSplit(
+                split.othersCount,
+                ref.money(context, split.first),
+                ref.money(context, split.others),
+              );
+      case AmountEntry.installment:
+        final total = _totalValue;
+        return total == null
+            ? null
+            : l10n.amountComputedTotal(ref.money(context, total));
     }
   }
 
@@ -914,6 +1076,64 @@ class _Preview extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Which amount is typed (total or one installment), its field, and the
+/// other value worked out below it, muted and marked "calculated".
+class _AmountEntrySection extends StatelessWidget {
+  const _AmountEntrySection({
+    required this.entry,
+    required this.onChanged,
+    required this.field,
+    required this.computed,
+  });
+
+  final AmountEntry entry;
+  final ValueChanged<AmountEntry> onChanged;
+  final Widget field;
+  final String? computed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final line = computed;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          label: l10n.amountEntryLabel,
+          container: true,
+          child: SegmentedButton<AmountEntry>(
+            key: const ValueKey('amount-entry'),
+            segments: [
+              ButtonSegment(
+                value: AmountEntry.total,
+                label: Text(l10n.amountEntryTotal),
+              ),
+              ButtonSegment(
+                value: AmountEntry.installment,
+                label: Text(l10n.amountEntryInstallment),
+              ),
+            ],
+            selected: {entry},
+            onSelectionChanged: (s) => onChanged(s.single),
+          ),
+        ),
+        const SizedBox(height: 12),
+        field,
+        if (line != null)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 12, top: 4),
+            child: Text(
+              line,
+              key: const ValueKey('amount-computed'),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: context.colors.textMuted),
+            ),
+          ),
+      ],
     );
   }
 }

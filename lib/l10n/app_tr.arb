@@ -306,5 +306,12 @@
   "previewSameMonth": "Aynı aya düşen ödemeler: {months}.",
   "previewSameMonthItem": "{month} ({count})",
   "previewMonthSeparator": ", ",
-  "intervalEditHint": "Yalnızca ödenmemiş taksitlerin tarihi değişir."
+  "intervalEditHint": "Yalnızca ödenmemiş taksitlerin tarihi değişir.",
+  "amountEntryLabel": "Hangi tutarı biliyorsun?",
+  "amountEntryTotal": "Toplam",
+  "amountEntryInstallment": "Taksit",
+  "fieldInstallmentAmount": "Taksit tutarı",
+  "amountComputedInstallment": "Taksit {amount} · hesaplandı",
+  "amountComputedSplit": "{count, plural, other{İlk taksit {first}, diğer {count} taksit {others} · hesaplandı}}",
+  "amountComputedTotal": "Toplam {amount} · hesaplandı"
 }

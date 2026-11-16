@@ -3,6 +3,7 @@
 
 import 'package:drift/drift.dart';
 
+import '../../core/engine/amount_entry.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/plan_draft.dart';
@@ -193,6 +194,11 @@ class AppSettings extends Table {
   /// picked date is never stored here. Null until first used: 30 days.
   TextColumn get lastPayLaterRule => textEnum<PayLaterRuleKind>().nullable()();
   IntColumn get lastPayLaterValue => integer().nullable()();
+
+  /// The amount typed last when adding a plan with several payments
+  /// (schema v10): the total or one installment. Null until a plan is
+  /// saved: the total, as before.
+  TextColumn get lastAmountEntry => textEnum<AmountEntry>().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

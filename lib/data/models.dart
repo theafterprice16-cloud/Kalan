@@ -162,3 +162,8 @@ PayLaterRule lastPayLaterRuleOf(SettingsRow? settings) =>
       settings?.lastPayLaterValue,
     ) ??
     defaultPayLaterRule;
+
+/// The amount the add form asks for first: the one typed last, or the
+/// total.
+AmountEntry lastAmountEntryOf(SettingsRow? settings) =>
+    settings?.lastAmountEntry ?? AmountEntry.total;

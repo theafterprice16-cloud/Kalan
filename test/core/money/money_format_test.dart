@@ -98,6 +98,19 @@ String intlText(int minor, Currency cur, String lang) {
 }
 
 void main() {
+  group('the largest typed amount', () {
+    for (final code in ['TRY', 'JPY', 'KWD']) {
+      test('$code: parseAmount takes it and nothing above it', () {
+        final currency = Currency.fromCode(code);
+        final max = maxTypedAmountMinor(currency);
+        String input(int minor) =>
+            formatMinorForInput(minor, currency, localeName: 'tr');
+        expect(parseAmount(input(max), currency, localeName: 'tr'), max);
+        expect(parseAmount(input(max + 1), currency, localeName: 'tr'), null);
+      });
+    }
+  });
+
   group('registry', () {
     test('has the 75 currencies of the table, each once', () {
       final codes = Currency.all.map((c) => c.code).toList();

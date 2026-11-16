@@ -63,6 +63,9 @@ extension MoneyRefX on WidgetRef {
   int? parseMoney(BuildContext context, String text) =>
       parseAmount(text, currency, localeName: context.localeName);
 
+  /// The largest amount an amount field takes, in minor units.
+  int get maxAmountMinor => maxTypedAmountMinor(currency);
+
   /// Text to prefill an amount field with.
   String moneyInput(BuildContext context, int minor) =>
       formatMinorForInput(minor, currency, localeName: context.localeName);
