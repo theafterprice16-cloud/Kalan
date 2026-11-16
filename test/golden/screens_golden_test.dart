@@ -496,6 +496,47 @@ void main() {
         });
       }
 
+      // Total or installment: 1,000 / 3 does not divide evenly; Deniz
+      // knows only "850 a month, 9 months".
+      for (final (lang, locale, addPlan, monthly, installment) in [
+        ('tr', const Locale('tr', 'TR'), 'Plan ekle', 'Aylık taksit', 'Taksit'),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Add plan',
+          'Monthly installments',
+          'Installment',
+        ),
+      ]) {
+        for (final (entry, amount, count) in [
+          ('total', '1000', '3'),
+          ('installment', '850', '9'),
+        ]) {
+          testWidgets('add plan, $entry entry, $lang', (tester) async {
+            await start(tester, locale: locale);
+            await tester.tap(find.text(addPlan));
+            await tester.pumpAndSettle();
+            await tester.tap(find.widgetWithText(ChoiceChip, monthly));
+            await tester.pumpAndSettle();
+            if (entry == 'installment') {
+              await tester.tap(
+                find.descendant(
+                  of: find.byKey(const ValueKey('amount-entry')),
+                  matching: find.text(installment),
+                ),
+              );
+              await tester.pumpAndSettle();
+            }
+            await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+            await tester.enterText(find.byKey(ValueKey(entry)), amount);
+            await tester.enterText(find.byKey(const ValueKey('count')), count);
+            FocusManager.instance.primaryFocus?.unfocus();
+            await tester.pumpAndSettle();
+            await shoot(tester, '34-amount-entry-$entry-$lang-$theme');
+          });
+        }
+      }
+
       // "Pay later" in both languages (today: 20 November 2026).
       for (final (lang, locale, plansTab, addPlan, payLater, nextMonth, auto)
           in [
