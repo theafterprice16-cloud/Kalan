@@ -403,7 +403,7 @@ void main() {
       final schema = await verifier.schemaAt(10);
       seedCommon(schema);
       schema.rawDatabase.execute(
-        "INSERT INTO sources (id, name, kind, statement_day, due_day) "
+        'INSERT INTO sources (id, name, kind, statement_day, due_day) '
         "VALUES (2, 'Bonus', 'card', 5, 15)",
       );
       schema.rawDatabase.execute(
