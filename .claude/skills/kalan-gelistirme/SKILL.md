@@ -37,7 +37,7 @@ Ana oturumun modelini sen değiştiremezsin ve değiştirmeye çalışma: oturum
 |---|---|---|
 | `kalan-kesif` | Haiku · low | 2+ dosyada arama, "X nerede/nasıl çalışıyor", renk kodu veya ARB taraması, paket belgesi okuma, uzun log okuma |
 | `kalan-kontrol` | Haiku · low | `flutter analyze`, testler, format, golden, build_runner; yalnızca hatalar döner |
-| Ana oturum | Oturum modeli (önerilen Sonnet) | Birbirine bağlı düzenlemeler, küçük düzeltmeler, entegrasyon, commit |
+| Ana oturum | Oturum modeli (varsayılan Opus; limit daralınca küçük işlerde Sonnet) | Birbirine bağlı düzenlemeler, küçük düzeltmeler, entegrasyon, commit |
 | `kalan-uygulayici` | Sonnet · medium | Dosya listesi verilebilen bağımsız parça (ayrı ekran, ARB metinleri + testleri, veri dosyası) |
 | `kalan-mimar` | Opus · high | Büyük ya da riskli işin planı, riskli diff incelemesi, 2 denemede çözülmeyen hatanın kök nedeni |
 | Fork | Ana model, ortak önbellek | Yan iş bu konuşmanın bağlamına muhtaçsa (örneğin az önce değişen koda test taslağı) |
