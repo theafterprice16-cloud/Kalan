@@ -306,3 +306,19 @@ Yol Haritası 9. Açık sorular ürün sahibinin iş tanımında cevaplandı: me
 | "Kendi kartı" | Yalnızca kart taksidi planında planın kartı "çekildiği yer" sayılır. Kaynak adı bir kartla eşleşen 4 ödemeli, aylık, elle ya da sonra öde planlarında sayılmaz (diff incelemesi bulgusu, düzeltildi). |
 | Farklı gün listesi | Elle ödenen planda genel ayar 3/5/7 ise "genel ayara göre" gün 4/6/8 olur ve seçeneklerde yoktur; "Farklı gün" listesi açılınca genel ayarın günü işaretli gelir. |
 
+## Maaş günü özeti (16 Kasım 2026)
+
+Yol Haritası 10. Açık sorular ürün sahibinin iş tanımında cevaplandı: varsayılan açık (mevcut kullanıcılarda da), gelir yoksa yalnızca ödeme sayısı ve toplam (bildirim yine gelir), hafta sonuna denk gelen maaş gününde bildirim o gün (kaydırma yok, Karar 3).
+
+| Konu | Karar |
+|---|---|
+| Ne zaman | Her maaş döneminin motordaki ilk günü (aylıkta ay kısaysa son gün, iki haftada bir ve haftalıkta bilinen maaş gününden adımla), kullanıcının hatırlatma saatinde. Yalnızca sıradaki özet kurulur: bugün maaş günüyse ve saat geçmediyse bugünkü, yoksa bir sonraki dönemin (`nextPaydayPeriod`). |
+| İçerik | Ana ekranın o sabah göstereceği sayılar: aynı hesap (`periodSummaryOn`, `lib/data/period_totals.dart`; ana ekran da artık bunu kullanır), dönemin ilk günü "bugün" sayılarak. Böylece o güne kadar ödenmemiş kalan günü geçmiş ödemeler yeni dönemin toplamına girer (`countingDate`, ana ekranla aynı). Ödemeler değişince içerik yeniden kurulur. |
+| Metin | "Yeni dönem başladı. Bu dönem 6 ödeme, toplam 8.300 TL. Kalan 12.450 TL." Gelir yoksa kalan cümlesi yok. Eksi kalanda "Bu dönem 1.200 TL eksik görünüyor." (eksi işareti olmadan tutar). Ödeme yoksa "Bu dönem ödeme yok." Tavsiye, yorum, ünlem yok. EN: "A new pay period has started. 6 payments this period, ₺8,300 in total. ₺12,450 left." / "This period looks ₺1,200 short." |
+| Tutar gösterme | Mevcut "Bildirimde tutarı göster" anahtarı kapalıysa özet yalnızca ödeme sayısını söyler ("Bu dönem 6 ödeme var."); kilit ekranında tutar görünmesin diye. Uygulama genelindeki tutar gizleme (28. madde) yapılınca özet ona da uyacak; şimdi kod yok. |
+| Ayrı bildirim | Ödeme bildirimleriyle birleştirilmez, düğmesi yok, dokununca ana ekran. Kendi kimlik aralığı (3 × 2^28 + gün). Ödeme bildirimlerinin listesi, zamanı ve metni değişmedi (testli). Özet planlayıcıda ayrı adımdır (`withPaydaySummary`); bildirim türü listesine yeni tür eklenmedi, böylece düğme ve erteleme kuralları hiç etkilenmez. |
+| 60 sınırı | Özet sınırın içinde sayılır; ödeme bildirimleri önceliklidir: liste 60 ödeme bildirimiyle doluysa özet o kurulumda eklenmez. |
+| Açma/kapama | Ayarlar > Hatırlatmalar'da "Israrlı hatırlatma"nın altında anahtar (mevcut anahtar stili; accent yok). Hatırlatmalar ana anahtarı kapalıyken özet de kurulmaz ve satır pasif görünür. Bildirim izni yoksa mevcut izin satırı geçerli; yeni izin isteği yok. Saklama: `app_settings.payday_summary_enabled` (şema v12, varsayılan açık; göçte mevcut satır açık gelir). |
+| Yeniden kurma | Mevcut tek merkez (`ReminderSync`): planlar, ödemeler, sabit ödemeler ve ayarlar (gelir, maaş günü, para birimi, dil, saat, anahtar) değişince; uygulama açılınca ve öne gelince. İkinci zamanlayıcı yok. |
+| Test yardımcısı | Sahte bildirim kapısı ödeme bildirimlerini ve özeti ayrı listeler (`pending` / `paydays`); gerçek kapıya ikisi birlikte verilir. Mevcut testler değişmeden geçer. |
+

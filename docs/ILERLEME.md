@@ -19,9 +19,11 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 9. Ödeme şekli (16 Kasım 2026): her planda "Otomatik çekilir" / "Elle ödenir" / "Belirtilmedi"; kart taksidi otomatik gelir; otomatikte isteğe bağlı çekildiği yer; elle ödenen plana hatırlatma genel ayardan bir gün önce; bildirim metni şekle göre; ana ekranda ikon; şema v11
 
+- 10. Maaş günü özeti bildirimi (16 Kasım 2026): her maaş döneminin ilk günü, hatırlatma saatinde tek bildirim; ödeme sayısı, toplam ve (gelir varsa) kalan, ana ekranla aynı hesap; Ayarlar'da anahtar, varsayılan açık; şema v12
+
 ## Sıradaki
 
-- 10. Maaş günü özeti bildirimi
+- 11. Pro satın alma
 
 ## Yarım kalan
 
