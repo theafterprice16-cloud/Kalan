@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
+import 'package:kalan/core/money/money_format.dart';
 import 'package:kalan/core/reminders/reminder_models.dart';
 import 'package:kalan/core/reminders/reminder_planner.dart';
 import 'package:kalan/core/reminders/reminder_time.dart';
@@ -25,12 +26,14 @@ ReminderPayment pay(
   int amount = 85000,
   bool paid = false,
   ReminderChoice choice = ReminderChoice.general,
+  PaymentMethod? method,
 }) => ReminderPayment(
   name: name,
   date: date,
   amountMinor: amount,
   isPaid: paid,
   choice: choice,
+  method: method,
 );
 
 ReminderTexts texts([String lang = 'tr', String currency = 'TRY']) =>
@@ -362,7 +365,7 @@ void main() {
   group('lead days', () {
     test('the global setting is the default for "General"', () {
       const s = ReminderSettings(leadDays: 5);
-      expect(defaultLeadDaysFor(pay(d(11, 14)), s), 5);
+      expect(defaultLeadDaysFor(null, s), 5);
       expect(leadDaysFor(pay(d(11, 14)), s), 5);
       expect(leadDaysFor(pay(d(11, 14), choice: ReminderChoice.days(1)), s), 1);
     });
@@ -385,5 +388,182 @@ void main() {
         expect(r.first.fireDate, d(11, 14).addDays(-days));
       });
     }
+  });
+
+  group('payment method', () {
+    const auto = PaymentMethod.automatic;
+    const manual = PaymentMethod.manual;
+
+    test('days before: automatic and not set follow the global, manual '
+        'is one day earlier', () {
+      for (final days in leadDayChoices) {
+        final s = ReminderSettings(leadDays: days);
+        expect(defaultLeadDaysFor(null, s), days);
+        expect(defaultLeadDaysFor(auto, s), days);
+        expect(defaultLeadDaysFor(manual, s), days + 1);
+        expect(leadDaysFor(pay(d(11, 14), method: manual), s), days + 1);
+      }
+    });
+
+    test("a plan's own choice always wins", () {
+      const s = ReminderSettings();
+      for (final method in [null, auto, manual]) {
+        final own = pay(
+          d(11, 14),
+          method: method,
+          choice: ReminderChoice.days(5),
+        );
+        expect(leadDaysFor(own, s), 5);
+        expect(slots(plan([own], now: at(d(11, 1), 20))), [
+          (d(11, 9), ReminderKind.ahead),
+          (d(11, 14), ReminderKind.onDay),
+        ]);
+        final off = pay(
+          d(11, 14),
+          method: method,
+          choice: ReminderChoice.disabled,
+        );
+        expect(plan([off]), isEmpty);
+      }
+    });
+
+    test('not set: times and text exactly as before', () {
+      final r = plan([pay(d(11, 14))]);
+      expect(slots(r), [
+        (d(11, 12), ReminderKind.ahead),
+        (d(11, 14), ReminderKind.onDay),
+      ]);
+      expect(r[0].body, '14 Kasım Cuma günü 1 ödeme var: Klarna, ₺850');
+      expect(r[1].body, 'Bugün 1 ödeme var: Klarna, ₺850');
+      final en = plan([pay(d(11, 14))], lang: 'en');
+      expect(en[0].body, '1 payment on Friday, November 14: Klarna, ₺850');
+    });
+
+    test('automatic: the global day, and the money in the account', () {
+      final r = plan([
+        pay(d(11, 14), name: 'Zip', amount: 12000, method: auto),
+      ], currency: 'JPY');
+      expect(slots(r), [
+        (d(11, 12), ReminderKind.ahead),
+        (d(11, 14), ReminderKind.onDay),
+      ]);
+      final yen = formatMoney(
+        12000,
+        Currency.fromCode('JPY'),
+        localeName: 'tr',
+      );
+      expect(
+        r[0].body,
+        '14 Kasım Cuma günü 1 ödeme var: Zip, $yen. '
+        'Otomatik çekilir; tutar hesabında bulunsun.',
+      );
+      expect(
+        r[1].body,
+        'Bugün 1 ödeme var: Zip, $yen. '
+        'Otomatik çekilir; tutar hesabında bulunsun.',
+      );
+    });
+
+    test('manual: one day earlier, and a note to pay', () {
+      final r = plan([pay(d(11, 14), name: 'Market', method: manual)]);
+      expect(slots(r), [
+        (d(11, 11), ReminderKind.ahead),
+        (d(11, 14), ReminderKind.onDay),
+      ]);
+      expect(
+        r[0].body,
+        '14 Kasım Cuma günü 1 ödeme var: Market, ₺850. '
+        'Bu ödemeyi sen yapıyorsun.',
+      );
+      expect(
+        r[1].body,
+        'Bugün 1 ödeme var: Market, ₺850. Bu ödemeyi sen yapıyorsun.',
+      );
+      final en = plan([
+        pay(d(11, 14), name: 'Market', method: manual),
+      ], lang: 'en');
+      expect(
+        en[1].body,
+        '1 payment today: Market, ₺850. You make this payment yourself.',
+      );
+    });
+
+    test('amounts hidden: the note stays, no amount', () {
+      final r = plan([
+        pay(d(11, 14), method: auto),
+      ], settings: const ReminderSettings(showAmounts: false));
+      expect(
+        r[1].body,
+        'Bugün 1 ödeme var: Klarna. Otomatik çekilir; tutar hesabında '
+        'bulunsun.',
+      );
+      expect(r[1].body, isNot(contains('850')));
+    });
+
+    test('merged: one method keeps its text, mixed ones the general text', () {
+      final same = plan([
+        pay(d(11, 14), name: 'A', method: manual),
+        pay(d(11, 14), name: 'B', amount: 160000, method: manual),
+      ]);
+      expect(
+        same.last.body,
+        'Bugün 2 ödeme var, toplam ₺2.450. Bu ödemeleri sen yapıyorsun.',
+      );
+      for (final other in [auto, null]) {
+        final mixed = plan([
+          pay(d(11, 14), name: 'A', method: manual),
+          pay(d(11, 14), name: 'B', amount: 160000, method: other),
+        ]);
+        final onDay = mixed.firstWhere((x) => x.kind == ReminderKind.onDay);
+        expect(onDay.body, 'Bugün 2 ödeme var, toplam ₺2.450');
+      }
+    });
+
+    test('repeats and snoozes: same moments and buttons, the note kept', () {
+      const settings = ReminderSettings(repeatMode: ReminderRepeat.evening);
+      ReminderPayment p(PaymentMethod? method) => ReminderPayment(
+        name: 'Zip',
+        date: d(11, 14),
+        amountMinor: 85000,
+        ref: const PlanPaymentRef(7),
+        method: method,
+      );
+      final snooze = ReminderSnooze(
+        id: 1,
+        kind: ReminderKind.onDay,
+        fireDate: d(11, 15),
+        minuteOfDay: 600,
+        refs: const [PlanPaymentRef(7)],
+      );
+      List<PlannedReminder> run(PaymentMethod? method) => planReminders(
+        payments: [p(method)],
+        settings: settings,
+        now: at(d(11, 10), 20),
+        texts: texts(),
+        snoozes: [snooze],
+      );
+      final unset = run(null);
+      final auto = run(PaymentMethod.automatic);
+      Object shape(PlannedReminder r) =>
+          (r.id, r.fireAt, r.kind, '${r.buttons}', r.isSnoozed);
+      expect(auto.map(shape).toList(), unset.map(shape).toList());
+      expect(auto.where((r) => r.isSnoozed), hasLength(1));
+      for (var i = 0; i < auto.length; i++) {
+        expect(
+          auto[i].body,
+          '${unset[i].body}. Otomatik çekilir; tutar hesabında bulunsun.',
+        );
+      }
+    });
+
+    test('reminderMethodOf: shared method for ahead and on day only', () {
+      final a = pay(d(11, 14), method: auto);
+      final m = pay(d(11, 14), method: manual);
+      expect(reminderMethodOf(ReminderKind.ahead, [a, a]), auto);
+      expect(reminderMethodOf(ReminderKind.onDay, [m]), manual);
+      expect(reminderMethodOf(ReminderKind.onDay, [a, m]), equals(null));
+      expect(reminderMethodOf(ReminderKind.overdue, [a]), equals(null));
+      expect(reminderMethodOf(ReminderKind.ahead, const []), equals(null));
+    });
   });
 }

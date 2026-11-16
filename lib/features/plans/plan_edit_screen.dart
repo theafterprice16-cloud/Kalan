@@ -14,6 +14,7 @@ import '../../data/models.dart';
 import 'add_plan_screen.dart' show findSourceByName;
 import 'interval_field.dart';
 import 'pay_later_form.dart';
+import 'payment_method_ui.dart';
 
 /// "This plan is already underway", changed after the plan was added: the
 /// same switch and fields as on the add screen, filled in. Payments marked
@@ -42,6 +43,10 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   /// "Monthly installments" and "Pay in 4": the payment interval.
   IntervalInput? _interval;
 
+  /// Payment method and where an automatic one is taken from.
+  PaymentMethod? _method;
+  int? _chargeSourceId;
+
   @override
   void dispose() {
     _paid.dispose();
@@ -60,6 +65,8 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     _count.text = '${plan.plan.installmentCount}';
     _paidPayIn4 = initial.clamp(1, 3);
     if (plan.interval case final interval?) _interval = IntervalInput(interval);
+    _method = plan.plan.paymentMethod;
+    _chargeSourceId = plan.chargeSourceId;
   }
 
   bool _isPayIn4(PlanWithPayments plan) => plan.plan.kind == PlanKind.payIn4;
@@ -181,6 +188,13 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
       _formKey.currentState!.validate();
       return;
     }
+    await ref
+        .read(planRepositoryProvider)
+        .setPaymentMethod(
+          plan.plan.id,
+          _method,
+          chargeSourceId: storedChargeSourceId(_chargeSourceId, plan.ownCardId),
+        );
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),
       fallback: messenger,
@@ -217,105 +231,121 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
       appBar: AppBar(title: Text(l10n.planEdit)),
       body: Form(
         key: _formKey,
-        child: ListView(
+        // Built in full, so the save button is always there to reach.
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
-            if (!payIn4) ...[
-              TextFormField(
-                key: const ValueKey('total-installments'),
-                controller: _count,
-                enabled: _countEditable(plan),
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: l10n.fieldTotalInstallments,
-                  helperText: _countEditable(plan) ? l10n.resizeHint : null,
-                  helperMaxLines: 3,
-                ),
-                onChanged: (_) => setState(() => _countError = null),
-                validator: (v) => _validateCount(plan, v),
-              ),
-              gap,
-            ],
-            AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              alignment: Alignment.topCenter,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SwitchListTile(
-                    key: const ValueKey('underway'),
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.underwayToggle),
-                    subtitle: Text(
-                      l10n.underwayHint,
-                      style: TextStyle(color: context.colors.textMuted),
-                    ),
-                    value: _underway,
-                    // A plan with its first payment marked paid in Kalan
-                    // has nothing the switch could cover.
-                    onChanged: max < 1 && !_underway
-                        ? null
-                        : (v) => setState(() => _underway = v),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!payIn4) ...[
+                TextFormField(
+                  key: const ValueKey('total-installments'),
+                  controller: _count,
+                  enabled: _countEditable(plan),
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: l10n.fieldTotalInstallments,
+                    helperText: _countEditable(plan) ? l10n.resizeHint : null,
+                    helperMaxLines: 3,
                   ),
-                  if (_underway) ...[
-                    const SizedBox(height: 8),
-                    if (!payIn4) ...[
-                      TextFormField(
-                        key: const ValueKey('paid-count'),
-                        controller: _paid,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: l10n.fieldPaidInstallments,
+                  onChanged: (_) => setState(() => _countError = null),
+                  validator: (v) => _validateCount(plan, v),
+                ),
+                gap,
+              ],
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                alignment: Alignment.topCenter,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SwitchListTile(
+                      key: const ValueKey('underway'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.underwayToggle),
+                      subtitle: Text(
+                        l10n.underwayHint,
+                        style: TextStyle(color: context.colors.textMuted),
+                      ),
+                      value: _underway,
+                      // A plan with its first payment marked paid in Kalan
+                      // has nothing the switch could cover.
+                      onChanged: max < 1 && !_underway
+                          ? null
+                          : (v) => setState(() => _underway = v),
+                    ),
+                    if (_underway) ...[
+                      const SizedBox(height: 8),
+                      if (!payIn4) ...[
+                        TextFormField(
+                          key: const ValueKey('paid-count'),
+                          controller: _paid,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l10n.fieldPaidInstallments,
+                          ),
+                          onChanged: (_) => setState(() {}),
+                          validator: (v) => _validate(plan, v),
                         ),
-                        onChanged: (_) => setState(() {}),
-                        validator: (v) => _validate(plan, v),
-                      ),
-                    ] else
-                      ChoiceField<int>(
-                        key: const ValueKey('paid-payin4'),
-                        label: l10n.fieldPaidInstallments,
-                        selected: _paidPayIn4,
-                        options: [
-                          for (var n = 1; n <= (max < 3 ? max : 3); n++)
-                            (n, l10n.numberValue(n)),
-                        ],
-                        onSelected: (n) => setState(() => _paidPayIn4 = n),
-                      ),
-                    if (showDate) ...[
-                      gap,
-                      DateField(
-                        key: const ValueKey('next-date'),
-                        label: l10n.fieldNextPaymentDate,
-                        value: nextDate,
-                        format: context.longDate,
-                        onChanged: (d) => setState(() {
-                          _nextDate = d;
-                          _nextDateTouched = true;
-                        }),
-                      ),
+                      ] else
+                        ChoiceField<int>(
+                          key: const ValueKey('paid-payin4'),
+                          label: l10n.fieldPaidInstallments,
+                          selected: _paidPayIn4,
+                          options: [
+                            for (var n = 1; n <= (max < 3 ? max : 3); n++)
+                              (n, l10n.numberValue(n)),
+                          ],
+                          onSelected: (n) => setState(() => _paidPayIn4 = n),
+                        ),
+                      if (showDate) ...[
+                        gap,
+                        DateField(
+                          key: const ValueKey('next-date'),
+                          label: l10n.fieldNextPaymentDate,
+                          value: nextDate,
+                          format: context.longDate,
+                          onChanged: (d) => setState(() {
+                            _nextDate = d;
+                            _nextDateTouched = true;
+                          }),
+                        ),
+                      ],
                     ],
                   ],
-                ],
+                ),
               ),
-            ),
-            if (_interval case final interval?) ...[
+              if (_interval case final interval?) ...[
+                gap,
+                IntervalField(
+                  input: interval,
+                  onChanged: () => setState(() {}),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.intervalEditHint,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: context.colors.textMuted),
+                ),
+              ],
               gap,
-              IntervalField(input: interval, onChanged: () => setState(() {})),
-              const SizedBox(height: 8),
-              Text(
-                l10n.intervalEditHint,
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: context.colors.textMuted),
+              PaymentMethodFields(
+                method: _method,
+                chargeSourceId: _chargeSourceId,
+                ownCardId: plan.ownCardId,
+                onMethodChanged: (m) => setState(() => _method = m),
+                onChargeSourceChanged: (id) =>
+                    setState(() => _chargeSourceId = id),
+              ),
+              gap,
+              FilledButton(
+                key: const ValueKey('save-plan-edit'),
+                onPressed: _saving ? null : () => _save(plan),
+                child: Text(l10n.actionSave),
               ),
             ],
-            gap,
-            FilledButton(
-              key: const ValueKey('save-plan-edit'),
-              onPressed: _saving ? null : () => _save(plan),
-              child: Text(l10n.actionSave),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -338,6 +368,8 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
   final _formKey = GlobalKey<FormState>();
   late final PayLaterInput _input;
   bool _saving = false;
+  PaymentMethod? _method;
+  int? _chargeSourceId;
 
   @override
   void initState() {
@@ -351,6 +383,8 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
     );
     _input.store.text = plan.plan.title ?? '';
     _input.source.text = plan.source?.name ?? '';
+    _method = plan.plan.paymentMethod;
+    _chargeSourceId = plan.chargeSourceId;
     for (final c in _input.controllers) {
       c.addListener(_refresh);
     }
@@ -401,6 +435,16 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
           rule: rule,
           chosenDate: _input.chosenDate,
         );
+    await ref
+        .read(planRepositoryProvider)
+        .setPaymentMethod(
+          plan.plan.id,
+          _method,
+          chargeSourceId: storedChargeSourceId(
+            _chargeSourceId,
+            widget.plan.ownCardId,
+          ),
+        );
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),
       fallback: messenger,
@@ -415,21 +459,33 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
       appBar: AppBar(title: Text(l10n.planEdit)),
       body: Form(
         key: _formKey,
-        child: ListView(
+        // Built in full, so the save button is always there to reach.
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-          children: [
-            PayLaterFields(
-              input: _input,
-              onChanged: _refresh,
-              locked: widget.plan.payments.first.isPaid,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              key: const ValueKey('save-plan-edit'),
-              onPressed: _saving ? null : _save,
-              child: Text(l10n.actionSave),
-            ),
-          ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PayLaterFields(
+                input: _input,
+                onChanged: _refresh,
+                locked: widget.plan.payments.first.isPaid,
+              ),
+              const SizedBox(height: 16),
+              PaymentMethodFields(
+                method: _method,
+                chargeSourceId: _chargeSourceId,
+                onMethodChanged: (m) => setState(() => _method = m),
+                onChargeSourceChanged: (id) =>
+                    setState(() => _chargeSourceId = id),
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                key: const ValueKey('save-plan-edit'),
+                onPressed: _saving ? null : _save,
+                child: Text(l10n.actionSave),
+              ),
+            ],
+          ),
         ),
       ),
     );

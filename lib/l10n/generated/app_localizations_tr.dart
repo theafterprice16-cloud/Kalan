@@ -1471,4 +1471,62 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errorTotalTooLarge =>
       'Toplam çok büyük oluyor. Taksiti ya da taksit sayısını küçült.';
+
+  @override
+  String reminderWithNote(String body, String note) {
+    return '$body. $note';
+  }
+
+  @override
+  String reminderNoteAutomatic(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Otomatik çekilir; tutar hesabında bulunsun.',
+      one: 'Otomatik çekilir; tutar hesabında bulunsun.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderNoteManual(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bu ödemeleri sen yapıyorsun.',
+      one: 'Bu ödemeyi sen yapıyorsun.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paymentMethodLabel => 'Ödeme şekli';
+
+  @override
+  String get paymentMethodAutomatic => 'Otomatik çekilir';
+
+  @override
+  String get paymentMethodManual => 'Elle ödenir';
+
+  @override
+  String get paymentMethodNotSet => 'Belirtilmedi';
+
+  @override
+  String get paymentMethodAutomaticHint =>
+      'Hatırlatma, tutarın hesabında bulunmasını hatırlatır.';
+
+  @override
+  String get paymentMethodManualHint =>
+      'Hatırlatma bir gün daha erken gelir; ödemeye vaktin kalır.';
+
+  @override
+  String get chargeSourceLabel => 'Çekildiği yer';
+
+  @override
+  String get chargeSourceNone => 'Seçilmedi';
+
+  @override
+  String paymentMethodFrom(String method, String source) {
+    return '$method · $source';
+  }
 }

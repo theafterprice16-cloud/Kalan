@@ -1454,4 +1454,62 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorTotalTooLarge =>
       'The total gets too large. Lower the installment or the number of payments.';
+
+  @override
+  String reminderWithNote(String body, String note) {
+    return '$body. $note';
+  }
+
+  @override
+  String reminderNoteAutomatic(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'They\'re taken automatically; keep the amount in your account.',
+      one: 'It\'s taken automatically; keep the amount in your account.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reminderNoteManual(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You make these payments yourself.',
+      one: 'You make this payment yourself.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paymentMethodLabel => 'Payment method';
+
+  @override
+  String get paymentMethodAutomatic => 'Taken automatically';
+
+  @override
+  String get paymentMethodManual => 'Paid manually';
+
+  @override
+  String get paymentMethodNotSet => 'Not set';
+
+  @override
+  String get paymentMethodAutomaticHint =>
+      'Reminders tell you to keep the amount in your account.';
+
+  @override
+  String get paymentMethodManualHint =>
+      'Reminders come a day earlier, so there\'s time to go and pay.';
+
+  @override
+  String get chargeSourceLabel => 'Taken from';
+
+  @override
+  String get chargeSourceNone => 'Not chosen';
+
+  @override
+  String paymentMethodFrom(String method, String source) {
+    return '$method · $source';
+  }
 }

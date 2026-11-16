@@ -17,9 +17,11 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 8. Toplam tutarla ya da taksit tutarıyla giriş (16 Kasım 2026): plan eklemede "Toplam" / "Taksit" parçalı düğmesi, diğer değer anında "hesaplandı" notuyla, artık ilk taksitte ve ekranda açık; son kullanılan yol hatırlanır (ilk açılış "Toplam"); şema v10; ardından: yol değişince klavye açık kalır, çok uzun tutara "çok büyük" hata metni
 
+- 9. Ödeme şekli (16 Kasım 2026): her planda "Otomatik çekilir" / "Elle ödenir" / "Belirtilmedi"; kart taksidi otomatik gelir; otomatikte isteğe bağlı çekildiği yer; elle ödenen plana hatırlatma genel ayardan bir gün önce; bildirim metni şekle göre; ana ekranda ikon; şema v11
+
 ## Sıradaki
 
-- 9. Ödeme şekli etiketi: otomatik çekilir / elle ödenir
+- 10. Maaş günü özeti bildirimi
 
 ## Yarım kalan
 

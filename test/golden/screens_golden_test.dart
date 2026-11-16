@@ -702,6 +702,81 @@ void main() {
           await shoot(tester, '17-plan-reminder-choice-$lang-$theme');
         });
       }
+
+      // Payment method: add plan (More details open), plan details, home.
+      for (final (lang, locale, plansTab, addPlan, cardKind, details) in [
+        (
+          'tr',
+          const Locale('tr', 'TR'),
+          'Planlar',
+          'Plan ekle',
+          'Kredi kartı taksidi',
+          'Ayrıntı ekle',
+        ),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Plans',
+          'Add plan',
+          'Card installments',
+          'More details',
+        ),
+      ]) {
+        /// Telefon (card) automatic, Kulaklık manual, Mont not set.
+        Future<void> withMethods(AppDatabase db) async {
+          await seedRich(db, incomeMinor: 4500000);
+          for (final (title, method) in [
+            ('Telefon', PaymentMethod.automatic),
+            ('Kulaklık', PaymentMethod.manual),
+          ]) {
+            await (db.update(db.plans)..where((p) => p.title.equals(title)))
+                .write(PlansCompanion(paymentMethod: Value(method)));
+          }
+        }
+
+        testWidgets('add plan, payment method, $lang', (tester) async {
+          await start(tester, locale: locale);
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, cardKind));
+          await tester.pumpAndSettle();
+          await pickDropdown(tester, const ValueKey('card'), 'Bonus');
+          await tester.enterText(find.byKey(const ValueKey('total')), '12000');
+          await tester.enterText(find.byKey(const ValueKey('count')), '6');
+          FocusManager.instance.primaryFocus?.unfocus();
+          await scrollTo(tester, find.text(details));
+          await tester.tap(find.text(details));
+          await tester.pumpAndSettle();
+          await scrollTo(
+            tester,
+            find.byWidgetPredicate((w) => '${w.key}'.contains('charge-source')),
+          );
+          await shoot(tester, '35-add-plan-payment-method-$lang-$theme');
+        });
+
+        testWidgets('plan detail, payment method, $lang', (tester) async {
+          await start(tester, locale: locale, seed: withMethods);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Telefon'));
+          await tester.pumpAndSettle();
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('item-payment-method')),
+          );
+          await shoot(tester, '36-plan-detail-payment-method-$lang-$theme');
+        });
+
+        testWidgets('home, payment method icons, $lang', (tester) async {
+          await start(tester, locale: locale, seed: withMethods);
+          // The period's payments at the top: manual, not set, automatic.
+          await tester.drag(
+            find.byType(Scrollable).first,
+            const Offset(0, -560),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          await shoot(tester, '37-home-payment-method-$lang-$theme');
+        });
+      }
     });
   }
 }

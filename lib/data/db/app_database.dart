@@ -4,6 +4,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import '../../core/engine/amount_entry.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
+import '../../core/engine/payment_method.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
 import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
@@ -51,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -160,6 +161,17 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(
           schema.appSettings,
           schema.appSettings.lastAmountEntry,
+        );
+      },
+      // v11: payment method and where an automatic payment is taken from.
+      // Card plans are taken automatically from their card (left empty:
+      // a card plan's own card is the default); every other plan stays
+      // "not set", so its reminders do not change.
+      from10To11: (m, schema) async {
+        await m.addColumn(schema.plans, schema.plans.paymentMethod);
+        await m.addColumn(schema.plans, schema.plans.chargeSourceId);
+        await customStatement(
+          "UPDATE plans SET payment_method = 'automatic' WHERE kind = 'card'",
         );
       },
     ),

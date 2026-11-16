@@ -446,7 +446,7 @@ void main() {
         find.byKey(const ValueKey('total-installments')),
         '4',
       );
-      await tapKey(tester, 'save-plan-edit');
+      await saveEdit(tester);
       expect(
         find.text('Burada en az 5 olabilir; ödenmiş taksitler kalır.'),
         findsOneWidget,
@@ -455,7 +455,7 @@ void main() {
         find.byKey(const ValueKey('total-installments')),
         '12',
       );
-      await tapKey(tester, 'save-plan-edit');
+      await saveEdit(tester);
       final rows = await paymentsOf(db);
       expect(rows, hasLength(12));
       expect(rows.fold(0, (s, r) => s + r.amountMinor), 850000);

@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/amount_entry.dart';
 import 'package:kalan/core/engine/pay_later.dart';
 import 'package:kalan/core/engine/pay_period.dart';
+import 'package:kalan/core/engine/payment_method.dart';
 import 'package:kalan/core/engine/plan_draft.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
@@ -392,6 +393,115 @@ void main() {
       expect(payments.map((p) => (p.seq, p.dueDay, p.amountMinor)), [
         (1, 20405, 2500),
       ]);
+      await db.close();
+    },
+  );
+
+  test(
+    'v10 -> current: card plans automatic, others not set, nothing else moves',
+    () async {
+      final schema = await verifier.schemaAt(10);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO sources (id, name, kind, statement_day, due_day) '
+        "VALUES (2, 'Bonus', 'card', 5, 15)",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO plans (id, source_id, kind, installment_count, origin, '
+        'reminders_enabled, reminder_lead_days, interval_days) '
+        "VALUES (2, 1, 'monthly', 3, 'template', 1, 5, NULL), "
+        "(3, 2, 'card', 3, 'template', 0, NULL, NULL), "
+        "(4, NULL, 'payLater', 1, 'template', 1, NULL, NULL), "
+        "(5, 1, 'manual', 2, 'manual', 1, NULL, 30)",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at) '
+        'VALUES (3, 1, 20500, 1000, 1700000000), (3, 2, 20531, 1000, NULL)',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final plans = await (db.select(
+        db.plans,
+      )..orderBy([(p) => OrderingTerm.asc(p.id)])).get();
+      expect(plans.map((p) => (p.id, p.paymentMethod, p.chargeSourceId)), [
+        (1, null, null),
+        (2, null, null),
+        (3, PaymentMethod.automatic, null),
+        (4, null, null),
+        (5, null, null),
+      ]);
+      // Reminder choices, sources and intervals are untouched.
+      expect(
+        plans.map(
+          (p) => (
+            p.sourceId,
+            p.kind,
+            p.remindersEnabled,
+            p.reminderLeadDays,
+            p.intervalDays,
+          ),
+        ),
+        [
+          (1, PlanKind.payIn4, true, null, null),
+          (1, PlanKind.monthly, true, 5, null),
+          (2, PlanKind.card, false, null, null),
+          (null, PlanKind.payLater, true, null, null),
+          (1, PlanKind.manual, true, null, 30),
+        ],
+      );
+      final payments = await (db.select(
+        db.payments,
+      )..orderBy([(p) => OrderingTerm.asc(p.id)])).get();
+      expect(
+        payments.map(
+          (p) => (p.planId, p.seq, p.dueDay, p.amountMinor, p.paidAt != null),
+        ),
+        [
+          (1, 1, 20405, 2500, false),
+          (3, 1, 20500, 1000, true),
+          (3, 2, 20531, 1000, false),
+        ],
+      );
+      final check = await db.customSelect('PRAGMA foreign_key_check').get();
+      expect(check, isEmpty);
+      await db.close();
+    },
+  );
+
+  test(
+    'the payment method is stored by name; a deleted source clears it',
+    () async {
+      final db = AppDatabase(NativeDatabase.memory());
+      final card = await db
+          .into(db.sources)
+          .insert(
+            SourcesCompanion.insert(name: 'Bonus', kind: SourceKind.card),
+          );
+      final zip = await db
+          .into(db.sources)
+          .insert(
+            SourcesCompanion.insert(name: 'Zip', kind: SourceKind.provider),
+          );
+      await db
+          .into(db.plans)
+          .insert(
+            PlansCompanion.insert(
+              sourceId: Value(zip),
+              kind: PlanKind.payIn4,
+              installmentCount: 4,
+              origin: PlanOrigin.template,
+              paymentMethod: const Value(PaymentMethod.automatic),
+              chargeSourceId: Value(card),
+            ),
+          );
+      final raw = await db
+          .customSelect('SELECT payment_method FROM plans')
+          .getSingle();
+      expect(raw.read<String>('payment_method'), 'automatic');
+      await (db.delete(db.sources)..where((s) => s.id.equals(card))).go();
+      final plan = await db.select(db.plans).getSingle();
+      expect(plan.chargeSourceId, equals(null));
+      expect(plan.paymentMethod, PaymentMethod.automatic);
       await db.close();
     },
   );

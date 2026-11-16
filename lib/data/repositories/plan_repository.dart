@@ -71,6 +71,8 @@ class PlanRepository {
     required int? sourceId,
     required PlanOrigin origin,
     String? title,
+    PaymentMethod? paymentMethod,
+    int? chargeSourceId,
     DateTime? now,
   }) => _db.transaction(() async {
     final paidAt = now ?? DateTime.now();
@@ -90,6 +92,10 @@ class PlanRepository {
             payLaterRule: Value(draft.payLaterRule?.kind),
             payLaterValue: Value(draft.payLaterRule?.value),
             intervalDays: Value(draft.interval?.days),
+            paymentMethod: Value(paymentMethod),
+            chargeSourceId: Value(
+              paymentMethod == PaymentMethod.automatic ? chargeSourceId : null,
+            ),
           ),
         );
     await _db.batch((b) {
@@ -222,6 +228,22 @@ class PlanRepository {
       ),
     );
   });
+
+  /// The plan's payment method (null: not set) and, for an automatic one,
+  /// where it is taken from (null: not chosen, or a card plan's own card).
+  /// Any other method forgets the source.
+  Future<void> setPaymentMethod(
+    int planId,
+    PaymentMethod? method, {
+    int? chargeSourceId,
+  }) => (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+    PlansCompanion(
+      paymentMethod: Value(method),
+      chargeSourceId: Value(
+        method == PaymentMethod.automatic ? chargeSourceId : null,
+      ),
+    ),
+  );
 
   /// The plan's repeat reminders; null follows the global setting.
   Future<void> setRepeatMode(int planId, ReminderRepeat? mode) =>

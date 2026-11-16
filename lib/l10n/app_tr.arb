@@ -315,5 +315,17 @@
   "amountComputedSplit": "{count, plural, other{İlk taksit {first}, diğer {count} taksit {others} · hesaplandı}}",
   "amountComputedTotal": "Toplam {amount} · hesaplandı",
   "errorAmountTooLarge": "Bu tutar çok büyük.",
-  "errorTotalTooLarge": "Toplam çok büyük oluyor. Taksiti ya da taksit sayısını küçült."
+  "errorTotalTooLarge": "Toplam çok büyük oluyor. Taksiti ya da taksit sayısını küçült.",
+  "reminderWithNote": "{body}. {note}",
+  "reminderNoteAutomatic": "{count, plural, =1{Otomatik çekilir; tutar hesabında bulunsun.} other{Otomatik çekilir; tutar hesabında bulunsun.}}",
+  "reminderNoteManual": "{count, plural, =1{Bu ödemeyi sen yapıyorsun.} other{Bu ödemeleri sen yapıyorsun.}}",
+  "paymentMethodLabel": "Ödeme şekli",
+  "paymentMethodAutomatic": "Otomatik çekilir",
+  "paymentMethodManual": "Elle ödenir",
+  "paymentMethodNotSet": "Belirtilmedi",
+  "paymentMethodAutomaticHint": "Hatırlatma, tutarın hesabında bulunmasını hatırlatır.",
+  "paymentMethodManualHint": "Hatırlatma bir gün daha erken gelir; ödemeye vaktin kalır.",
+  "chargeSourceLabel": "Çekildiği yer",
+  "chargeSourceNone": "Seçilmedi",
+  "paymentMethodFrom": "{method} · {source}"
 }

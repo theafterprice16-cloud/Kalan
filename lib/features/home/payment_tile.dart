@@ -7,6 +7,7 @@ import '../../app/providers.dart';
 import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
+import '../plans/payment_method_ui.dart';
 import 'home_view.dart';
 import 'past_due.dart';
 
@@ -49,8 +50,20 @@ class PaymentTile extends ConsumerWidget {
       color: colors.textMuted,
     );
 
+    final method = entry.paymentMethod;
     final details = <Widget>[
-      Text(date, style: secondary),
+      // The payment method's icon before the date, read out as its word.
+      if (method == null)
+        Text(date, style: secondary)
+      else
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PaymentMethodIcon(method),
+            const SizedBox(width: 4),
+            Text(date, style: secondary),
+          ],
+        ),
       if (entry.isRecurring)
         Text(l10n.recurringTag, style: secondary)
       else if (entry.isPayLater)

@@ -180,6 +180,7 @@ class ReminderScheduler {
             ),
             ref: PlanPaymentRef(pay.id),
             repeat: p.plan.repeatMode,
+            method: p.plan.paymentMethod,
           ),
       for (final r in await RecurringRepository(db).all())
         for (final date in r.occurrences(
