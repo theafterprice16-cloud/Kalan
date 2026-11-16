@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import '../../core/engine/amount_entry.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
+import '../../core/engine/payment_method.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
 import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
@@ -72,6 +73,19 @@ class Plans extends Table {
   /// (1-365); null is the same day each month. Unused by other kinds.
   IntColumn get intervalDays => integer().nullable().check(
     intervalDays.isNull() | intervalDays.isBetweenValues(1, 365),
+  )();
+
+  /// How the payments are paid (schema v11): null is "not set" and keeps
+  /// the reminders exactly as before.
+  TextColumn get paymentMethod => textEnum<PaymentMethod>().nullable()();
+
+  /// Where an automatic payment is taken from (schema v11): any source or
+  /// card. Null is "not chosen"; a card plan then means its own card
+  /// (`PlanWithPayments.chargeSource`). Deleting the source clears it.
+  IntColumn get chargeSourceId => integer().nullable().references(
+    Sources,
+    #id,
+    onDelete: KeyAction.setNull,
   )();
 }
 

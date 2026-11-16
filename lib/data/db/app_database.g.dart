@@ -676,6 +676,29 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     requiredDuringInsert: false,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<PaymentMethod?, String>
+  paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<PaymentMethod?>($PlansTable.$converterpaymentMethodn);
+  static const VerificationMeta _chargeSourceIdMeta = const VerificationMeta(
+    'chargeSourceId',
+  );
+  @override
+  late final GeneratedColumn<int> chargeSourceId = GeneratedColumn<int>(
+    'charge_source_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES sources (id) ON DELETE SET NULL',
+    ),
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     sourceId,
@@ -693,6 +716,8 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     payLaterRule,
     payLaterValue,
     intervalDays,
+    paymentMethod,
+    chargeSourceId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -801,6 +826,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         ),
       );
     }
+    if (data.containsKey('charge_source_id')) {
+      context.handle(
+        _chargeSourceIdMeta,
+        chargeSourceId.isAcceptableOrUnknown(
+          data['charge_source_id']!,
+          _chargeSourceIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -882,6 +916,16 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         DriftSqlType.int,
         data['${effectivePrefix}interval_days'],
       ),
+      paymentMethod: $PlansTable.$converterpaymentMethodn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}payment_method'],
+        ),
+      ),
+      chargeSourceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}charge_source_id'],
+      ),
     );
   }
 
@@ -905,6 +949,14 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
   static JsonTypeConverter2<PayLaterRuleKind?, String?, String?>
   $converterpayLaterRulen = JsonTypeConverter2.asNullable(
     $converterpayLaterRule,
+  );
+  static JsonTypeConverter2<PaymentMethod, String, String>
+  $converterpaymentMethod = const EnumNameConverter<PaymentMethod>(
+    PaymentMethod.values,
+  );
+  static JsonTypeConverter2<PaymentMethod?, String?, String?>
+  $converterpaymentMethodn = JsonTypeConverter2.asNullable(
+    $converterpaymentMethod,
   );
 }
 
@@ -938,6 +990,15 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   /// "Monthly installments" and "Pay in 4" (schema v9): every N days
   /// (1-365); null is the same day each month. Unused by other kinds.
   final int? intervalDays;
+
+  /// How the payments are paid (schema v11): null is "not set" and keeps
+  /// the reminders exactly as before.
+  final PaymentMethod? paymentMethod;
+
+  /// Where an automatic payment is taken from (schema v11): any source or
+  /// card. Null is "not chosen"; a card plan then means its own card
+  /// (`PlanWithPayments.chargeSource`). Deleting the source clears it.
+  final int? chargeSourceId;
   const PlanRow({
     required this.id,
     this.sourceId,
@@ -955,6 +1016,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     this.payLaterRule,
     this.payLaterValue,
     this.intervalDays,
+    this.paymentMethod,
+    this.chargeSourceId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1001,6 +1064,14 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     if (!nullToAbsent || intervalDays != null) {
       map['interval_days'] = Variable<int>(intervalDays);
     }
+    if (!nullToAbsent || paymentMethod != null) {
+      map['payment_method'] = Variable<String>(
+        $PlansTable.$converterpaymentMethodn.toSql(paymentMethod),
+      );
+    }
+    if (!nullToAbsent || chargeSourceId != null) {
+      map['charge_source_id'] = Variable<int>(chargeSourceId);
+    }
     return map;
   }
 
@@ -1038,6 +1109,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       intervalDays: intervalDays == null && nullToAbsent
           ? const Value.absent()
           : Value(intervalDays),
+      paymentMethod: paymentMethod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentMethod),
+      chargeSourceId: chargeSourceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chargeSourceId),
     );
   }
 
@@ -1071,6 +1148,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       ),
       payLaterValue: serializer.fromJson<int?>(json['payLaterValue']),
       intervalDays: serializer.fromJson<int?>(json['intervalDays']),
+      paymentMethod: $PlansTable.$converterpaymentMethodn.fromJson(
+        serializer.fromJson<String?>(json['paymentMethod']),
+      ),
+      chargeSourceId: serializer.fromJson<int?>(json['chargeSourceId']),
     );
   }
   @override
@@ -1101,6 +1182,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       ),
       'payLaterValue': serializer.toJson<int?>(payLaterValue),
       'intervalDays': serializer.toJson<int?>(intervalDays),
+      'paymentMethod': serializer.toJson<String?>(
+        $PlansTable.$converterpaymentMethodn.toJson(paymentMethod),
+      ),
+      'chargeSourceId': serializer.toJson<int?>(chargeSourceId),
     };
   }
 
@@ -1121,6 +1206,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
     Value<int?> payLaterValue = const Value.absent(),
     Value<int?> intervalDays = const Value.absent(),
+    Value<PaymentMethod?> paymentMethod = const Value.absent(),
+    Value<int?> chargeSourceId = const Value.absent(),
   }) => PlanRow(
     id: id ?? this.id,
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
@@ -1142,6 +1229,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         ? payLaterValue.value
         : this.payLaterValue,
     intervalDays: intervalDays.present ? intervalDays.value : this.intervalDays,
+    paymentMethod: paymentMethod.present
+        ? paymentMethod.value
+        : this.paymentMethod,
+    chargeSourceId: chargeSourceId.present
+        ? chargeSourceId.value
+        : this.chargeSourceId,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -1181,6 +1274,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       intervalDays: data.intervalDays.present
           ? data.intervalDays.value
           : this.intervalDays,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
+      chargeSourceId: data.chargeSourceId.present
+          ? data.chargeSourceId.value
+          : this.chargeSourceId,
     );
   }
 
@@ -1202,7 +1301,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('repeatMode: $repeatMode, ')
           ..write('payLaterRule: $payLaterRule, ')
           ..write('payLaterValue: $payLaterValue, ')
-          ..write('intervalDays: $intervalDays')
+          ..write('intervalDays: $intervalDays, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('chargeSourceId: $chargeSourceId')
           ..write(')'))
         .toString();
   }
@@ -1225,6 +1326,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     payLaterRule,
     payLaterValue,
     intervalDays,
+    paymentMethod,
+    chargeSourceId,
   );
   @override
   bool operator ==(Object other) =>
@@ -1245,7 +1348,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.repeatMode == this.repeatMode &&
           other.payLaterRule == this.payLaterRule &&
           other.payLaterValue == this.payLaterValue &&
-          other.intervalDays == this.intervalDays);
+          other.intervalDays == this.intervalDays &&
+          other.paymentMethod == this.paymentMethod &&
+          other.chargeSourceId == this.chargeSourceId);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
@@ -1265,6 +1370,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<PayLaterRuleKind?> payLaterRule;
   final Value<int?> payLaterValue;
   final Value<int?> intervalDays;
+  final Value<PaymentMethod?> paymentMethod;
+  final Value<int?> chargeSourceId;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1282,6 +1389,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.payLaterRule = const Value.absent(),
     this.payLaterValue = const Value.absent(),
     this.intervalDays = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.chargeSourceId = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
@@ -1300,6 +1409,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.payLaterRule = const Value.absent(),
     this.payLaterValue = const Value.absent(),
     this.intervalDays = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.chargeSourceId = const Value.absent(),
   }) : kind = Value(kind),
        installmentCount = Value(installmentCount),
        origin = Value(origin);
@@ -1320,6 +1431,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<String>? payLaterRule,
     Expression<int>? payLaterValue,
     Expression<int>? intervalDays,
+    Expression<String>? paymentMethod,
+    Expression<int>? chargeSourceId,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1338,6 +1451,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       if (payLaterRule != null) 'pay_later_rule': payLaterRule,
       if (payLaterValue != null) 'pay_later_value': payLaterValue,
       if (intervalDays != null) 'interval_days': intervalDays,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
+      if (chargeSourceId != null) 'charge_source_id': chargeSourceId,
     });
   }
 
@@ -1358,6 +1473,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<PayLaterRuleKind?>? payLaterRule,
     Value<int?>? payLaterValue,
     Value<int?>? intervalDays,
+    Value<PaymentMethod?>? paymentMethod,
+    Value<int?>? chargeSourceId,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -1376,6 +1493,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       payLaterRule: payLaterRule ?? this.payLaterRule,
       payLaterValue: payLaterValue ?? this.payLaterValue,
       intervalDays: intervalDays ?? this.intervalDays,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      chargeSourceId: chargeSourceId ?? this.chargeSourceId,
     );
   }
 
@@ -1438,6 +1557,14 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     if (intervalDays.present) {
       map['interval_days'] = Variable<int>(intervalDays.value);
     }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(
+        $PlansTable.$converterpaymentMethodn.toSql(paymentMethod.value),
+      );
+    }
+    if (chargeSourceId.present) {
+      map['charge_source_id'] = Variable<int>(chargeSourceId.value);
+    }
     return map;
   }
 
@@ -1459,7 +1586,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('repeatMode: $repeatMode, ')
           ..write('payLaterRule: $payLaterRule, ')
           ..write('payLaterValue: $payLaterValue, ')
-          ..write('intervalDays: $intervalDays')
+          ..write('intervalDays: $intervalDays, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('chargeSourceId: $chargeSourceId')
           ..write(')'))
         .toString();
   }
@@ -4553,6 +4682,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
     WritePropagation(
       on: TableUpdateQuery.onTableName(
+        'sources',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('plans', kind: UpdateKind.update)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
         'plans',
         limitUpdateKind: UpdateKind.delete,
       ),
@@ -4586,30 +4722,6 @@ typedef $$SourcesTableUpdateCompanionBuilder = SourcesCompanion Function({
   Value<bool> shiftDueToBusinessDay,
   Value<DateTime> createdAt,
 });
-
-final class $$SourcesTableReferences
-    extends BaseReferences<_$AppDatabase, $SourcesTable, SourceRow> {
-  $$SourcesTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$PlansTable, List<PlanRow>> _plansRefsTable(
-    _$AppDatabase db,
-  ) => MultiTypedResultKey.fromTable(
-    db.plans,
-    aliasName: 'sources__id__plans__source_id',
-  );
-
-  $$PlansTableProcessedTableManager get plansRefs {
-    final manager = $$PlansTableTableManager(
-      $_db,
-      $_db.plans,
-    ).filter((f) => f.sourceId.id.sqlEquals($_itemColumn<int>('id')!));
-
-    final cache = $_typedResult.readTableOrNull(_plansRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
 
 class $$SourcesTableFilterComposer
     extends Composer<_$AppDatabase, $SourcesTable> {
@@ -4655,31 +4767,6 @@ class $$SourcesTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> plansRefs(
-    Expression<bool> Function($$PlansTableFilterComposer f) f,
-  ) {
-    final $$PlansTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plans,
-      getReferencedColumn: (t) => t.sourceId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlansTableFilterComposer(
-            $db: $db,
-            $table: $db.plans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$SourcesTableOrderingComposer
@@ -4760,31 +4847,6 @@ class $$SourcesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
-  Expression<T> plansRefs<T extends Object>(
-    Expression<T> Function($$PlansTableAnnotationComposer a) f,
-  ) {
-    final $$PlansTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.plans,
-      getReferencedColumn: (t) => t.sourceId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$PlansTableAnnotationComposer(
-            $db: $db,
-            $table: $db.plans,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 }
 
 class $$SourcesTableTableManager
@@ -4798,9 +4860,9 @@ class $$SourcesTableTableManager
           $$SourcesTableAnnotationComposer,
           $$SourcesTableCreateCompanionBuilder,
           $$SourcesTableUpdateCompanionBuilder,
-          (SourceRow, $$SourcesTableReferences),
+          (SourceRow, BaseReferences<_$AppDatabase, $SourcesTable, SourceRow>),
           SourceRow,
-          PrefetchHooks Function({bool plansRefs})
+          PrefetchHooks Function()
         > {
   $$SourcesTableTableManager(_$AppDatabase db, $SourcesTable table)
     : super(
@@ -4853,38 +4915,15 @@ class $$SourcesTableTableManager
               .map(
                 (e) => (
                   e.readTable<$SourcesTable, SourceRow>(table),
-                  $$SourcesTableReferences(db, table, e),
+                  BaseReferences<_$AppDatabase, $SourcesTable, SourceRow>(
+                    db,
+                    table,
+                    e,
+                  ),
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({plansRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (plansRefs) db.plans],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (plansRefs)
-                    await $_getPrefetchedDataByColumns<
-                      SourceRow,
-                      $SourcesTable,
-                      PlanRow,
-                      $PlansTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$SourcesTableReferences._plansRefsTable(
-                        db,
-                      ),
-                      managerFromTypedResult: (p0) =>
-                          $$SourcesTableReferences(db, table, p0).plansRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'source_id',
-                      typedResults: items,
-                    ),
-                ];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
@@ -4899,9 +4938,9 @@ typedef $$SourcesTableProcessedTableManager =
       $$SourcesTableAnnotationComposer,
       $$SourcesTableCreateCompanionBuilder,
       $$SourcesTableUpdateCompanionBuilder,
-      (SourceRow, $$SourcesTableReferences),
+      (SourceRow, BaseReferences<_$AppDatabase, $SourcesTable, SourceRow>),
       SourceRow,
-      PrefetchHooks Function({bool plansRefs})
+      PrefetchHooks Function()
     >;
 typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -4920,6 +4959,8 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<PayLaterRuleKind?> payLaterRule,
   Value<int?> payLaterValue,
   Value<int?> intervalDays,
+  Value<PaymentMethod?> paymentMethod,
+  Value<int?> chargeSourceId,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -4938,6 +4979,8 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<PayLaterRuleKind?> payLaterRule,
   Value<int?> payLaterValue,
   Value<int?> intervalDays,
+  Value<PaymentMethod?> paymentMethod,
+  Value<int?> chargeSourceId,
 });
 
 final class $$PlansTableReferences
@@ -4955,6 +4998,23 @@ final class $$PlansTableReferences
       $_db.sources,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_sourceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $SourcesTable _chargeSourceIdTable(_$AppDatabase db) =>
+      db.sources.createAlias('plans__charge_source_id__sources__id');
+
+  $$SourcesTableProcessedTableManager? get chargeSourceId {
+    final $_column = $_itemColumn<int>('charge_source_id');
+    if ($_column == null) return null;
+    final manager = $$SourcesTableTableManager(
+      $_db,
+      $_db.sources,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_chargeSourceIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -5067,10 +5127,39 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<PaymentMethod?, PaymentMethod, String>
+  get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   $$SourcesTableFilterComposer get sourceId {
     final $$SourcesTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.sourceId,
+      referencedTable: $db.sources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourcesTableFilterComposer(
+            $db: $db,
+            $table: $db.sources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SourcesTableFilterComposer get chargeSourceId {
+    final $$SourcesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.chargeSourceId,
       referencedTable: $db.sources,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -5200,10 +5289,38 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.sourceId,
+      referencedTable: $db.sources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourcesTableOrderingComposer(
+            $db: $db,
+            $table: $db.sources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SourcesTableOrderingComposer get chargeSourceId {
+    final $$SourcesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.chargeSourceId,
       referencedTable: $db.sources,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -5300,10 +5417,39 @@ class $$PlansTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<PaymentMethod?, String> get paymentMethod =>
+      $composableBuilder(
+        column: $table.paymentMethod,
+        builder: (column) => column,
+      );
+
   $$SourcesTableAnnotationComposer get sourceId {
     final $$SourcesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.sourceId,
+      referencedTable: $db.sources,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$SourcesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.sources,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$SourcesTableAnnotationComposer get chargeSourceId {
+    final $$SourcesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.chargeSourceId,
       referencedTable: $db.sources,
       getReferencedColumn: (t) => t.id,
       builder:
@@ -5362,7 +5508,11 @@ class $$PlansTableTableManager
           $$PlansTableUpdateCompanionBuilder,
           (PlanRow, $$PlansTableReferences),
           PlanRow,
-          PrefetchHooks Function({bool sourceId, bool paymentsRefs})
+          PrefetchHooks Function({
+            bool sourceId,
+            bool chargeSourceId,
+            bool paymentsRefs,
+          })
         > {
   $$PlansTableTableManager(_$AppDatabase db, $PlansTable table)
     : super(
@@ -5393,6 +5543,8 @@ class $$PlansTableTableManager
                 Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
                 Value<int?> payLaterValue = const Value.absent(),
                 Value<int?> intervalDays = const Value.absent(),
+                Value<PaymentMethod?> paymentMethod = const Value.absent(),
+                Value<int?> chargeSourceId = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -5410,6 +5562,8 @@ class $$PlansTableTableManager
                 payLaterRule: payLaterRule,
                 payLaterValue: payLaterValue,
                 intervalDays: intervalDays,
+                paymentMethod: paymentMethod,
+                chargeSourceId: chargeSourceId,
               ),
           createCompanionCallback:
               ({
@@ -5429,6 +5583,8 @@ class $$PlansTableTableManager
                 Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
                 Value<int?> payLaterValue = const Value.absent(),
                 Value<int?> intervalDays = const Value.absent(),
+                Value<PaymentMethod?> paymentMethod = const Value.absent(),
+                Value<int?> chargeSourceId = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -5446,6 +5602,8 @@ class $$PlansTableTableManager
                 payLaterRule: payLaterRule,
                 payLaterValue: payLaterValue,
                 intervalDays: intervalDays,
+                paymentMethod: paymentMethod,
+                chargeSourceId: chargeSourceId,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -5455,63 +5613,82 @@ class $$PlansTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({sourceId = false, paymentsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (paymentsRefs) db.payments],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (sourceId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.sourceId,
-                        referencedTable: $$PlansTableReferences._sourceIdTable(
-                          db,
-                        ),
-                        referencedColumn: $$PlansTableReferences
-                            ._sourceIdTable(db)
-                            .id,
-                      ) as T;
-                    }
+          prefetchHooksCallback:
+              ({
+                sourceId = false,
+                chargeSourceId = false,
+                paymentsRefs = false,
+              }) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [if (paymentsRefs) db.payments],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (sourceId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.sourceId,
+                            referencedTable: $$PlansTableReferences
+                                ._sourceIdTable(db),
+                            referencedColumn: $$PlansTableReferences
+                                ._sourceIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (chargeSourceId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.chargeSourceId,
+                            referencedTable: $$PlansTableReferences
+                                ._chargeSourceIdTable(db),
+                            referencedColumn: $$PlansTableReferences
+                                ._chargeSourceIdTable(db)
+                                .id,
+                          ) as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (paymentsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          PlanRow,
+                          $PlansTable,
+                          PaymentRow,
+                          $PaymentsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PlansTableReferences
+                              ._paymentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PlansTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).paymentsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'plan_id',
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (paymentsRefs)
-                    await $_getPrefetchedDataByColumns<
-                      PlanRow,
-                      $PlansTable,
-                      PaymentRow,
-                      $PaymentsTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$PlansTableReferences
-                          ._paymentsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$PlansTableReferences(db, table, p0).paymentsRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'plan_id',
-                      typedResults: items,
-                    ),
-                ];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -5528,7 +5705,11 @@ typedef $$PlansTableProcessedTableManager =
       $$PlansTableUpdateCompanionBuilder,
       (PlanRow, $$PlansTableReferences),
       PlanRow,
-      PrefetchHooks Function({bool sourceId, bool paymentsRefs})
+      PrefetchHooks Function({
+        bool sourceId,
+        bool chargeSourceId,
+        bool paymentsRefs,
+      })
     >;
 typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
   Value<int> id,

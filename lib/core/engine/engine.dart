@@ -4,6 +4,7 @@ library;
 export '../date/local_date.dart';
 export 'amount_entry.dart';
 export 'past_due.dart';
+export 'payment_method.dart';
 export 'pay_later.dart';
 export 'pay_period.dart';
 export 'payment_edit.dart';
