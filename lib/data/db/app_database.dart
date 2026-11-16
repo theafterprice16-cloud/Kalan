@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../core/engine/amount_entry.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/plan_draft.dart';
@@ -50,7 +51,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -151,6 +152,14 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(schema.plans, schema.plans.intervalDays);
         await customStatement(
           "UPDATE plans SET interval_days = 14 WHERE kind = 'payIn4'",
+        );
+      },
+      // v10: the amount typed last when adding a plan. Empty for everyone:
+      // the form opens with the total, as before.
+      from9To10: (m, schema) async {
+        await m.addColumn(
+          schema.appSettings,
+          schema.appSettings.lastAmountEntry,
         );
       },
     ),

@@ -10,6 +10,9 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/core/engine/amount_entry.dart';
+import 'package:kalan/core/engine/pay_later.dart';
+import 'package:kalan/core/engine/pay_period.dart';
 import 'package:kalan/core/engine/plan_draft.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
@@ -367,6 +370,50 @@ void main() {
       await db.close();
     },
   );
+
+  test(
+    'v9 -> current: no amount entry remembered, settings and plans kept',
+    () async {
+      final schema = await verifier.schemaAt(9);
+      seedCommon(
+        schema,
+        settingsExtra: ', last_pay_later_rule, last_pay_later_value',
+        values: ", 'days', 45",
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final settings = await db.select(db.appSettings).getSingle();
+      expect(settings.lastAmountEntry, equals(null));
+      expect(settings.currencyCode, 'TRY');
+      expect(settings.payDay, 15);
+      expect(settings.lastPayLaterRule, PayLaterRuleKind.days);
+      expect(settings.lastPayLaterValue, 45);
+      final payments = await db.select(db.payments).get();
+      expect(payments.map((p) => (p.seq, p.dueDay, p.amountMinor)), [
+        (1, 20405, 2500),
+      ]);
+      await db.close();
+    },
+  );
+
+  test('the amount entry is stored by name', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    await db
+        .into(db.appSettings)
+        .insert(
+          AppSettingsCompanion.insert(
+            currencyCode: 'TRY',
+            payFrequency: PayFrequency.monthly,
+            payDay: const Value(15),
+            lastAmountEntry: const Value(AmountEntry.installment),
+          ),
+        );
+    final raw = await db
+        .customSelect('SELECT last_amount_entry FROM app_settings')
+        .getSingle();
+    expect(raw.read<String>('last_amount_entry'), 'installment');
+    await db.close();
+  });
 
   test('interval days outside 1-365 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
