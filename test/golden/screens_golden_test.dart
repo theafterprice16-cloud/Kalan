@@ -456,6 +456,46 @@ void main() {
         });
       }
 
+      // Payment interval: Marta, 3 installments every 30 days from 1 Aug.
+      for (final (lang, locale, addPlan, monthly, every30) in [
+        (
+          'tr',
+          const Locale('tr', 'TR'),
+          'Plan ekle',
+          'Aylık taksit',
+          '30 günde bir',
+        ),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Add plan',
+          'Monthly installments',
+          'Every 30 days',
+        ),
+      ]) {
+        testWidgets('add plan, every 30 days, $lang', (tester) async {
+          await start(tester, locale: locale, today: LocalDate(2027, 8, 1));
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, monthly));
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+          await tester.enterText(find.byKey(const ValueKey('total')), '3000');
+          await tester.enterText(find.byKey(const ValueKey('count')), '3');
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+          final chip = find.widgetWithText(ChoiceChip, every30);
+          await tester.ensureVisible(chip);
+          await tester.tap(chip);
+          await tester.pumpAndSettle();
+          await tester.ensureVisible(
+            find.byKey(const ValueKey('preview-same-month')),
+          );
+          await tester.pumpAndSettle();
+          await shoot(tester, '33-interval-add-$lang-$theme');
+        });
+      }
+
       // "Pay later" in both languages (today: 20 November 2026).
       for (final (lang, locale, plansTab, addPlan, payLater, nextMonth, auto)
           in [

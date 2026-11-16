@@ -1372,4 +1372,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String payLaterSourceLine(String name) {
     return 'Source: $name';
   }
+
+  @override
+  String get fieldPaymentInterval => 'Payment interval';
+
+  @override
+  String get intervalSameDay => 'Same day each month';
+
+  @override
+  String get intervalEvery30Days => 'Every 30 days';
+
+  @override
+  String get intervalBiweekly => 'Every 2 weeks';
+
+  @override
+  String get intervalWeekly => 'Every week';
+
+  @override
+  String get intervalCustom => 'Other';
+
+  @override
+  String get fieldIntervalDays => 'Days between payments';
+
+  @override
+  String previewSameMonth(String months) {
+    return 'Months with more than one payment: $months.';
+  }
+
+  @override
+  String previewSameMonthItem(String month, int count) {
+    return '$month ($count)';
+  }
+
+  @override
+  String get previewMonthSeparator => ', ';
+
+  @override
+  String get intervalEditHint => 'Only unpaid installments get new dates.';
 }

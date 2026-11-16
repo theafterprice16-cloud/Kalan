@@ -295,5 +295,16 @@
   "payLaterRuleLine": "Ne zaman: {rule}",
   "errorPayLaterDays": "Gün sayısı 1 ile 180 arasında olmalı.",
   "errorPayLaterDay": "Gün 1 ile 31 arasında olmalı.",
-  "payLaterSourceLine": "Kaynak: {name}"
+  "payLaterSourceLine": "Kaynak: {name}",
+  "fieldPaymentInterval": "Ödeme aralığı",
+  "intervalSameDay": "Her ayın aynı günü",
+  "intervalEvery30Days": "30 günde bir",
+  "intervalBiweekly": "İki haftada bir",
+  "intervalWeekly": "Haftada bir",
+  "intervalCustom": "Özel",
+  "fieldIntervalDays": "Kaç günde bir",
+  "previewSameMonth": "Aynı aya düşen ödemeler: {months}.",
+  "previewSameMonthItem": "{month} ({count})",
+  "previewMonthSeparator": ", ",
+  "intervalEditHint": "Yalnızca ödenmemiş taksitlerin tarihi değişir."
 }

@@ -35,31 +35,45 @@ abstract final class PlanCalculator {
       DraftPayment(seq: firstSeq + i, date: dates[i], amountMinor: amounts[i]),
   ];
 
-  /// Pay in 4: four payments, two weeks apart, first one on [firstDate].
+  static void _checkInterval(PaymentInterval interval) {
+    if (!interval.isValid) throw const InvalidPlanInput('interval');
+  }
+
+  /// Pay in 4: four payments, first one on [firstDate], two weeks apart
+  /// unless another [interval] is chosen.
   static PlanDraft payIn4({
     required LocalDate firstDate,
     required int totalMinor,
+    PaymentInterval interval = PaymentInterval.biweekly,
   }) {
     _checkTotal(totalMinor, 4);
+    _checkInterval(interval);
     return PlanDraft(
       kind: PlanKind.payIn4,
       installmentCount: 4,
-      payments: _zip(payIn4Dates(firstDate), splitEvenly(totalMinor, 4)),
+      interval: interval,
+      payments: _zip(
+        payIn4Dates(firstDate, interval: interval),
+        splitEvenly(totalMinor, 4),
+      ),
     );
   }
 
-  /// Monthly installments on the same day each month.
+  /// Installments on the same day each month, or every [interval].
   static PlanDraft monthly({
     required LocalDate firstDate,
     required int totalMinor,
     required int count,
+    PaymentInterval interval = PaymentInterval.sameDay,
   }) {
     _checkTotal(totalMinor, count);
+    _checkInterval(interval);
     return PlanDraft(
       kind: PlanKind.monthly,
       installmentCount: count,
+      interval: interval,
       payments: _zip(
-        monthlyDates(firstDate, count),
+        interval.datesFrom(firstDate, count),
         splitEvenly(totalMinor, count),
       ),
     );

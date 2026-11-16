@@ -13,10 +13,11 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 - 4. Bildirimden "ödendi" işaretleme (13 Kasım 2026)
 - 5. Israrlı hatırlatma (14 Kasım 2026)
 - 6. "Sonra öde" tek ödemeli plan türü (14 Kasım 2026, PR #9 ve #10)
+- 7. Ödeme aralığı seçimi (16 Kasım 2026): aylık taksit ve 4 ödemeli planda her ayın aynı günü / 30 gün / 2 hafta / hafta / özel N gün; önizlemede aynı ay notu; düzenlemede yalnızca ödenmemiş taksitler; şema v9
 
 ## Sıradaki
 
-- 7. Ödeme aralığı seçimi
+- 8. Toplam tutarla ya da taksit tutarıyla giriş
 
 ## Yarım kalan
 

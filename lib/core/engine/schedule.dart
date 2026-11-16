@@ -9,16 +9,90 @@ LocalDate shiftToBusinessDay(LocalDate date) => switch (date.weekday) {
   _ => date,
 };
 
-/// Pay in 4: the first payment on [first], then every 14 days.
-List<LocalDate> payIn4Dates(LocalDate first) => [
-  for (var i = 0; i < 4; i++) first.addDays(14 * i),
-];
+/// How often the payments of an installment plan repeat: the same day
+/// each month, or every N days (30 days, two weeks, a week, any 1-365).
+///
+/// Every date of such a plan comes from [dateAt], so plans set up going
+/// forward, plans already underway and added installments agree.
+class PaymentInterval {
+  /// Same day every month, clamped to month end without drifting
+  /// (31 Jan, 28 Feb, 31 Mar).
+  const PaymentInterval.sameDayEachMonth() : days = null;
+
+  /// Every [days] days (1-365).
+  const PaymentInterval.everyDays(int this.days);
+
+  static const sameDay = PaymentInterval.sameDayEachMonth();
+  static const every30Days = PaymentInterval.everyDays(30);
+  static const biweekly = PaymentInterval.everyDays(14);
+  static const weekly = PaymentInterval.everyDays(7);
+
+  static const minDays = 1;
+  static const maxDays = 365;
+
+  /// Null for the same day each month.
+  final int? days;
+
+  bool get isValid => switch (days) {
+    null => true,
+    final n => n >= minDays && n <= maxDays,
+  };
+
+  /// The interval a plan stored as [days] (null: same day each month).
+  static PaymentInterval fromDays(int? days) =>
+      days == null ? sameDay : PaymentInterval.everyDays(days);
+
+  /// The date [offset] payments after (negative: before) the payment on
+  /// [anchor]. Monthly dates keep [anchor]'s day of month.
+  LocalDate dateAt(LocalDate anchor, int offset) => switch (days) {
+    null => anchor.addMonths(offset, preferredDay: anchor.day),
+    final n => anchor.addDays(n * offset),
+  };
+
+  /// [count] dates, the first on [first].
+  List<LocalDate> datesFrom(LocalDate first, int count) => [
+    for (var i = 0; i < count; i++) dateAt(first, i),
+  ];
+
+  @override
+  bool operator ==(Object other) =>
+      other is PaymentInterval && other.days == days;
+
+  @override
+  int get hashCode => days.hashCode;
+
+  @override
+  String toString() =>
+      days == null ? 'PaymentInterval.sameDay' : 'PaymentInterval($days d)';
+}
+
+/// Months that hold more than one of [dates], in date order, with how
+/// many fall in each: the preview's "same month" note.
+List<({int year, int month, int count})> monthsWithSeveral(
+  Iterable<LocalDate> dates,
+) {
+  final counts = <(int, int), int>{};
+  for (final d in dates) {
+    counts.update((d.year, d.month), (n) => n + 1, ifAbsent: () => 1);
+  }
+  final months = [
+    for (final MapEntry(key: (y, m), value: n) in counts.entries)
+      if (n > 1) (year: y, month: m, count: n),
+  ]..sort((a, b) => a.year != b.year ? a.year - b.year : a.month - b.month);
+  return months;
+}
+
+/// Pay in 4: the first payment on [first], then every 14 days (or every
+/// [interval]).
+List<LocalDate> payIn4Dates(
+  LocalDate first, {
+  PaymentInterval interval = PaymentInterval.biweekly,
+}) => interval.datesFrom(first, 4);
 
 /// Same day every month, clamped to month end without drifting
 /// (31 Jan, 28 Feb, 31 Mar).
-List<LocalDate> monthlyDates(LocalDate first, int count) => [
-  for (var i = 0; i < count; i++) first.addMonths(i, preferredDay: first.day),
-];
+List<LocalDate> monthlyDates(LocalDate first, int count) =>
+    PaymentInterval.sameDay.datesFrom(first, count);
 
 /// Every [step] [unit]s starting at [first].
 List<LocalDate> intervalDates(

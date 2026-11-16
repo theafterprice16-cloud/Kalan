@@ -11,15 +11,29 @@ sealed class UnderwayPattern {
   const UnderwayPattern();
 }
 
-/// Same day every month (the next payment's day), with the engine's month
-/// end rule: 31 Jan, 28 Feb, 31 Mar.
-class MonthlyPattern extends UnderwayPattern {
-  const MonthlyPattern();
+/// Payments every [interval] ([PaymentInterval.dateAt]): the same day each
+/// month (the next payment's day, with the engine's month end rule: 31 Jan,
+/// 28 Feb, 31 Mar) or every N days.
+class IntervalPattern extends UnderwayPattern {
+  const IntervalPattern(this.interval);
+  final PaymentInterval interval;
+
+  @override
+  bool operator ==(Object other) =>
+      other is IntervalPattern && other.interval == interval;
+
+  @override
+  int get hashCode => interval.hashCode;
+}
+
+/// Same day every month.
+class MonthlyPattern extends IntervalPattern {
+  const MonthlyPattern() : super(PaymentInterval.sameDay);
 }
 
 /// Pay in 4: every 14 days.
-class PayIn4Pattern extends UnderwayPattern {
-  const PayIn4Pattern();
+class PayIn4Pattern extends IntervalPattern {
+  const PayIn4Pattern() : super(PaymentInterval.biweekly);
 }
 
 /// A credit card's due date each month, shifted off weekends if the card
@@ -34,9 +48,10 @@ class CardPattern extends UnderwayPattern {
 ///
 /// Built so that a plan set up going forward from the first date would
 /// land on the same dates: monthly plans keep [nextDate]'s day of month
-/// (clamped at month end, without drifting), Pay in 4 steps 14 days, card
-/// plans use the card's due date of each month ([CardTerms.dueInMonth] and
-/// [dueMonthOf], as for any card plan). [nextDate] itself is kept as given.
+/// (clamped at month end, without drifting), day intervals step N days
+/// (Pay in 4: 14), card plans use the card's due date of each month
+/// ([CardTerms.dueInMonth] and [dueMonthOf], as for any card plan).
+/// [nextDate] itself is kept as given.
 List<LocalDate> underwayDates({
   required LocalDate nextDate,
   required int paidCount,
@@ -48,15 +63,11 @@ List<LocalDate> underwayDates({
     throw const InvalidPlanInput('paidCount');
   }
   switch (pattern) {
-    case MonthlyPattern():
+    case IntervalPattern(:final interval):
+      if (!interval.isValid) throw const InvalidPlanInput('interval');
       return [
         for (var i = 0; i < totalCount; i++)
-          nextDate.addMonths(i - paidCount, preferredDay: nextDate.day),
-      ];
-    case PayIn4Pattern():
-      return [
-        for (var i = 0; i < totalCount; i++)
-          nextDate.addDays(14 * (i - paidCount)),
+          interval.dateAt(nextDate, i - paidCount),
       ];
     case CardPattern(:final terms):
       final base = dueMonthOf(nextDate, terms);
@@ -92,6 +103,7 @@ PlanDraft underwayPlan({
   required LocalDate nextDate,
   CardTerms? terms,
   bool isCashAdvance = false,
+  PaymentInterval? interval,
 }) {
   if (count < 1 || count > PlanCalculator.maxInstallments) {
     throw const InvalidPlanInput('count');
@@ -100,9 +112,13 @@ PlanDraft underwayPlan({
   if (paidCount < 1 || paidCount >= count) {
     throw const InvalidPlanInput('paidCount');
   }
+  final planInterval = switch (kind) {
+    PlanKind.monthly => interval ?? PaymentInterval.sameDay,
+    PlanKind.payIn4 => interval ?? PaymentInterval.biweekly,
+    _ => null,
+  };
   final pattern = switch (kind) {
-    PlanKind.monthly => const MonthlyPattern(),
-    PlanKind.payIn4 => const PayIn4Pattern(),
+    PlanKind.monthly || PlanKind.payIn4 => IntervalPattern(planInterval!),
     PlanKind.card when terms != null => CardPattern(terms),
     _ => throw const InvalidPlanInput('kind'),
   };
@@ -121,6 +137,7 @@ PlanDraft underwayPlan({
     installmentCount: count,
     isCashAdvance: kind == PlanKind.card && isCashAdvance,
     paidBeforeCount: paidCount,
+    interval: planInterval,
     payments: [
       for (var i = 0; i < count; i++)
         DraftPayment(seq: i + 1, date: dates[i], amountMinor: amounts[i]),

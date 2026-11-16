@@ -89,6 +89,7 @@ class PlanRepository {
             origin: origin,
             payLaterRule: Value(draft.payLaterRule?.kind),
             payLaterValue: Value(draft.payLaterRule?.value),
+            intervalDays: Value(draft.interval?.days),
           ),
         );
     await _db.batch((b) {
@@ -350,33 +351,75 @@ class PlanRepository {
     }
   });
 
-  /// The plan edit screen's save: the installment count and "already
-  /// underway" together, in the order that keeps both valid.
+  /// The plan edit screen's save: the installment count, "already
+  /// underway" and the payment interval together, in the order that keeps
+  /// them valid. Nothing is stored when the change is rejected.
+  ///
+  /// "Monthly installments" and "Pay in 4" follow their own interval: a
+  /// new [interval] is stored and redates the payments after the anchor
+  /// that are unpaid and not edited by hand. The anchor is the first
+  /// unpaid payment not edited by hand from number `paidBefore + 1` on; it
+  /// keeps its date, so no unpaid payment moves into the past; payments
+  /// paid before Kalan follow the new rule backwards. With [nextDate],
+  /// payment number `paidBefore + 1` moves there and the rest follow it
+  /// ([setPaidBefore]). Other kinds use [pattern] and ignore [interval].
   Future<ResizeRejection?> editPlan(
     int planId, {
     required int count,
     required int paidBefore,
     LocalDate? nextDate,
     UnderwayPattern? pattern,
+    PaymentInterval? interval,
   }) => _db
-      .transaction(() async {
+      .transaction<ResizeRejection?>(() async {
+        if (paidBefore < 0 || paidBefore >= count) {
+          throw ArgumentError.value(paidBefore, 'paidBefore');
+        }
         final current = await (_db.select(
           _db.plans,
         )..where((p) => p.id.equals(planId))).getSingle();
-        Future<void> underway() => setPaidBefore(
-          planId,
-          count: paidBefore,
-          nextDate: nextDate,
-          pattern: nextDate == null ? null : pattern,
-        );
+        final hasInterval =
+            current.kind == PlanKind.monthly || current.kind == PlanKind.payIn4;
+        final stored = PaymentInterval.fromDays(current.intervalDays);
+        final chosen = hasInterval ? interval ?? stored : null;
+        if (chosen != null && !chosen.isValid) {
+          throw ArgumentError.value(interval, 'interval');
+        }
+        final newInterval = chosen != null && chosen != stored;
+        final datePattern = chosen != null ? IntervalPattern(chosen) : pattern;
+
         if (count >= current.installmentCount) {
-          final rejected = await resize(planId, count: count, pattern: pattern);
-          if (rejected != null) return rejected;
-          await underway();
-        } else {
-          await underway();
-          final rejected = await resize(planId, count: count, pattern: pattern);
+          final rejected = await resize(
+            planId,
+            count: count,
+            pattern: datePattern,
+          );
           if (rejected != null) throw _Rollback(rejected);
+          await _underwayAndInterval(
+            planId,
+            paidBefore: paidBefore,
+            nextDate: nextDate,
+            pattern: datePattern,
+            redate: newInterval,
+          );
+        } else {
+          await _underwayAndInterval(
+            planId,
+            paidBefore: paidBefore,
+            nextDate: nextDate,
+            pattern: datePattern,
+            redate: newInterval,
+          );
+          final rejected = await resize(
+            planId,
+            count: count,
+            pattern: datePattern,
+          );
+          if (rejected != null) throw _Rollback(rejected);
+        }
+        if (newInterval) {
+          await (_db.update(_db.plans)..where((p) => p.id.equals(planId)))
+              .write(PlansCompanion(intervalDays: Value(chosen.days)));
         }
         return null;
       })
@@ -384,6 +427,54 @@ class PlanRepository {
         (Object e) => (e as _Rollback).reason,
         test: (e) => e is _Rollback,
       );
+
+  /// [setPaidBefore], then, for a new interval without a new next date,
+  /// the payments after the anchor (see [editPlan]) and the ones paid
+  /// before Kalan follow [pattern] from the anchor.
+  Future<void> _underwayAndInterval(
+    int planId, {
+    required int paidBefore,
+    required LocalDate? nextDate,
+    required UnderwayPattern? pattern,
+    required bool redate,
+  }) async {
+    await setPaidBefore(
+      planId,
+      count: paidBefore,
+      nextDate: nextDate,
+      pattern: nextDate == null ? null : pattern,
+    );
+    if (!redate || nextDate != null || pattern == null) return;
+    final rows =
+        await (_db.select(_db.payments)
+              ..where((p) => p.planId.equals(planId))
+              ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
+            .get();
+    bool free(PaymentRow r) => !r.isPaid && !r.isEdited;
+    var anchor = paidBefore;
+    while (anchor < rows.length && !free(rows[anchor])) {
+      anchor++;
+    }
+    if (anchor >= rows.length) return;
+    final dates = underwayDates(
+      nextDate: rows[anchor].date,
+      paidCount: anchor,
+      totalCount: rows.length,
+      pattern: pattern,
+    );
+    // Payments paid before Kalan follow the plan's rule backwards
+    // ([underwayDates]); payments marked paid in Kalan never move.
+    bool moves(int i) =>
+        i > anchor && free(rows[i]) ||
+        i < paidBefore && rows[i].paidBeforeKalan && !rows[i].isEdited;
+    for (var i = 0; i < rows.length; i++) {
+      final r = rows[i];
+      if (!moves(i) || r.dueDay == dates[i].epochDay) continue;
+      await (_db.update(_db.payments)..where((p) => p.id.equals(r.id))).write(
+        PaymentsCompanion(dueDay: Value(dates[i].epochDay)),
+      );
+    }
+  }
 
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();

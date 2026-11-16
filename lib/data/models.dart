@@ -80,6 +80,14 @@ class PlanWithPayments {
   PayLaterRule? get payLaterRule =>
       PayLaterRule.from(plan.payLaterRule, plan.payLaterValue);
 
+  /// "Monthly installments" and "Pay in 4": how often the payments
+  /// repeat (null for other kinds). Stored empty: the same day each month.
+  PaymentInterval? get interval => switch (plan.kind) {
+    PlanKind.monthly ||
+    PlanKind.payIn4 => PaymentInterval.fromDays(plan.intervalDays),
+    _ => null,
+  };
+
   LocalDate? get purchaseDate => plan.purchaseDay == null
       ? null
       : LocalDate.fromEpochDay(plan.purchaseDay!);

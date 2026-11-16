@@ -331,6 +331,67 @@ void main() {
     },
   );
 
+  test(
+    'v8 -> current: Pay in 4 every 14 days, monthly same day, dates kept',
+    () async {
+      final schema = await verifier.schemaAt(8);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO plans (id, source_id, kind, installment_count, origin) '
+        "VALUES (2, 1, 'monthly', 3, 'template'), "
+        "(3, 1, 'card', 3, 'template'), (4, NULL, 'payLater', 1, 'template')",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor) '
+        'VALUES (2, 1, 20500, 1000), (2, 2, 20531, 1000)',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final plans = await (db.select(
+        db.plans,
+      )..orderBy([(p) => OrderingTerm.asc(p.id)])).get();
+      expect(plans.map((p) => (p.id, p.kind, p.intervalDays)), [
+        (1, PlanKind.payIn4, 14),
+        (2, PlanKind.monthly, null),
+        (3, PlanKind.card, null),
+        (4, PlanKind.payLater, null),
+      ]);
+      final payments = await (db.select(
+        db.payments,
+      )..orderBy([(p) => OrderingTerm.asc(p.id)])).get();
+      expect(payments.map((p) => (p.planId, p.seq, p.dueDay, p.amountMinor)), [
+        (1, 1, 20405, 2500),
+        (2, 1, 20500, 1000),
+        (2, 2, 20531, 1000),
+      ]);
+      await db.close();
+    },
+  );
+
+  test('interval days outside 1-365 are refused', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    await db
+        .into(db.sources)
+        .insert(
+          SourcesCompanion.insert(name: 'Klarna', kind: SourceKind.provider),
+        );
+    PlansCompanion plan(int days) => PlansCompanion.insert(
+      sourceId: const Value(1),
+      kind: PlanKind.monthly,
+      installmentCount: 3,
+      origin: PlanOrigin.template,
+      intervalDays: Value(days),
+    );
+    await db.into(db.plans).insert(plan(365));
+    for (final days in [0, 366]) {
+      await expectLater(
+        db.into(db.plans).insert(plan(days)),
+        throwsA(isA<SqliteException>()),
+      );
+    }
+    await db.close();
+  });
+
   test('the same snooze twice is stored once', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final entry = ReminderSnoozesCompanion.insert(

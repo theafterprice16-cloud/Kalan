@@ -13,6 +13,16 @@ Future<void> openAddPlan(WidgetTester tester) async {
   expect(find.text('Plan türü'), findsOneWidget);
 }
 
+/// Scrolls the form back up until [finder] is built.
+Future<void> scrollUpTo(WidgetTester tester, Finder finder) async {
+  await tester.scrollUntilVisible(
+    finder,
+    -200,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.pumpAndSettle();
+}
+
 int visibleInputCount(WidgetTester tester) =>
     find.byType(TextFormField).evaluate().length +
     find.byType(DateField).evaluate().length +
@@ -50,13 +60,19 @@ void main() {
       seed: (db) => seedSettings(db, incomeMinor: 5000000),
     );
     await openAddPlan(tester);
+    await scrollTo(
+      tester,
+      find.text('Alanları doldurunca ödemeleri burada görürsün.'),
+    );
     expect(
       find.text('Alanları doldurunca ödemeleri burada görürsün.'),
       findsOneWidget,
     );
+    await scrollUpTo(tester, find.byKey(const ValueKey('source')));
     await tester.enterText(find.byKey(const ValueKey('source')), 'Klarna');
     await tester.enterText(find.byKey(const ValueKey('total')), '400,01');
     await tester.pumpAndSettle();
+    await scrollTo(tester, find.text('1 Oca 2027'));
     expect(find.text('4 ödeme, toplam ₺400,01.'), findsOneWidget);
     expect(find.text('₺100,01'), findsOneWidget);
     expect(find.text('1 Oca 2027'), findsOneWidget);
@@ -110,6 +126,87 @@ void main() {
     expect(plan.kind, PlanKind.card);
     expect(plan.purchaseDay, testToday.epochDay);
     expect(find.text('1/3'), findsOneWidget);
+  });
+
+  testWidgets('payment interval: default per type, preview, saved', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      seed: (db) => seedSettings(db, incomeMinor: 5000000),
+    );
+    await openAddPlan(tester);
+    bool selected(String label) => tester
+        .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, label))
+        .selected;
+
+    // Pay in 4 starts every two weeks; monthly on the same day each month.
+    await scrollTo(tester, find.text('İki haftada bir'));
+    expect(selected('İki haftada bir'), isTrue);
+    await scrollUpTo(tester, find.widgetWithText(ChoiceChip, 'Aylık taksit'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Aylık taksit'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+    await tester.enterText(find.byKey(const ValueKey('total')), '300');
+    await tester.enterText(find.byKey(const ValueKey('count')), '3');
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.text('Her ayın aynı günü'));
+    expect(selected('Her ayın aynı günü'), isTrue);
+    expect(find.byKey(const ValueKey('preview-same-month')), findsNothing);
+
+    // Every 30 days from 20 Nov 2026.
+    await tester.tap(find.widgetWithText(ChoiceChip, '30 günde bir'));
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.text('19 Oca 2027'));
+    expect(find.text('20 Ara 2026'), findsOneWidget);
+    expect(find.byKey(const ValueKey('preview-same-month')), findsNothing);
+
+    // Other: every 10 days; two payments land in November.
+    await scrollUpTo(tester, find.widgetWithText(ChoiceChip, 'Özel'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Özel'));
+    await tester.pumpAndSettle();
+    await scrollTo(
+      tester,
+      find.text('Alanları doldurunca ödemeleri burada görürsün.'),
+    );
+    expect(
+      find.text('Alanları doldurunca ödemeleri burada görürsün.'),
+      findsOneWidget,
+    );
+    await scrollUpTo(tester, find.byKey(const ValueKey('interval-days')));
+    await tester.enterText(find.byKey(const ValueKey('interval-days')), '10');
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.byKey(const ValueKey('preview-same-month')));
+    expect(
+      find.text('Aynı aya düşen ödemeler: Kasım 2026 (2).'),
+      findsOneWidget,
+    );
+    expect(find.text('30 Kas 2026'), findsOneWidget);
+    expect(find.text('10 Ara 2026'), findsOneWidget);
+
+    await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+    await tester.tap(find.byKey(const ValueKey('save-plan')));
+    await tester.pumpAndSettle();
+    final plan = await db.select(db.plans).getSingle();
+    expect(plan.kind, PlanKind.monthly);
+    expect(plan.intervalDays, 10);
+  });
+
+  testWidgets('an "Other" interval outside 1-365 is refused', (tester) async {
+    final db = await pumpApp(tester, seed: seedSettings);
+    await openAddPlan(tester);
+    await tester.enterText(find.byKey(const ValueKey('source')), 'Klarna');
+    await tester.enterText(find.byKey(const ValueKey('total')), '400');
+    await scrollTo(tester, find.widgetWithText(ChoiceChip, 'Özel'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Özel'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('interval-days')), '400');
+    await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+    await tester.tap(find.byKey(const ValueKey('save-plan')));
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.text('1 ile 365 arasında bir sayı yaz.'));
+    expect(find.text('1 ile 365 arasında bir sayı yaz.'), findsOneWidget);
+    expect(await db.select(db.plans).get(), isEmpty);
   });
 
   testWidgets('empty form explains what is missing', (tester) async {

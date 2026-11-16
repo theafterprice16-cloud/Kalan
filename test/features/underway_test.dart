@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/data/models.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
 import 'package:material_ui/material_ui.dart';
@@ -39,6 +40,14 @@ Future<void> tapKey(WidgetTester tester, String key) async {
   await tester.pumpAndSettle();
   await tester.tap(f);
   await tester.pumpAndSettle();
+}
+
+/// Saves the edit screen. A focused field would scroll itself back into
+/// view, so the keyboard is closed first.
+Future<void> saveEdit(WidgetTester tester) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pumpAndSettle();
+  await tapKey(tester, 'save-plan-edit');
 }
 
 /// Types a date into the platform picker ("05.12.2026" in Turkish).
@@ -360,7 +369,9 @@ void main() {
       expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
       expect(find.text('3'), findsOneWidget);
       await tester.enterText(find.byKey(const ValueKey('paid-count')), '4');
-      await tapKey(tester, 'save-plan-edit');
+      await saveEdit(tester);
+      await tester.ensureVisible(find.byKey(const ValueKey('paid-count')));
+      await tester.pumpAndSettle();
       expect(find.text('Burada en fazla 3 olabilir.'), findsOneWidget);
       final rows = await paymentsOf(db);
       expect(rows.where((r) => r.paidBeforeKalan), hasLength(3));
@@ -373,7 +384,7 @@ void main() {
       final marked = (await paymentsOf(db))[3].paidAt;
       await openEdit(tester);
       await tester.enterText(find.byKey(const ValueKey('paid-count')), '1');
-      await tapKey(tester, 'save-plan-edit');
+      await saveEdit(tester);
       expect(
         find.text('2 taksit ödenmemiş olarak geri gelecek.'),
         findsOneWidget,
@@ -450,6 +461,42 @@ void main() {
       expect(rows.fold(0, (s, r) => s + r.amountMinor), 850000);
       expect(find.text('4/12 ödendi'), findsOneWidget);
       expect(find.text('Toplam ₺8.500'), findsOneWidget);
+    });
+
+    testWidgets('the interval changes only what is not paid in Kalan', (
+      tester,
+    ) async {
+      final db = await pumpExample5(tester);
+      await openEdit(tester);
+      final sameDay = find.widgetWithText(ChoiceChip, 'Her ayın aynı günü');
+      await tester.ensureVisible(sameDay);
+      expect(tester.widget<ChoiceChip>(sameDay).selected, isTrue);
+      expect(
+        find.text('Yalnızca ödenmemiş taksitlerin tarihi değişir.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.widgetWithText(ChoiceChip, '30 günde bir'));
+      await tester.pumpAndSettle();
+      await tapKey(tester, 'save-plan-edit');
+      final rows = await paymentsOf(db);
+      // The 5th (5 Jan, first unpaid) keeps its date; the rest follow it,
+      // the 3 paid before Kalan backwards. The 4th (marked paid in Kalan)
+      // stays.
+      expect(rows.map((r) => r.date), [
+        LocalDate(2026, 9, 7),
+        LocalDate(2026, 10, 7),
+        LocalDate(2026, 11, 6),
+        LocalDate(2026, 12, 5),
+        LocalDate(2027, 1, 5),
+        LocalDate(2027, 2, 4),
+        LocalDate(2027, 3, 6),
+        LocalDate(2027, 4, 5),
+        LocalDate(2027, 5, 5),
+        LocalDate(2027, 6, 4),
+      ]);
+      expect(rows.where((r) => r.isPaid), hasLength(4));
+      final plan = await db.select(db.plans).getSingle();
+      expect(plan.intervalDays, 30);
     });
 
     testWidgets('a plain plan can be marked as underway later', (tester) async {

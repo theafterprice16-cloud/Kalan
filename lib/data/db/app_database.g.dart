@@ -661,6 +661,20 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _intervalDaysMeta = const VerificationMeta(
+    'intervalDays',
+  );
+  @override
+  late final GeneratedColumn<int> intervalDays = GeneratedColumn<int>(
+    'interval_days',
+    aliasedName,
+    true,
+    check: () =>
+        intervalDays.isNull() |
+        ComparableExpr(intervalDays).isBetweenValues(1, 365),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -678,6 +692,7 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     repeatMode,
     payLaterRule,
     payLaterValue,
+    intervalDays,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -777,6 +792,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         ),
       );
     }
+    if (data.containsKey('interval_days')) {
+      context.handle(
+        _intervalDaysMeta,
+        intervalDays.isAcceptableOrUnknown(
+          data['interval_days']!,
+          _intervalDaysMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -854,6 +878,10 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         DriftSqlType.int,
         data['${effectivePrefix}pay_later_value'],
       ),
+      intervalDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}interval_days'],
+      ),
     );
   }
 
@@ -906,6 +934,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   /// changed purchase date ([purchaseDay]). Null for other kinds.
   final PayLaterRuleKind? payLaterRule;
   final int? payLaterValue;
+
+  /// "Monthly installments" and "Pay in 4" (schema v9): every N days
+  /// (1-365); null is the same day each month. Unused by other kinds.
+  final int? intervalDays;
   const PlanRow({
     required this.id,
     this.sourceId,
@@ -922,6 +954,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     this.repeatMode,
     this.payLaterRule,
     this.payLaterValue,
+    this.intervalDays,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -965,6 +998,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     if (!nullToAbsent || payLaterValue != null) {
       map['pay_later_value'] = Variable<int>(payLaterValue);
     }
+    if (!nullToAbsent || intervalDays != null) {
+      map['interval_days'] = Variable<int>(intervalDays);
+    }
     return map;
   }
 
@@ -999,6 +1035,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       payLaterValue: payLaterValue == null && nullToAbsent
           ? const Value.absent()
           : Value(payLaterValue),
+      intervalDays: intervalDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(intervalDays),
     );
   }
 
@@ -1031,6 +1070,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         serializer.fromJson<String?>(json['payLaterRule']),
       ),
       payLaterValue: serializer.fromJson<int?>(json['payLaterValue']),
+      intervalDays: serializer.fromJson<int?>(json['intervalDays']),
     );
   }
   @override
@@ -1060,6 +1100,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         $PlansTable.$converterpayLaterRulen.toJson(payLaterRule),
       ),
       'payLaterValue': serializer.toJson<int?>(payLaterValue),
+      'intervalDays': serializer.toJson<int?>(intervalDays),
     };
   }
 
@@ -1079,6 +1120,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     Value<ReminderRepeat?> repeatMode = const Value.absent(),
     Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
     Value<int?> payLaterValue = const Value.absent(),
+    Value<int?> intervalDays = const Value.absent(),
   }) => PlanRow(
     id: id ?? this.id,
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
@@ -1099,6 +1141,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     payLaterValue: payLaterValue.present
         ? payLaterValue.value
         : this.payLaterValue,
+    intervalDays: intervalDays.present ? intervalDays.value : this.intervalDays,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -1135,6 +1178,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       payLaterValue: data.payLaterValue.present
           ? data.payLaterValue.value
           : this.payLaterValue,
+      intervalDays: data.intervalDays.present
+          ? data.intervalDays.value
+          : this.intervalDays,
     );
   }
 
@@ -1155,7 +1201,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('reminderLeadDays: $reminderLeadDays, ')
           ..write('repeatMode: $repeatMode, ')
           ..write('payLaterRule: $payLaterRule, ')
-          ..write('payLaterValue: $payLaterValue')
+          ..write('payLaterValue: $payLaterValue, ')
+          ..write('intervalDays: $intervalDays')
           ..write(')'))
         .toString();
   }
@@ -1177,6 +1224,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     repeatMode,
     payLaterRule,
     payLaterValue,
+    intervalDays,
   );
   @override
   bool operator ==(Object other) =>
@@ -1196,7 +1244,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.reminderLeadDays == this.reminderLeadDays &&
           other.repeatMode == this.repeatMode &&
           other.payLaterRule == this.payLaterRule &&
-          other.payLaterValue == this.payLaterValue);
+          other.payLaterValue == this.payLaterValue &&
+          other.intervalDays == this.intervalDays);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
@@ -1215,6 +1264,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<ReminderRepeat?> repeatMode;
   final Value<PayLaterRuleKind?> payLaterRule;
   final Value<int?> payLaterValue;
+  final Value<int?> intervalDays;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1231,6 +1281,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.repeatMode = const Value.absent(),
     this.payLaterRule = const Value.absent(),
     this.payLaterValue = const Value.absent(),
+    this.intervalDays = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
@@ -1248,6 +1299,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.repeatMode = const Value.absent(),
     this.payLaterRule = const Value.absent(),
     this.payLaterValue = const Value.absent(),
+    this.intervalDays = const Value.absent(),
   }) : kind = Value(kind),
        installmentCount = Value(installmentCount),
        origin = Value(origin);
@@ -1267,6 +1319,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<int>? repeatMode,
     Expression<String>? payLaterRule,
     Expression<int>? payLaterValue,
+    Expression<int>? intervalDays,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1284,6 +1337,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       if (repeatMode != null) 'repeat_mode': repeatMode,
       if (payLaterRule != null) 'pay_later_rule': payLaterRule,
       if (payLaterValue != null) 'pay_later_value': payLaterValue,
+      if (intervalDays != null) 'interval_days': intervalDays,
     });
   }
 
@@ -1303,6 +1357,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<ReminderRepeat?>? repeatMode,
     Value<PayLaterRuleKind?>? payLaterRule,
     Value<int?>? payLaterValue,
+    Value<int?>? intervalDays,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -1320,6 +1375,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       repeatMode: repeatMode ?? this.repeatMode,
       payLaterRule: payLaterRule ?? this.payLaterRule,
       payLaterValue: payLaterValue ?? this.payLaterValue,
+      intervalDays: intervalDays ?? this.intervalDays,
     );
   }
 
@@ -1379,6 +1435,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     if (payLaterValue.present) {
       map['pay_later_value'] = Variable<int>(payLaterValue.value);
     }
+    if (intervalDays.present) {
+      map['interval_days'] = Variable<int>(intervalDays.value);
+    }
     return map;
   }
 
@@ -1399,7 +1458,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('reminderLeadDays: $reminderLeadDays, ')
           ..write('repeatMode: $repeatMode, ')
           ..write('payLaterRule: $payLaterRule, ')
-          ..write('payLaterValue: $payLaterValue')
+          ..write('payLaterValue: $payLaterValue, ')
+          ..write('intervalDays: $intervalDays')
           ..write(')'))
         .toString();
   }
@@ -4790,6 +4850,7 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<ReminderRepeat?> repeatMode,
   Value<PayLaterRuleKind?> payLaterRule,
   Value<int?> payLaterValue,
+  Value<int?> intervalDays,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -4807,6 +4868,7 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<ReminderRepeat?> repeatMode,
   Value<PayLaterRuleKind?> payLaterRule,
   Value<int?> payLaterValue,
+  Value<int?> intervalDays,
 });
 
 final class $$PlansTableReferences
@@ -4928,6 +4990,11 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
 
   ColumnFilters<int> get payLaterValue => $composableBuilder(
     column: $table.payLaterValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get intervalDays => $composableBuilder(
+    column: $table.intervalDays,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5059,6 +5126,11 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get intervalDays => $composableBuilder(
+    column: $table.intervalDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5154,6 +5226,11 @@ class $$PlansTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get intervalDays => $composableBuilder(
+    column: $table.intervalDays,
+    builder: (column) => column,
+  );
+
   $$SourcesTableAnnotationComposer get sourceId {
     final $$SourcesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -5246,6 +5323,7 @@ class $$PlansTableTableManager
                 Value<ReminderRepeat?> repeatMode = const Value.absent(),
                 Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
                 Value<int?> payLaterValue = const Value.absent(),
+                Value<int?> intervalDays = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -5262,6 +5340,7 @@ class $$PlansTableTableManager
                 repeatMode: repeatMode,
                 payLaterRule: payLaterRule,
                 payLaterValue: payLaterValue,
+                intervalDays: intervalDays,
               ),
           createCompanionCallback:
               ({
@@ -5280,6 +5359,7 @@ class $$PlansTableTableManager
                 Value<ReminderRepeat?> repeatMode = const Value.absent(),
                 Value<PayLaterRuleKind?> payLaterRule = const Value.absent(),
                 Value<int?> payLaterValue = const Value.absent(),
+                Value<int?> intervalDays = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -5296,6 +5376,7 @@ class $$PlansTableTableManager
                 repeatMode: repeatMode,
                 payLaterRule: payLaterRule,
                 payLaterValue: payLaterValue,
+                intervalDays: intervalDays,
               ),
           withReferenceMapper: (p0) => p0
               .map(
