@@ -19,6 +19,7 @@ Ayrıntılı kurallar repodaki üç skill'de durur. Yalnızca işin gerektirdiğ
 |---|---|
 | Her UI, ekran metni, bildirim, Pro/satın alma, mağaza metni, ağ işi | `kalan-urun-kurallari`: değişmez kurallar, ses tonu, terim sözlüğü, Pro modeli |
 | Renk, tema, ikon, grafik, logo | `kalan-palet`: 14 token, kullanım kuralları, Flutter eşlemesi |
+| Yeni ya da değişen ekran, widget, geçiş, diyalog, anahtar, animasyon | `flutter-cross-ui`: iOS + Android davranışı, marka önce, cam yok, adaptif bileşenler, 5 maddelik kontrol (`kalan-palet` ile birlikte) |
 | ARB, çeviri, tarih/tutar biçimi, para birimi, sağdan sola | `kalan-yerellestirme`: 22 yerel sürüm, basamak kuralları |
 
 Nasıl okunur:

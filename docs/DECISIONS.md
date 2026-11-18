@@ -323,3 +323,13 @@ Yol Haritası 10. Açık sorular ürün sahibinin iş tanımında cevaplandı: v
 | Test yardımcısı | Sahte bildirim kapısı ödeme bildirimlerini ve özeti ayrı listeler (`pending` / `paydays`); gerçek kapıya ikisi birlikte verilir. Mevcut testler değişmeden geçer. |
 | Bilinen sınırlar (diff incelemesi) | 1) Yalnızca sıradaki özet kurulduğu için, özet geldikten sonra uygulama bir sonraki maaş gününe kadar hiç açılmazsa (ve bildirimden "Ödendi" de kullanılmazsa) sonraki dönemin özeti kurulmaz; uygulama açılınca yeniden kurulur. Brifteki "yalnızca sıradaki dönem başı" kararının sonucu. 2) Android'de zamanlama kesin olmadığından, saat geçmiş ama bildirim henüz gösterilmemişken uygulama açılırsa o günün özeti düşebilir; ödeme hatırlatmalarında da var olan durum. 3) Maaş günü özet geldikten sonra hatırlatma saati daha geç bir saate alınırsa özet aynı gün bir kez daha gelir; "gününde" hatırlatmasında da böyle. Üçü de bu maddede değiştirilmedi. |
 
+## iOS + Android arayüz kuralları (18 Kasım 2026)
+
+| Konu | Karar |
+|---|---|
+| Ağırlık | Önce marka: iki telefonda da aynı Kalan görünümü. Platforma uyan davranıştır (sayfa geçişi, geri jesti, açılır pencere, anahtar, kaydırma, titreşim). |
+| Liquid Glass | Kullanılmaz. Cam, bulanıklık ve saydam katman yok; yüzen katmanlar da düz `surface` + `border`. Apple'dan yalnızca geçiş, kaydırarak geri, titreşim ve dokunma alanı alınır. |
+| Material 3 Expressive | Yalnızca "standard" yumuşak hareket; sıçrayan yay, şekil değiştiren düğme, büyük renk blokları yok. |
+| Yazı tipi | Telefonun kendi yazı tipi (SF / Roboto); özel font yok. Hiyerarşi `textTheme` rolleriyle. |
+| Dokunma | İki platformda en az 48x48 (Apple'ın 44 pt alt sınırını da karşılar). |
+| Skill | `.claude/skills/flutter-cross-ui`: her UI işinde `kalan-palet` ile birlikte, ayrıca istenmeden uygulanır. |
