@@ -41,8 +41,13 @@ jobs:
       - run: flutter pub get
       - name: Build debug APK
         run: flutter build apk --debug
-      - name: Build release APK
-        run: flutter build apk --release
+      - name: Merge the release manifest
+        # Only the manifest merge: what every library adds to the shipped
+        # app. (A full release build runs Android lint, which needs a newer
+        # JDK than this job uses.)
+        run: |
+          flutter build apk --release --config-only
+          cd android && ./gradlew --no-daemon :app:processReleaseMainManifest
       - name: Release manifest has no network permission
         # Kalan makes no network requests of its own. Play Billing needs
         # com.android.vending.BILLING; INTERNET must never be merged in.
