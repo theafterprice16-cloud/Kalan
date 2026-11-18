@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/design/haptics.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/tab_messengers.dart';
@@ -145,20 +147,21 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final count = _underway ? _paidCount(plan) ?? 0 : 0;
     final back = plan.paidBefore.length - count;
     if (back > 0) {
-      final ok = await showDialog<bool>(
+      final ok = await showKalanDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => KalanAlertDialog(
           key: const ValueKey('underway-revert'),
           content: Text(l10n.underwayRevert(back)),
           actions: [
-            TextButton(
+            KalanDialogAction(
+              label: l10n.actionCancel,
               onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.actionCancel),
             ),
-            TextButton(
+            KalanDialogAction(
               key: const ValueKey('underway-revert-confirm'),
+              label: l10n.underwayRevertConfirm,
+              primary: true,
               onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.underwayRevertConfirm),
             ),
           ],
         ),
@@ -195,6 +198,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
           _method,
           chargeSourceId: storedChargeSourceId(_chargeSourceId, plan.ownCardId),
         );
+    KalanHaptics.success();
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),
       fallback: messenger,
@@ -225,7 +229,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final next = _nextPayment(plan);
     final showDate = _pattern(plan) != null && next != null;
     final nextDate = _nextDateTouched ? _nextDate : next?.date;
-    const gap = SizedBox(height: 16);
+    const gap = SizedBox(height: KalanSpace.md);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.planEdit)),
@@ -233,7 +237,12 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
         key: _formKey,
         // Built in full, so the save button is always there to reach.
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(
+            KalanSpace.md,
+            KalanSpace.xs,
+            KalanSpace.md,
+            KalanSpace.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -260,7 +269,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SwitchListTile(
+                    SwitchListTile.adaptive(
                       key: const ValueKey('underway'),
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.underwayToggle),
@@ -276,7 +285,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                           : (v) => setState(() => _underway = v),
                     ),
                     if (_underway) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: KalanSpace.xs),
                       if (!payIn4) ...[
                         TextFormField(
                           key: const ValueKey('paid-count'),
@@ -322,7 +331,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                   input: interval,
                   onChanged: () => setState(() {}),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: KalanSpace.xs),
                 Text(
                   l10n.intervalEditHint,
                   style: Theme.of(context).textTheme.bodyMedium
@@ -445,6 +454,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
             widget.plan.ownCardId,
           ),
         );
+    KalanHaptics.success();
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),
       fallback: messenger,
@@ -461,7 +471,12 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
         key: _formKey,
         // Built in full, so the save button is always there to reach.
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(
+            KalanSpace.md,
+            KalanSpace.xs,
+            KalanSpace.md,
+            KalanSpace.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -470,7 +485,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
                 onChanged: _refresh,
                 locked: widget.plan.payments.first.isPaid,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: KalanSpace.md),
               PaymentMethodFields(
                 method: _method,
                 chargeSourceId: _chargeSourceId,
@@ -478,7 +493,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
                 onChargeSourceChanged: (id) =>
                     setState(() => _chargeSourceId = id),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: KalanSpace.md),
               FilledButton(
                 key: const ValueKey('save-plan-edit'),
                 onPressed: _saving ? null : _save,

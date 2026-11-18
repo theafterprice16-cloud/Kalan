@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/design/haptics.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
@@ -417,6 +418,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             _ownCardId,
           ),
         );
+    KalanHaptics.success();
     final settings = ref.read(settingsRepositoryProvider);
     if (payLater) {
       await settings.rememberPayLaterRule(draft.payLaterRule!);
@@ -520,7 +522,12 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                padding: const EdgeInsets.fromLTRB(
+                  KalanSpace.md,
+                  KalanSpace.xs,
+                  KalanSpace.md,
+                  KalanSpace.xl,
+                ),
                 children: [
                   ChoiceField<AddMode>(
                     label: l10n.addPlanTypeLabel,
@@ -538,7 +545,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                     }),
                   ),
                   if (_mode == AddMode.payLater) ...[
-                    const SizedBox(height: 8),
+                    const SizedBox(height: KalanSpace.xs),
                     Text(
                       l10n.kindPayLaterHint,
                       key: const ValueKey('pay-later-hint'),
@@ -546,21 +553,21 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                           ?.copyWith(color: context.colors.textMuted),
                     ),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: KalanSpace.md),
                   if (_mode == AddMode.payLater)
                   // One payment: the due date line is the preview.
                   ...[
                     PayLaterFields(input: _payLater, onChanged: _refresh),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: KalanSpace.xs),
                     _details(context),
                   ] else ...[
                     ..._fields(context),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: KalanSpace.xs),
                     _details(context),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: KalanSpace.xs),
                     _Preview(draft: _buildDraft()),
                   ],
-                  const SizedBox(height: 16),
+                  const SizedBox(height: KalanSpace.md),
                   FilledButton(
                     key: const ValueKey('save-plan'),
                     onPressed:
@@ -578,7 +585,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   List<Widget> _fields(BuildContext context) {
     final l10n = context.l10n;
-    const gap = SizedBox(height: 16);
+    const gap = SizedBox(height: KalanSpace.md);
     Widget amount(
       TextEditingController c,
       String label,
@@ -817,7 +824,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: KalanSpace.sm),
         Expanded(
           child: DropdownButtonFormField<IntervalUnit>(
             key: const ValueKey('unit'),
@@ -896,7 +903,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       key: const ValueKey('more-details'),
       title: Text(l10n.actionMoreDetails),
       tilePadding: EdgeInsets.zero,
-      childrenPadding: const EdgeInsets.only(bottom: 8),
+      childrenPadding: const EdgeInsets.only(bottom: KalanSpace.xs),
       children: [
         // "Pay later" has its own store name field.
         if (_mode != AddMode.payLater)
@@ -910,7 +917,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             ),
           ),
         if (_mode == AddMode.card) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: KalanSpace.xs),
           // A plan already underway has no purchase date to defer from.
           if (!_underway)
             TextFormField(
@@ -925,14 +932,14 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                     : null;
               },
             ),
-          SwitchListTile(
+          SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.fieldCashAdvance),
             value: _cashAdvance,
             onChanged: (v) => setState(() => _cashAdvance = v),
           ),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: KalanSpace.xs),
         PaymentMethodFields(
           method: _paymentMethod,
           chargeSourceId: _chargeSourceId,
@@ -1002,7 +1009,7 @@ class SourceNameField extends StatelessWidget {
         child: Material(
           color: Theme.of(context).colorScheme.surfaceContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(KalanRadius.input),
             side: BorderSide(
               color: Theme.of(context).colorScheme.outlineVariant,
             ),
@@ -1043,7 +1050,7 @@ class _Preview extends ConsumerWidget {
     final listed = d?.payments.skip(d.paidBeforeCount).toList() ?? const [];
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(KalanSpace.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1054,7 +1061,7 @@ class _Preview extends ConsumerWidget {
                 style: theme.textTheme.titleMedium,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: KalanSpace.xs),
             if (d == null)
               Text(
                 l10n.previewEmpty,
@@ -1076,7 +1083,7 @@ class _Preview extends ConsumerWidget {
               ),
               if (d.paidBeforeCount > 0)
                 Padding(
-                  padding: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.only(top: KalanSpace.xxs),
                   child: Text(
                     l10n.paidBeforeSummary(
                       d.paidBeforeCount,
@@ -1096,7 +1103,7 @@ class _Preview extends ConsumerWidget {
               if (monthsWithSeveral(listed.map((p) => p.date)) case final months
                   when months.isNotEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(top: 4),
+                  padding: const EdgeInsets.only(top: KalanSpace.xxs),
                   child: Text(
                     l10n.previewSameMonth(
                       months
@@ -1114,10 +1121,10 @@ class _Preview extends ConsumerWidget {
                     ),
                   ),
                 ),
-              const SizedBox(height: 8),
+              const SizedBox(height: KalanSpace.xs),
               for (final p in listed)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(vertical: KalanSpace.xxs),
                   child: Row(
                     children: [
                       SizedBox(
@@ -1187,11 +1194,14 @@ class _AmountEntrySection extends StatelessWidget {
             onSelectionChanged: (s) => onChanged(s.single),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: KalanSpace.sm),
         field,
         if (line != null)
           Padding(
-            padding: const EdgeInsetsDirectional.only(start: 12, top: 4),
+            padding: const EdgeInsetsDirectional.only(
+              start: KalanSpace.sm,
+              top: KalanSpace.xxs,
+            ),
             child: Text(
               line,
               key: const ValueKey('amount-computed'),
@@ -1227,7 +1237,7 @@ class _UnderwaySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SwitchListTile(
+          SwitchListTile.adaptive(
             key: const ValueKey('underway'),
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.underwayToggle),
@@ -1238,7 +1248,7 @@ class _UnderwaySection extends StatelessWidget {
             value: value,
             onChanged: onChanged,
           ),
-          if (value) ...[const SizedBox(height: 8), ...children],
+          if (value) ...[const SizedBox(height: KalanSpace.xs), ...children],
         ],
       ),
     );

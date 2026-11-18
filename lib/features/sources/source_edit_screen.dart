@@ -161,7 +161,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(KalanSpace.md),
                 children: [
                   TextFormField(
                     key: const ValueKey('source-name'),
@@ -173,7 +173,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                         ? l10n.errorNameRequired
                         : null,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: KalanSpace.xs),
                   ChoiceField<SourceKind>(
                     label: l10n.fieldSourceKind,
                     selected: _kind,
@@ -184,7 +184,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                     onSelected: (k) => setState(() => _kind = k),
                   ),
                   if (_kind == SourceKind.card) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: KalanSpace.md),
                     _dayField(
                       l10n.fieldStatementDay,
                       l10n.statementDayHelp,
@@ -192,7 +192,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                       (d) => setState(() => _statementDay = d),
                       const ValueKey('statement-day'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: KalanSpace.md),
                     _dayField(
                       l10n.fieldDueDay,
                       l10n.dueDayHelp,
@@ -200,7 +200,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                       (d) => setState(() => _dueDay = d),
                       const ValueKey('due-day'),
                     ),
-                    SwitchListTile(
+                    SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.fieldShiftWeekend),
                       value: _shift,
@@ -213,7 +213,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                             ?.copyWith(color: context.colors.textMuted),
                       ),
                   ],
-                  const SizedBox(height: 24),
+                  const SizedBox(height: KalanSpace.lg),
                   FilledButton(
                     key: const ValueKey('save-source'),
                     onPressed: _save,

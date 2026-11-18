@@ -8,6 +8,7 @@ import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/date/local_date.dart';
 import '../../core/design/choice_dialog.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/money/currency.dart';
@@ -45,7 +46,7 @@ class SettingsScreen extends ConsumerWidget {
     SettingsRow s,
   ) async {
     final l10n = context.l10n;
-    final picked = await showDialog<Choice<String?>>(
+    final picked = await showKalanDialog<Choice<String?>>(
       context: context,
       builder: (_) => ChoiceDialog<String?>(
         title: l10n.settingsLanguage,
@@ -64,7 +65,7 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _pickTheme(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;
-    final picked = await showDialog<Choice<ThemeMode>>(
+    final picked = await showKalanDialog<Choice<ThemeMode>>(
       context: context,
       builder: (_) => ChoiceDialog<ThemeMode>(
         title: l10n.settingsTheme,
@@ -89,7 +90,7 @@ class SettingsScreen extends ConsumerWidget {
     final from = Currency.fromCode(s.currencyCode);
     final to = await showCurrencyPicker(context, selected: from);
     if (to == null || to == from || !context.mounted) return;
-    final ok = await showDialog<bool>(
+    final ok = await showKalanDialog<bool>(
       context: context,
       builder: (_) => CurrencyChangeDialog(from: from, to: to),
     );
@@ -107,7 +108,7 @@ class SettingsScreen extends ConsumerWidget {
     required int? current,
     required AppSettingsCompanion Function(int?) toChanges,
   }) async {
-    final result = await showDialog<Choice<int?>>(
+    final result = await showKalanDialog<Choice<int?>>(
       context: context,
       builder: (_) => _AmountDialog(
         title: title,
@@ -142,7 +143,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navSettings)),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.only(bottom: KalanSpace.xl),
         children: [
           SectionTitle(l10n.settingsPay),
           ListTile(
@@ -214,7 +215,7 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => context.push(Routes.roadmap),
           ),
           if (kDebugMode)
-            SwitchListTile(
+            SwitchListTile.adaptive(
               key: const ValueKey('debug-pro'),
               title: Text(l10n.settingsDebugPro),
               value: s.debugPro,
@@ -222,7 +223,12 @@ class SettingsScreen extends ConsumerWidget {
                   _update(ref, AppSettingsCompanion(debugPro: Value(v))),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.md,
+              KalanSpace.lg,
+              KalanSpace.md,
+              0,
+            ),
             child: Text(l10n.settingsPrivacy, style: secondary),
           ),
         ],
@@ -274,7 +280,7 @@ class _AmountDialogState extends State<_AmountDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AlertDialog(
+    return KalanAlertDialog(
       title: Text(widget.title),
       content: Form(
         key: _formKey,
@@ -286,11 +292,13 @@ class _AmountDialogState extends State<_AmountDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        KalanDialogAction(
+          label: l10n.actionCancel,
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.actionCancel),
         ),
-        TextButton(
+        KalanDialogAction(
+          label: l10n.actionSave,
+          primary: true,
           onPressed: () {
             if (!_formKey.currentState!.validate()) return;
             final text = _controller.text;
@@ -307,7 +315,6 @@ class _AmountDialogState extends State<_AmountDialog> {
               ),
             );
           },
-          child: Text(l10n.actionSave),
         ),
       ],
     );

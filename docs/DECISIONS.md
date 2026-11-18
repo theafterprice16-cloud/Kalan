@@ -333,3 +333,19 @@ Yol Haritası 10. Açık sorular ürün sahibinin iş tanımında cevaplandı: v
 | Yazı tipi | Telefonun kendi yazı tipi (SF / Roboto); özel font yok. Hiyerarşi `textTheme` rolleriyle. |
 | Dokunma | İki platformda en az 48x48 (Apple'ın 44 pt alt sınırını da karşılar). |
 | Skill | `.claude/skills/flutter-cross-ui`: her UI işinde `kalan-palet` ile birlikte, ayrıca istenmeden uygulanır. |
+
+## Arayüz uyum düzenlemesi (18 Kasım 2026)
+
+Mevcut ekranlar `flutter-cross-ui` kurallarına bağlandı; iş mantığı, veritabanı ve metinler değişmedi.
+
+| Konu | Karar |
+|---|---|
+| iPhone'da açılır pencere (ürün sahibi, 18 Kasım 2026) | Apple'ın hazır penceresi (`CupertinoAlertDialog`, `AlertDialog.adaptive`) her zaman buzlu cam ve karartma kullanıyor; "cam yok" kararıyla çeliştiği için kullanılmaz. iPhone'da düz Kalan penceresi Apple düzeninde: başlık ve mesaj ortada, düğmeler alt kenarda ince çizgiyle ayrılmış. Android'de Material pencere. Tek yol: `showKalanDialog` + `KalanAlertDialog` + `KalanDialogAction` (`lib/core/design/kalan_dialog.dart`). Silme `late`. Dışarı dokununca iki telefonda da kapanır. |
+| Seçim listeli pencereler | Tema, dil gibi listeler (`ChoiceDialog`) iki telefonda da Kalan'ın liste penceresi olarak kalır; yalnızca açılış yolu `showKalanDialog`. |
+| Android öngörülü geri (ürün sahibi, 18 Kasım 2026) | Manifest'e `android:enableOnBackInvokedCallback="true"` eklendi; temada Android için `PredictiveBackPageTransitionsBuilder`. iOS'ta temanın kendi Cupertino geçişi (sağdan kayma, kenardan geri) kullanılır. |
+| Cupertino paketi | `CupertinoPageTransitionsBuilder` ve `CupertinoDialogAction` artık ayrı `cupertino_ui` paketinde; doğrudan bağımlılık eklenmedi (yeni paket yok). iOS geçişi temanın varsayılanından gelir, pencere düğmeleri Kalan'ın kendi yardımcısı. |
+| Anahtarlar | `SwitchListTile.adaptive`; iPhone'da şekil Apple'ın, renk temadaki mürekkep tokenları (`ThemeData.adaptations` ile; yeşil yok). |
+| Yükleniyor göstergesi | `.adaptive` sürüme geçmedi: iPhone sürümü tokenla renklendirilemeyen Apple grisi kullanıyor. |
+| Ölçüler | Boşluk `KalanSpace` (4, 8, 12, 16, 24, 32; liste altı FAB payı 96), köşe `KalanRadius` (8, 12, 16): `lib/core/theme/kalan_spacing.dart`. 4'ün katı olmayanlar en yakın kata yuvarlandı, eşitlikte küçüğe; 2 sıfır olmasın diye 4 (2→4, 6→4, 10→8, 20→16; ana kartın iç boşluğu diğer kartlarla aynı 16 oldu). |
+| Titreşim | Yalnızca `KalanHaptics.success()` (hafif): "ödendi" işaretleme (ana ekran, günü geçenler, plan ayrıntısı) ve plan / sabit ödeme kaydı. Geri alma, işareti kaldırma ve bildirim düğmesinde yok. |
+| Bekçi | `test/app/ui_guard_test.dart`: `lib/features` altında cam, platform dallanması, çıplak `showDialog`, `HapticFeedback`, adaptif olmayan anahtar, sayıyla köşe ve boşluk yakalanır. Bildirim ağ geçidindeki iOS metin seçimi istisna. iPhone penceresinde düğmeler büyük yazıda alt alta dizilir; başlık ekran okuyucuya başlık olarak bildirilir. |

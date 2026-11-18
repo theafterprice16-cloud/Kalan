@@ -20,9 +20,9 @@ class RoadmapScreen extends ConsumerWidget {
           child: EmptyState(l10n.roadmapEmpty),
         ),
         AsyncData(:final value) => ListView.separated(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(KalanSpace.md),
           itemCount: value.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
+          separatorBuilder: (_, _) => const SizedBox(height: KalanSpace.sm),
           itemBuilder: (context, i) => _RoadmapCard(item: value[i]),
         ),
         AsyncError() => Center(child: EmptyState(l10n.roadmapError)),
@@ -55,7 +55,7 @@ class _RoadmapCard extends StatelessWidget {
     );
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(KalanSpace.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,19 +66,19 @@ class _RoadmapCard extends StatelessWidget {
                 style: theme.textTheme.titleMedium,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: KalanSpace.xxs),
             Text(item.summary(locale), style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 12),
+            const SizedBox(height: KalanSpace.sm),
             Wrap(
-              spacing: 16,
-              runSpacing: 4,
+              spacing: KalanSpace.md,
+              runSpacing: KalanSpace.xxs,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(icon, size: 18, color: context.colors.textMuted),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: KalanSpace.xxs),
                     Text(label, style: secondary),
                   ],
                 ),

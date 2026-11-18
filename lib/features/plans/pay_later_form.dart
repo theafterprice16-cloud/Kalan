@@ -123,7 +123,7 @@ class PayLaterFields extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final today = ref.watch(todayProvider);
-    const gap = SizedBox(height: 16);
+    const gap = SizedBox(height: KalanSpace.md);
     final day = int.tryParse(input.number.text.trim());
     final nextMonthLabel =
         input.choice == PayLaterChoice.nextMonth &&
@@ -160,7 +160,7 @@ class PayLaterFields extends ConsumerWidget {
           textCapitalization: TextCapitalization.words,
           decoration: InputDecoration(labelText: l10n.payLaterStore),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: KalanSpace.xs),
         IgnorePointer(
           ignoring: locked,
           child: ChoiceField<PayLaterChoice>(
@@ -282,7 +282,7 @@ class PayLaterDueLine extends ConsumerWidget {
     final days = ref.watch(todayProvider).daysUntil(due);
     final date = short ? context.dayMonth(due) : context.longDate(due);
     return Wrap(
-      spacing: 8,
+      spacing: KalanSpace.xs,
       children: [
         Text(
           l10n.payLaterDueOn(date),

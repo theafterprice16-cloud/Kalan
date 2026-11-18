@@ -126,7 +126,7 @@ class RemindersSection extends ConsumerWidget {
               child: Text(l10n.openPhoneSettings),
             ),
           ),
-        SwitchListTile(
+        SwitchListTile.adaptive(
           key: const ValueKey('reminders-enabled'),
           title: Text(l10n.remindersEnabled),
           subtitle: Text(l10n.remindersEnabledHint, style: muted),
@@ -170,7 +170,7 @@ class RemindersSection extends ConsumerWidget {
                 repeatModeLabel(context, reminders.repeatMode),
                 style: muted,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: KalanSpace.xxs),
               Text(l10n.repeatRemindersHelp, style: muted),
               if (reminders.repeatMode == ReminderRepeat.daily)
                 Text(
@@ -184,7 +184,7 @@ class RemindersSection extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: on ? () => _pickRepeat(context, ref) : null,
         ),
-        SwitchListTile(
+        SwitchListTile.adaptive(
           key: const ValueKey('payday-summary'),
           title: Text(l10n.reminderPaydayToggle),
           subtitle: Text(l10n.reminderPaydayToggleHint, style: muted),
@@ -195,7 +195,7 @@ class RemindersSection extends ConsumerWidget {
                 )
               : null,
         ),
-        SwitchListTile(
+        SwitchListTile.adaptive(
           key: const ValueKey('reminder-show-amount'),
           title: Text(l10n.reminderShowAmount),
           value: privacy.showAmountsInNotifications(settings),

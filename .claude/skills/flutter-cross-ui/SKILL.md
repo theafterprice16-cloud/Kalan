@@ -33,9 +33,9 @@ Renk tokenları ve renk yasakları `kalan-palet`'tedir; burada tekrar edilmez. B
 
 ## 2. iOS katmanı (Apple HIG)
 
-1. Sayfa geçişi sağdan kayar ve kenardan sağa kaydırarak geri gidilir. Bu davranış tek yerde, temanın `pageTransitionsTheme`'inde iOS için `CupertinoPageTransitionsBuilder` ile kurulur; ekranlarda elle `CupertinoPageRoute` ya da özel `PageRouteBuilder` yazılmaz (go_router sayfaları temayı izler).
+1. Sayfa geçişi sağdan kayar ve kenardan sağa kaydırarak geri gidilir. Bu davranış tek yerde, temanın `pageTransitionsTheme`'inde kurulur (iOS için temanın kendi Cupertino geçişi; `cupertino_ui` doğrudan bağımlılık değildir); ekranlarda elle `CupertinoPageRoute` ya da özel `PageRouteBuilder` yazılmaz (go_router sayfaları temayı izler).
 2. Geri jestini bozan şey yapılmaz: tam ekran `GestureDetector` ile yatay sürükleme, `PopScope(canPop: false)` yalnızca kaydedilmemiş değişiklik varken.
-3. Açılır pencere `showAdaptiveDialog` + `AlertDialog.adaptive`; iPhone'da Apple biçimi çıkar. Eylem düğmeleri `lib/core/design`'daki tek yardımcıdan gelir (iOS'ta `CupertinoDialogAction`, Android'de `TextButton`). Geri alınamaz eylemde düğme kelimesi açıktır ("Sil") ve `late` rengi kullanılır.
+3. Açılır pencere `showKalanDialog` + `KalanAlertDialog` + `KalanDialogAction` (`lib/core/design/kalan_dialog.dart`). `AlertDialog.adaptive` / `showAdaptiveDialog` kullanılmaz: iPhone'daki Apple penceresi her zaman buzlu cam ve karartma getirir (ürün sahibi kararı, 18 Kasım 2026). iPhone'da düz Kalan penceresi Apple düzenindedir (başlık ortada, düğmeler alt kenarda çizgiyle ayrılmış); Android'de Material. Geri alınamaz eylemde düğme kelimesi açıktır ("Sil") ve `destructive: true` ile `late` rengi kullanılır.
 4. Alt sayfa (bottom sheet) iki platformda da aynı Kalan alt sayfasıdır; tutamak gösterilir, aşağı kaydırarak kapanır.
 5. Kaydırma sekmesi (bounce) Flutter'ın platform davranışıdır; `physics` elle değiştirilmez.
 6. Hareket yay (spring) hissindedir ama **sıçramaz**: sakin ton için aşma (overshoot) yok. Süreler 150–300 ms; `MediaQuery.disableAnimationsOf(context)` açıksa animasyon kısaltılır ya da kapatılır.
@@ -52,9 +52,9 @@ Renk tokenları ve renk yasakları `kalan-palet`'tedir; burada tekrar edilmez. B
 
 ## 4. Ortak kurallar
 
-1. `Platform.isIOS` ya da `defaultTargetPlatform` dallanması ekranlarda yazılmaz. Önce `.adaptive` bileşen (`Switch.adaptive`, `Checkbox.adaptive`, `Radio.adaptive`, `Slider.adaptive`, `CircularProgressIndicator.adaptive`, `AlertDialog.adaptive`, `showAdaptiveDialog`); yetmezse platform farkı `lib/core/design` içinde tek yardımcıda toplanır.
+1. `Platform.isIOS` ya da `defaultTargetPlatform` dallanması ekranlarda yazılmaz. Önce `.adaptive` bileşen (`Switch.adaptive`, `SwitchListTile.adaptive`, `Checkbox.adaptive`, `Radio.adaptive`, `Slider.adaptive`); diyalog için `KalanAlertDialog`. Platform farkı `lib/core/design` içinde tek yardımcıda toplanır (`followsApple`). `CircularProgressIndicator.adaptive` kullanılmaz (iPhone'da tokenla boyanamayan Apple grisi).
 2. Adaptif bileşen iPhone'da Cupertino rengi (ör. yeşil anahtar) getirebilir. Renk tokenlardan gelmiyorsa renkler yardımcıda tokenla verilir; iOS golden görüntüsünde yeşil görülmemelidir.
-3. Titreşim yalnızca `lib/core/design`'daki tek yardımcıdan: seçim değişince `HapticFeedback.selectionClick`, "ödendi" ve kayıt başarılı olunca `HapticFeedback.lightImpact`. Hata, uyarı ve her dokunuşta titreşim yok.
+3. Titreşim yalnızca `lib/core/design`'daki tek yardımcıdan (`KalanHaptics`): seçim değişince `HapticFeedback.selectionClick`, "ödendi" ve kayıt başarılı olunca `HapticFeedback.lightImpact`. Hata, uyarı ve her dokunuşta titreşim yok.
 4. TR/EN metin taşması: Türkçe metin İngilizceden ~%30 uzun olabilir. Düğme ve etiket metni kesilmez, satır kaydırır; yalnızca kullanıcı adları (plan, kaynak) `maxLines` + `ellipsis` alır. Sabit genişlikli metin kutusu yok. Değişen ekran `textScaler` 2.0 ile taşmadan açılır.
 5. Büyük harf çevirisi dile göre yapılır: Türkçede `i` → `İ`. Kullanıcı metninde düz `toUpperCase()` yerine yerel ayarlı dönüştürme kullanılır.
 6. Her durum renkle birlikte kelime ya da ikonla anlatılır; ikon düğmelerinin `tooltip`/`semanticLabel` metni ARB'dedir.
@@ -69,17 +69,20 @@ Container(color: Colors.white.withOpacity(.6), padding: const EdgeInsets.all(15)
   child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), ...));
 
 // Doğru: adaptif diyalog, token, 4'ün katı boşluk, düz yüzey
-final ok = await showAdaptiveDialog<bool>(
+final ok = await showKalanDialog<bool>(
   context: context,
-  builder: (_) => AlertDialog.adaptive(
-    title: Text(l10n.deletePlanTitle),
-    actions: [adaptiveAction(context, l10n.cancel), adaptiveAction(context, l10n.delete, destructive: true)],
+  builder: (context) => KalanAlertDialog(
+    content: Text(l10n.planDeleteConfirm),
+    actions: [
+      KalanDialogAction(label: l10n.actionCancel, onPressed: () => Navigator.pop(context, false)),
+      KalanDialogAction(label: l10n.actionDelete, destructive: true, onPressed: () => Navigator.pop(context, true)),
+    ],
   ),
 );
 DecoratedBox(decoration: BoxDecoration(color: context.colors.surface, border: Border.all(color: context.colors.border)));
 ```
 
-(`adaptiveAction` adı örnektir; repodaki karşılığı kullanılır.)
+Boşluk ve köşe `KalanSpace` / `KalanRadius` (`lib/core/theme/kalan_spacing.dart`); `test/app/ui_guard_test.dart` `lib/features` altını denetler.
 
 ## Teslimden önce 5 madde
 

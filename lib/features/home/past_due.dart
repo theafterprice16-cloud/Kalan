@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/design/haptics.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
@@ -62,6 +63,7 @@ Future<PaidWhen?> markPastDuePaid(
   );
   if (choice == null) return null;
   await repo.setPaidOn(paymentId, choice == PaidWhen.today ? today : dueDate);
+  KalanHaptics.success();
   showMarkedPaid(
     messenger,
     l10n,
@@ -94,13 +96,23 @@ class PaidWhenSheet extends StatelessWidget {
     return SafeArea(
       child: SingleChildScrollView(
         key: const ValueKey('paid-when-sheet'),
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+        padding: const EdgeInsets.fromLTRB(
+          KalanSpace.xs,
+          0,
+          KalanSpace.xs,
+          KalanSpace.xs,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: const EdgeInsets.fromLTRB(
+                KalanSpace.md,
+                0,
+                KalanSpace.md,
+                KalanSpace.xs,
+              ),
               child: Semantics(
                 header: true,
                 child: Text(
@@ -122,7 +134,7 @@ class PaidWhenSheet extends StatelessWidget {
               l10n.paidWhenOnDueHint,
               const ValueKey('paid-when-due'),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: KalanSpace.xs),
             Align(
               alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
@@ -164,7 +176,12 @@ class _PastDueSectionState extends State<PastDueSection> {
         : items.take(pastDueVisibleRows).toList();
     return Padding(
       key: const ValueKey('past-due'),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.fromLTRB(
+        KalanSpace.md,
+        KalanSpace.md,
+        KalanSpace.md,
+        0,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -180,7 +197,7 @@ class _PastDueSectionState extends State<PastDueSection> {
           ),
           if (widget.view.pastDueFromEarlier)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: KalanSpace.xxs),
               child: Text(
                 l10n.pastDueDeducted,
                 key: const ValueKey('past-due-deducted'),
@@ -189,7 +206,7 @@ class _PastDueSectionState extends State<PastDueSection> {
                 ),
               ),
             ),
-          const SizedBox(height: 8),
+          const SizedBox(height: KalanSpace.xs),
           Card(
             clipBehavior: Clip.antiAlias,
             child: AnimatedSize(
@@ -247,11 +264,16 @@ class PastDueRow extends ConsumerWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 56),
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                    KalanSpace.md,
+                    KalanSpace.xs,
+                    KalanSpace.xs,
+                    KalanSpace.xs,
+                  ),
                   child: Row(
                     children: [
                       LetterBadge(entry.label(l10n)),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: KalanSpace.sm),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,12 +284,12 @@ class PastDueRow extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.titleMedium,
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: KalanSpace.xxs),
                             DaysAgoNote(days: days),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: KalanSpace.xs),
                       AmountText(amount, size: AmountSize.small),
                     ],
                   ),
@@ -277,7 +299,7 @@ class PastDueRow extends ConsumerWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsetsDirectional.only(end: 4),
+          padding: const EdgeInsetsDirectional.only(end: KalanSpace.xxs),
           child: TextButton(
             key: ValueKey('past-due-paid-${entry.paymentId}'),
             onPressed: () => markPastDuePaid(

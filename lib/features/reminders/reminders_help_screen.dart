@@ -15,10 +15,15 @@ class RemindersHelpScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     Widget section(String title, String body) => Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(
+        KalanSpace.md,
+        0,
+        KalanSpace.md,
+        KalanSpace.md,
+      ),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(KalanSpace.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -26,7 +31,7 @@ class RemindersHelpScreen extends ConsumerWidget {
                 header: true,
                 child: Text(title, style: theme.textTheme.titleMedium),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: KalanSpace.xxs),
               Text(body, style: theme.textTheme.bodyMedium),
             ],
           ),
@@ -36,10 +41,15 @@ class RemindersHelpScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.remindersHelpLink)),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.only(bottom: KalanSpace.xl),
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.md,
+              KalanSpace.xs,
+              KalanSpace.md,
+              KalanSpace.md,
+            ),
             child: Text(
               l10n.remindersHelpIntro,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -58,7 +68,7 @@ class RemindersHelpScreen extends ConsumerWidget {
           ),
           if (ref.watch(notificationGatewayProvider).supported)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: KalanSpace.md),
               child: OutlinedButton(
                 onPressed: ref
                     .read(notificationGatewayProvider)

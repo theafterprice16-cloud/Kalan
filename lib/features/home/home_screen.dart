@@ -39,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
         label: Text(l10n.actionAddPlan),
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 96),
+        padding: const EdgeInsets.only(bottom: KalanSpace.fabClearance),
         children: [
           _Header(view: view),
           PastDueSection(view: view),
@@ -80,10 +80,15 @@ class _Header extends ConsumerWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(
+        KalanSpace.md,
+        KalanSpace.xs,
+        KalanSpace.md,
+        0,
+      ),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(KalanSpace.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -97,7 +102,7 @@ class _Header extends ConsumerWidget {
                           : l10n.homeLeftLabel,
                       style: theme.textTheme.titleMedium,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: KalanSpace.xxs),
                     AmountText(
                       key: const ValueKey('home-number'),
                       left == null ? spokenFor : ref.money(context, left),
@@ -107,7 +112,7 @@ class _Header extends ConsumerWidget {
                 ),
               ),
               if (left != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: KalanSpace.sm),
                 PeriodBar(
                   spokenForMinor: s.spokenForMinor,
                   incomeMinor: s.incomeMinor!,
@@ -116,10 +121,10 @@ class _Header extends ConsumerWidget {
                     ref.money(context, s.incomeMinor!),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: KalanSpace.sm),
                 Wrap(
-                  spacing: 16,
-                  runSpacing: 4,
+                  spacing: KalanSpace.md,
+                  runSpacing: KalanSpace.xxs,
                   children: [
                     Text(
                       '${l10n.homeSpokenForLabel} $spokenFor',
@@ -132,13 +137,13 @@ class _Header extends ConsumerWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: KalanSpace.sm),
               Text(
                 l10n.homeSummary(s.itemCount, spokenFor),
                 style: theme.textTheme.bodyLarge,
               ),
               if (s.status == PeriodStatus.tight) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: KalanSpace.sm),
                 StatusNote(
                   key: const ValueKey('status-tight'),
                   icon: Icons.hourglass_bottom,
@@ -149,7 +154,7 @@ class _Header extends ConsumerWidget {
                 ),
               ],
               if (s.status == PeriodStatus.negative) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: KalanSpace.sm),
                 StatusNote(
                   key: const ValueKey('status-negative'),
                   icon: Icons.remove_circle_outline,
@@ -159,7 +164,7 @@ class _Header extends ConsumerWidget {
                 ),
               ],
               if (s.status == PeriodStatus.noIncome) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: KalanSpace.sm),
                 Text(l10n.homeNoIncomeHint, style: secondary),
               ],
             ],

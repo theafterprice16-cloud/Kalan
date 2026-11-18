@@ -83,6 +83,8 @@ class LetterBadge extends StatelessWidget {
         ),
         child: Text(
           letterOf(name, localeName: locale),
+          // One decorative letter in a fixed circle, hidden from screen
+          // readers; the name beside it is real text and scales.
           textScaler: TextScaler.noScaling,
           style: TextStyle(
             color: colors.textMuted,

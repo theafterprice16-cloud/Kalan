@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
@@ -94,7 +95,12 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.md,
+              KalanSpace.xs,
+              KalanSpace.md,
+              KalanSpace.xs,
+            ),
             child: TextField(
               key: const ValueKey('currency-search'),
               controller: _query,
@@ -108,7 +114,7 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
           Expanded(
             child: rows.isEmpty
                 ? Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(KalanSpace.xl),
                     child: Text(
                       l10n.currencyNoMatch,
                       textAlign: TextAlign.center,
@@ -176,11 +182,11 @@ class _SymbolBox extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: colors.surfaceRaised,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(KalanRadius.input),
         ),
         child: FittedBox(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
             child: Text(
               symbol,
               style: TextStyle(
@@ -217,7 +223,7 @@ class CurrencyField extends ConsumerWidget {
       excludeSemantics: true,
       child: InkWell(
         key: const ValueKey('currency-field'),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(KalanRadius.input),
         onTap: () async {
           final picked = await showCurrencyPicker(context, selected: value);
           if (picked != null) onChanged(picked);
@@ -257,34 +263,35 @@ class CurrencyChangeDialog extends ConsumerWidget {
     );
     String show(int minor, Currency c) =>
         formatMoney(minor, c, localeName: context.localeName);
-    return AlertDialog(
+    return KalanAlertDialog(
       title: Text(l10n.currencyChangeTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.settingsCurrencyNote),
-          const SizedBox(height: 12),
+          const SizedBox(height: KalanSpace.sm),
           Text(
             l10n.currencyChangePreview(show(sample, from), show(after, to)),
             key: const ValueKey('currency-preview'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           if (from.decimals != to.decimals) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: KalanSpace.sm),
             Text(l10n.currencyChangeRounding),
           ],
         ],
       ),
       actions: [
-        TextButton(
+        KalanDialogAction(
+          label: l10n.actionCancel,
           onPressed: () => Navigator.pop(context, false),
-          child: Text(l10n.actionCancel),
         ),
-        TextButton(
+        KalanDialogAction(
           key: const ValueKey('currency-confirm'),
+          label: l10n.currencyChangeConfirm,
+          primary: true,
           onPressed: () => Navigator.pop(context, true),
-          child: Text(l10n.currencyChangeConfirm),
         ),
       ],
     );

@@ -66,6 +66,17 @@ void main() {
     expect(LetterBadge.letterOf('  '), '?');
   });
 
+  testWidgets('LetterBadge follows the app language for i', (tester) async {
+    await pumpLocalized(tester, const LetterBadge('ilaç'));
+    expect(find.text('İ'), findsOneWidget);
+    await pumpLocalized(
+      tester,
+      const LetterBadge('ilaç'),
+      locale: const Locale('en'),
+    );
+    expect(find.text('I'), findsOneWidget);
+  });
+
   testWidgets('LetterBadge is hidden from screen readers', (tester) async {
     await pumpLocalized(tester, const LetterBadge('Klarna'));
     expect(find.text('K'), findsOneWidget);

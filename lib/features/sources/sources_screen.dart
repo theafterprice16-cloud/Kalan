@@ -31,7 +31,10 @@ class SourcesScreen extends ConsumerWidget {
           : sources.isEmpty
           ? Center(child: EmptyState(l10n.sourcesEmpty))
           : ListView(
-              padding: const EdgeInsets.only(bottom: 96, top: 8),
+              padding: const EdgeInsets.only(
+                bottom: KalanSpace.fabClearance,
+                top: KalanSpace.xs,
+              ),
               children: [
                 for (final s in sources)
                   ListTile(
