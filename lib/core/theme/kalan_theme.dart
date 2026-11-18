@@ -2,8 +2,10 @@ import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'kalan_colors.dart';
+import 'kalan_spacing.dart';
 
 export 'kalan_colors.dart';
+export 'kalan_spacing.dart';
 
 /// Flat themes derived from [KalanColors]: no gradients, no shadows, no
 /// surface tint. Depth comes from bg → surface → surfaceRaised and thin
@@ -86,6 +88,17 @@ abstract final class KalanTheme {
       materialTapTargetSize: MaterialTapTargetSize.padded,
       visualDensity: VisualDensity.standard,
       extensions: [c],
+      // Behaviour follows the phone; the look stays Kalan's. Android uses the
+      // predictive back animation; iOS is left to the theme's own fallback,
+      // the Cupertino slide from the right with the edge swipe back.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+        },
+      ),
+      // On iPhone an adaptive switch would drop the switch theme and turn
+      // Apple green; keep the ink tokens on both phones.
+      adaptations: const [_KalanSwitchAdaptation()],
     );
     final outline = BorderSide(color: c.border);
     final ring = focusRing(c);
@@ -98,7 +111,7 @@ abstract final class KalanTheme {
     Color selectedOr(Set<WidgetState> s, Color selected, Color rest) =>
         s.contains(WidgetState.selected) ? selected : rest;
     final raised = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(KalanRadius.sheet),
       side: outline,
     );
     // Derive from the theme's text styles so font, size and weight stay.
@@ -119,7 +132,7 @@ abstract final class KalanTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(KalanRadius.card),
           side: outline,
         ),
       ),
@@ -161,7 +174,9 @@ abstract final class KalanTheme {
         elevation: 0,
         modalElevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(KalanRadius.sheet),
+          ),
           side: outline,
         ),
       ),
@@ -257,21 +272,23 @@ abstract final class KalanTheme {
         behavior: SnackBarBehavior.floating,
       ),
       inputDecorationTheme: InputDecorationTheme(
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KalanRadius.input),
+        ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(KalanRadius.input),
           borderSide: outline,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(KalanRadius.input),
           borderSide: BorderSide(color: c.focus, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(KalanRadius.input),
           borderSide: BorderSide(color: c.late),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(KalanRadius.input),
           borderSide: BorderSide(color: c.late, width: 2),
         ),
         floatingLabelStyle: text.bodyLarge?.copyWith(color: c.text),
@@ -354,4 +371,13 @@ abstract final class KalanTheme {
       listTileTheme: ListTileThemeData(iconColor: c.textMuted),
     );
   }
+}
+
+/// Keeps [ThemeData.switchTheme] for adaptive switches on every platform.
+class _KalanSwitchAdaptation extends Adaptation<SwitchThemeData> {
+  const _KalanSwitchAdaptation();
+
+  @override
+  SwitchThemeData adapt(ThemeData theme, SwitchThemeData defaultValue) =>
+      defaultValue;
 }
