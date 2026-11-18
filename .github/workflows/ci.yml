@@ -48,6 +48,10 @@ jobs:
         run: |
           flutter build apk --release --config-only
           cd android && ./gradlew --no-daemon :app:processReleaseMainManifest
+      - name: Where each network permission comes from
+        run: |
+          report=$(find build/app/outputs/logs -name 'manifest-merger-release-report.txt' | head -n 1)
+          test -n "$report" && grep -A4 'INTERNET\|ACCESS_NETWORK_STATE' "$report" || true
       - name: Release manifest has no network permission
         # Kalan makes no network requests of its own. Play Billing needs
         # com.android.vending.BILLING; INTERNET must never be merged in.
