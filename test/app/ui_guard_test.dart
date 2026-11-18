@@ -9,11 +9,16 @@ import 'package:flutter_test/flutter_test.dart';
 final bannedLines = <String, RegExp>{
   'BackdropFilter': RegExp(r'\bBackdropFilter\b'),
   'ImageFilter.blur': RegExp(r'\bImageFilter\.blur\b'),
-  'Platform.isIOS': RegExp(r'\bPlatform\.is(IOS|Android|MacOS)\b'),
+  'platform branching': RegExp(
+    r'\bPlatform\.is(IOS|Android|MacOS)\b|\bdefaultTargetPlatform\b|\.platform\s*==',
+  ),
   'bare showDialog': RegExp(r'\bshowDialog\s*[<(]'),
-  'Cupertino dialog': RegExp(r'\b(showCupertinoDialog|CupertinoAlertDialog)\b'),
+  // Apple's dialogs and sheets are frosted glass; use showKalanDialog.
+  'glass dialog': RegExp(
+    r'\b(showCupertino\w*|CupertinoAlertDialog|CupertinoActionSheet|showAdaptiveDialog)\b|\bAlertDialog\.adaptive\b',
+  ),
   'HapticFeedback': RegExp(r'\bHapticFeedback\.'),
-  'non-adaptive switch': RegExp(r'\bSwitchListTile\('),
+  'non-adaptive switch': RegExp(r'\b(SwitchListTile|Switch)\('),
 };
 
 final _number = RegExp(r'(?<![\w.])[1-9]\d*(\.\d+)?(?![\w.])');
@@ -62,7 +67,9 @@ void main() {
       final path = entity.path.replaceAll(r'\', '/');
       offenders.addAll(
         offendersIn(path, entity.readAsStringSync()).where(
-          (o) => !(platformExceptions.contains(path) && o.contains('Platform')),
+          (o) =>
+              !(platformExceptions.contains(path) &&
+                  o.contains('platform branching')),
         ),
       );
     }
@@ -77,6 +84,12 @@ void main() {
       'await showDialog<bool>(',
       'showDialog(context: context)',
       'showCupertinoDialog(context: context)',
+      'showAdaptiveDialog<bool>(',
+      'builder: (_) => AlertDialog.adaptive(',
+      'showCupertinoModalPopup(context: context)',
+      'if (defaultTargetPlatform == TargetPlatform.iOS) {}',
+      'Theme.of(context).platform == TargetPlatform.iOS',
+      'Switch(value: v, onChanged: f)',
       'HapticFeedback.lightImpact();',
       'SwitchListTile(',
       'borderRadius: BorderRadius.circular(8)',
@@ -93,6 +106,8 @@ void main() {
     const allowed = [
       'await showKalanDialog<bool>(',
       'SwitchListTile.adaptive(',
+      'Switch.adaptive(value: v, onChanged: f)',
+      'if (followsApple(context)) {}',
       'KalanHaptics.success();',
       'BorderRadius.circular(KalanRadius.input)',
       'EdgeInsets.fromLTRB(KalanSpace.md, 0, KalanSpace.md, KalanSpace.xs)',

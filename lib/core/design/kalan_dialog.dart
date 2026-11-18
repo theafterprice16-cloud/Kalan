@@ -48,7 +48,10 @@ class KalanAlertDialog extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final divider = Divider(height: 1, thickness: 1, color: colors.border);
     final Widget actionArea;
-    if (actions.length <= 2) {
+    // Side by side as on iPhone; stacked when there are more than two or
+    // the text is large, so labels never squeeze.
+    final large = MediaQuery.textScalerOf(context).scale(10) > 13;
+    if (actions.length <= 2 && !large) {
       actionArea = IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,10 +96,13 @@ class KalanAlertDialog extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (title != null)
-                      DefaultTextStyle.merge(
-                        style: text.titleMedium?.copyWith(color: colors.text),
-                        textAlign: TextAlign.center,
-                        child: title!,
+                      Semantics(
+                        header: true,
+                        child: DefaultTextStyle.merge(
+                          style: text.titleMedium?.copyWith(color: colors.text),
+                          textAlign: TextAlign.center,
+                          child: title!,
+                        ),
                       ),
                     if (title != null && content != null)
                       const SizedBox(height: KalanSpace.xs),
