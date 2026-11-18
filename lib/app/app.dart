@@ -8,6 +8,7 @@ import '../core/routing/router.dart';
 import '../core/routing/routes.dart';
 import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
+import '../entitlement/pro_controller.dart';
 import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
 import '../features/reminders/reminder_actions.dart';
@@ -34,6 +35,9 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     super.initState();
     _lifecycle = AppLifecycleListener(onResume: _onResume);
     _taps = notificationTaps.stream.listen(_onTap);
+    // Pro: the saved state at once, the store checked in the background,
+    // and purchase updates heard from the start (before onboarding too).
+    ref.read(proControllerProvider);
     // App start: schedule from the stored data right away.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(reminderSyncProvider).request();

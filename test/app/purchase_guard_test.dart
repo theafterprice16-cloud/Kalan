@@ -5,17 +5,17 @@ import 'package:flutter_test/flutter_test.dart';
 /// The store package stays behind the Entitlement layer, and Kalan never
 /// hands the store anything that identifies the user.
 void main() {
-  Iterable<File> dartFiles(String dir) => Directory(dir)
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'));
+  Iterable<File> dartFiles(String dir) =>
+      Directory(dir)
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'));
 
   test('screens never import the store package', () {
     final offenders = [
       for (final dir in ['lib/features', 'lib/core', 'lib/app'])
         for (final f in dartFiles(dir))
-          if (f.readAsStringSync().contains('package:in_app_purchase'))
-            f.path,
+          if (f.readAsStringSync().contains('package:in_app_purchase')) f.path,
     ];
     expect(offenders, isEmpty);
   });
