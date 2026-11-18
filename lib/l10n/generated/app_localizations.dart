@@ -494,12 +494,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 payment was made before you added this plan.} other{{count} payments were made before you added this plan.}}'**
   String planStartedMidway(int count);
 
-  /// No description provided for @freeLimitReached.
-  ///
-  /// In en, this message translates to:
-  /// **'The free version holds up to {limit} open plans. You can add a new one when a plan finishes.'**
-  String freeLimitReached(int limit);
-
   /// No description provided for @addRecurring.
   ///
   /// In en, this message translates to:
@@ -2112,6 +2106,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On payday, at your reminder time: this period\'s payments, total and what\'s left.'**
   String get reminderPaydayToggleHint;
+
+  /// Pro screen title and the Settings row. Product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan Pro'**
+  String get proTitle;
+
+  /// No description provided for @proIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The free version keeps up to {limit} open plans. Pro removes the limit and adds:'**
+  String proIntro(int limit);
+
+  /// One line in the list of what Pro adds.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited open plans'**
+  String get proFeatureUnlimitedPlans;
+
+  /// price comes from the store, already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} · pay once. No subscription, nothing renews.'**
+  String proPriceLine(String price);
+
+  /// No description provided for @proPriceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The price couldn\'t be loaded right now.'**
+  String get proPriceUnavailable;
+
+  /// No description provided for @proRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get proRetry;
+
+  /// No description provided for @proBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Pro'**
+  String get proBuy;
+
+  /// No description provided for @proRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchase'**
+  String get proRestore;
+
+  /// No description provided for @proActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro is on. Thank you.'**
+  String get proActive;
+
+  /// No description provided for @proPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The payment is waiting for approval. Pro turns on once it\'s approved.'**
+  String get proPending;
+
+  /// After a purchase or a restore that found Pro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro is on.'**
+  String get proTurnedOn;
+
+  /// No description provided for @proRestoreNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Pro purchase found on this store account.'**
+  String get proRestoreNotFound;
+
+  /// No description provided for @proStoreUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the store right now. Try again later.'**
+  String get proStoreUnreachable;
+
+  /// No description provided for @proPurchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The purchase didn\'t go through. Try again later.'**
+  String get proPurchaseFailed;
+
+  /// No description provided for @settingsProFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get settingsProFree;
+
+  /// No description provided for @settingsProOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get settingsProOn;
+
+  /// No description provided for @settingsProPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for approval'**
+  String get settingsProPending;
+
+  /// No description provided for @limitSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.'**
+  String limitSheetBody(int limit);
+
+  /// No description provided for @limitSheetSeePro.
+  ///
+  /// In en, this message translates to:
+  /// **'See Pro'**
+  String get limitSheetSeePro;
+
+  /// No description provided for @limitSheetNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get limitSheetNotNow;
 }
 
 class _AppLocalizationsDelegate

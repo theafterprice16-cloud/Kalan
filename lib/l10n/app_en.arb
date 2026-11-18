@@ -175,14 +175,6 @@
       }
     }
   },
-  "freeLimitReached": "The free version holds up to {limit} open plans. You can add a new one when a plan finishes.",
-  "@freeLimitReached": {
-    "placeholders": {
-      "limit": {
-        "type": "int"
-      }
-    }
-  },
   "addRecurring": "Add recurring payment",
   "kindPayIn4": "Pay in 4",
   "kindMonthly": "Monthly installments",
@@ -1440,5 +1432,57 @@
   "reminderPaydayToggleHint": "On payday, at your reminder time: this period's payments, total and what's left.",
   "@reminderPaydayToggleHint": {
     "description": "Under the payday summary switch."
-  }
+  },
+  "proTitle": "Kalan Pro",
+  "@proTitle": {
+    "description": "Pro screen title and the Settings row. Product name, not translated."
+  },
+  "proIntro": "The free version keeps up to {limit} open plans. Pro removes the limit and adds:",
+  "@proIntro": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "proFeatureUnlimitedPlans": "Unlimited open plans",
+  "@proFeatureUnlimitedPlans": {
+    "description": "One line in the list of what Pro adds."
+  },
+  "proPriceLine": "{price} · pay once. No subscription, nothing renews.",
+  "@proPriceLine": {
+    "placeholders": {
+      "price": {
+        "type": "String",
+        "example": "$1.00"
+      }
+    },
+    "description": "price comes from the store, already formatted."
+  },
+  "proPriceUnavailable": "The price couldn't be loaded right now.",
+  "proRetry": "Try again",
+  "proBuy": "Get Pro",
+  "proRestore": "Restore purchase",
+  "proActive": "Pro is on. Thank you.",
+  "proPending": "The payment is waiting for approval. Pro turns on once it's approved.",
+  "proTurnedOn": "Pro is on.",
+  "@proTurnedOn": {
+    "description": "After a purchase or a restore that found Pro."
+  },
+  "proRestoreNotFound": "No Pro purchase found on this store account.",
+  "proStoreUnreachable": "Couldn't reach the store right now. Try again later.",
+  "proPurchaseFailed": "The purchase didn't go through. Try again later.",
+  "settingsProFree": "Free",
+  "settingsProOn": "Pro",
+  "settingsProPending": "Waiting for approval",
+  "limitSheetBody": "The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.",
+  "@limitSheetBody": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "limitSheetSeePro": "See Pro",
+  "limitSheetNotNow": "Not now"
 }

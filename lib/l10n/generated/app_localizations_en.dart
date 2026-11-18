@@ -254,11 +254,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String freeLimitReached(int limit) {
-    return 'The free version holds up to $limit open plans. You can add a new one when a plan finishes.';
-  }
-
-  @override
   String get addRecurring => 'Add recurring payment';
 
   @override
@@ -1555,4 +1550,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reminderPaydayToggleHint =>
       'On payday, at your reminder time: this period\'s payments, total and what\'s left.';
+
+  @override
+  String get proTitle => 'Kalan Pro';
+
+  @override
+  String proIntro(int limit) {
+    return 'The free version keeps up to $limit open plans. Pro removes the limit and adds:';
+  }
+
+  @override
+  String get proFeatureUnlimitedPlans => 'Unlimited open plans';
+
+  @override
+  String proPriceLine(String price) {
+    return '$price · pay once. No subscription, nothing renews.';
+  }
+
+  @override
+  String get proPriceUnavailable => 'The price couldn\'t be loaded right now.';
+
+  @override
+  String get proRetry => 'Try again';
+
+  @override
+  String get proBuy => 'Get Pro';
+
+  @override
+  String get proRestore => 'Restore purchase';
+
+  @override
+  String get proActive => 'Pro is on. Thank you.';
+
+  @override
+  String get proPending =>
+      'The payment is waiting for approval. Pro turns on once it\'s approved.';
+
+  @override
+  String get proTurnedOn => 'Pro is on.';
+
+  @override
+  String get proRestoreNotFound =>
+      'No Pro purchase found on this store account.';
+
+  @override
+  String get proStoreUnreachable =>
+      'Couldn\'t reach the store right now. Try again later.';
+
+  @override
+  String get proPurchaseFailed =>
+      'The purchase didn\'t go through. Try again later.';
+
+  @override
+  String get settingsProFree => 'Free';
+
+  @override
+  String get settingsProOn => 'Pro';
+
+  @override
+  String get settingsProPending => 'Waiting for approval';
+
+  @override
+  String limitSheetBody(int limit) {
+    return 'The free version keeps up to $limit open plans. You can add a new one when a plan finishes, or with Pro.';
+  }
+
+  @override
+  String get limitSheetSeePro => 'See Pro';
+
+  @override
+  String get limitSheetNotNow => 'Not now';
 }
