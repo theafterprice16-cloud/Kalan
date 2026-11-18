@@ -52,6 +52,7 @@ Kıdemli bir Flutter geliştiricisisin. [Maddenin gerektirdiği uzmanlık: yerel
 - Ücretsiz sürümde en fazla 4 açık plan; Pro ile sınırsız. Bu sınıra dokunma.
 - Pro tek seferlik satın almadır; abonelik yok.
 - Tüm geliştirmeler Mürekkep ve Safran paletine uyar; yalnızca tema tokenları kullanılır.
+- Ekran, geçiş, diyalog, anahtar ya da animasyon değişiyorsa `flutter-cross-ui` skill'i uygulanır: marka önce, cam yok, adaptif bileşenler, 48x48 dokunma, iOS golden.
 </degismez_kurallar>
 
 <kapsam>
