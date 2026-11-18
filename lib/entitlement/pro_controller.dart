@@ -77,22 +77,41 @@ class ProController extends Notifier<ProState> {
   Completer<PurchaseOutcome>? _purchase;
   Timer? _purchaseTimer;
 
+  /// Store updates are handled one batch at a time, in order.
+  Future<void> _events = Future.value();
+
+  /// Counts purchases saved here. A store answer that started before one
+  /// of them is out of date and never takes Pro away.
+  int _grants = 0;
+
   @override
   ProState build() {
     _store = ref.watch(proStatusStoreProvider);
     _gateway = ref.watch(storeGatewayProvider);
     final events = _gateway.events.listen(
-      (list) => unawaited(_onEvents(list)),
+      (list) => _events = _events.then((_) => _onEvents(list)),
       onError: (Object _) {},
     );
     ref.onDispose(() {
       unawaited(events.cancel());
       _purchaseTimer?.cancel();
+      final purchase = _purchase;
+      _purchase = null;
+      if (purchase != null && !purchase.isCompleted) {
+        purchase.complete(PurchaseOutcome.canceled);
+      }
     });
     // The stored state counts right away, offline too; the store is asked
     // in the background.
     scheduleMicrotask(() => unawaited(_check()));
     return ProState(_store.read());
+  }
+
+  /// Back in the foreground: ask the store again. Acknowledges a purchase
+  /// whose acknowledgement failed earlier; never shows anything.
+  Future<void> recheck() async {
+    if (state.busy != ProBusy.none) return;
+    await _check();
   }
 
   /// Opens the store's purchase sheet. Null when a purchase or restore is
@@ -120,13 +139,14 @@ class ProController extends Notifier<ProState> {
   Future<PurchaseOutcome?> restore() async {
     if (state.busy != ProBusy.none) return null;
     state = state.copyWith(busy: ProBusy.restoring);
+    final grants = _grants;
     OwnershipQuery query;
     try {
       query = await _gateway.restore();
     } on Object {
       query = const QueryFailed(FailureKind.unknown);
     }
-    await _apply(query);
+    await _apply(query, grantsBefore: grants);
     if (!ref.mounted) return null;
     state = state.copyWith(busy: ProBusy.none);
     return switch (query) {
@@ -141,23 +161,27 @@ class ProController extends Notifier<ProState> {
     };
   }
 
-  /// Background check at start, and after a store update that did not
-  /// come from a purchase started here.
-  Future<void> _check() async {
+  /// Background check at start, on resume, and after a store update that
+  /// did not come from a purchase started here.
+  Future<OwnershipQuery> _check() async {
+    final grants = _grants;
     OwnershipQuery query;
     try {
       query = await _gateway.queryOwnership();
     } on Object {
       query = const QueryFailed(FailureKind.unknown);
     }
-    await _apply(query);
+    await _apply(query, grantsBefore: grants);
+    return query;
   }
 
   /// Saves the verdict, then acknowledges what the store listed. Saving
   /// comes first so a crash in between never loses a paid purchase.
-  Future<void> _apply(OwnershipQuery query) async {
+  Future<void> _apply(OwnershipQuery query, {required int grantsBefore}) async {
     if (!ref.mounted) return;
-    await _save(applyVerdict(state.status, verdictFor(query)));
+    final next = statusAfter(state.status, query);
+    final outdated = _grants != grantsBefore && next != ProStatus.pro;
+    if (!outdated) await _save(next);
     if (query is Owned) {
       for (final token in query.tokens) {
         await _complete(token);
@@ -171,16 +195,21 @@ class ProController extends Notifier<ProState> {
       switch (event) {
         case StorePurchased(:final token):
           if (_purchase != null) {
-            // The purchase started from the Pro screen.
+            // The purchase started from the Pro screen: saved first, the
+            // screen told, then acknowledged.
             await _save(ProStatus.pro);
-            await _complete(token);
+            _grants++;
             _endPurchase(PurchaseOutcome.unlocked);
+            await _complete(token);
           } else {
             // From outside (approval, family sharing, a store update):
             // the store's own list decides. A refund on the App Store
             // also arrives here, so it is never taken as a purchase.
-            await _check();
-            if (ref.mounted && state.status == ProStatus.pro) {
+            final query = await _check();
+            if (!ref.mounted) return;
+            final answered = query is! QueryFailed;
+            if (state.status == ProStatus.pro ||
+                (answered && token.finishWithoutPro)) {
               await _complete(token);
             }
           }
@@ -192,7 +221,17 @@ class ProController extends Notifier<ProState> {
           _endPurchase(PurchaseOutcome.canceled);
         case StoreFailed(:final token):
           if (token != null) await _complete(token);
-          _endPurchase(PurchaseOutcome.failed);
+          if (_purchase != null) {
+            // "Already owned" arrives as an error: the store's list
+            // decides whether this is Pro after all.
+            await _check();
+            if (!ref.mounted) return;
+            _endPurchase(
+              state.status == ProStatus.pro
+                  ? PurchaseOutcome.unlocked
+                  : PurchaseOutcome.failed,
+            );
+          }
       }
     }
   }
@@ -208,7 +247,7 @@ class ProController extends Notifier<ProState> {
     try {
       await _gateway.complete(token);
     } on Object {
-      // Delivered again at the next start and acknowledged then.
+      // Tried again by the next check (start or back in the foreground).
     }
   }
 

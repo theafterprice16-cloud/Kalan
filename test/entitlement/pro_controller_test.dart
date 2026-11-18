@@ -88,6 +88,10 @@ void main() {
       expect(outcome, PurchaseOutcome.unlocked);
       expect(status(c), ProStatus.pro);
       expect(log, ['buy', 'save pro', 'complete purchase']);
+      expect(
+        log.indexOf('save pro'),
+        lessThan(log.indexOf('complete purchase')),
+      );
       expect(c.read(proControllerProvider).busy, ProBusy.none);
     });
 
@@ -154,7 +158,87 @@ void main() {
       ]);
       await pumpEventQueue();
       expect(status(c), ProStatus.notPro);
+      // Google Play token: never acknowledged without Pro.
       expect(log, isNot(contains('complete refund')));
+    });
+
+    test('App Store refund update: closed, Pro not given', () async {
+      store.ownership = const Inconclusive();
+      final c = start();
+      await pumpEventQueue();
+      store.emit([
+        const StorePurchased(
+          StoreToken('refund', needsCompletion: true, finishWithoutPro: true),
+        ),
+      ]);
+      await pumpEventQueue();
+      expect(status(c), ProStatus.notPro);
+      expect(log, contains('complete refund'));
+    });
+
+    test('an update from outside while offline: kept for later', () async {
+      store.ownership = const QueryFailed(FailureKind.network);
+      final c = start();
+      await pumpEventQueue();
+      store.emit([
+        const StorePurchased(
+          StoreToken('later', needsCompletion: true, finishWithoutPro: true),
+        ),
+      ]);
+      await pumpEventQueue();
+      expect(status(c), ProStatus.notPro);
+      expect(log, isNot(contains('complete later')));
+    });
+
+    test('a start-up answer older than a purchase never removes it', () async {
+      final slow = store.hangingQuery = Completer();
+      final c = start();
+      await pumpEventQueue();
+      final outcome = await c.read(proControllerProvider.notifier).buy();
+      expect(outcome, PurchaseOutcome.unlocked);
+      slow.complete(const NotOwned());
+      await pumpEventQueue();
+      expect(status(c), ProStatus.pro);
+      expect(saved.status, ProStatus.pro);
+    });
+
+    test('"already owned" error: the store list turns Pro on', () async {
+      store.afterBuy = [const StoreFailed()];
+      store.ownership = const Owned();
+      final c = start();
+      await pumpEventQueue();
+      expect(
+        await c.read(proControllerProvider.notifier).buy(),
+        PurchaseOutcome.unlocked,
+      );
+      expect(status(c), ProStatus.pro);
+    });
+
+    testWidgets('no answer in two minutes: the button is free again', (
+      tester,
+    ) async {
+      // testWidgets runs on a fake clock: pump moves time forward.
+      store.afterBuy = null;
+      final c = start();
+      addTearDown(c.dispose);
+      await tester.pump();
+      PurchaseOutcome? outcome;
+      unawaited(
+        c.read(proControllerProvider.notifier).buy().then((o) => outcome = o),
+      );
+      await tester.pump();
+      expect(c.read(proControllerProvider).busy, ProBusy.buying);
+      await tester.pump(ProController.purchaseWait);
+      expect(outcome, PurchaseOutcome.canceled);
+      expect(c.read(proControllerProvider).busy, ProBusy.none);
+      // The store answers late: still saved, as an outside update.
+      store.ownership = const Owned();
+      store.emit([
+        const StorePurchased(StoreToken('late', needsCompletion: true)),
+      ]);
+      await tester.pump();
+      await tester.pump();
+      expect(status(c), ProStatus.pro);
     });
 
     test('a second tap while buying is ignored', () async {
@@ -173,6 +257,36 @@ void main() {
       expect(await first, PurchaseOutcome.unlocked);
     });
   });
+
+  group('pending', () {
+    test('a declined App Store request does not stay pending', () async {
+      store.ownership = const Inconclusive();
+      final c = start(ProStatus.pending);
+      await pumpEventQueue();
+      expect(status(c), ProStatus.notPro);
+    });
+
+    test('Google Play still pending at start: stays pending', () async {
+      store.ownership = const OwnedPending();
+      final c = start(ProStatus.pending);
+      await pumpEventQueue();
+      expect(status(c), ProStatus.pending);
+    });
+  });
+
+  test(
+    'back in the foreground: an unacknowledged purchase is retried',
+    () async {
+      store.ownership = const Owned([
+        StoreToken('unacked', needsCompletion: true),
+      ]);
+      final c = start(ProStatus.pro);
+      await pumpEventQueue();
+      log.clear();
+      await c.read(proControllerProvider.notifier).recheck();
+      expect(log, ['query', 'complete unacked']);
+    },
+  );
 
   group('restore', () {
     test('found: Pro is on', () async {

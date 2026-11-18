@@ -37,3 +37,11 @@ ProStatus applyVerdict(ProStatus status, ProVerdict verdict) =>
       ProVerdict.keep => status,
       ProVerdict.revoke => ProStatus.notPro,
     };
+
+/// The stored state after a store answer. A pending payment is not Pro,
+/// so an answer that cannot see it (the App Store after a declined Ask to
+/// Buy, which sends no event) clears it instead of keeping it forever.
+ProStatus statusAfter(ProStatus status, OwnershipQuery query) =>
+    status == ProStatus.pending && query is Inconclusive
+    ? ProStatus.notPro
+    : applyVerdict(status, verdictFor(query));

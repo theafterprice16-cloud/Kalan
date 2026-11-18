@@ -12,13 +12,22 @@ const proProductId = 'kalan_pro_lifetime';
 /// A store purchase that may still need acknowledging. Opaque outside the
 /// gateway that created it.
 class StoreToken {
-  const StoreToken(this.raw, {required this.needsCompletion});
+  const StoreToken(
+    this.raw, {
+    required this.needsCompletion,
+    this.finishWithoutPro = false,
+  });
 
   final Object raw;
 
   /// Google Play refunds an unacknowledged purchase after three days and
   /// the App Store keeps re-delivering an unfinished one.
   final bool needsCompletion;
+
+  /// The App Store: finishing a transaction grants nothing and takes
+  /// nothing away, so one that did not turn Pro on (a refund) can be
+  /// closed. Never on Google Play, where acknowledging means "delivered".
+  final bool finishWithoutPro;
 }
 
 /// What the store reported about the Pro product, in the order it came.
@@ -117,13 +126,16 @@ typedef StoreRecord = ({String productId, bool pending, StoreToken token});
 /// Turns a finished store query into an [OwnershipQuery]. [authoritative]
 /// is true only when an empty answer really means "not owned" (Google
 /// Play's purchase query, or the App Store right after a successful sync).
+/// [failed]: the query partly failed; only Pro found in [records] counts.
 OwnershipQuery ownershipFrom({
   required bool authoritative,
   required List<StoreRecord> records,
+  bool failed = false,
 }) {
   final pro = records.where((r) => r.productId == proProductId).toList();
   final owned = pro.where((r) => !r.pending).toList();
   if (owned.isNotEmpty) return Owned([for (final r in owned) r.token]);
+  if (failed) return const QueryFailed(FailureKind.unknown);
   if (pro.isNotEmpty) return const OwnedPending();
   return authoritative ? const NotOwned() : const Inconclusive();
 }

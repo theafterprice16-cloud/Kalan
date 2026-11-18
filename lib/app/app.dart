@@ -67,6 +67,8 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     ref.invalidate(plansProvider);
     ref.invalidate(recurringProvider);
     ref.read(reminderSyncProvider).request();
+    // Pro: a quiet store check (finishes an acknowledgement that failed).
+    unawaited(ref.read(proControllerProvider.notifier).recheck());
   }
 
   /// A tapped reminder opens the home screen. A button, should the

@@ -52,6 +52,21 @@ void main() {
       );
     });
 
+    test('partly failed query: Pro found counts, an empty list does not', () {
+      expect(
+        ownershipFrom(
+          authoritative: false,
+          failed: true,
+          records: [record(proProductId)],
+        ),
+        isA<Owned>(),
+      );
+      expect(
+        ownershipFrom(authoritative: false, failed: true, records: const []),
+        isA<QueryFailed>(),
+      );
+    });
+
     test('App Store cache without a sync: never "not owned"', () {
       expect(
         ownershipFrom(authoritative: false, records: const []),

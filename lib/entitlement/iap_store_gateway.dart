@@ -12,8 +12,8 @@ import 'store_gateway.dart';
 /// App Store (StoreKit 2) and Google Play Billing through the official
 /// `in_app_purchase` plugin. The only file that imports it.
 ///
-/// Nothing that identifies the user is ever passed: no
-/// application user name, no account or profile id.
+/// Nothing that identifies the user is ever passed to the store: no user
+/// name, no account or profile id.
 class IapStoreGateway implements StoreGateway {
   IapStoreGateway({InAppPurchase? iap, TargetPlatform? platform})
     : _iap = iap ?? InAppPurchase.instance,
@@ -32,7 +32,8 @@ class IapStoreGateway implements StoreGateway {
   Stream<List<StoreEvent>> get events => _iap.purchaseStream.map(
     (list) => [
       for (final p in list)
-        if (p.productID == proProductId) storeEventFrom(p),
+        if (p.productID == proProductId)
+          storeEventFrom(p, finishWithoutPro: !_android),
     ],
   );
 
@@ -61,7 +62,7 @@ class IapStoreGateway implements StoreGateway {
   @override
   Future<bool> buy() async {
     if (_product == null && await loadPrice() is! PriceLoaded) return false;
-    // A non-consumable, bought once. No applicationUserName.
+    // A non-consumable, bought once. Nothing about the user is passed.
     return _iap.buyNonConsumable(
       purchaseParam: PurchaseParam(productDetails: _product!),
     );
@@ -99,9 +100,12 @@ class IapStoreGateway implements StoreGateway {
     final response = await _iap
         .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>()
         .queryPastPurchases();
-    if (response.error != null) return const QueryFailed(FailureKind.unknown);
+    // The query asks for one-time products and subscriptions together; a
+    // failure in either makes an empty answer untrustworthy, but Pro found
+    // in the list is still Pro.
     return ownershipFrom(
-      authoritative: true,
+      authoritative: response.error == null,
+      failed: response.error != null,
       records: [
         for (final p in response.pastPurchases)
           (
@@ -125,7 +129,11 @@ class IapStoreGateway implements StoreGateway {
           (
             productId: t.productId,
             pending: false,
-            token: StoreToken(t, needsCompletion: false),
+            token: StoreToken(
+              t,
+              needsCompletion: false,
+              finishWithoutPro: true,
+            ),
           ),
       ],
     );
@@ -148,8 +156,12 @@ class IapStoreGateway implements StoreGateway {
 }
 
 /// One purchase update as Kalan sees it.
-StoreEvent storeEventFrom(PurchaseDetails p) {
-  final token = StoreToken(p, needsCompletion: p.pendingCompletePurchase);
+StoreEvent storeEventFrom(PurchaseDetails p, {bool finishWithoutPro = false}) {
+  final token = StoreToken(
+    p,
+    needsCompletion: p.pendingCompletePurchase,
+    finishWithoutPro: finishWithoutPro,
+  );
   return switch (p.status) {
     PurchaseStatus.purchased => StorePurchased(token),
     PurchaseStatus.restored => StorePurchased(token, restored: true),

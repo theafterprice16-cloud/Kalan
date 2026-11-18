@@ -11,11 +11,20 @@ void main() {
           .whereType<File>()
           .where((f) => f.path.endsWith('.dart'));
 
+  test('only the store gateway imports the store package', () {
+    final offenders = [
+      for (final f in dartFiles('lib'))
+        if (f.readAsStringSync().contains('package:in_app_purchase') &&
+            !f.path.endsWith('lib/entitlement/iap_store_gateway.dart'))
+          f.path,
+    ];
+    expect(offenders, isEmpty);
+  });
+
   test('screens never import the store package', () {
     final offenders = [
-      for (final dir in ['lib/features', 'lib/core', 'lib/app'])
-        for (final f in dartFiles(dir))
-          if (f.readAsStringSync().contains('package:in_app_purchase')) f.path,
+      for (final f in dartFiles('lib/features'))
+        if (f.readAsStringSync().contains('in_app_purchase')) f.path,
     ];
     expect(offenders, isEmpty);
   });

@@ -65,4 +65,33 @@ void main() {
       });
     }
   });
+
+  group('statusAfter', () {
+    test('an unclear answer clears a pending payment (not Pro)', () {
+      expect(
+        statusAfter(ProStatus.pending, const Inconclusive()),
+        ProStatus.notPro,
+      );
+    });
+
+    test('an unclear answer keeps Pro', () {
+      expect(statusAfter(ProStatus.pro, const Inconclusive()), ProStatus.pro);
+    });
+
+    test('no answer keeps a pending payment', () {
+      expect(
+        statusAfter(ProStatus.pending, const QueryFailed(FailureKind.network)),
+        ProStatus.pending,
+      );
+    });
+
+    test('never removes Pro without the store saying so', () {
+      for (final q in [
+        const Inconclusive(),
+        for (final k in FailureKind.values) QueryFailed(k),
+      ]) {
+        expect(statusAfter(ProStatus.pro, q), ProStatus.pro);
+      }
+    });
+  });
 }
