@@ -103,7 +103,9 @@ class KalanAlertDialog extends StatelessWidget {
                     if (content != null)
                       DefaultTextStyle.merge(
                         style: text.bodyMedium?.copyWith(color: colors.text),
-                        textAlign: TextAlign.center,
+                        // A plain message is centred as on iPhone; forms
+                        // keep their fields' own alignment.
+                        textAlign: content is Text ? TextAlign.center : null,
                         child: content!,
                       ),
                   ],

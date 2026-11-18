@@ -51,11 +51,11 @@ Future<void> loadFonts() async {
     await loader.load();
   }
 
-  await family('Roboto', [
-    'Roboto-Regular.ttf',
-    'Roboto-Medium.ttf',
-    'Roboto-Bold.ttf',
-  ]);
+  const roboto = ['Roboto-Regular.ttf', 'Roboto-Medium.ttf', 'Roboto-Bold.ttf'];
+  await family('Roboto', roboto);
+  // iOS text styles ask for the system font; Roboto stands in for it.
+  await family('CupertinoSystemText', roboto);
+  await family('CupertinoSystemDisplay', roboto);
   await family('MaterialIcons', ['MaterialIcons-Regular.otf']);
 }
 
@@ -702,6 +702,47 @@ void main() {
           await shoot(tester, '17-plan-reminder-choice-$lang-$theme');
         });
       }
+
+      // iPhone behaviour, Kalan look: switches stay ink (never Apple
+      // green); dialogs are flat Kalan surfaces in Apple's arrangement.
+      final ios = TargetPlatformVariant.only(TargetPlatform.iOS);
+
+      testWidgets('ios, settings switches', variant: ios, (tester) async {
+        await start(tester);
+        await openTab(tester, 'Ayarlar');
+        const key = ValueKey('reminders-enabled');
+        await scrollTo(tester, find.byKey(key));
+        final top = tester.getTopLeft(find.byKey(key)).dy;
+        await tester.drag(find.byType(Scrollable).first, Offset(0, 140 - top));
+        await tester.pump(const Duration(milliseconds: 400));
+        await shoot(tester, '40-ios-settings-switches-$theme');
+      });
+
+      testWidgets('ios, delete plan', variant: ios, (tester) async {
+        await start(tester);
+        await openTab(tester, 'Planlar');
+        await tester.tap(find.text('Mont'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Planı sil'));
+        await shoot(tester, '41-ios-delete-plan-$theme');
+      });
+
+      testWidgets('ios, edit payment', variant: ios, (tester) async {
+        await start(tester);
+        await openTab(tester, 'Planlar');
+        await tester.tap(find.text('Kulaklık'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('4 Ara 2026'));
+        await shoot(tester, '42-ios-edit-payment-$theme');
+      });
+
+      testWidgets('ios, theme choice', variant: ios, (tester) async {
+        await start(tester);
+        await openTab(tester, 'Ayarlar');
+        await scrollTo(tester, find.text('Tema'));
+        await tester.tap(find.text('Tema'));
+        await shoot(tester, '43-ios-theme-choice-$theme');
+      });
 
       // Payment method: add plan (More details open), plan details, home.
       for (final (lang, locale, plansTab, addPlan, cardKind, details) in [

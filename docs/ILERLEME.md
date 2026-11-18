@@ -21,6 +21,10 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 10. Maaş günü özeti bildirimi (16 Kasım 2026): her maaş döneminin ilk günü, hatırlatma saatinde tek bildirim; ödeme sayısı, toplam ve (gelir varsa) kalan, ana ekranla aynı hesap; Ayarlar'da anahtar, varsayılan açık; şema v12
 
+Ara işler:
+
+- Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
+
 ## Sıradaki
 
 - 11. Pro satın alma
