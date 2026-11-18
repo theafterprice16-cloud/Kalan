@@ -7,6 +7,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/design/haptics.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
@@ -33,19 +35,19 @@ class PlanDetailScreen extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
     final router = GoRouter.of(context);
-    final ok = await showDialog<bool>(
+    final ok = await showKalanDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => KalanAlertDialog(
         content: Text(l10n.planDeleteConfirm),
         actions: [
-          TextButton(
+          KalanDialogAction(
+            label: l10n.actionCancel,
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.late),
+          KalanDialogAction(
+            label: l10n.actionDelete,
+            destructive: true,
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionDelete),
           ),
         ],
       ),
@@ -269,7 +271,7 @@ class _PaymentRow extends ConsumerWidget {
       return;
     }
     final amountError = ref.amountError(context);
-    final result = await showDialog<(LocalDate, int)>(
+    final result = await showKalanDialog<(LocalDate, int)>(
       context: context,
       builder: (_) => _EditPaymentDialog(payment: payment, ref: ref),
     );
@@ -369,9 +371,13 @@ class _PaymentRow extends ConsumerWidget {
                       paymentId: payment.id,
                       dueDate: payment.date,
                     )
-                  : () => ref
-                        .read(planRepositoryProvider)
-                        .setPaid(payment.id, paid: !payment.isPaid),
+                  : () async {
+                      final paid = !payment.isPaid;
+                      await ref
+                          .read(planRepositoryProvider)
+                          .setPaid(payment.id, paid: paid);
+                      if (paid) KalanHaptics.success();
+                    },
               icon: Icon(
                 payment.isPaid
                     ? Icons.check_circle
@@ -425,7 +431,7 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return AlertDialog(
+    return KalanAlertDialog(
       title: Text(l10n.editPaymentTitle),
       content: Form(
         key: _formKey,
@@ -453,11 +459,13 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        KalanDialogAction(
+          label: l10n.actionCancel,
           onPressed: () => Navigator.pop(context),
-          child: Text(l10n.actionCancel),
         ),
-        TextButton(
+        KalanDialogAction(
+          label: l10n.actionSave,
+          primary: true,
           onPressed: () {
             if (!_formKey.currentState!.validate()) return;
             Navigator.pop(context, (
@@ -465,7 +473,6 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
               widget.ref.parseMoney(context, _amount.text)!,
             ));
           },
-          child: Text(l10n.actionSave),
         ),
       ],
     );

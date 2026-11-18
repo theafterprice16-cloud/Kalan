@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/design/haptics.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
@@ -62,6 +63,7 @@ Future<PaidWhen?> markPastDuePaid(
   );
   if (choice == null) return null;
   await repo.setPaidOn(paymentId, choice == PaidWhen.today ? today : dueDate);
+  KalanHaptics.success();
   showMarkedPaid(
     messenger,
     l10n,

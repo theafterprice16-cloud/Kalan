@@ -8,10 +8,11 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/design/haptics.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/engine/engine.dart';
 import '../../core/reminders/reminder_models.dart';
 import '../../core/routing/tab_messengers.dart';
-import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
@@ -121,6 +122,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
         ),
       );
     }
+    KalanHaptics.success();
     router.popWithMessage(
       SnackBar(content: Text(l10n.recurringSaved)),
       fallback: messenger,
@@ -133,19 +135,19 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
-    final ok = await showDialog<bool>(
+    final ok = await showKalanDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => KalanAlertDialog(
         content: Text(l10n.recurringDeleteConfirm),
         actions: [
-          TextButton(
+          KalanDialogAction(
+            label: l10n.actionCancel,
             onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.actionCancel),
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: context.colors.late),
+          KalanDialogAction(
+            label: l10n.actionDelete,
+            destructive: true,
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.actionDelete),
           ),
         ],
       ),

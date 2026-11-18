@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/design/haptics.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/tab_messengers.dart';
@@ -145,20 +147,21 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final count = _underway ? _paidCount(plan) ?? 0 : 0;
     final back = plan.paidBefore.length - count;
     if (back > 0) {
-      final ok = await showDialog<bool>(
+      final ok = await showKalanDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => KalanAlertDialog(
           key: const ValueKey('underway-revert'),
           content: Text(l10n.underwayRevert(back)),
           actions: [
-            TextButton(
+            KalanDialogAction(
+              label: l10n.actionCancel,
               onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.actionCancel),
             ),
-            TextButton(
+            KalanDialogAction(
               key: const ValueKey('underway-revert-confirm'),
+              label: l10n.underwayRevertConfirm,
+              primary: true,
               onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.underwayRevertConfirm),
             ),
           ],
         ),
@@ -195,6 +198,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
           _method,
           chargeSourceId: storedChargeSourceId(_chargeSourceId, plan.ownCardId),
         );
+    KalanHaptics.success();
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),
       fallback: messenger,
@@ -260,7 +264,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SwitchListTile(
+                    SwitchListTile.adaptive(
                       key: const ValueKey('underway'),
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.underwayToggle),
@@ -445,6 +449,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
             widget.plan.ownCardId,
           ),
         );
+    KalanHaptics.success();
     router.popWithMessage(
       SnackBar(content: Text(l10n.planUpdated)),
       fallback: messenger,

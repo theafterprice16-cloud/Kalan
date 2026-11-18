@@ -200,7 +200,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                       (d) => setState(() => _dueDay = d),
                       const ValueKey('due-day'),
                     ),
-                    SwitchListTile(
+                    SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.fieldShiftWeekend),
                       value: _shift,

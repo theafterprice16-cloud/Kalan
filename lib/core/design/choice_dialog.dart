@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'kalan_dialog.dart';
+
 /// A picked value, so a null pick can be told apart from "dismissed".
 class Choice<T> {
   const Choice(this.value);
@@ -55,7 +57,7 @@ Future<Choice<T>?> showChoiceDialog<T>(
   required T selected,
   required List<(T, String)> options,
   String? note,
-}) => showDialog<Choice<T>>(
+}) => showKalanDialog<Choice<T>>(
   context: context,
   builder: (_) => ChoiceDialog<T>(
     title: title,

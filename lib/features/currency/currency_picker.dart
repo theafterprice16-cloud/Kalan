@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
@@ -257,11 +258,11 @@ class CurrencyChangeDialog extends ConsumerWidget {
     );
     String show(int minor, Currency c) =>
         formatMoney(minor, c, localeName: context.localeName);
-    return AlertDialog(
+    return KalanAlertDialog(
       title: Text(l10n.currencyChangeTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.settingsCurrencyNote),
           const SizedBox(height: 12),
@@ -277,14 +278,15 @@ class CurrencyChangeDialog extends ConsumerWidget {
         ],
       ),
       actions: [
-        TextButton(
+        KalanDialogAction(
+          label: l10n.actionCancel,
           onPressed: () => Navigator.pop(context, false),
-          child: Text(l10n.actionCancel),
         ),
-        TextButton(
+        KalanDialogAction(
           key: const ValueKey('currency-confirm'),
+          label: l10n.currencyChangeConfirm,
+          primary: true,
           onPressed: () => Navigator.pop(context, true),
-          child: Text(l10n.currencyChangeConfirm),
         ),
       ],
     );

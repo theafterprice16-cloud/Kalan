@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 /// The only way screens make the phone vibrate. Light and rare: never on
-/// errors, warnings or ordinary taps.
+/// errors, warnings or ordinary taps. Fire and forget: a phone without a
+/// vibration motor simply ignores it.
 abstract final class KalanHaptics {
   /// A choice changed (picker, segmented choice).
-  static Future<void> selection() => HapticFeedback.selectionClick();
+  static void selection() => unawaited(HapticFeedback.selectionClick());
 
   /// A payment was marked paid, or a plan or recurring payment was saved.
-  static Future<void> success() => HapticFeedback.lightImpact();
+  static void success() => unawaited(HapticFeedback.lightImpact());
 }

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/design/haptics.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
@@ -417,6 +418,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             _ownCardId,
           ),
         );
+    KalanHaptics.success();
     final settings = ref.read(settingsRepositoryProvider);
     if (payLater) {
       await settings.rememberPayLaterRule(draft.payLaterRule!);
@@ -925,7 +927,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                     : null;
               },
             ),
-          SwitchListTile(
+          SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.fieldCashAdvance),
             value: _cashAdvance,
@@ -1227,7 +1229,7 @@ class _UnderwaySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SwitchListTile(
+          SwitchListTile.adaptive(
             key: const ValueKey('underway'),
             contentPadding: EdgeInsets.zero,
             title: Text(l10n.underwayToggle),

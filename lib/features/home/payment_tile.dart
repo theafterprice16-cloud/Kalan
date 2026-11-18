@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/design/haptics.dart';
 import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
@@ -29,6 +30,7 @@ class PaymentTile extends ConsumerWidget {
         : plans.setPaid(entry.paymentId!, paid: paid);
     await set(paid: paid);
     if (paid) {
+      KalanHaptics.success();
       showMarkedPaid(messenger, l10n, onUndo: () => set(paid: false));
     } else {
       messenger
