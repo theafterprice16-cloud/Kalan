@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/core/routing/router.dart';
+import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -65,11 +67,11 @@ void main() {
   });
 
   testWidgets('empty roadmap shows one calm sentence', (tester) async {
-    await pumpApp(tester, seed: seedSettings);
-    await openTab(tester, 'Ayarlar');
-    await scrollTo(tester, find.text('Yol Haritası'));
-    await tester.tap(find.text('Yol Haritası'));
-    await tester.pumpAndSettle();
+    await pumpApp(
+      tester,
+      seed: seedSettings,
+      overrides: [initialRouteProvider.overrideWithValue(Routes.roadmap)],
+    );
     expect(find.text('Şu an burada paylaşılacak bir şey yok.'), findsOneWidget);
   });
 
@@ -79,12 +81,9 @@ void main() {
       seed: seedSettings,
       overrides: [
         roadmapSourceProvider.overrideWith((ref) async => docExample()),
+        initialRouteProvider.overrideWithValue(Routes.roadmap),
       ],
     );
-    await openTab(tester, 'Ayarlar');
-    await scrollTo(tester, find.text('Yol Haritası'));
-    await tester.tap(find.text('Yol Haritası'));
-    await tester.pumpAndSettle();
     expect(find.text('Ödeme hatırlatmaları'), findsOneWidget);
     expect(find.text('Dosyaya dışa aktarma'), findsOneWidget);
     expect(find.text('Yapılıyor'), findsOneWidget);
@@ -100,12 +99,9 @@ void main() {
       seed: seedSettings,
       overrides: [
         roadmapSourceProvider.overrideWith((ref) async => docExample()),
+        initialRouteProvider.overrideWithValue(Routes.roadmap),
       ],
     );
-    await openTab(tester, 'Settings');
-    await scrollTo(tester, find.text('Roadmap'));
-    await tester.tap(find.text('Roadmap'));
-    await tester.pumpAndSettle();
     expect(find.text('Payment reminders'), findsOneWidget);
     expect(find.text('In progress'), findsOneWidget);
     expect(find.text('Target version 1.1'), findsOneWidget);
@@ -115,12 +111,20 @@ void main() {
     await pumpApp(
       tester,
       seed: seedSettings,
-      overrides: [roadmapSourceProvider.overrideWith((ref) async => '{')],
+      overrides: [
+        roadmapSourceProvider.overrideWith((ref) async => '{'),
+        initialRouteProvider.overrideWithValue(Routes.roadmap),
+      ],
     );
-    await openTab(tester, 'Ayarlar');
-    await scrollTo(tester, find.text('Yol Haritası'));
-    await tester.tap(find.text('Yol Haritası'));
-    await tester.pumpAndSettle();
     expect(find.text('Yol haritası okunamadı.'), findsOneWidget);
+  });
+
+  testWidgets('Settings has no roadmap row', (tester) async {
+    await pumpApp(tester, seed: seedSettings);
+    await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Kaynaklar ve kartlar'));
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -2000));
+    await tester.pumpAndSettle();
+    expect(find.text('Yol Haritası'), findsNothing);
   });
 }

@@ -209,11 +209,6 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(Routes.sources),
           ),
-          ListTile(
-            title: Text(l10n.settingsRoadmap),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push(Routes.roadmap),
-          ),
           if (kDebugMode)
             SwitchListTile.adaptive(
               key: const ValueKey('debug-pro'),
