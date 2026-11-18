@@ -1,0 +1,53 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "4B1A7C20",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "14.99",
+      "familyShareable" : true,
+      "internalID" : "9E3D5A11",
+      "localizations" : [
+        {
+          "description" : "Unlimited open plans. Pay once.",
+          "displayName" : "Kalan Pro",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "Sınırsız açık plan. Bir kez ödenir.",
+          "displayName" : "Kalan Pro",
+          "locale" : "tr"
+        }
+      ],
+      "productID" : "kalan_pro_lifetime",
+      "referenceName" : "Kalan Pro (lifetime)",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

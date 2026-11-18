@@ -41,3 +41,17 @@ jobs:
       - run: flutter pub get
       - name: Build debug APK
         run: flutter build apk --debug
+      - name: Build release APK
+        run: flutter build apk --release
+      - name: Release manifest has no network permission
+        # Kalan makes no network requests of its own. Play Billing needs
+        # com.android.vending.BILLING; INTERNET must never be merged in.
+        run: |
+          manifest=$(find build/app/intermediates -path '*release*' -name AndroidManifest.xml | grep -i merged | head -n 1)
+          test -n "$manifest"
+          echo "Merged release manifest: $manifest"
+          grep -o 'android.permission[^"]*\|com.android.vending.BILLING' "$manifest" | sort -u
+          if grep -q 'android.permission.INTERNET' "$manifest"; then
+            echo "INTERNET permission found in the release manifest"
+            exit 1
+          fi
