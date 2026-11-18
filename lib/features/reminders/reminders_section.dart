@@ -170,7 +170,7 @@ class RemindersSection extends ConsumerWidget {
                 repeatModeLabel(context, reminders.repeatMode),
                 style: muted,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: KalanSpace.xxs),
               Text(l10n.repeatRemindersHelp, style: muted),
               if (reminders.repeatMode == ReminderRepeat.daily)
                 Text(

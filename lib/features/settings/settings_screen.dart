@@ -143,7 +143,7 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navSettings)),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.only(bottom: KalanSpace.xl),
         children: [
           SectionTitle(l10n.settingsPay),
           ListTile(
@@ -223,7 +223,12 @@ class SettingsScreen extends ConsumerWidget {
                   _update(ref, AppSettingsCompanion(debugPro: Value(v))),
             ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.md,
+              KalanSpace.lg,
+              KalanSpace.md,
+              0,
+            ),
             child: Text(l10n.settingsPrivacy, style: secondary),
           ),
         ],

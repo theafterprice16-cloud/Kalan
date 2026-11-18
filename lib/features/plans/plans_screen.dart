@@ -97,17 +97,23 @@ class _PlanList extends ConsumerWidget {
     final secondary = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: context.colors.textMuted);
     return ListView(
-      padding: const EdgeInsets.only(bottom: 96, top: 8),
+      padding: const EdgeInsets.only(
+        bottom: KalanSpace.fabClearance,
+        top: KalanSpace.xs,
+      ),
       children: [
         for (final p in plans)
           InkWell(
             onTap: () => context.push(Routes.plan(p.plan.id)),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                horizontal: KalanSpace.md,
+                vertical: KalanSpace.xs,
+              ),
               child: Row(
                 children: [
                   LetterBadge(context.planName(p)),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: KalanSpace.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,13 +127,13 @@ class _PlanList extends ConsumerWidget {
                               ),
                             ),
                             if (p.isOpen && planRepeats(p.plan, global)) ...[
-                              const SizedBox(width: 6),
+                              const SizedBox(width: KalanSpace.xxs),
                               const RepeatIcon(),
                             ],
                           ],
                         ),
                         Wrap(
-                          spacing: 12,
+                          spacing: KalanSpace.sm,
                           children: [
                             Text(
                               planKindLabel(context, p.plan),
@@ -159,7 +165,7 @@ class _PlanList extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: KalanSpace.xs),
                   AmountText(
                     ref.money(
                       context,
@@ -193,7 +199,10 @@ class _RecurringList extends ConsumerWidget {
     final secondary = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: context.colors.textMuted);
     return ListView(
-      padding: const EdgeInsets.only(bottom: 96, top: 8),
+      padding: const EdgeInsets.only(
+        bottom: KalanSpace.fabClearance,
+        top: KalanSpace.xs,
+      ),
       children: [
         for (final r in items)
           Builder(
@@ -203,13 +212,13 @@ class _RecurringList extends ConsumerWidget {
                 onTap: () => context.push(Routes.recurring(r.item.id)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+                    horizontal: KalanSpace.md,
+                    vertical: KalanSpace.xs,
                   ),
                   child: Row(
                     children: [
                       LetterBadge(r.item.name),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: KalanSpace.sm),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,13 +234,13 @@ class _RecurringList extends ConsumerWidget {
                                   ),
                                 ),
                                 if (recurringRepeats(r.item, global)) ...[
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: KalanSpace.xxs),
                                   const RepeatIcon(),
                                 ],
                               ],
                             ),
                             Wrap(
-                              spacing: 12,
+                              spacing: KalanSpace.sm,
                               children: [
                                 Text(
                                   recurrenceLabel(context, r.item.recurrence),

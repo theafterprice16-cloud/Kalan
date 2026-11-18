@@ -98,13 +98,18 @@ class PlanDetailScreen extends ConsumerWidget {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: const EdgeInsets.only(bottom: KalanSpace.xl),
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.md,
+              KalanSpace.xs,
+              KalanSpace.md,
+              0,
+            ),
             child: Card(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(KalanSpace.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -113,7 +118,7 @@ class PlanDetailScreen extends ConsumerWidget {
                         LetterBadge(
                           plan.source?.name ?? context.planName(plan),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: KalanSpace.sm),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +137,7 @@ class PlanDetailScreen extends ConsumerWidget {
                                     plan.plan,
                                     ref.watch(globalRepeatModeProvider),
                                   )) ...[
-                                    const SizedBox(width: 6),
+                                    const SizedBox(width: KalanSpace.xxs),
                                     const RepeatIcon(),
                                   ],
                                 ],
@@ -146,7 +151,7 @@ class PlanDetailScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: KalanSpace.md),
                     AmountText(
                       ref.money(context, plan.remainingMinor),
                       size: AmountSize.medium,
@@ -155,10 +160,10 @@ class PlanDetailScreen extends ConsumerWidget {
                       l10n.planToPay(ref.money(context, plan.remainingMinor)),
                       style: secondary,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: KalanSpace.xs),
                     Wrap(
-                      spacing: 16,
-                      runSpacing: 4,
+                      spacing: KalanSpace.md,
+                      runSpacing: KalanSpace.xxs,
                       children: [
                         // One payment: no "0/1"; the due date below.
                         if (!plan.isPayLater)
@@ -180,11 +185,11 @@ class PlanDetailScreen extends ConsumerWidget {
                       ],
                     ),
                     if (plan.isPayLater) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: KalanSpace.xs),
                       PayLaterSummary(plan: plan),
                     ],
                     if (midwayCount > 0) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: KalanSpace.xs),
                       Text(
                         l10n.planStartedMidway(midwayCount),
                         style: secondary,
@@ -196,7 +201,12 @@ class PlanDetailScreen extends ConsumerWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.xxs,
+              KalanSpace.xs,
+              KalanSpace.xxs,
+              0,
+            ),
             child: ReminderChoiceTile(
               method: plan.plan.paymentMethod,
               value: reminderChoiceOf(
@@ -221,7 +231,12 @@ class PlanDetailScreen extends ConsumerWidget {
           // Paid before Kalan: one line, no dates, nothing to open.
           if (plan.paidBefore.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              padding: const EdgeInsets.fromLTRB(
+                KalanSpace.md,
+                0,
+                KalanSpace.md,
+                KalanSpace.xs,
+              ),
               child: Text(
                 l10n.paidBeforeSummary(
                   plan.paidBefore.length,
@@ -234,13 +249,13 @@ class PlanDetailScreen extends ConsumerWidget {
           for (final p in plan.listedPayments)
             _PaymentRow(plan: plan, payment: p),
           // Below the payments, so they stay at the top of the screen.
-          const Divider(height: 24),
+          const Divider(height: KalanSpace.lg),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
             child: PaymentMethodTile(plan: plan),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
             child: RepeatChoiceTile(
               value: plan.plan.repeatMode,
               enabled: plan.plan.remindersEnabled,
@@ -317,7 +332,12 @@ class _PaymentRow extends ConsumerWidget {
           ? () => context.push(Routes.planEdit(plan.plan.id))
           : () => _edit(context, ref),
       child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 4, 4),
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          KalanSpace.md,
+          KalanSpace.xxs,
+          KalanSpace.xxs,
+          KalanSpace.xxs,
+        ),
         child: Row(
           children: [
             if (!plan.isPayLater)
@@ -338,7 +358,7 @@ class _PaymentRow extends ConsumerWidget {
                 children: [
                   Text(context.longDate(payment.date)),
                   Wrap(
-                    spacing: 8,
+                    spacing: KalanSpace.xs,
                     children: [
                       if (payment.isPaid)
                         Text(l10n.paidLabel, style: secondary),
@@ -446,13 +466,13 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
                 format: context.longDate,
                 onChanged: (d) => setState(() => _date = d),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: KalanSpace.md),
               AmountField(
                 fieldKey: const ValueKey('edit-amount'),
                 controller: _amount,
                 label: l10n.fieldAmount,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: KalanSpace.sm),
               Text(l10n.editPaymentHelp),
             ],
           ),

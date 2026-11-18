@@ -90,7 +90,7 @@ class PaymentMethodFields extends ConsumerWidget {
           onSelected: onMethodChanged,
         ),
         if (hint != null) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: KalanSpace.xs),
           Text(
             hint,
             key: const ValueKey('payment-method-hint'),
@@ -99,7 +99,7 @@ class PaymentMethodFields extends ConsumerWidget {
           ),
         ],
         if (method == PaymentMethod.automatic && sources.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: KalanSpace.md),
           DropdownButtonFormField<int?>(
             // A different card on the add screen starts it again.
             key: ValueKey('charge-source-$ownCardId'),

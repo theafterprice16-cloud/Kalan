@@ -13,6 +13,7 @@ import '../../core/design/kalan_dialog.dart';
 import '../../core/engine/engine.dart';
 import '../../core/reminders/reminder_models.dart';
 import '../../core/routing/tab_messengers.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../onboarding/pay_form.dart';
 import '../plans/plan_labels.dart';
@@ -183,7 +184,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
           : Form(
               key: _formKey,
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(KalanSpace.md),
                 children: [
                   TextFormField(
                     key: const ValueKey('recurring-name'),
@@ -198,13 +199,13 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                         ? l10n.errorNameRequired
                         : null,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: KalanSpace.xs),
                   AmountField(
                     fieldKey: const ValueKey('recurring-amount'),
                     controller: _amount,
                     label: l10n.fieldAmount,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: KalanSpace.md),
                   ChoiceField<Recurrence>(
                     label: l10n.fieldRecurrence,
                     selected: _recurrence,
@@ -214,14 +215,14 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                     ],
                     onSelected: (r) => setState(() => _recurrence = r),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: KalanSpace.md),
                   DateField(
                     label: l10n.fieldFirstDate,
                     value: _start,
                     format: context.longDate,
                     onChanged: (d) => setState(() => _start = d),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: KalanSpace.md),
                   DateField(
                     label: l10n.fieldEndDate,
                     value: _end,
@@ -237,7 +238,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                             icon: const Icon(Icons.close),
                           ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: KalanSpace.xs),
                   ReminderChoiceTile(
                     value: _reminders,
                     onChanged: (v) => setState(() => _reminders = v),
@@ -247,7 +248,7 @@ class _RecurringEditScreenState extends ConsumerState<RecurringEditScreen> {
                     enabled: !_reminders.off,
                     onChanged: (v) => setState(() => _repeat = v),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: KalanSpace.md),
                   FilledButton(
                     key: const ValueKey('save-recurring'),
                     onPressed: _save,

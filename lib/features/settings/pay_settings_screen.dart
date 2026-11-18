@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/routing/tab_messengers.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../onboarding/pay_form.dart';
 
 /// Pay frequency and payday, shared with onboarding.
@@ -43,10 +44,10 @@ class _PaySettingsScreenState extends ConsumerState<PaySettingsScreen> {
       body: _pay == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(KalanSpace.md),
               children: [
                 PayFields(value: _pay!, onChanged: () => setState(() {})),
-                const SizedBox(height: 24),
+                const SizedBox(height: KalanSpace.lg),
                 FilledButton(
                   key: const ValueKey('save-pay'),
                   onPressed: _save,

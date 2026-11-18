@@ -8,6 +8,7 @@ import '../../core/design/form_fields.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 
 /// Pay settings being edited, shared by onboarding and Settings.
@@ -89,7 +90,7 @@ class PayFields extends StatelessWidget {
             onChanged();
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: KalanSpace.md),
         switch (value.frequency) {
           PayFrequency.monthly => DropdownButtonFormField<int>(
             key: const ValueKey('pay-day'),

@@ -62,7 +62,7 @@ class PaymentTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             PaymentMethodIcon(method),
-            const SizedBox(width: 4),
+            const SizedBox(width: KalanSpace.xxs),
             Text(date, style: secondary),
           ],
         ),
@@ -85,7 +85,7 @@ class PaymentTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.circle, size: 10, color: colors.text),
-            const SizedBox(width: 4),
+            const SizedBox(width: KalanSpace.xxs),
             Text(
               days == 0 ? l10n.dueToday : l10n.dueTomorrow,
               style: theme.textTheme.bodyMedium,
@@ -97,7 +97,7 @@ class PaymentTile extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.check, size: 16, color: colors.textMuted),
-            const SizedBox(width: 2),
+            const SizedBox(width: KalanSpace.xxs),
             Text(l10n.paidLabel, style: secondary),
           ],
         ),
@@ -112,11 +112,16 @@ class PaymentTile extends ConsumerWidget {
                   ? () => context.push(Routes.recurring(entry.recurringId!))
                   : () => context.push(Routes.plan(entry.planId!)),
               child: Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8),
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  KalanSpace.md,
+                  KalanSpace.xs,
+                  KalanSpace.xs,
+                  KalanSpace.xs,
+                ),
                 child: Row(
                   children: [
                     LetterBadge(entry.label(l10n)),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: KalanSpace.sm),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,12 +130,16 @@ class PaymentTile extends ConsumerWidget {
                             entry.label(l10n),
                             style: theme.textTheme.titleMedium,
                           ),
-                          const SizedBox(height: 2),
-                          Wrap(spacing: 12, runSpacing: 2, children: details),
+                          const SizedBox(height: KalanSpace.xxs),
+                          Wrap(
+                            spacing: KalanSpace.sm,
+                            runSpacing: KalanSpace.xxs,
+                            children: details,
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: KalanSpace.xs),
                     AmountText(
                       amount,
                       size: AmountSize.small,
@@ -143,7 +152,7 @@ class PaymentTile extends ConsumerWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsetsDirectional.only(end: 4),
+          padding: const EdgeInsetsDirectional.only(end: KalanSpace.xxs),
           child: IconButton(
             tooltip: entry.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
             onPressed: () => _toggle(context, ref),

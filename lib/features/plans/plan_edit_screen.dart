@@ -229,7 +229,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final next = _nextPayment(plan);
     final showDate = _pattern(plan) != null && next != null;
     final nextDate = _nextDateTouched ? _nextDate : next?.date;
-    const gap = SizedBox(height: 16);
+    const gap = SizedBox(height: KalanSpace.md);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.planEdit)),
@@ -237,7 +237,12 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
         key: _formKey,
         // Built in full, so the save button is always there to reach.
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(
+            KalanSpace.md,
+            KalanSpace.xs,
+            KalanSpace.md,
+            KalanSpace.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -280,7 +285,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                           : (v) => setState(() => _underway = v),
                     ),
                     if (_underway) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: KalanSpace.xs),
                       if (!payIn4) ...[
                         TextFormField(
                           key: const ValueKey('paid-count'),
@@ -326,7 +331,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                   input: interval,
                   onChanged: () => setState(() {}),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: KalanSpace.xs),
                 Text(
                   l10n.intervalEditHint,
                   style: Theme.of(context).textTheme.bodyMedium
@@ -466,7 +471,12 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
         key: _formKey,
         // Built in full, so the save button is always there to reach.
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(
+            KalanSpace.md,
+            KalanSpace.xs,
+            KalanSpace.md,
+            KalanSpace.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -475,7 +485,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
                 onChanged: _refresh,
                 locked: widget.plan.payments.first.isPaid,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: KalanSpace.md),
               PaymentMethodFields(
                 method: _method,
                 chargeSourceId: _chargeSourceId,
@@ -483,7 +493,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
                 onChargeSourceChanged: (id) =>
                     setState(() => _chargeSourceId = id),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: KalanSpace.md),
               FilledButton(
                 key: const ValueKey('save-plan-edit'),
                 onPressed: _saving ? null : _save,

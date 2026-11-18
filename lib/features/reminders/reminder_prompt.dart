@@ -47,7 +47,12 @@ class ReminderPermissionSheet extends StatelessWidget {
     return SafeArea(
       child: SingleChildScrollView(
         key: const ValueKey('reminder-sheet'),
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        padding: const EdgeInsets.fromLTRB(
+          KalanSpace.lg,
+          0,
+          KalanSpace.lg,
+          KalanSpace.md,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -59,7 +64,7 @@ class ReminderPermissionSheet extends StatelessWidget {
                 color: context.colors.text,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: KalanSpace.sm),
             Semantics(
               header: true,
               child: Text(
@@ -68,19 +73,19 @@ class ReminderPermissionSheet extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: KalanSpace.xs),
             Text(
               l10n.reminderPromptBody,
               style: theme.textTheme.bodyLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: KalanSpace.lg),
             FilledButton(
               key: const ValueKey('reminder-sheet-accept'),
               onPressed: () => Navigator.pop(context, true),
               child: Text(l10n.reminderPromptAccept),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: KalanSpace.xs),
             TextButton(
               key: const ValueKey('reminder-sheet-later'),
               onPressed: () => Navigator.pop(context, false),

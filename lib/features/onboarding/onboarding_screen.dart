@@ -6,6 +6,7 @@ import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
+import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../currency/currency_picker.dart';
 import 'pay_form.dart';
@@ -76,7 +77,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(KalanSpace.lg),
             children: [
               Semantics(
                 header: true,
@@ -87,16 +88,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: KalanSpace.xs),
               Text(l10n.onboardingIntro, style: theme.textTheme.bodyLarge),
-              const SizedBox(height: 32),
+              const SizedBox(height: KalanSpace.xl),
               CurrencyField(
                 value: _currencyOrDefault,
                 onChanged: (c) => setState(() => _currency = c),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: KalanSpace.lg),
               PayFields(value: _pay, onChanged: () => setState(() {})),
-              const SizedBox(height: 24),
+              const SizedBox(height: KalanSpace.lg),
               OptionalAmountField(
                 fieldKey: const ValueKey('net-income'),
                 controller: _income,
@@ -104,7 +105,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 label: l10n.fieldNetIncome,
                 helperText: l10n.netIncomeHelp,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KalanSpace.xl),
               FilledButton(
                 onPressed: _saving ? null : _save,
                 child: Text(l10n.onboardingStart),

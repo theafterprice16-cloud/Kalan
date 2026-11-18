@@ -95,7 +95,12 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(
+              KalanSpace.md,
+              KalanSpace.xs,
+              KalanSpace.md,
+              KalanSpace.xs,
+            ),
             child: TextField(
               key: const ValueKey('currency-search'),
               controller: _query,
@@ -109,7 +114,7 @@ class _CurrencyPickerScreenState extends ConsumerState<CurrencyPickerScreen> {
           Expanded(
             child: rows.isEmpty
                 ? Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(KalanSpace.xl),
                     child: Text(
                       l10n.currencyNoMatch,
                       textAlign: TextAlign.center,
@@ -177,11 +182,11 @@ class _SymbolBox extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: colors.surfaceRaised,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(KalanRadius.input),
         ),
         child: FittedBox(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
             child: Text(
               symbol,
               style: TextStyle(
@@ -218,7 +223,7 @@ class CurrencyField extends ConsumerWidget {
       excludeSemantics: true,
       child: InkWell(
         key: const ValueKey('currency-field'),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(KalanRadius.input),
         onTap: () async {
           final picked = await showCurrencyPicker(context, selected: value);
           if (picked != null) onChanged(picked);
@@ -265,14 +270,14 @@ class CurrencyChangeDialog extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l10n.settingsCurrencyNote),
-          const SizedBox(height: 12),
+          const SizedBox(height: KalanSpace.sm),
           Text(
             l10n.currencyChangePreview(show(sample, from), show(after, to)),
             key: const ValueKey('currency-preview'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           if (from.decimals != to.decimals) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: KalanSpace.sm),
             Text(l10n.currencyChangeRounding),
           ],
         ],

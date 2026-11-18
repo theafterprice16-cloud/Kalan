@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../core/design/form_fields.dart';
 import '../../core/engine/engine.dart';
+import '../../core/theme/kalan_theme.dart';
 
 /// The payment interval choices, in screen order.
 enum IntervalOption { sameDay, every30Days, biweekly, weekly, custom }
@@ -87,7 +88,7 @@ class IntervalField extends StatelessWidget {
             },
           ),
           if (input.option == IntervalOption.custom) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: KalanSpace.md),
             TextFormField(
               key: const ValueKey('interval-days'),
               controller: input.customDays,
