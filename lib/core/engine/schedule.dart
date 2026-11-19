@@ -247,12 +247,16 @@ List<LocalDate> cardInstallmentDates({
 /// statement is due in February): the dates then follow the statements,
 /// never a due date in February no purchase would get. On a shared due
 /// date the entered payment is the later statement's, so the payments
-/// after it fall one a month.
+/// after it fall one a month; a date entered before that due date is the
+/// earlier statement's, so the dates stay in order.
 LocalDate dueAfterStatements(LocalDate due, CardTerms terms, int offset) {
   final month = dueMonthOf(due, terms);
   final monthDue = terms.dueInMonth(month.year, month.month);
   LocalDate? statement;
-  for (final back in const [0, -1]) {
+  // On a shared due date the later statement, unless the entered date is
+  // before it (then it is the earlier statement's payment, and every
+  // earlier payment stays before it).
+  for (final back in due < monthDue ? const [-1, 0] : const [0, -1]) {
     final candidate = terms.statementInMonth(month.year, month.month + back);
     if (terms.dueFor(candidate) == monthDue) {
       statement = candidate;
@@ -260,11 +264,21 @@ LocalDate dueAfterStatements(LocalDate due, CardTerms terms, int offset) {
     }
   }
   // No statement is due in that month (February above): the entered
-  // date is paid with the first statement due after it.
-  statement ??= terms.nextStatement(monthDue);
-  return terms.dueFor(
-    terms.statementInMonth(statement.year, statement.month + offset),
-  );
+  // date is paid with the first statement due on or after it, so the
+  // payments before it stay before it.
+  statement ??= terms.nextStatement(due);
+  LocalDate step(LocalDate s, int k) =>
+      terms.statementInMonth(s.year, s.month + k);
+  // A weekend shift can carry the previous month's due date past an
+  // entered date early in the month (31 Oct, a Saturday, is due 2 Nov;
+  // 1 Nov entered): the payments stay in order around the entered date.
+  while (terms.dueFor(step(statement!, -1)) > due) {
+    statement = step(statement, -1);
+  }
+  while (terms.dueFor(step(statement!, 1)) < due) {
+    statement = step(statement, 1);
+  }
+  return terms.dueFor(step(statement, offset));
 }
 
 /// Card plan started midway: the next payment is on [nextDue] as the user

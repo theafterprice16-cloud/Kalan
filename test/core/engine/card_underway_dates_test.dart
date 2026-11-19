@@ -60,17 +60,30 @@ void main() {
     });
   });
 
-  test('every other card keeps exactly the dates it had', () {
+  test('every other card keeps the dates it had, unless out of order', () {
+    // The old grid could put the payment before an entered date after it
+    // when a weekend shift carried the previous due date into the month
+    // (1 Nov entered, 31 Oct due 2 Nov). Everywhere else: identical.
+    var changed = 0;
     for (final terms in allTerms()) {
       if (sharesDueDates(terms)) continue;
       for (var day = 0; day < 730; day += 5) {
         final date = d('2026-01-01').addDays(day);
+        final oldOrdered =
+            oldDueAfter(date, terms, -1) <= date &&
+            oldDueAfter(date, terms, 1) >= date;
         for (final offset in const [-3, -1, 1, 2, 5]) {
-          expect(
-            dueAfterStatements(date, terms, offset),
-            oldDueAfter(date, terms, offset),
-            reason: '$terms $date $offset',
-          );
+          final now = dueAfterStatements(date, terms, offset);
+          if (oldOrdered) {
+            expect(
+              now,
+              oldDueAfter(date, terms, offset),
+              reason: '$terms $date $offset',
+            );
+          } else {
+            changed++;
+            expect(offset < 0 ? now <= date : now >= date, isTrue);
+          }
         }
         expect(
           nextCardDueAfter(date, terms),
@@ -79,6 +92,7 @@ void main() {
         );
       }
     }
+    expect(changed, lessThan(1000)); // a few shifted month starts only
   });
 
   test('an underway card plan lands on the dates a purchase would give', () {
@@ -212,5 +226,47 @@ void main() {
         6: d('2027-04-30'),
       });
     });
+  });
+
+  test('any entered date on any card keeps the payments in order', () {
+    for (final terms in allTerms()) {
+      for (var day = 0; day < 730; day += sharesDueDates(terms) ? 1 : 7) {
+        final next = d('2026-01-01').addDays(day);
+        final dates = underwayDates(
+          nextDate: next,
+          paidCount: 3,
+          totalCount: 6,
+          pattern: CardPattern(terms),
+        );
+        for (var i = 1; i < dates.length; i++) {
+          expect(
+            dates[i] >= dates[i - 1],
+            isTrue,
+            reason:
+                '${terms.statementDay}/${terms.dueDay} '
+                '${terms.shiftDueToBusinessDay}, next $next: $dates',
+          );
+        }
+      }
+    }
+  });
+
+  test('statement 28, due 30: a free date before the shared due date', () {
+    const terms = CardTerms(
+      statementDay: 28,
+      dueDay: 30,
+      shiftDueToBusinessDay: false,
+    );
+    expect(
+      underwayDates(
+        nextDate: d('2027-03-10'),
+        paidCount: 2,
+        totalCount: 4,
+        pattern: const CardPattern(terms),
+      ),
+      // 10 Mar is the 28 Feb statement's payment, paid early: the paid ones
+      // stay before it, the 28 Mar statement is still due 30 Mar.
+      [d('2026-12-30'), d('2027-01-30'), d('2027-03-10'), d('2027-03-30')],
+    );
   });
 }

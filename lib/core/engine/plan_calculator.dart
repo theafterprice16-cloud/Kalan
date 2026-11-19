@@ -202,7 +202,9 @@ abstract final class PlanCalculator {
   /// date per tracked seq, keyed by seq.
   ///
   /// Plans with a purchase date are rebuilt from it. Plans started midway
-  /// keep their first tracked payment's month as the anchor.
+  /// keep their first tracked payment's due month as the anchor and then
+  /// step statement by statement ([dueAfterStatements]); on a card where
+  /// no statement is due in that month, the first one due after it.
   static Map<int, LocalDate> recomputeCardDates({
     required List<DraftPayment> payments,
     required int installmentCount,
