@@ -31,13 +31,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 15. Dönem açığı (19 Kasım 2026): gelir girilmişse eksi dönemin çubuğunda gelire kadar safran, aşan kısım koyu safran, arada ince mürekkep çizgi (ana ekran şeridi dahil); gelecek dönemin özetinde "Bu dönem X eksik görünüyor.", bu dönemde ana ekranla aynı "eksik kalıyor"; ekran okuyucu "eksik" ve tutarı söyler; gelir yoksa iz yok; geciken ödemeler yalnızca bu döneme; bildirim yok; şema değişmedi. Ardından üç düzeltme: maaş günü bildirimi "eksik kalıyor" der; çubuk altındaki tutarlar hepsi sığıyorsa tam yazılır; küçük açık bandı abartılmaz (ölçekli, en az 4 px)
 
+- 16. Kart ekstre tahmini (19 Kasım 2026): Kaynaklar ve kartlar ekranında her kart kendi kartında; kart taksidi olan kartta sıradaki ve sonraki 5 ekstre: "14 Kas ekstresi", "Kesildi" (kesilmiş ama son ödemesi gelmemiş), taksit sayısı, toplam (text), son ödeme günü; taksitsiz ekstre "Taksit yok"; kart altında "Yalnızca Kalan'a girdiğin taksitler."; ekstreye dokununca plan adı, "3/10", tutar, "Ödendi"; yalnızca kartın kendi kart taksitleri, ödenmişler dahil; taksiti olmayan kartta bölüm yok; karta kaydıran rota (17 için) ve tek ekstre rotası; ücretsiz; şema değişmedi
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 16. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 17. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 
