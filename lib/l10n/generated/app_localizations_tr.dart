@@ -1699,4 +1699,77 @@ class AppLocalizationsTr extends AppLocalizations {
   ) {
     return '$range: söz verilmiş $spokenFor, $amount eksik.';
   }
+
+  @override
+  String get comingViewLabel => 'Görünüm';
+
+  @override
+  String get comingViewChart => 'Grafik';
+
+  @override
+  String get comingViewCalendar => 'Takvim';
+
+  @override
+  String get calendarToday => 'Bugün';
+
+  @override
+  String get calendarPreviousMonth => 'Önceki ay';
+
+  @override
+  String get calendarNextMonth => 'Sonraki ay';
+
+  @override
+  String calendarDayTotal(String amount) {
+    return 'Toplam $amount';
+  }
+
+  @override
+  String get calendarPayday => 'Maaş günü';
+
+  @override
+  String get calendarNoPayments => 'Bu gün ödeme yok.';
+
+  @override
+  String calendarCellPayments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ödeme',
+      one: '1 ödeme',
+      zero: 'Ödeme yok',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarCellAllLate => 'gecikmiş';
+
+  @override
+  String calendarCellSomeLate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tanesi gecikmiş',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarCellAllPaid => 'ödendi';
+
+  @override
+  String calendarCellSomePaid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tanesi ödendi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarCellPayday => 'maaş günü';
+
+  @override
+  String get calendarCellToday => 'bugün';
 }

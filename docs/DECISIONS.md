@@ -416,3 +416,32 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Ödeme satırı | Büyük yazıda (2x) taşma düzeltildi: "Bugün/Yarın" notu satır kaydırır. Tutar kendi genişliğinde kalır; yalnızca ad sütunu 96 px'in altına inecekse küçülür (ilk sürümdeki %40 sınırı, dar telefonda uzun tutarları gereksiz küçültüyordu; 19 Kasım 2026 düzeltmesi). Golden'lar aynı. |
 | Günü geçen satırı | Ekran okuyucu satıra çift dokununca plan açılır (Semantics'e dokunma eylemi eklendi; 19 Kasım 2026). |
 
+
+## Takvim görünümü (13) (19 Kasım 2026)
+
+Ürün sahibi kararları (yeniden sorulmaz):
+
+| Konu | Karar |
+|---|---|
+| Yer | Ayrı sekme yok. İleriki dönemler ekranının üstünde "Grafik \| Takvim" seçimi; varsayılan "Grafik"; seçim uygulama açık kaldıkça hatırlanır. |
+| Gün kutusu | Yalnızca işaret; tutar yazılmaz. Toplam, güne dokununca açılan bölümde. |
+| Sabit ödemeler | Plan ödemeleriyle aynı işaret. |
+| İşaretler | Bekleyen: dolu nokta (`text`). Ödenmiş: içi boş nokta ve küçük tik (`textMuted`). Gecikmiş: `late` nokta ve küçük saat ikonu. Maaş günü: `text` halka. Bugün: `border` çerçeve. Takvimde `accent` ve `chartCommitted` yok (brifteki accent halka ve chartCommitted nokta geçersiz). Her işaretin şekli farklı, ekran okuyucu etiketi var. |
+| Bir günde çok durum | Tek işaret; öncelik gecikmiş > bekleyen > ödenmiş. Maaş halkası diğer işaretle birlikte durur. Ekran okuyucu hepsini sayar ("14 Kasım, 2 ödeme, 1 tanesi gecikmiş, maaş günü"). |
+| Gecikmiş ödeme | Kendi son ödeme gününde görünür; takvim onu bugüne taşımaz. Ödenmiş ödeme ("Bugün" ile ödenmiş olsa da) son ödeme gününde görünür. Dönem toplamı yine yalnızca `countingDate` ile; takvim ay ya da dönem toplamı göstermez. |
+| Ay aralığı | Geriye en çok 12 ay; ileriye son plan ödemesinin ya da bitiş günü olan sabit ödemenin ayına kadar, en az 6 ay. Bitişsiz sabit ödeme aralığı uzatmaz. "Bugün" bu aya döner (bu aydayken pasif). Ok düğmeleri ve yatay kaydırma. |
+| Haftanın ilk günü | Cihazın bölge ayarından (intl yerel verisi, `FIRSTDAYOFWEEK`): ABD pazar, Türkiye pazartesi. Sıra: intl'de dil_bölge ("en_US"); yoksa bölgenin CLDR `weekData` ilk günü (ürün sahibi kararı, 19 Kasım 2026: İngilizce telefon + Türkiye bölgesi pazartesi başlasın diye standarttan birebir alınan ülke listesi eklendi; "elle sıra yazılmaz" kuralına bu tek istisna; listede olmayan bölge pazartesi, CLDR `001`); bölge yoksa dilin intl verisi; en son Material'ın uygulama dili varsayılanı. Bölge `deviceRegionProvider`'dan. Gün adları intl'in kısa adı ("Pzt", "Mon"). |
+| Gün bölümü | Güne dokununca altta kart: tarih ve gün adı, maaş günüyse "Maaş günü", ödemeler ana ekranın satırıyla ("ödendi" aynı kod), "Toplam …" ya da "Bu gün ödeme yok." |
+| Sağdan sola | Izgara satırları `Directionality`'yi izler; kaydırma yönü okuma yönüne göre. |
+
+Teknik kararlar (Claude, 19 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Gün haritası | `calendarMonth` (`lib/features/periods/calendar_month.dart`, saf Dart): ayın her günü için ödemeler, durum ve maaş günü. Tarihler motorun sakladığı etkin son ödeme günü ve `recurringOccurrences`; yeni tarih kuralı yok. Maaş günleri `PaySchedule` dönem başlangıçları (12. maddeyle aynı kaynak). Plan satırı `planEntryOf` ile ana ekranla aynı yerden kurulur. |
+| Durum | Plan ödemesi: ödendi → ödenmiş; `isPastDue` → gecikmiş; diğer → bekleyen. "Kalan'dan önce ödendi" kayıtları hiç görünmez. Sabit ödeme: işaretli gün → ödenmiş; işaretsiz geçmiş tekrar yalnızca içinde bulunulan dönemdeyse gecikmiş (ana ekrandaki "x gün önce" ile aynı); önceki dönemlerin işaretsiz tekrarları bekleyen gibi düz nokta, "x gün önce" notu yok (karar 24a; ödenmiş saymak bilinmeyeni uydurmak olurdu, gizlemek dönem listesiyle çelişirdi). |
+| "Ödendi" | Gün bölümünde ana ekranın `PaymentTile` satırı (tek dokunuş, repository `setPaid`, "Geri al"); gecikmiş plan ödemesinde ana ekranın `PastDueRow` satırı ("Ne zaman ödedin?"). İkinci kod yolu yok. `PaymentTile`'a yalnızca `showDaysAgo` (varsayılan açık) eklendi. |
+| Seçim hafızası | Bellekte (Riverpod), uygulama kapanınca "Grafik"e döner. Kalıcı yapılmadı: ana ekrandaki şerit 12. maddedeki gibi önce grafiği beklenen yerde açar. |
+| Seçim bileşeni | Plan eklemedeki "Toplam \| Taksit" ile aynı `SegmentedButton` ve tema (seçili parça: mürekkep yazı, onay işareti, yükseltilmiş yüzey). Yeni tema rengi yazılmadı. |
+| Düzen | Seçim ekranın ilk satırı, içerikle birlikte kayar. Ay başlığı satırında ay adı, "Bugün", önceki ve sonraki ay. Gün hücresi 56 px yüksek; iPhone genişliğinde 53 px geniş (48x48 testli). Dar ekranda yan boşluk küçülür; 336 dp'ye kadar hücre 48 geniş kalır (testli), daha dar ekranda yedi sütun 48'e sığmaz. Ekran okuyucu güne çift dokunarak bölümü açar. Gün sayısı büyük yazıda en çok 1,3 kat büyür, hücre taşmaz. Diğer ayın günleri `textMuted`, işaretsiz, dokunulmaz. |
+| Test değişikliği | `coming_periods_screen_test.dart`'ta bir satır: seçim üstte durduğu için "4/4" satırı ekranın altında kalıyor; `skipOffstage: false` ile aranıyor. Mantık değişmedi. 52 ve 53 numaralı golden'lar seçimle yenilendi. |

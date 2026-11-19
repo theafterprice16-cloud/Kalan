@@ -14,7 +14,7 @@ import 'past_due.dart';
 
 /// A payment row with a one-tap "paid" toggle.
 class PaymentTile extends ConsumerWidget {
-  const PaymentTile({required this.entry, super.key});
+  const PaymentTile({required this.entry, super.key, this.showDaysAgo = true});
 
   /// The name column never gets narrower than this because of the amount.
   static const double _minNameWidth = KalanSpace.xl * 3;
@@ -33,6 +33,11 @@ class PaymentTile extends ConsumerWidget {
   }
 
   final HomeEntry entry;
+
+  /// "x days ago" on an unpaid payment whose day has passed. Off on the
+  /// calendar for earlier periods' unmarked recurring payments, which are
+  /// never late (decision 24a).
+  final bool showDaysAgo;
 
   Future<void> _toggle(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -95,7 +100,7 @@ class PaymentTile extends ConsumerWidget {
             entry.installmentCount!,
           ),
         ),
-      if (!entry.isPaid && days < 0) DaysAgoNote(days: -days),
+      if (showDaysAgo && !entry.isPaid && days < 0) DaysAgoNote(days: -days),
       if (soon)
         Row(
           mainAxisSize: MainAxisSize.min,

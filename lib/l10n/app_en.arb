@@ -1579,5 +1579,89 @@
         "type": "String"
       }
     }
+  },
+  "comingViewLabel": "View",
+  "@comingViewLabel": {
+    "description": "Label of the Chart | Calendar choice on the Coming pay periods screen. Takvim etiketi; kısa ve sakin."
+  },
+  "comingViewChart": "Chart",
+  "@comingViewChart": {
+    "description": "Segment that shows the bar chart of coming pay periods. Takvim etiketi; kısa ve sakin."
+  },
+  "comingViewCalendar": "Calendar",
+  "@comingViewCalendar": {
+    "description": "Segment that shows the month calendar of payments. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarToday": "Today",
+  "@calendarToday": {
+    "description": "Button that returns the calendar to the current month. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarPreviousMonth": "Previous month",
+  "@calendarPreviousMonth": {
+    "description": "Tooltip of the button that shows the previous month. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarNextMonth": "Next month",
+  "@calendarNextMonth": {
+    "description": "Tooltip of the button that shows the next month. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarDayTotal": "Total {amount}",
+  "@calendarDayTotal": {
+    "description": "Total of the selected day's payments, paid or not. amount: formatted money. Takvim etiketi; kısa ve sakin.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarPayday": "Payday",
+  "@calendarPayday": {
+    "description": "Row in the selected day's section when a pay period starts that day. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarNoPayments": "No payments on this day.",
+  "@calendarNoPayments": {
+    "description": "Shown when the tapped day has no payments. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarCellPayments": "{count, plural, =0{No payments} =1{1 payment} other{{count} payments}}",
+  "@calendarCellPayments": {
+    "description": "Screen reader: how many payments a calendar day has. First part of the day's label, after the date. Takvim etiketi; kısa ve sakin.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarCellAllLate": "late",
+  "@calendarCellAllLate": {
+    "description": "Screen reader: every payment of the day is late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarCellSomeLate": "{count, plural, other{{count} late}}",
+  "@calendarCellSomeLate": {
+    "description": "Screen reader: some of the day's payments are late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarCellAllPaid": "paid",
+  "@calendarCellAllPaid": {
+    "description": "Screen reader: every payment of the day is paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarCellSomePaid": "{count, plural, other{{count} paid}}",
+  "@calendarCellSomePaid": {
+    "description": "Screen reader: some of the day's payments are paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarCellPayday": "payday",
+  "@calendarCellPayday": {
+    "description": "Screen reader: a pay period starts this day. Joined with a comma. Takvim etiketi; kısa ve sakin."
+  },
+  "calendarCellToday": "today",
+  "@calendarCellToday": {
+    "description": "Screen reader: the day is today. Joined with a comma. Takvim etiketi; kısa ve sakin."
   }
 }
