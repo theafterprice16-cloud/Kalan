@@ -9,6 +9,7 @@ import '../../core/money/currency.dart';
 import '../../core/reminders/reminder_models.dart';
 import '../../core/reminders/reminder_planner.dart';
 import '../../data/db/app_database.dart';
+import '../../data/models.dart';
 import '../../data/period_totals.dart';
 import '../../data/repositories/plan_repository.dart';
 import '../../data/repositories/recurring_repository.dart';
@@ -71,16 +72,31 @@ class ReminderScheduler {
         now: input.now,
       ),
     );
-    await gateway.replaceAll(
-      withPaydaySummary(
-        _plan(input),
-        payday: input.payday,
-        settings: input.settings,
-        now: input.now,
-        texts: input.texts,
-      ),
-    );
+    await gateway.replaceAll(_all(input));
   }
+
+  /// Everything that would be handed to the system right now: payment
+  /// reminders first, then the payday summary, then statement closing
+  /// reminders, each only in the room the ones before it leave.
+  Future<List<PlannedReminder>> buildAll() async {
+    final input = await _input();
+    if (input == null) return const [];
+    return _all(input);
+  }
+
+  List<PlannedReminder> _all(_Input input) => withStatementClosings(
+    withPaydaySummary(
+      _plan(input),
+      payday: input.payday,
+      settings: input.settings,
+      now: input.now,
+      texts: input.texts,
+    ),
+    cards: input.cards,
+    settings: input.settings,
+    now: input.now,
+    texts: input.texts,
+  );
 
   /// The next payday summary that would be scheduled (null when it is
   /// off or reminders are off), without the payment reminders.
@@ -255,6 +271,17 @@ class ReminderScheduler {
       now: local,
       today: today,
       payments: payments,
+      cards: [
+        for (final source in await db.select(db.sources).get())
+          if (source.statementReminderEnabled)
+            if (source.cardTerms case final terms?)
+              StatementCard(
+                id: source.id,
+                name: source.name,
+                terms: terms,
+                leadDays: source.statementReminderDays,
+              ),
+      ],
       snoozes: await ReminderSnoozeRepository(db).all(),
       texts: L10nReminderTexts(
         l10n: l10n,
@@ -270,6 +297,7 @@ typedef _Input = ({
   tz.TZDateTime now,
   LocalDate today,
   List<ReminderPayment> payments,
+  List<StatementCard> cards,
   List<ReminderSnooze> snoozes,
   ReminderTexts texts,
 });

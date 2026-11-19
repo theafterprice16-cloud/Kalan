@@ -26,11 +26,18 @@ class FakeNotificationGateway implements NotificationGateway {
   /// Everything handed over in the last [replaceAll].
   List<PlannedReminder> all = const [];
 
-  /// The payment reminders in [all] (the payday summary is in [paydays]),
-  /// so payment reminder tests see the same list with or without it.
+  /// The payment reminders in [all] (the payday summary is in [paydays],
+  /// statement closing reminders in [statements]), so payment reminder
+  /// tests see the same list with or without them.
   List<PlannedReminder> get pending => [
     for (final r in all)
-      if (!r.isPaydaySummary) r,
+      if (!r.isPaydaySummary && !r.isStatementClosing) r,
+  ];
+
+  /// The statement closing reminders in [all].
+  List<PlannedReminder> get statements => [
+    for (final r in all)
+      if (r.isStatementClosing) r,
   ];
 
   /// The payday summary, when one is scheduled.

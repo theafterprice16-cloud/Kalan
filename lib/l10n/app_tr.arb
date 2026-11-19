@@ -394,5 +394,9 @@
   "cardStatementDueOn": "Son ödeme {date}",
   "cardStatementCountTotal": "{count, plural, other{{count} taksit}} · {amount}",
   "cardStatementEmpty": "Taksit yok",
-  "cardStatementNotComing": "Bu ekstre kartının sıradaki ekstreleri arasında değil."
+  "cardStatementNotComing": "Bu ekstre kartının sıradaki ekstreleri arasında değil.",
+  "statementReminderToggle": "Hesap kesim hatırlatması",
+  "statementReminderToggleHint": "Hesap kesim gününden önce, hatırlatma saatinde bir bildirim.",
+  "statementReminderDays": "Kaç gün önce",
+  "reminderStatementClosing": "{days, plural, =1{{card} kartının hesabı 1 gün sonra, {date} tarihinde kesiliyor. Bu tarihten sonraki taksitler {next} ekstresine girer.} other{{card} kartının hesabı {days} gün sonra, {date} tarihinde kesiliyor. Bu tarihten sonraki taksitler {next} ekstresine girer.}}"
 }

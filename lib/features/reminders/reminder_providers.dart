@@ -45,10 +45,10 @@ final reminderDebounceProvider = Provider<Duration>(
   (ref) => const Duration(milliseconds: 300),
 );
 
-/// Reschedules every reminder whenever plans, payments, recurring payments
-/// or settings (reminder settings, language, currency) change. One central
-/// listener instead of calls from screens; the app also requests a run on
-/// start and when it comes back to the foreground.
+/// Reschedules every reminder whenever plans, payments, recurring payments,
+/// sources (cards) or settings (reminder settings, language, currency)
+/// change. One central listener instead of calls from screens; the app
+/// also requests a run on start and when it comes back to the foreground.
 final reminderSyncProvider = Provider<ReminderSync>((ref) {
   final sync = ReminderSync(
     ref.watch(reminderSchedulerProvider),
@@ -56,6 +56,8 @@ final reminderSyncProvider = Provider<ReminderSync>((ref) {
   );
   ref.listen(plansProvider, (_, _) => sync.request());
   ref.listen(recurringProvider, (_, _) => sync.request());
+  // Card days and the statement closing reminder.
+  ref.listen(sourcesProvider, (_, _) => sync.request());
   ref.listen(settingsProvider, (_, _) => sync.request());
   ref.onDispose(sync.dispose);
   return sync;

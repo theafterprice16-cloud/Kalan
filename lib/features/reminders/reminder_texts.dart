@@ -117,4 +117,17 @@ class L10nReminderTexts implements ReminderTexts {
     }
     return ReminderText(body: body, expanded: body);
   }
+
+  @override
+  String statementClosing({
+    required String card,
+    required int days,
+    required LocalDate date,
+    required LocalDate next,
+  }) => l10n.reminderStatementClosing(
+    days,
+    card,
+    _dayMonth(date),
+    _dayMonth(next),
+  );
 }

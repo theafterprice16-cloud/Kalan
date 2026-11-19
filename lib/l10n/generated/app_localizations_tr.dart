@@ -1871,4 +1871,32 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get cardStatementNotComing =>
       'Bu ekstre kartının sıradaki ekstreleri arasında değil.';
+
+  @override
+  String get statementReminderToggle => 'Hesap kesim hatırlatması';
+
+  @override
+  String get statementReminderToggleHint =>
+      'Hesap kesim gününden önce, hatırlatma saatinde bir bildirim.';
+
+  @override
+  String get statementReminderDays => 'Kaç gün önce';
+
+  @override
+  String reminderStatementClosing(
+    int days,
+    String card,
+    String date,
+    String next,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other:
+          '$card kartının hesabı $days gün sonra, $date tarihinde kesiliyor. Bu tarihten sonraki taksitler $next ekstresine girer.',
+      one:
+          '$card kartının hesabı 1 gün sonra, $date tarihinde kesiliyor. Bu tarihten sonraki taksitler $next ekstresine girer.',
+    );
+    return '$_temp0';
+  }
 }
