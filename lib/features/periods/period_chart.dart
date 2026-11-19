@@ -33,10 +33,6 @@ class BarGeometry {
   /// The shortest a bar part with a nonzero amount is drawn.
   static const double minVisible = 4;
 
-  /// The shortest the part over income is drawn: the bar's top rounding,
-  /// which would otherwise swallow it.
-  static const double minOver = KalanRadius.input;
-
   /// The amount the full [height] stands for: the largest spoken for or
   /// income among [periods], so every bar shares one scale.
   static int scaleOf(List<ComingPeriod> periods) => periods.fold(
@@ -62,13 +58,10 @@ class BarGeometry {
     final spent = math.min(height, part(spokenForMinor));
     if (incomeMinor == null) return BarGeometry(spokenFor: spent, left: 0);
     if (isShort) {
-      // The part over income is never hidden, even one minor unit: at
-      // least the bar's top rounding, so it reads as its own band. The
-      // part up to income gives way when the bar is short of room.
-      final over = math.min(
-        height,
-        math.max(minOver, part(spokenForMinor - incomeMinor)),
-      );
+      // To scale, like every part: only the shared [minVisible] keeps
+      // even one minor unit over income in sight. The part up to income
+      // gives way when the bar is short of room.
+      final over = math.min(height, part(spokenForMinor - incomeMinor));
       final upToIncome = math.min(height - over, part(incomeMinor));
       return BarGeometry(
         spokenFor: upToIncome,
@@ -112,8 +105,14 @@ class ComingBar extends StatelessWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(KalanRadius.input),
+              // A thin part over income would vanish in the usual top
+              // rounding: the rounding is never deeper than that part.
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(
+                  g.over > 0
+                      ? math.min(KalanRadius.input, g.over)
+                      : KalanRadius.input,
+                ),
               ),
               child: SizedBox(
                 width: barWidth,
@@ -146,12 +145,13 @@ class ComingBar extends StatelessWidget {
             ),
           ),
           // A little wider than the bar, so it reads on the background
-          // too, but clear of the column's selection frame.
+          // too, but clear of the column's selection frame. Its top edge
+          // is the income level: it never covers the part over income.
           if (g.incomeLine != null)
             Positioned(
               left: 0,
               right: 0,
-              bottom: math.max(0, g.incomeLine! - _line / 2),
+              bottom: math.max(0, g.incomeLine! - _line),
               height: _line,
               child: Center(
                 child: SizedBox(
@@ -223,6 +223,37 @@ class ComingPeriodsChart extends ConsumerWidget {
   static const double barHeight = 144;
   static const double minColumnWidth = 56;
 
+  /// The amount under a bar, shared by the drawing and the fit check.
+  static TextStyle? amountStyle(ThemeData theme) => theme.textTheme.bodySmall
+      ?.copyWith(fontWeight: FontWeight.w600, fontFeatures: AmountText.tabular);
+
+  /// The amount a column shows under its bar: left when income is set
+  /// (negative when short), otherwise spoken for.
+  static int amountOf(ComingPeriod p) => p.leftMinor ?? p.spokenForMinor;
+
+  /// Whether every period's amount fits its column in full ("-1.200")
+  /// on one line, at the user's text size. All columns then show full
+  /// amounts; otherwise all show short ones ("-1,2 B"), so the row never
+  /// mixes the two, and never cuts or wraps an amount.
+  bool _fullAmountsFit(BuildContext context, WidgetRef ref, double column) {
+    // The column's outer padding, then the same again inside the
+    // selection frame, so no amount touches it.
+    final room = column - 4 * KalanSpace.xxs;
+    final style = amountStyle(Theme.of(context));
+    for (final p in periods) {
+      final painter = TextPainter(
+        text: TextSpan(text: ref.money(context, amountOf(p)), style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      final width = painter.width;
+      painter.dispose();
+      if (width > room) return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scale = BarGeometry.scaleOf(periods);
@@ -232,6 +263,7 @@ class ComingPeriodsChart extends ConsumerWidget {
         final width = fits
             ? constraints.maxWidth / periods.length
             : minColumnWidth;
+        final fullAmounts = _fullAmountsFit(context, ref, width);
         final row = Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -243,6 +275,7 @@ class ComingPeriodsChart extends ConsumerWidget {
                   period: p,
                   scale: scale,
                   selected: i == selected,
+                  fullAmount: fullAmounts,
                   onTap: () => onSelect(i),
                 ),
               ),
@@ -264,6 +297,7 @@ class _Column extends ConsumerStatefulWidget {
     required this.period,
     required this.scale,
     required this.selected,
+    required this.fullAmount,
     required this.onTap,
     super.key,
   });
@@ -271,6 +305,9 @@ class _Column extends ConsumerStatefulWidget {
   final ComingPeriod period;
   final int scale;
   final bool selected;
+
+  /// Full amount under the bar ("-1.200"), or short ("-1,2 B").
+  final bool fullAmount;
   final VoidCallback onTap;
 
   @override
@@ -315,7 +352,10 @@ class _ColumnState extends ConsumerState<_Column> {
         : '$label ${busyWeekSummaryText(context, ref, busy)}';
     // The period's main number, as on the home screen: left when income
     // is set (negative when short), otherwise spoken for.
-    final amount = ref.moneyShort(context, left ?? p.spokenForMinor);
+    final amountMinor = ComingPeriodsChart.amountOf(p);
+    final amount = widget.fullAmount
+        ? ref.money(context, amountMinor)
+        : ref.moneyShort(context, amountMinor);
     final small = theme.textTheme.bodySmall;
 
     final border = _focused
@@ -373,10 +413,8 @@ class _ColumnState extends ConsumerState<_Column> {
                     Text(
                       p.isNegative ? l10n.comingPeriodsShort(amount) : amount,
                       textAlign: TextAlign.center,
-                      style: small?.copyWith(
+                      style: ComingPeriodsChart.amountStyle(theme)?.copyWith(
                         color: p.isNegative ? colors.negativeText : colors.text,
-                        fontWeight: FontWeight.w600,
-                        fontFeatures: AmountText.tabular,
                       ),
                     ),
                     // Beside the bar, never on it: a small icon and

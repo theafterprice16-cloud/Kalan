@@ -192,7 +192,8 @@ void main() {
       ),
       findsNothing,
     );
-    // The line sits where the two parts meet.
+    // The line's top edge is where the two parts meet: it never covers
+    // the part over income.
     final over = tester.getRect(
       find.descendant(
         of: bar,
@@ -205,7 +206,7 @@ void main() {
         matching: find.byKey(const ValueKey('coming-bar-income-line')),
       ),
     );
-    expect(line.center.dy, closeTo(over.bottom, 0.01));
+    expect(line.top, closeTo(over.bottom, 0.01));
   });
 
   testWidgets('without income: no part over income, no line, no note', (
@@ -315,6 +316,34 @@ void main() {
     await tester.runAsync(() => seedRent(db));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('coming-periods-strip')), findsOneWidget);
+  });
+
+  testWidgets('amounts under the bars in full when every one fits', (
+    tester,
+  ) async {
+    // Income ₺14.000: periods 0 and 1 are ₺1.200 short.
+    await pumpApp(tester, seed: (db) => seed(db, income: 1400000));
+    await openStrip(tester);
+    expect(find.text('-₺1.200 eksik'), findsNWidgets(2));
+    expect(find.textContaining('B eksik'), findsNothing);
+  });
+
+  testWidgets('large text on a small phone: every amount short, none cut', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpApp(tester, seed: (db) => seed(db, income: 1400000));
+    await scrollTo(tester, find.byKey(const ValueKey('coming-periods-strip')));
+    await openStrip(tester);
+    expect(find.text('-₺1.200 eksik'), findsNothing);
+    // The row scrolls sideways here; the first columns are built. The
+    // short form keeps "1,2" and "B" together with a no-break space.
+    expect(find.text('-₺1,2\u00a0B eksik'), findsNWidgets(2));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('large text on a small phone does not overflow', (tester) async {
@@ -467,9 +496,9 @@ void main() {
         height: 156,
         isShort: true,
       );
-      expect(g.spokenFor, closeTo(148, 0.001));
-      // ₺1.200 is 6 px on this scale; drawn at the top rounding's 8.
-      expect(g.over, BarGeometry.minOver);
+      // To scale: ₺1.200 is 6 px, ₺30.000 150 px.
+      expect(g.spokenFor, closeTo(150, 0.001));
+      expect(g.over, closeTo(6, 0.001));
       expect(g.left, 0);
       expect(g.incomeLine, g.spokenFor);
       expect(g.spokenFor + g.over, closeTo(156, 0.001));
@@ -483,7 +512,7 @@ void main() {
         height: 100,
         isShort: true,
       );
-      expect(g.over, BarGeometry.minOver);
+      expect(g.over, BarGeometry.minVisible);
       expect(g.spokenFor + g.over, closeTo(100, 0.001));
       expect(g.incomeLine, g.spokenFor);
     });
