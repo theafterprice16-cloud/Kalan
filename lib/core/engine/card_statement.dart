@@ -105,18 +105,28 @@ List<CardStatement> cardStatements({
     // statement moves on, and an earlier one a statement short of its
     // successor moves up. A lone payment stays on the earlier statement,
     // which is due the same day.
-    bool sharesDue(int index, LocalDate due) =>
-        terms.dueFor(statementAt(index)) == due;
+    int distance(int index, LocalDate due) =>
+        due.daysUntil(terms.dueFor(statementAt(index))).abs();
+    bool consecutive(int n) => plan[n + 1].seq == plan[n].seq + 1;
+    // Forward: a later installment on its predecessor's statement moves
+    // on when the next statement is due as near (an edited date a few days
+    // off a shared due date moves too).
     for (var n = 1; n < plan.length; n++) {
-      if (indexes[n] <= indexes[n - 1] &&
-          sharesDue(indexes[n - 1] + 1, plan[n].dueDate)) {
+      if (consecutive(n - 1) &&
+          indexes[n] <= indexes[n - 1] &&
+          distance(indexes[n - 1] + 1, plan[n].dueDate) <=
+              distance(indexes[n], plan[n].dueDate)) {
         indexes[n] = indexes[n - 1] + 1;
       }
     }
+    // Backward: an installment a statement short of its successor moves
+    // up onto the shared due date, but only when the successor sits
+    // exactly on its own statement's due date (not an edited date).
     for (var n = plan.length - 2; n >= 0; n--) {
-      if (indexes[n + 1] - indexes[n] > 1 &&
-          plan[n + 1].seq == plan[n].seq + 1 &&
-          sharesDue(indexes[n] + 1, plan[n].dueDate)) {
+      if (consecutive(n) &&
+          indexes[n + 1] - indexes[n] > 1 &&
+          distance(indexes[n + 1], plan[n + 1].dueDate) == 0 &&
+          distance(indexes[n] + 1, plan[n].dueDate) == 0) {
         indexes[n] = indexes[n] + 1;
       }
     }

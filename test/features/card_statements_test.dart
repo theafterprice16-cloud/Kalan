@@ -250,4 +250,16 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('a statement that is not a coming one says so', (tester) async {
+    await open(
+      tester,
+      route: Routes.cardStatement(1, LocalDate(2026, 10, 14).epochDay),
+    );
+    expect(
+      find.text('Bu ekstre kartının sıradaki ekstreleri arasında değil.'),
+      findsOneWidget,
+    );
+    expect(find.text('Taksit yok'), findsNothing);
+  });
 }

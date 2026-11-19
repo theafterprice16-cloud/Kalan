@@ -2480,6 +2480,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No installments'**
   String get cardStatementEmpty;
+
+  /// Statement detail opened for a statement that is no longer one of the six coming ones (or a removed card). Calm, factual. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura, es-419 Mexico estado de cuenta.)
+  ///
+  /// In en, this message translates to:
+  /// **'This statement is not among your card\'s coming statements.'**
+  String get cardStatementNotComing;
 }
 
 class _AppLocalizationsDelegate

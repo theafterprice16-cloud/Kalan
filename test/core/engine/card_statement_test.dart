@@ -415,4 +415,53 @@ void main() {
       expect(statements.first.installments.single.seq, 2);
     });
   });
+
+  group('two statements with one due date (statement 28, due 30)', () {
+    const terms = CardTerms(
+      statementDay: 28,
+      dueDay: 30,
+      shiftDueToBusinessDay: false,
+    );
+    // Bought 10 Jan 2027: Jan statement due 30 Jan, Feb and Mar statements
+    // both due 30 Mar, Apr statement due 30 Apr.
+    List<StatementInstallment> plan({LocalDate? third}) => [
+      for (final (seq, due) in [
+        (1, d('2027-01-30')),
+        (2, d('2027-03-30')),
+        (3, third ?? d('2027-03-30')),
+        (4, d('2027-04-30')),
+      ])
+        StatementInstallment(
+          paymentId: seq,
+          planId: 1,
+          seq: seq,
+          installmentCount: 4,
+          amountMinor: 1000,
+          dueDate: due,
+          isPaid: false,
+        ),
+    ];
+    List<int> counts(List<StatementInstallment> items) => [
+      for (final s in cardStatements(
+        terms: terms,
+        today: d('2027-01-20'),
+        installments: items,
+      ).take(4))
+        s.count,
+    ];
+
+    test('the engine dates fill one statement each', () {
+      expect(counts(plan()), [1, 1, 1, 1]);
+    });
+
+    test('a shared due date edited two days earlier keeps its statement', () {
+      expect(counts(plan(third: d('2027-03-28'))), [1, 1, 1, 1]);
+    });
+
+    test('an edited next installment does not pull the one before', () {
+      // The third moved to 20 Apr belongs to the Apr statement; the second
+      // stays on Feb.
+      expect(counts(plan(third: d('2027-04-20'))), [1, 1, 0, 2]);
+    });
+  });
 }

@@ -1857,4 +1857,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardStatementEmpty => 'No installments';
+
+  @override
+  String get cardStatementNotComing =>
+      'This statement is not among your card\'s coming statements.';
 }

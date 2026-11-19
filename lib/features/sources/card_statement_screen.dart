@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
+import '../../app/providers.dart';
 import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
@@ -31,14 +32,26 @@ class CardStatementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final date = LocalDate.fromEpochDay(statementDay);
+    final loading =
+        !ref.watch(sourcesProvider).hasValue ||
+        !ref.watch(plansProvider).hasValue;
     final view = ref.watch(cardStatementsProvider(cardId));
     final statement = view?.statementOn(date);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.cardStatementTitle(context.shortDate(date))),
       ),
-      body: view == null || statement == null
-          ? Center(child: EmptyState(l10n.cardStatementEmpty))
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : view == null || statement == null
+          // Not one of the six coming statements (an old link, a removed
+          // card): say so, never "no installments".
+          ? Center(
+              child: EmptyState(
+                key: const ValueKey('statement-not-coming'),
+                l10n.cardStatementNotComing,
+              ),
+            )
           : _body(context, ref, view, statement),
     );
   }

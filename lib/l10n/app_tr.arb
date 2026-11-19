@@ -393,5 +393,6 @@
   "cardStatementCutOn": "Hesap kesim {date}",
   "cardStatementDueOn": "Son ödeme {date}",
   "cardStatementCountTotal": "{count, plural, other{{count} taksit}} · {amount}",
-  "cardStatementEmpty": "Taksit yok"
+  "cardStatementEmpty": "Taksit yok",
+  "cardStatementNotComing": "Bu ekstre kartının sıradaki ekstreleri arasında değil."
 }

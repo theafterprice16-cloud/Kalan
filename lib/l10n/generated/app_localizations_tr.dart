@@ -1867,4 +1867,8 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get cardStatementEmpty => 'Taksit yok';
+
+  @override
+  String get cardStatementNotComing =>
+      'Bu ekstre kartının sıradaki ekstreleri arasında değil.';
 }
