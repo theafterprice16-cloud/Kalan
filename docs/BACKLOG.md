@@ -2,7 +2,7 @@
 
 Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulamalardır.
 
-1. **İleri bakış**: ~~önümüzdeki dönemler çubuk olarak~~ Tamamlandı (19 Kasım 2026, yol haritası 12; Karar 4 gereği ücretsiz, herkese 6 dönem). Kalanlar: sıkışık dönem işareti (yol haritası 14), bütün planların bittiği tarih (PayDown).
+1. **İleri bakış**: ~~önümüzdeki dönemler çubuk olarak~~ Tamamlandı (19 Kasım 2026, yol haritası 12; Karar 4 gereği ücretsiz, herkese 6 dönem). ~~yoğun hafta işareti~~ tamamlandı (19 Kasım 2026, yol haritası 14; grafikte ve takvimde, ana ekranda yok). Kalan: bütün planların bittiği tarih (PayDown).
 2. **Dene** (Pro): yeni bir planın etkisini kaydetmeden gösterme.
 3. ~~**Bildirim ve hatırlatmalar**~~ Tamamlandı (13 Kasım 2026): her ödeme için "önceden" (1, 2, 3, 5 ya da 7 gün; varsayılan 2) ve "gününde" bildirimi, saat ayarı (09:00), aynı gün ve türde birleştirme, en yakın 60, plan bazında Genel ayar / Kapalı / Farklı gün, "Bildirimde tutarı göster", ilk plandan sonra izin sayfası, dokununca ana ekran. Sonraya kalanlar (ayrı maddeler): ~~bildirimden "Ödendi" işaretleme~~ (tamamlandı, aşağıda); ~~**ısrarlı hatırlatma**~~ (tamamlandı, aşağıda); otomatik çekim / elle ödeme ayrımı (`defaultLeadDaysFor` hazır); maaş günü özeti; hesap kesim uyarısı. Planlayıcı yeni türler için hazır.
 4. **İade bekliyor** işareti; gecikme ücreti kaydı (Frizzbee); kısmi ya da farklı tutarla ödeme (Bills Monitor).

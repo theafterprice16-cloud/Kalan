@@ -17,6 +17,7 @@ class ComingPeriod {
     required this.summary,
     required this.entries,
     required this.pastDue,
+    this.busyWeek,
   });
 
   final PeriodSummary summary;
@@ -26,6 +27,10 @@ class ComingPeriod {
 
   /// Unpaid past-due payments; only ever in the current period.
   final List<HomeEntry> pastDue;
+
+  /// Plan payments piled up in a few days of the period; null when not.
+  /// An observation, not the tight status ([PeriodStatus.tight]).
+  final BusyWeek? busyWeek;
 
   PayPeriod get period => summary.period;
   int get spokenForMinor => summary.spokenForMinor;
@@ -68,9 +73,28 @@ List<ComingPeriod> comingPeriods({
         ),
         entries: rows.entries,
         pastDue: rows.pastDue,
+        busyWeek: busyWeekIn(plans: plans, period: period),
       );
     }(),
 ];
+
+/// The busy week of [period] from [plans]' payments: plan payments only
+/// (recurring payments never count), each on the due day the engine
+/// stored, paid or not. Payments paid before Kalan are left out: their
+/// dates are never shown. The one data path for the chart and the
+/// calendar.
+BusyWeek? busyWeekIn({
+  required Iterable<PlanWithPayments> plans,
+  required PayPeriod period,
+}) => busyWeekOf(
+  period: period,
+  planPayments: [
+    for (final p in plans)
+      for (final pay in p.payments)
+        if (!pay.paidBeforeKalan)
+          DatedAmount(LocalDate.fromEpochDay(pay.dueDay), pay.amountMinor),
+  ],
+);
 
 /// The coming pay periods; null while data loads or before onboarding.
 /// Follows plans, payments, recurring payments, income and payday.

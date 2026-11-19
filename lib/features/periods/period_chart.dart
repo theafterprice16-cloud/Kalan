@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../core/design/widgets.dart';
 import '../../core/theme/kalan_theme.dart';
+import 'busy_week_view.dart';
 import 'coming_periods.dart';
 
 /// Pixel heights of one bar, from the bottom: spoken for, left above it,
@@ -269,6 +270,10 @@ class _ColumnState extends ConsumerState<_Column> {
         ref.money(context, left),
       );
     }
+    final busy = p.busyWeek;
+    final fullLabel = busy == null
+        ? label
+        : '$label ${busyWeekSummaryText(context, ref, busy)}';
     // The period's main number, as on the home screen: left when income
     // is set (negative when short), otherwise spoken for.
     final amount = ref.moneyShort(context, left ?? p.spokenForMinor);
@@ -283,7 +288,7 @@ class _ColumnState extends ConsumerState<_Column> {
     return Semantics(
       button: true,
       selected: widget.selected,
-      label: label,
+      label: fullLabel,
       // The tap is read out with the label (the InkWell's own is excluded).
       onTap: widget.onTap,
       excludeSemantics: true,
@@ -335,6 +340,12 @@ class _ColumnState extends ConsumerState<_Column> {
                         fontFeatures: AmountText.tabular,
                       ),
                     ),
+                    // Beside the bar, never on it: a small icon and
+                    // "busy". Tapping the column opens the explanation.
+                    if (busy != null) ...[
+                      const SizedBox(height: KalanSpace.xxs),
+                      const BusyWeekTag(key: ValueKey('coming-busy-week')),
+                    ],
                   ],
                 ),
               ),

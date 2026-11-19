@@ -9,6 +9,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../home/past_due.dart';
 import '../home/payment_tile.dart';
 import '../settings/settings_screen.dart' show editNetIncome;
+import 'busy_week_view.dart';
 import 'coming_periods.dart';
 import 'payment_calendar.dart';
 import 'period_chart.dart';
@@ -155,6 +156,12 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
                   // The same sentence as on the home screen.
                   text: l10n.homeNegative(ref.money(context, -left!)),
                 ),
+              ],
+              // Busy week: an observation in its own box, apart from the
+              // short status.
+              if (p.busyWeek case final busy?) ...[
+                const SizedBox(height: KalanSpace.xs),
+                BusyWeekNote(week: busy),
               ],
             ],
           ),

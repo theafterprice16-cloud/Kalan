@@ -2380,6 +2380,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'today'**
   String get calendarCellToday;
+
+  /// One word beside a small icon under a bar of the coming pay periods chart: plan payments pile up in one week of that period. Never written on the bar. Gözlem bildirir, uyarı değildir. 'Sıkışık dönem' ile karıştırma.
+  ///
+  /// In en, this message translates to:
+  /// **'busy'**
+  String get busyWeekTag;
+
+  /// One line in the period summary and on the calendar: the days where plan payments pile up, how many and their total. range: 'Dec 17–21'; amount: formatted money. Gözlem bildirir, uyarı değildir. 'Sıkışık dönem' ile karıştırma.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Busy week: {range} · 1 payment · {amount}} other{Busy week: {range} · {count} payments · {amount}}}'**
+  String busyWeekSummary(String range, int count, String amount);
+
+  /// Days of a busy week within one month: 'Dec 17–21'. month: short month name; startDay, endDay: day numbers. Gözlem bildirir, uyarı değildir. 'Sıkışık dönem' ile karıştırma.
+  ///
+  /// In en, this message translates to:
+  /// **'{month} {startDay}–{endDay}'**
+  String busyWeekRangeSameMonth(String month, String startDay, String endDay);
+
+  /// Screen reader: the day is inside a busy week of plan payments. Joined with a comma. Gözlem bildirir, uyarı değildir. 'Sıkışık dönem' ile karıştırma.
+  ///
+  /// In en, this message translates to:
+  /// **'busy week'**
+  String get calendarCellBusyWeek;
 }
 
 class _AppLocalizationsDelegate

@@ -106,16 +106,22 @@ void main() {
     final semantics = tester.ensureSemantics();
     await openCalendar(tester);
     expect(
-      find.bySemanticsLabel('10 Kasım, 1 ödeme, gecikmiş'),
+      find.bySemanticsLabel('10 Kasım, 1 ödeme, gecikmiş, yoğun hafta'),
       findsOneWidget,
     );
-    expect(find.bySemanticsLabel('14 Kasım, 2 ödeme'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('14 Kasım, 2 ödeme, yoğun hafta'),
+      findsOneWidget,
+    );
     expect(find.bySemanticsLabel('5 Kasım, 1 ödeme, ödendi'), findsOneWidget);
     expect(
       find.bySemanticsLabel('15 Kasım, Ödeme yok, maaş günü'),
       findsOneWidget,
     );
-    expect(find.bySemanticsLabel('13 Kasım, Ödeme yok, bugün'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('13 Kasım, Ödeme yok, yoğun hafta, bugün'),
+      findsOneWidget,
+    );
     semantics.dispose();
   });
 
@@ -124,7 +130,7 @@ void main() {
     await openCalendar(tester, today: LocalDate(2026, 11, 19));
     expect(markIn(10, 'mark-late'), findsOneWidget);
     expect(
-      find.bySemanticsLabel('10 Kasım, 1 ödeme, gecikmiş'),
+      find.bySemanticsLabel('10 Kasım, 1 ödeme, gecikmiş, yoğun hafta'),
       findsOneWidget,
     );
     // Never moved to today.
@@ -157,7 +163,9 @@ void main() {
   testWidgets('screen readers can tap a day', (tester) async {
     final semantics = tester.ensureSemantics();
     await openCalendar(tester);
-    tester.semantics.tap(find.semantics.byLabel('14 Kasım, 2 ödeme'));
+    tester.semantics.tap(
+      find.semantics.byLabel('14 Kasım, 2 ödeme, yoğun hafta'),
+    );
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('calendar-day-section')), findsOneWidget);
     semantics.dispose();

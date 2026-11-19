@@ -50,3 +50,19 @@ Future<void> seedCalendar(AppDatabase db) async {
   await PlanRepository(db)
       .setPaid(paymentId, paid: true, now: DateTime(2026, 11, 5, 10));
 }
+
+/// 20 Nov 2026, payday 15: this period 15 Nov - 14 Dec, the next one
+/// 15 Dec - 14 Jan (the "December" period of the examples).
+final busyWeekToday = LocalDate(2026, 11, 20);
+
+/// Item 14, Example 1: six plan payments in the December period, four of them
+/// 17-21 Dec (₺1.000 + ₺1.500 + ₺1.200 + ₺1.500 = ₺5.200).
+Future<void> seedBusyWeek(AppDatabase db) async {
+  await seedSettings(db, incomeMinor: 4500000);
+  await seedSingle(db, 'Saat', LocalDate(2026, 12, 17), 100000);
+  await seedSingle(db, 'Kulaklık', LocalDate(2026, 12, 18), 150000);
+  await seedSingle(db, 'Mont', LocalDate(2026, 12, 20), 120000);
+  await seedSingle(db, 'Telefon', LocalDate(2026, 12, 21), 150000);
+  await seedSingle(db, 'Bot', LocalDate(2027, 1, 2), 80000);
+  await seedSingle(db, 'Laptop', LocalDate(2027, 1, 10), 200000);
+}

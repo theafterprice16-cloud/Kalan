@@ -10,6 +10,7 @@ import '../../data/models.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../home/past_due.dart';
 import '../home/payment_tile.dart';
+import 'busy_week_view.dart';
 import 'calendar_month.dart';
 
 /// The two views of the Coming pay periods screen.
@@ -77,6 +78,20 @@ class PaymentCalendar extends ConsumerStatefulWidget {
   /// Between day frames, and between a mark's dot and its icon.
   static const double hairGap = KalanSpace.xxs / 2;
 
+  /// The box around a day's number (and its payday ring).
+  static const double numberBox = 30;
+
+  /// The row of marks under the number.
+  static const double markRow = 12;
+
+  /// Where a busy week's line runs: in the gap right under the number,
+  /// clear of the today and selected frames.
+  static const double busyLineTop =
+      hairGap +
+      (cellHeight - (numberBox + KalanSpace.xxs + markRow)) / 2 +
+      numberBox +
+      (KalanSpace.xxs - _BusyLine.thickness) / 2;
+
   @override
   ConsumerState<PaymentCalendar> createState() => _PaymentCalendarState();
 }
@@ -116,6 +131,18 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
       month: month,
       today: today,
     );
+    final busyWeeks = calendarBusyWeeks(
+      plans: source.plans,
+      schedule: source.schedule,
+      month: month,
+    );
+    BusyWeek? busyOn(LocalDate d) {
+      for (final w in busyWeeks) {
+        if (w.contains(d)) return w;
+      }
+      return null;
+    }
+
     final canBack = month > range.first;
     final canForward = month < range.last;
     final rtl = Directionality.of(context) == TextDirection.rtl;
@@ -195,6 +222,7 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
                 days: days,
                 today: today,
                 selected: selected,
+                busyOn: busyOn,
                 firstWeekday: firstWeekdayOf(
                   context,
                   ref.watch(deviceRegionProvider),
@@ -210,6 +238,7 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
             date: selected,
             day: days[selected],
             today: today,
+            busyWeek: busyOn(selected),
           ),
       ],
     );
@@ -222,6 +251,7 @@ class _MonthGrid extends StatelessWidget {
     required this.days,
     required this.today,
     required this.selected,
+    required this.busyOn,
     required this.firstWeekday,
     required this.onTap,
   });
@@ -230,6 +260,9 @@ class _MonthGrid extends StatelessWidget {
   final Map<LocalDate, CalendarDay> days;
   final LocalDate today;
   final LocalDate? selected;
+
+  /// The busy week a day is in, if any.
+  final BusyWeek? Function(LocalDate) busyOn;
   final int firstWeekday;
   final ValueChanged<LocalDate> onTap;
 
@@ -270,6 +303,7 @@ class _MonthGrid extends StatelessWidget {
                           day: days[d],
                           isToday: d == today,
                           isSelected: d == selected,
+                          busyWeek: busyOn(d),
                           onTap: () => onTap(d),
                         )
                       : _OtherMonthCell(date: d),
@@ -313,6 +347,7 @@ String calendarDayLabel(
   String date,
   CalendarDay? day, {
   required bool isToday,
+  bool isBusyWeek = false,
 }) {
   final count = day?.payments.length ?? 0;
   return [
@@ -327,6 +362,7 @@ String calendarDayLabel(
           ? l10n.calendarCellAllPaid
           : l10n.calendarCellSomePaid(day.paidCount),
     if (day?.isPayday ?? false) l10n.calendarCellPayday,
+    if (isBusyWeek) l10n.calendarCellBusyWeek,
     if (isToday) l10n.calendarCellToday,
   ].join(', ');
 }
@@ -338,6 +374,7 @@ class _DayCell extends StatelessWidget {
     required this.isToday,
     required this.isSelected,
     required this.onTap,
+    this.busyWeek,
   });
 
   final LocalDate date;
@@ -345,6 +382,10 @@ class _DayCell extends StatelessWidget {
   final bool isToday;
   final bool isSelected;
   final VoidCallback onTap;
+
+  /// The busy week this day is in: a thin ink line joins its days under
+  /// the marks, and its first day carries the busy week icon.
+  final BusyWeek? busyWeek;
 
   @override
   Widget build(BuildContext context) {
@@ -366,6 +407,7 @@ class _DayCell extends StatelessWidget {
         context.dayMonth(date),
         day,
         isToday: isToday,
+        isBusyWeek: busyWeek != null,
       ),
       // The tap is read out with the label (the InkWell's own is excluded).
       onTap: onTap,
@@ -374,50 +416,114 @@ class _DayCell extends StatelessWidget {
         key: ValueKey('calendar-cell-${date.day}'),
         onTap: onTap,
         borderRadius: BorderRadius.circular(KalanRadius.input),
-        child: Container(
-          height: PaymentCalendar.cellHeight,
-          // Inside the InkWell: frames keep apart, the tap area stays whole.
-          margin: const EdgeInsets.all(PaymentCalendar.hairGap),
-          decoration: BoxDecoration(
-            border: frame,
-            borderRadius: BorderRadius.circular(KalanRadius.input),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                key: payday ? ValueKey('calendar-payday-${date.day}') : null,
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                decoration: payday
-                    ? BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.text, width: 1.5),
-                      )
-                    : null,
-                child: Text(
-                  '${date.day}',
-                  maxLines: 1,
-                  // Large text grows the number only so far: the cell keeps
-                  // its size and never overflows.
-                  textScaler: MediaQuery.textScalerOf(context)
-                      .clamp(maxScaleFactor: 1.3),
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colors.text,
-                    fontFeatures: AmountText.tabular,
+        child: Stack(
+          children: [
+            Container(
+              height: PaymentCalendar.cellHeight,
+              // Inside the InkWell: frames keep apart, the tap area stays whole.
+              margin: const EdgeInsets.all(PaymentCalendar.hairGap),
+              decoration: BoxDecoration(
+                border: frame,
+                borderRadius: BorderRadius.circular(KalanRadius.input),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    key: payday
+                        ? ValueKey('calendar-payday-${date.day}')
+                        : null,
+                    width: PaymentCalendar.numberBox,
+                    height: PaymentCalendar.numberBox,
+                    alignment: Alignment.center,
+                    decoration: payday
+                        ? BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.text, width: 1.5),
+                          )
+                        : null,
+                    child: Text(
+                      '${date.day}',
+                      maxLines: 1,
+                      // Large text grows the number only so far: the cell keeps
+                      // its size and never overflows.
+                      textScaler: MediaQuery.textScalerOf(context)
+                          .clamp(maxScaleFactor: 1.3),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: colors.text,
+                        fontFeatures: AmountText.tabular,
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: KalanSpace.xxs),
+                  SizedBox(
+                    height: PaymentCalendar.markRow,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CalendarMarkView(mark: day?.mark ?? CalendarMark.none),
+                        if (busyWeek?.first == date) ...[
+                          if (day?.mark != CalendarMark.none)
+                            const SizedBox(width: PaymentCalendar.hairGap * 2),
+                          Icon(
+                            busyWeekIcon,
+                            key: const ValueKey('calendar-busy-icon'),
+                            size: 11,
+                            color: colors.text,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (busyWeek case final w?)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: PaymentCalendar.busyLineTop,
+                height: _BusyLine.thickness,
+                child: _BusyLine(
+                  isFirst: w.first == date,
+                  isLast: w.last == date,
                 ),
               ),
-              const SizedBox(height: KalanSpace.xxs),
-              SizedBox(
-                height: 12,
-                child: CalendarMarkView(mark: day?.mark ?? CalendarMark.none),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// A busy week's thin ink line in one cell: from the middle of its first
+/// day to the middle of its last, so the days read as joined. Follows the
+/// reading direction.
+class _BusyLine extends StatelessWidget {
+  const _BusyLine({required this.isFirst, required this.isLast});
+
+  final bool isFirst;
+  final bool isLast;
+
+  static const double thickness = 1.5;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = ColoredBox(color: context.colors.text);
+    // A one-day "week": a short line under its marks.
+    if (isFirst && isLast) {
+      return Center(
+        key: const ValueKey('calendar-busy-line'),
+        child: SizedBox(width: KalanSpace.md, child: ink),
+      );
+    }
+    return Row(
+      key: const ValueKey('calendar-busy-line'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: isFirst ? const SizedBox.shrink() : ink),
+        Expanded(child: isLast ? const SizedBox.shrink() : ink),
+      ],
     );
   }
 }
@@ -491,11 +597,15 @@ class _DaySection extends ConsumerWidget {
     required this.day,
     required this.today,
     super.key,
+    this.busyWeek,
   });
 
   final LocalDate date;
   final CalendarDay? day;
   final LocalDate today;
+
+  /// The busy week the day is in: its explanation shows in the section.
+  final BusyWeek? busyWeek;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -562,6 +672,11 @@ class _DaySection extends ConsumerWidget {
                         key: const ValueKey('calendar-day-total'),
                         style: theme.textTheme.bodyLarge,
                       ),
+                    ),
+                  if (busyWeek case final w?)
+                    Padding(
+                      padding: const EdgeInsets.only(top: KalanSpace.xs),
+                      child: BusyWeekNote(week: w),
                     ),
                 ],
               ),
