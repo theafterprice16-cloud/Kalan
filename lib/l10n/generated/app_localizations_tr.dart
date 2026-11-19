@@ -421,6 +421,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sourceKindCard => 'Kredi kartı';
 
   @override
+  String get sourceKindAccount => 'Banka hesabı';
+
+  @override
   String get fieldStatementDay => 'Ekstre günü';
 
   @override
@@ -1898,5 +1901,67 @@ class AppLocalizationsTr extends AppLocalizations {
           '$card kartının hesabı 1 gün sonra, $date tarihinde kesiliyor. Bu tarihten sonraki taksitler $next ekstresine girer.',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get chargeTitleAccount => 'Hesapta bulunsun';
+
+  @override
+  String get chargeTitleCard => 'Bu karta yansıyacak';
+
+  @override
+  String get chargeTitleProvider => 'Bu kaynaktan çekilecek';
+
+  @override
+  String chargeNext(String date, String amount) {
+    return 'Sıradaki çekim: $date · $amount';
+  }
+
+  @override
+  String chargeBy(String date, String amount) {
+    return '$date tarihine kadar · $amount';
+  }
+
+  @override
+  String chargeByDate(String date) {
+    return '$date tarihine kadar';
+  }
+
+  @override
+  String chargePaidOn(String date) {
+    return '$date · ödendi';
+  }
+
+  @override
+  String get chargePastDue => 'Günü geçen ödeme dahil';
+
+  @override
+  String get chargeDetails => 'Ayrıntı';
+
+  @override
+  String get chargeNextPeriod => 'Sonraki dönem';
+
+  @override
+  String get chargeEmpty => 'Bu dönem bu kaynaktan çıkacak otomatik ödeme yok.';
+
+  @override
+  String get chargeNextEmpty =>
+      'Sonraki dönem bu kaynaktan otomatik ödeme çıkmıyor.';
+
+  @override
+  String get chargeUnassignedTitle => 'Kaynağı seçilmemiş otomatik ödemeler';
+
+  @override
+  String chargeUnassignedRow(String date, String amount) {
+    return 'Sıradaki: $date · $amount';
+  }
+
+  @override
+  String get chargeUnassignedNote =>
+      'Çekildiği yeri planın ayrıntısından seçebilirsin.';
+
+  @override
+  String reminderNoteAccount(String account, String amount) {
+    return 'Otomatik çekilir. $account: $amount bulunsun.';
   }
 }

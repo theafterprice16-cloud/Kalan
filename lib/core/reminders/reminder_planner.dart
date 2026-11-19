@@ -385,6 +385,11 @@ PlannedReminder buildReminder({
     dueDates: dueDates,
     showAmounts: settings.showAmounts,
     method: reminderMethodOf(kind, group),
+    account: reminderAccountOf(
+      kind,
+      group,
+      showAmounts: settings.showAmounts,
+    )?.name,
   );
   final repeating = group.any(
     (p) => repeatModeFor(p, settings) != ReminderRepeat.off,

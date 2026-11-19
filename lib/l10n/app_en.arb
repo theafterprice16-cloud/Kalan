@@ -250,6 +250,10 @@
   "fieldSourceKind": "Type",
   "sourceKindProvider": "Pay later provider",
   "sourceKindCard": "Credit card",
+  "sourceKindAccount": "Bank account",
+  "@sourceKindAccount": {
+    "description": "Source type: a bank account automatic payments are taken from (for example a salary account). Kalan never connects to it and never asks for its balance."
+  },
   "fieldStatementDay": "Statement date",
   "statementDayHelp": "The day of the month your statement is cut.",
   "fieldDueDay": "Due date",
@@ -1865,6 +1869,132 @@
         "type": "String",
         "example": "December 14",
         "description": "Next statement's date, day and month (intl MMMMd)"
+      }
+    }
+  },
+  "chargeTitleAccount": "Keep in account",
+  "@chargeTitleAccount": {
+    "description": "Section title on a bank account in Sources and cards: the automatic payments that will be taken from it this pay period, so the money should be there. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeTitleCard": "Coming to this card",
+  "@chargeTitleCard": {
+    "description": "Section title on a credit card in Sources and cards: other plans charged automatically to this card (not the card's own installments, which are on its statements). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeTitleProvider": "Coming out of this source",
+  "@chargeTitleProvider": {
+    "description": "Section title on a pay later provider chosen as where automatic payments are taken from. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeNext": "Next withdrawal: {date} · {amount}",
+  "@chargeNext": {
+    "description": "The next day automatic payments come out of this source and that day's total. Shown larger and bolder, never in a warning colour. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "18 Kas",
+        "description": "Short date, day and month (intl MMMd)"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺2.400",
+        "description": "Amount from the shared money formatter"
+      }
+    }
+  },
+  "chargeBy": "By {date} · {amount}",
+  "@chargeBy": {
+    "description": "Running total: everything that comes out of this source from the start of the pay period up to and including this day. Avoid grammar that changes with the date (no Turkish 'a/'e suffix). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "18 Kas",
+        "description": "Short date, day and month (intl MMMd)"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺2.400",
+        "description": "Amount from the shared money formatter"
+      }
+    }
+  },
+  "chargeByDate": "By {date}",
+  "@chargeByDate": {
+    "description": "A row of the day-by-day list; the running total (everything that comes out of this source from the start of the pay period up to and including this day) is shown at the end of the row. Avoid grammar that changes with the date (no Turkish 'a/'e suffix). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "18 Kas",
+        "description": "Short date, day and month (intl MMMd)"
+      }
+    }
+  },
+  "chargePaidOn": "{date} · paid",
+  "@chargePaidOn": {
+    "description": "A day whose automatic payments are already marked paid: shown muted with a tick and that day's sum at the end of the row; not added to the running total. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "18 Kas",
+        "description": "Short date, day and month (intl MMMd)"
+      }
+    }
+  },
+  "chargePastDue": "Includes a payment past its due date",
+  "@chargePastDue": {
+    "description": "Screen reader label of the clock icon on today's row when an unpaid payment past its due date is counted today. Calm, no urgency. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeDetails": "Details",
+  "@chargeDetails": {
+    "description": "Opens or closes the day-by-day list of this pay period's automatic payments. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeNextPeriod": "Next period",
+  "@chargeNextPeriod": {
+    "description": "Collapsed row; opens the same list for the next pay period (next payday to the one after). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeEmpty": "No automatic payments to come out of this source this period.",
+  "@chargeEmpty": {
+    "description": "One calm line when nothing automatic is left to come out of this source in the current pay period. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeNextEmpty": "No automatic payments from this source next period.",
+  "@chargeNextEmpty": {
+    "description": "Shown when the next pay period list is opened and it is empty. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeUnassignedTitle": "Automatic payments without a source",
+  "@chargeUnassignedTitle": {
+    "description": "Title of a separate card listing automatic plans whose account or card was not chosen. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "chargeUnassignedRow": "Next: {date} · {amount}",
+  "@chargeUnassignedRow": {
+    "description": "Under a plan's name in the card of automatic payments without a source: its next unpaid payment. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "18 Kas",
+        "description": "Short date, day and month (intl MMMd)"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺2.400",
+        "description": "Amount from the shared money formatter"
+      }
+    }
+  },
+  "chargeUnassignedNote": "You can choose where each is taken from in its plan details.",
+  "@chargeUnassignedNote": {
+    "description": "Note under the list of automatic payments without a source. Informal 'you' in Turkish (sen). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)"
+  },
+  "reminderNoteAccount": "It's taken automatically. Keep {amount} in {account}.",
+  "@reminderNoteAccount": {
+    "description": "Added to the reminder before a payment when every payment in it is taken automatically from the same bank account and amounts are shown. Replaces the general 'taken automatically' note. The account name is as the user typed it, so the Turkish text uses no case suffix on it. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "account": {
+        "type": "String",
+        "example": "Maaş hesabı",
+        "description": "Bank account name as the user typed it"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺2.400",
+        "description": "Total of the payments in this notification, from the shared money formatter"
       }
     }
   }

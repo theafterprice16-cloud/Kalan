@@ -10,9 +10,14 @@ import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import 'card_statements.dart';
+import 'charge_forecast_view.dart';
+import 'charge_section.dart';
 
 /// Sources and cards, each in its own card. A card with installments on
-/// its coming statements shows them under its name (16).
+/// its coming statements shows them under its name (16). A source that
+/// automatic payments are taken from (and every bank account) shows what
+/// comes out of it by which day (18); automatic plans without a source get
+/// their own card at the end.
 class SourcesScreen extends ConsumerStatefulWidget {
   const SourcesScreen({super.key, this.focusCardId});
 
@@ -51,6 +56,14 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
     // The statements follow the plans; wait for both before scrolling.
     final plansReady = ref.watch(plansProvider).hasValue;
     if (sources != null && plansReady) _scrollToFocusOnce();
+    final unassigned =
+        ref.watch(chargeForecastProvider)?.forecast.unassigned ?? const [];
+    final unassignedCard = unassigned.isEmpty
+        ? null
+        : UnassignedChargesCard(
+            items: unassigned,
+            canChoose: sources?.isNotEmpty ?? false,
+          );
     return Scaffold(
       appBar: AppBar(title: Text(l10n.sourcesTitle)),
       floatingActionButton: FloatingActionButton.extended(
@@ -61,7 +74,7 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
       ),
       body: sources == null
           ? const Center(child: CircularProgressIndicator())
-          : sources.isEmpty
+          : sources.isEmpty && unassignedCard == null
           ? Center(child: EmptyState(l10n.sourcesEmpty))
           : SingleChildScrollView(
               key: const ValueKey('sources-list'),
@@ -82,6 +95,8 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
                         source: s,
                       ),
                     ),
+                  if (sources.isEmpty) EmptyState(l10n.sourcesEmpty),
+                  ?unassignedCard,
                 ],
               ),
             ),
@@ -103,6 +118,15 @@ class _SourceCard extends ConsumerWidget {
     final view = s.kind == SourceKind.card
         ? ref.watch(cardStatementsProvider(s.id))
         : null;
+    final forecast = ref.watch(chargeForecastProvider);
+    // Every bank account, and any other source automatic payments are
+    // taken from.
+    final charges =
+        forecast != null &&
+            (s.kind == SourceKind.account ||
+                forecast.forecast.bySource.containsKey(s.id))
+        ? forecast.of(s.id)
+        : null;
     return Card(
       key: ValueKey('source-card-${s.id}'),
       clipBehavior: Clip.antiAlias,
@@ -113,17 +137,17 @@ class _SourceCard extends ConsumerWidget {
             minTileHeight: 64,
             leading: LetterBadge(s.name),
             title: Text(s.name),
-            subtitle: Text(
-              s.kind == SourceKind.card &&
-                      s.statementDay != null &&
-                      s.dueDay != null
-                  ? '${l10n.sourceKindCard} · '
-                        '${l10n.cardSummary(s.statementDay!, s.dueDay!)}'
-                  : l10n.sourceKindProvider,
-              style: secondary,
-            ),
+            subtitle: Text(switch (s.kind) {
+              SourceKind.card when s.statementDay != null && s.dueDay != null =>
+                '${l10n.sourceKindCard} · '
+                    '${l10n.cardSummary(s.statementDay!, s.dueDay!)}',
+              SourceKind.card => l10n.sourceKindCard,
+              SourceKind.account => l10n.sourceKindAccount,
+              SourceKind.provider => l10n.sourceKindProvider,
+            }, style: secondary),
             onTap: () => context.push(Routes.source(s.id)),
           ),
+          if (charges != null) ChargeSection(source: s, charges: charges),
           if (view != null) CardStatementsSection(view: view),
         ],
       ),

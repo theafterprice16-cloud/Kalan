@@ -11,8 +11,11 @@ import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
 import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 
-/// Provider ("sonra öde" service) or credit card.
-enum SourceKind { provider, card }
+/// Provider ("sonra öde" service), credit card or bank account. A bank
+/// account (18) is only where automatic payments are taken from: it is not
+/// offered as a plan's provider. Stored by name, so adding a kind needs no
+/// schema change.
+enum SourceKind { provider, card, account }
 
 /// Where a plan came from. Screenshot and pasted text readers will add
 /// values here; every origin goes through draft → confirm → save.

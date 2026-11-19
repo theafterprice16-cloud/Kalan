@@ -5,7 +5,8 @@ import 'package:drift/drift.dart' show Value, driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/date/local_date.dart';
-import 'package:kalan/core/engine/engine.dart' show PlanKind, underwayPlan;
+import 'package:kalan/core/engine/engine.dart'
+    show PaymentMethod, PlanKind, underwayPlan;
 import 'package:kalan/core/reminders/reminder_models.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
@@ -372,4 +373,61 @@ void main() {
     ]);
     await dir.delete(recursive: true);
   });
+
+  test(
+    '18: "keep in account" only for a bank account, before the payment',
+    () async {
+      final plans = PlanRepository(db);
+      final sources = SourceRepository(db, plans);
+      final account = await sources.create(
+        name: 'Maaş hesabı',
+        kind: SourceKind.account,
+      );
+      final card = await sources.create(
+        name: 'Bonus',
+        kind: SourceKind.card,
+        statementDay: 14,
+        dueDay: 24,
+      );
+      final planId = (await db.select(db.plans).getSingle()).id;
+      final before = await bodies();
+
+      await plans.setPaymentMethod(
+        planId,
+        PaymentMethod.automatic,
+        chargeSourceId: account,
+      );
+      final withAccount = await bodies();
+      expect(withAccount, hasLength(before.length));
+      expect(
+        withAccount[1],
+        '4 Aralık Cuma günü 1 ödeme var: Klarna, ₺100. '
+        'Otomatik çekilir. Maaş hesabı: ₺100 bulunsun.',
+      );
+      expect(
+        withAccount[2],
+        'Bugün 1 ödeme var: Klarna, ₺100. '
+        'Otomatik çekilir; tutar hesabında bulunsun.',
+      );
+
+      await plans.setPaymentMethod(
+        planId,
+        PaymentMethod.automatic,
+        chargeSourceId: card,
+      );
+      final withCard = await bodies();
+      expect(withCard, hasLength(before.length));
+      expect(
+        withCard.where((b) => b.contains('bulunsun.') && b.contains('Bonus')),
+        isEmpty,
+      );
+      expect(
+        withCard[1],
+        endsWith(
+          'Otomatik çekilir; tutar hesabında '
+          'bulunsun.',
+        ),
+      );
+    },
+  );
 }

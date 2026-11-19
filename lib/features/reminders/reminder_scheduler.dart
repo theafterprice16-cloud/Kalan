@@ -211,6 +211,12 @@ class ReminderScheduler {
     // the screens show (card statement and weekend shift applied).
     final plans = await PlanRepository(db).all();
     final recurring = await RecurringRepository(db).all();
+    final sources = await db.select(db.sources).get();
+    // Bank accounts automatic payments are taken from (18), by id.
+    final accounts = {
+      for (final s in sources)
+        if (s.kind == SourceKind.account) s.id: ChargeAccount(s.id, s.name),
+    };
     final payments = <ReminderPayment>[
       for (final p in plans)
         for (final pay in p.payments)
@@ -226,6 +232,7 @@ class ReminderScheduler {
             ref: PlanPaymentRef(pay.id),
             repeat: p.plan.repeatMode,
             method: p.plan.paymentMethod,
+            account: accounts[p.chargeSourceId],
           ),
       for (final r in recurring)
         for (final date in r.occurrences(
@@ -273,7 +280,7 @@ class ReminderScheduler {
       today: today,
       payments: payments,
       cards: [
-        for (final source in await db.select(db.sources).get())
+        for (final source in sources)
           if (source.statementReminderEnabled)
             if (source.cardTerms case final terms?)
               StatementCard(

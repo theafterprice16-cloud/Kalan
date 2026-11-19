@@ -987,7 +987,9 @@ class SourceNameField extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final names = <String>{
-      for (final s in sources) s.name,
+      // Bank accounts are where money is taken from, not providers.
+      for (final s in sources)
+        if (s.kind != SourceKind.account) s.name,
       ...providerSuggestions,
     }.toList();
     return RawAutocomplete<String>(

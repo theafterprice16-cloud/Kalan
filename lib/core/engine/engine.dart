@@ -5,6 +5,7 @@ export '../date/local_date.dart';
 export 'amount_entry.dart';
 export 'busy_week.dart';
 export 'card_statement.dart';
+export 'charge_forecast.dart';
 export 'past_due.dart';
 export 'pay_later.dart';
 export 'pay_period.dart';

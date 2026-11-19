@@ -96,6 +96,7 @@ class ReminderPayment {
     this.ref,
     this.repeat,
     this.method,
+    this.account,
   });
 
   final String name;
@@ -114,6 +115,25 @@ class ReminderPayment {
   /// How the plan is paid; null is "not set" (recurring payments too):
   /// the reminders are exactly as before payment methods existed.
   final PaymentMethod? method;
+
+  /// The bank account an automatic payment is taken from (18); null for
+  /// cards, providers, no source, other methods and recurring payments.
+  final ChargeAccount? account;
+}
+
+/// A bank account by id (two accounts may share a name) and name.
+class ChargeAccount {
+  const ChargeAccount(this.id, this.name);
+
+  final int id;
+  final String name;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ChargeAccount && other.id == id && other.name == name;
+
+  @override
+  int get hashCode => Object.hash(id, name);
 }
 
 /// A stored payment a notification points at: a plan payment by id, or a
@@ -256,13 +276,16 @@ abstract interface class ReminderTexts {
   ///
   /// With a [method] ([reminderMethodOf]) the text says what that method
   /// needs: the money in the account, or going to pay. Null: the text as
-  /// before payment methods existed.
+  /// before payment methods existed. With an [account] ([reminderAccountOf])
+  /// the automatic note names it and the total ("Keep {amount} in ..."),
+  /// only while amounts are shown.
   ReminderText describe({
     required ReminderKind kind,
     required List<ReminderPayment> payments,
     required List<LocalDate> dueDates,
     required bool showAmounts,
     PaymentMethod? method,
+    String? account,
   });
 
   /// Text of the payday summary. Without [showAmounts] only the number of
@@ -334,6 +357,30 @@ PaymentMethod? reminderMethodOf(
   if (kind == ReminderKind.overdue || payments.isEmpty) return null;
   final method = payments.first.method;
   return payments.every((p) => p.method == method) ? method : null;
+}
+
+/// The bank account a notification's "keep the amount there" sentence
+/// names (18): only for an "ahead" reminder with amounts shown, one due
+/// date, and every payment taken automatically from that same account.
+/// Null otherwise: the text stays as before. Never a new notification.
+ChargeAccount? reminderAccountOf(
+  ReminderKind kind,
+  List<ReminderPayment> payments, {
+  required bool showAmounts,
+}) {
+  if (kind != ReminderKind.ahead || !showAmounts || payments.isEmpty) {
+    return null;
+  }
+  final account = payments.first.account;
+  final date = payments.first.date;
+  if (account == null) return null;
+  final same = payments.every(
+    (p) =>
+        p.account == account &&
+        p.date == date &&
+        p.method == PaymentMethod.automatic,
+  );
+  return same ? account : null;
 }
 
 /// What the home screen will show for the pay period starting on [date],
