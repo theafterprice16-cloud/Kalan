@@ -826,6 +826,69 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     ),
   );
   @override
+  late final GeneratedColumnWithTypeConverter<PlanStatus, String> status =
+      GeneratedColumn<String>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('open'),
+      ).withConverter<PlanStatus>($PlansTable.$converterstatus);
+  @override
+  late final GeneratedColumnWithTypeConverter<CloseReason?, String>
+  closeReason = GeneratedColumn<String>(
+    'close_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<CloseReason?>($PlansTable.$convertercloseReasonn);
+  static const VerificationMeta _heldSinceDayMeta = const VerificationMeta(
+    'heldSinceDay',
+  );
+  @override
+  late final GeneratedColumn<int> heldSinceDay = GeneratedColumn<int>(
+    'held_since_day',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _holdCheckDayMeta = const VerificationMeta(
+    'holdCheckDay',
+  );
+  @override
+  late final GeneratedColumn<int> holdCheckDay = GeneratedColumn<int>(
+    'hold_check_day',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reopenedDayMeta = const VerificationMeta(
+    'reopenedDay',
+  );
+  @override
+  late final GeneratedColumn<int> reopenedDay = GeneratedColumn<int>(
+    'reopened_day',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _closedDayMeta = const VerificationMeta(
+    'closedDay',
+  );
+  @override
+  late final GeneratedColumn<int> closedDay = GeneratedColumn<int>(
+    'closed_day',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     sourceId,
@@ -845,6 +908,12 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     intervalDays,
     paymentMethod,
     chargeSourceId,
+    status,
+    closeReason,
+    heldSinceDay,
+    holdCheckDay,
+    reopenedDay,
+    closedDay,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -962,6 +1031,39 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         ),
       );
     }
+    if (data.containsKey('held_since_day')) {
+      context.handle(
+        _heldSinceDayMeta,
+        heldSinceDay.isAcceptableOrUnknown(
+          data['held_since_day']!,
+          _heldSinceDayMeta,
+        ),
+      );
+    }
+    if (data.containsKey('hold_check_day')) {
+      context.handle(
+        _holdCheckDayMeta,
+        holdCheckDay.isAcceptableOrUnknown(
+          data['hold_check_day']!,
+          _holdCheckDayMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reopened_day')) {
+      context.handle(
+        _reopenedDayMeta,
+        reopenedDay.isAcceptableOrUnknown(
+          data['reopened_day']!,
+          _reopenedDayMeta,
+        ),
+      );
+    }
+    if (data.containsKey('closed_day')) {
+      context.handle(
+        _closedDayMeta,
+        closedDay.isAcceptableOrUnknown(data['closed_day']!, _closedDayMeta),
+      );
+    }
     return context;
   }
 
@@ -1053,6 +1155,34 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         DriftSqlType.int,
         data['${effectivePrefix}charge_source_id'],
       ),
+      status: $PlansTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      closeReason: $PlansTable.$convertercloseReasonn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}close_reason'],
+        ),
+      ),
+      heldSinceDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}held_since_day'],
+      ),
+      holdCheckDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}hold_check_day'],
+      ),
+      reopenedDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reopened_day'],
+      ),
+      closedDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}closed_day'],
+      ),
     );
   }
 
@@ -1085,6 +1215,12 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
   $converterpaymentMethodn = JsonTypeConverter2.asNullable(
     $converterpaymentMethod,
   );
+  static JsonTypeConverter2<PlanStatus, String, String> $converterstatus =
+      const EnumNameConverter<PlanStatus>(PlanStatus.values);
+  static JsonTypeConverter2<CloseReason, String, String> $convertercloseReason =
+      const EnumNameConverter<CloseReason>(CloseReason.values);
+  static JsonTypeConverter2<CloseReason?, String?, String?>
+  $convertercloseReasonn = JsonTypeConverter2.asNullable($convertercloseReason);
 }
 
 class PlanRow extends DataClass implements Insertable<PlanRow> {
@@ -1126,6 +1262,29 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   /// card. Null is "not chosen"; a card plan then means its own card
   /// (`PlanWithPayments.chargeSource`). Deleting the source clears it.
   final int? chargeSourceId;
+
+  /// Open, on hold or closed (schema v14, 19). Every existing plan is
+  /// open: a plan whose payments are all paid is in the archive as before.
+  final PlanStatus status;
+
+  /// Why a closed plan was closed: return or cancellation. Null for every
+  /// other plan, finished (all paid) plans included.
+  final CloseReason? closeReason;
+
+  /// The day the plan was put on hold (epoch day). Kept after "Reopen",
+  /// with [reopenedDay], to count payments whose date passed meanwhile.
+  final int? heldSinceDay;
+
+  /// Where the 30 days before "Still waiting on the return?" start: the
+  /// hold day, or the day "Keep on hold" was last chosen.
+  final int? holdCheckDay;
+
+  /// The day a plan on hold was reopened; null while on hold or never held.
+  final int? reopenedDay;
+
+  /// The day a plan was closed; null for every other plan. Closing cannot
+  /// be undone.
+  final int? closedDay;
   const PlanRow({
     required this.id,
     this.sourceId,
@@ -1145,6 +1304,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     this.intervalDays,
     this.paymentMethod,
     this.chargeSourceId,
+    required this.status,
+    this.closeReason,
+    this.heldSinceDay,
+    this.holdCheckDay,
+    this.reopenedDay,
+    this.closedDay,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1199,6 +1364,28 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     if (!nullToAbsent || chargeSourceId != null) {
       map['charge_source_id'] = Variable<int>(chargeSourceId);
     }
+    {
+      map['status'] = Variable<String>(
+        $PlansTable.$converterstatus.toSql(status),
+      );
+    }
+    if (!nullToAbsent || closeReason != null) {
+      map['close_reason'] = Variable<String>(
+        $PlansTable.$convertercloseReasonn.toSql(closeReason),
+      );
+    }
+    if (!nullToAbsent || heldSinceDay != null) {
+      map['held_since_day'] = Variable<int>(heldSinceDay);
+    }
+    if (!nullToAbsent || holdCheckDay != null) {
+      map['hold_check_day'] = Variable<int>(holdCheckDay);
+    }
+    if (!nullToAbsent || reopenedDay != null) {
+      map['reopened_day'] = Variable<int>(reopenedDay);
+    }
+    if (!nullToAbsent || closedDay != null) {
+      map['closed_day'] = Variable<int>(closedDay);
+    }
     return map;
   }
 
@@ -1242,6 +1429,22 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       chargeSourceId: chargeSourceId == null && nullToAbsent
           ? const Value.absent()
           : Value(chargeSourceId),
+      status: Value(status),
+      closeReason: closeReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closeReason),
+      heldSinceDay: heldSinceDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(heldSinceDay),
+      holdCheckDay: holdCheckDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(holdCheckDay),
+      reopenedDay: reopenedDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reopenedDay),
+      closedDay: closedDay == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedDay),
     );
   }
 
@@ -1279,6 +1482,16 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         serializer.fromJson<String?>(json['paymentMethod']),
       ),
       chargeSourceId: serializer.fromJson<int?>(json['chargeSourceId']),
+      status: $PlansTable.$converterstatus.fromJson(
+        serializer.fromJson<String>(json['status']),
+      ),
+      closeReason: $PlansTable.$convertercloseReasonn.fromJson(
+        serializer.fromJson<String?>(json['closeReason']),
+      ),
+      heldSinceDay: serializer.fromJson<int?>(json['heldSinceDay']),
+      holdCheckDay: serializer.fromJson<int?>(json['holdCheckDay']),
+      reopenedDay: serializer.fromJson<int?>(json['reopenedDay']),
+      closedDay: serializer.fromJson<int?>(json['closedDay']),
     );
   }
   @override
@@ -1313,6 +1526,16 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         $PlansTable.$converterpaymentMethodn.toJson(paymentMethod),
       ),
       'chargeSourceId': serializer.toJson<int?>(chargeSourceId),
+      'status': serializer.toJson<String>(
+        $PlansTable.$converterstatus.toJson(status),
+      ),
+      'closeReason': serializer.toJson<String?>(
+        $PlansTable.$convertercloseReasonn.toJson(closeReason),
+      ),
+      'heldSinceDay': serializer.toJson<int?>(heldSinceDay),
+      'holdCheckDay': serializer.toJson<int?>(holdCheckDay),
+      'reopenedDay': serializer.toJson<int?>(reopenedDay),
+      'closedDay': serializer.toJson<int?>(closedDay),
     };
   }
 
@@ -1335,6 +1558,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     Value<int?> intervalDays = const Value.absent(),
     Value<PaymentMethod?> paymentMethod = const Value.absent(),
     Value<int?> chargeSourceId = const Value.absent(),
+    PlanStatus? status,
+    Value<CloseReason?> closeReason = const Value.absent(),
+    Value<int?> heldSinceDay = const Value.absent(),
+    Value<int?> holdCheckDay = const Value.absent(),
+    Value<int?> reopenedDay = const Value.absent(),
+    Value<int?> closedDay = const Value.absent(),
   }) => PlanRow(
     id: id ?? this.id,
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
@@ -1362,6 +1591,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     chargeSourceId: chargeSourceId.present
         ? chargeSourceId.value
         : this.chargeSourceId,
+    status: status ?? this.status,
+    closeReason: closeReason.present ? closeReason.value : this.closeReason,
+    heldSinceDay: heldSinceDay.present ? heldSinceDay.value : this.heldSinceDay,
+    holdCheckDay: holdCheckDay.present ? holdCheckDay.value : this.holdCheckDay,
+    reopenedDay: reopenedDay.present ? reopenedDay.value : this.reopenedDay,
+    closedDay: closedDay.present ? closedDay.value : this.closedDay,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -1407,6 +1642,20 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       chargeSourceId: data.chargeSourceId.present
           ? data.chargeSourceId.value
           : this.chargeSourceId,
+      status: data.status.present ? data.status.value : this.status,
+      closeReason: data.closeReason.present
+          ? data.closeReason.value
+          : this.closeReason,
+      heldSinceDay: data.heldSinceDay.present
+          ? data.heldSinceDay.value
+          : this.heldSinceDay,
+      holdCheckDay: data.holdCheckDay.present
+          ? data.holdCheckDay.value
+          : this.holdCheckDay,
+      reopenedDay: data.reopenedDay.present
+          ? data.reopenedDay.value
+          : this.reopenedDay,
+      closedDay: data.closedDay.present ? data.closedDay.value : this.closedDay,
     );
   }
 
@@ -1430,13 +1679,19 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('payLaterValue: $payLaterValue, ')
           ..write('intervalDays: $intervalDays, ')
           ..write('paymentMethod: $paymentMethod, ')
-          ..write('chargeSourceId: $chargeSourceId')
+          ..write('chargeSourceId: $chargeSourceId, ')
+          ..write('status: $status, ')
+          ..write('closeReason: $closeReason, ')
+          ..write('heldSinceDay: $heldSinceDay, ')
+          ..write('holdCheckDay: $holdCheckDay, ')
+          ..write('reopenedDay: $reopenedDay, ')
+          ..write('closedDay: $closedDay')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     sourceId,
     title,
@@ -1455,7 +1710,13 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     intervalDays,
     paymentMethod,
     chargeSourceId,
-  );
+    status,
+    closeReason,
+    heldSinceDay,
+    holdCheckDay,
+    reopenedDay,
+    closedDay,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1477,7 +1738,13 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.payLaterValue == this.payLaterValue &&
           other.intervalDays == this.intervalDays &&
           other.paymentMethod == this.paymentMethod &&
-          other.chargeSourceId == this.chargeSourceId);
+          other.chargeSourceId == this.chargeSourceId &&
+          other.status == this.status &&
+          other.closeReason == this.closeReason &&
+          other.heldSinceDay == this.heldSinceDay &&
+          other.holdCheckDay == this.holdCheckDay &&
+          other.reopenedDay == this.reopenedDay &&
+          other.closedDay == this.closedDay);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
@@ -1499,6 +1766,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<int?> intervalDays;
   final Value<PaymentMethod?> paymentMethod;
   final Value<int?> chargeSourceId;
+  final Value<PlanStatus> status;
+  final Value<CloseReason?> closeReason;
+  final Value<int?> heldSinceDay;
+  final Value<int?> holdCheckDay;
+  final Value<int?> reopenedDay;
+  final Value<int?> closedDay;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1518,6 +1791,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.intervalDays = const Value.absent(),
     this.paymentMethod = const Value.absent(),
     this.chargeSourceId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.closeReason = const Value.absent(),
+    this.heldSinceDay = const Value.absent(),
+    this.holdCheckDay = const Value.absent(),
+    this.reopenedDay = const Value.absent(),
+    this.closedDay = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
@@ -1538,6 +1817,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.intervalDays = const Value.absent(),
     this.paymentMethod = const Value.absent(),
     this.chargeSourceId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.closeReason = const Value.absent(),
+    this.heldSinceDay = const Value.absent(),
+    this.holdCheckDay = const Value.absent(),
+    this.reopenedDay = const Value.absent(),
+    this.closedDay = const Value.absent(),
   }) : kind = Value(kind),
        installmentCount = Value(installmentCount),
        origin = Value(origin);
@@ -1560,6 +1845,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<int>? intervalDays,
     Expression<String>? paymentMethod,
     Expression<int>? chargeSourceId,
+    Expression<String>? status,
+    Expression<String>? closeReason,
+    Expression<int>? heldSinceDay,
+    Expression<int>? holdCheckDay,
+    Expression<int>? reopenedDay,
+    Expression<int>? closedDay,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1580,6 +1871,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       if (intervalDays != null) 'interval_days': intervalDays,
       if (paymentMethod != null) 'payment_method': paymentMethod,
       if (chargeSourceId != null) 'charge_source_id': chargeSourceId,
+      if (status != null) 'status': status,
+      if (closeReason != null) 'close_reason': closeReason,
+      if (heldSinceDay != null) 'held_since_day': heldSinceDay,
+      if (holdCheckDay != null) 'hold_check_day': holdCheckDay,
+      if (reopenedDay != null) 'reopened_day': reopenedDay,
+      if (closedDay != null) 'closed_day': closedDay,
     });
   }
 
@@ -1602,6 +1899,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<int?>? intervalDays,
     Value<PaymentMethod?>? paymentMethod,
     Value<int?>? chargeSourceId,
+    Value<PlanStatus>? status,
+    Value<CloseReason?>? closeReason,
+    Value<int?>? heldSinceDay,
+    Value<int?>? holdCheckDay,
+    Value<int?>? reopenedDay,
+    Value<int?>? closedDay,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -1622,6 +1925,12 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       intervalDays: intervalDays ?? this.intervalDays,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       chargeSourceId: chargeSourceId ?? this.chargeSourceId,
+      status: status ?? this.status,
+      closeReason: closeReason ?? this.closeReason,
+      heldSinceDay: heldSinceDay ?? this.heldSinceDay,
+      holdCheckDay: holdCheckDay ?? this.holdCheckDay,
+      reopenedDay: reopenedDay ?? this.reopenedDay,
+      closedDay: closedDay ?? this.closedDay,
     );
   }
 
@@ -1692,6 +2001,28 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     if (chargeSourceId.present) {
       map['charge_source_id'] = Variable<int>(chargeSourceId.value);
     }
+    if (status.present) {
+      map['status'] = Variable<String>(
+        $PlansTable.$converterstatus.toSql(status.value),
+      );
+    }
+    if (closeReason.present) {
+      map['close_reason'] = Variable<String>(
+        $PlansTable.$convertercloseReasonn.toSql(closeReason.value),
+      );
+    }
+    if (heldSinceDay.present) {
+      map['held_since_day'] = Variable<int>(heldSinceDay.value);
+    }
+    if (holdCheckDay.present) {
+      map['hold_check_day'] = Variable<int>(holdCheckDay.value);
+    }
+    if (reopenedDay.present) {
+      map['reopened_day'] = Variable<int>(reopenedDay.value);
+    }
+    if (closedDay.present) {
+      map['closed_day'] = Variable<int>(closedDay.value);
+    }
     return map;
   }
 
@@ -1715,7 +2046,13 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('payLaterValue: $payLaterValue, ')
           ..write('intervalDays: $intervalDays, ')
           ..write('paymentMethod: $paymentMethod, ')
-          ..write('chargeSourceId: $chargeSourceId')
+          ..write('chargeSourceId: $chargeSourceId, ')
+          ..write('status: $status, ')
+          ..write('closeReason: $closeReason, ')
+          ..write('heldSinceDay: $heldSinceDay, ')
+          ..write('holdCheckDay: $holdCheckDay, ')
+          ..write('reopenedDay: $reopenedDay, ')
+          ..write('closedDay: $closedDay')
           ..write(')'))
         .toString();
   }
@@ -5191,6 +5528,12 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<int?> intervalDays,
   Value<PaymentMethod?> paymentMethod,
   Value<int?> chargeSourceId,
+  Value<PlanStatus> status,
+  Value<CloseReason?> closeReason,
+  Value<int?> heldSinceDay,
+  Value<int?> holdCheckDay,
+  Value<int?> reopenedDay,
+  Value<int?> closedDay,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -5211,6 +5554,12 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int?> intervalDays,
   Value<PaymentMethod?> paymentMethod,
   Value<int?> chargeSourceId,
+  Value<PlanStatus> status,
+  Value<CloseReason?> closeReason,
+  Value<int?> heldSinceDay,
+  Value<int?> holdCheckDay,
+  Value<int?> reopenedDay,
+  Value<int?> closedDay,
 });
 
 final class $$PlansTableReferences
@@ -5361,6 +5710,38 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
   get paymentMethod => $composableBuilder(
     column: $table.paymentMethod,
     builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<PlanStatus, PlanStatus, String> get status =>
+      $composableBuilder(
+        column: $table.status,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnWithTypeConverterFilters<CloseReason?, CloseReason, String>
+  get closeReason => $composableBuilder(
+    column: $table.closeReason,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get heldSinceDay => $composableBuilder(
+    column: $table.heldSinceDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get holdCheckDay => $composableBuilder(
+    column: $table.holdCheckDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reopenedDay => $composableBuilder(
+    column: $table.reopenedDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get closedDay => $composableBuilder(
+    column: $table.closedDay,
+    builder: (column) => ColumnFilters(column),
   );
 
   $$SourcesTableFilterComposer get sourceId {
@@ -5524,6 +5905,36 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get closeReason => $composableBuilder(
+    column: $table.closeReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get heldSinceDay => $composableBuilder(
+    column: $table.heldSinceDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get holdCheckDay => $composableBuilder(
+    column: $table.holdCheckDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reopenedDay => $composableBuilder(
+    column: $table.reopenedDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get closedDay => $composableBuilder(
+    column: $table.closedDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5653,6 +6064,33 @@ class $$PlansTableAnnotationComposer
         builder: (column) => column,
       );
 
+  GeneratedColumnWithTypeConverter<PlanStatus, String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<CloseReason?, String> get closeReason =>
+      $composableBuilder(
+        column: $table.closeReason,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<int> get heldSinceDay => $composableBuilder(
+    column: $table.heldSinceDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get holdCheckDay => $composableBuilder(
+    column: $table.holdCheckDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reopenedDay => $composableBuilder(
+    column: $table.reopenedDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get closedDay =>
+      $composableBuilder(column: $table.closedDay, builder: (column) => column);
+
   $$SourcesTableAnnotationComposer get sourceId {
     final $$SourcesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -5775,6 +6213,12 @@ class $$PlansTableTableManager
                 Value<int?> intervalDays = const Value.absent(),
                 Value<PaymentMethod?> paymentMethod = const Value.absent(),
                 Value<int?> chargeSourceId = const Value.absent(),
+                Value<PlanStatus> status = const Value.absent(),
+                Value<CloseReason?> closeReason = const Value.absent(),
+                Value<int?> heldSinceDay = const Value.absent(),
+                Value<int?> holdCheckDay = const Value.absent(),
+                Value<int?> reopenedDay = const Value.absent(),
+                Value<int?> closedDay = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -5794,6 +6238,12 @@ class $$PlansTableTableManager
                 intervalDays: intervalDays,
                 paymentMethod: paymentMethod,
                 chargeSourceId: chargeSourceId,
+                status: status,
+                closeReason: closeReason,
+                heldSinceDay: heldSinceDay,
+                holdCheckDay: holdCheckDay,
+                reopenedDay: reopenedDay,
+                closedDay: closedDay,
               ),
           createCompanionCallback:
               ({
@@ -5815,6 +6265,12 @@ class $$PlansTableTableManager
                 Value<int?> intervalDays = const Value.absent(),
                 Value<PaymentMethod?> paymentMethod = const Value.absent(),
                 Value<int?> chargeSourceId = const Value.absent(),
+                Value<PlanStatus> status = const Value.absent(),
+                Value<CloseReason?> closeReason = const Value.absent(),
+                Value<int?> heldSinceDay = const Value.absent(),
+                Value<int?> holdCheckDay = const Value.absent(),
+                Value<int?> reopenedDay = const Value.absent(),
+                Value<int?> closedDay = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -5834,6 +6290,12 @@ class $$PlansTableTableManager
                 intervalDays: intervalDays,
                 paymentMethod: paymentMethod,
                 chargeSourceId: chargeSourceId,
+                status: status,
+                closeReason: closeReason,
+                heldSinceDay: heldSinceDay,
+                holdCheckDay: holdCheckDay,
+                reopenedDay: reopenedDay,
+                closedDay: closedDay,
               ),
           withReferenceMapper: (p0) => p0
               .map(
