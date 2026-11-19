@@ -528,6 +528,53 @@ void main() {
     await db.close();
   });
 
+  test('v12 -> current: statement reminder off, 2 days, cards kept', () async {
+    final schema = await verifier.schemaAt(12);
+    seedCommon(schema);
+    schema.rawDatabase.execute(
+      'INSERT INTO sources (id, name, kind, statement_day, due_day) '
+      "VALUES (2, 'Maximum', 'card', 14, 24)",
+    );
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, db.schemaVersion);
+    final sources = await (db.select(
+      db.sources,
+    )..orderBy([(s) => OrderingTerm.asc(s.id)])).get();
+    expect(
+      sources.map(
+        (s) => (
+          s.name,
+          s.statementDay,
+          s.dueDay,
+          s.statementReminderEnabled,
+          s.statementReminderDays,
+        ),
+      ),
+      [('Klarna', null, null, false, 2), ('Maximum', 14, 24, false, 2)],
+    );
+    await db.close();
+  });
+
+  test('statement reminder days outside 1 and 2 are refused', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    Future<int> insert(int days) => db
+        .into(db.sources)
+        .insert(
+          SourcesCompanion.insert(
+            name: 'Card $days',
+            kind: SourceKind.card,
+            statementDay: const Value(14),
+            dueDay: const Value(24),
+            statementReminderDays: Value(days),
+          ),
+        );
+    await insert(1);
+    await insert(2);
+    await expectLater(insert(3), throwsA(isA<SqliteException>()));
+    await expectLater(insert(0), throwsA(isA<SqliteException>()));
+    await db.close();
+  });
+
   test('the amount entry is stored by name', () async {
     final db = AppDatabase(NativeDatabase.memory());
     await db

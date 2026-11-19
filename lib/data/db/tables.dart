@@ -34,6 +34,16 @@ class Sources extends Table {
   BoolColumn get shiftDueToBusinessDay =>
       boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  /// Statement closing reminder (schema v13): off by default, only for
+  /// cards with a statement day.
+  BoolColumn get statementReminderEnabled =>
+      boolean().withDefault(const Constant(false))();
+
+  /// How many days before the statement date it comes: 1 or 2.
+  IntColumn get statementReminderDays => integer()
+      .check(statementReminderDays.isIn(const [1, 2]))
+      .withDefault(const Constant(2))();
 }
 
 @DataClassName('PlanRow')

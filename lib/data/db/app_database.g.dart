@@ -95,6 +95,33 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _statementReminderEnabledMeta =
+      const VerificationMeta('statementReminderEnabled');
+  @override
+  late final GeneratedColumn<bool> statementReminderEnabled =
+      GeneratedColumn<bool>(
+        'statement_reminder_enabled',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("statement_reminder_enabled" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _statementReminderDaysMeta =
+      const VerificationMeta('statementReminderDays');
+  @override
+  late final GeneratedColumn<int> statementReminderDays = GeneratedColumn<int>(
+    'statement_reminder_days',
+    aliasedName,
+    false,
+    check: () => statementReminderDays.isIn(const [1, 2]),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(2),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -104,6 +131,8 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
     dueDay,
     shiftDueToBusinessDay,
     createdAt,
+    statementReminderEnabled,
+    statementReminderDays,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -158,6 +187,24 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('statement_reminder_enabled')) {
+      context.handle(
+        _statementReminderEnabledMeta,
+        statementReminderEnabled.isAcceptableOrUnknown(
+          data['statement_reminder_enabled']!,
+          _statementReminderEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('statement_reminder_days')) {
+      context.handle(
+        _statementReminderDaysMeta,
+        statementReminderDays.isAcceptableOrUnknown(
+          data['statement_reminder_days']!,
+          _statementReminderDaysMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -197,6 +244,14 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      statementReminderEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}statement_reminder_enabled'],
+      )!,
+      statementReminderDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}statement_reminder_days'],
+      )!,
     );
   }
 
@@ -217,6 +272,13 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
   final int? dueDay;
   final bool shiftDueToBusinessDay;
   final DateTime createdAt;
+
+  /// Statement closing reminder (schema v13): off by default, only for
+  /// cards with a statement day.
+  final bool statementReminderEnabled;
+
+  /// How many days before the statement date it comes: 1 or 2.
+  final int statementReminderDays;
   const SourceRow({
     required this.id,
     required this.name,
@@ -225,6 +287,8 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     this.dueDay,
     required this.shiftDueToBusinessDay,
     required this.createdAt,
+    required this.statementReminderEnabled,
+    required this.statementReminderDays,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -242,6 +306,10 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     }
     map['shift_due_to_business_day'] = Variable<bool>(shiftDueToBusinessDay);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['statement_reminder_enabled'] = Variable<bool>(
+      statementReminderEnabled,
+    );
+    map['statement_reminder_days'] = Variable<int>(statementReminderDays);
     return map;
   }
 
@@ -258,6 +326,8 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           : Value(dueDay),
       shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
       createdAt: Value(createdAt),
+      statementReminderEnabled: Value(statementReminderEnabled),
+      statementReminderDays: Value(statementReminderDays),
     );
   }
 
@@ -278,6 +348,12 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
         json['shiftDueToBusinessDay'],
       ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      statementReminderEnabled: serializer.fromJson<bool>(
+        json['statementReminderEnabled'],
+      ),
+      statementReminderDays: serializer.fromJson<int>(
+        json['statementReminderDays'],
+      ),
     );
   }
   @override
@@ -293,6 +369,10 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
       'dueDay': serializer.toJson<int?>(dueDay),
       'shiftDueToBusinessDay': serializer.toJson<bool>(shiftDueToBusinessDay),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'statementReminderEnabled': serializer.toJson<bool>(
+        statementReminderEnabled,
+      ),
+      'statementReminderDays': serializer.toJson<int>(statementReminderDays),
     };
   }
 
@@ -304,6 +384,8 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     Value<int?> dueDay = const Value.absent(),
     bool? shiftDueToBusinessDay,
     DateTime? createdAt,
+    bool? statementReminderEnabled,
+    int? statementReminderDays,
   }) => SourceRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -312,6 +394,9 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     dueDay: dueDay.present ? dueDay.value : this.dueDay,
     shiftDueToBusinessDay: shiftDueToBusinessDay ?? this.shiftDueToBusinessDay,
     createdAt: createdAt ?? this.createdAt,
+    statementReminderEnabled:
+        statementReminderEnabled ?? this.statementReminderEnabled,
+    statementReminderDays: statementReminderDays ?? this.statementReminderDays,
   );
   SourceRow copyWithCompanion(SourcesCompanion data) {
     return SourceRow(
@@ -326,6 +411,12 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           ? data.shiftDueToBusinessDay.value
           : this.shiftDueToBusinessDay,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      statementReminderEnabled: data.statementReminderEnabled.present
+          ? data.statementReminderEnabled.value
+          : this.statementReminderEnabled,
+      statementReminderDays: data.statementReminderDays.present
+          ? data.statementReminderDays.value
+          : this.statementReminderDays,
     );
   }
 
@@ -338,7 +429,9 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           ..write('statementDay: $statementDay, ')
           ..write('dueDay: $dueDay, ')
           ..write('shiftDueToBusinessDay: $shiftDueToBusinessDay, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('statementReminderEnabled: $statementReminderEnabled, ')
+          ..write('statementReminderDays: $statementReminderDays')
           ..write(')'))
         .toString();
   }
@@ -352,6 +445,8 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     dueDay,
     shiftDueToBusinessDay,
     createdAt,
+    statementReminderEnabled,
+    statementReminderDays,
   );
   @override
   bool operator ==(Object other) =>
@@ -363,7 +458,9 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           other.statementDay == this.statementDay &&
           other.dueDay == this.dueDay &&
           other.shiftDueToBusinessDay == this.shiftDueToBusinessDay &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.statementReminderEnabled == this.statementReminderEnabled &&
+          other.statementReminderDays == this.statementReminderDays);
 }
 
 class SourcesCompanion extends UpdateCompanion<SourceRow> {
@@ -374,6 +471,8 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
   final Value<int?> dueDay;
   final Value<bool> shiftDueToBusinessDay;
   final Value<DateTime> createdAt;
+  final Value<bool> statementReminderEnabled;
+  final Value<int> statementReminderDays;
   const SourcesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -382,6 +481,8 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     this.dueDay = const Value.absent(),
     this.shiftDueToBusinessDay = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.statementReminderEnabled = const Value.absent(),
+    this.statementReminderDays = const Value.absent(),
   });
   SourcesCompanion.insert({
     this.id = const Value.absent(),
@@ -391,6 +492,8 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     this.dueDay = const Value.absent(),
     this.shiftDueToBusinessDay = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.statementReminderEnabled = const Value.absent(),
+    this.statementReminderDays = const Value.absent(),
   }) : name = Value(name),
        kind = Value(kind);
   static Insertable<SourceRow> custom({
@@ -401,6 +504,8 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     Expression<int>? dueDay,
     Expression<bool>? shiftDueToBusinessDay,
     Expression<DateTime>? createdAt,
+    Expression<bool>? statementReminderEnabled,
+    Expression<int>? statementReminderDays,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -411,6 +516,10 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
       if (shiftDueToBusinessDay != null)
         'shift_due_to_business_day': shiftDueToBusinessDay,
       if (createdAt != null) 'created_at': createdAt,
+      if (statementReminderEnabled != null)
+        'statement_reminder_enabled': statementReminderEnabled,
+      if (statementReminderDays != null)
+        'statement_reminder_days': statementReminderDays,
     });
   }
 
@@ -422,6 +531,8 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     Value<int?>? dueDay,
     Value<bool>? shiftDueToBusinessDay,
     Value<DateTime>? createdAt,
+    Value<bool>? statementReminderEnabled,
+    Value<int>? statementReminderDays,
   }) {
     return SourcesCompanion(
       id: id ?? this.id,
@@ -432,6 +543,10 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
       shiftDueToBusinessDay:
           shiftDueToBusinessDay ?? this.shiftDueToBusinessDay,
       createdAt: createdAt ?? this.createdAt,
+      statementReminderEnabled:
+          statementReminderEnabled ?? this.statementReminderEnabled,
+      statementReminderDays:
+          statementReminderDays ?? this.statementReminderDays,
     );
   }
 
@@ -463,6 +578,16 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (statementReminderEnabled.present) {
+      map['statement_reminder_enabled'] = Variable<bool>(
+        statementReminderEnabled.value,
+      );
+    }
+    if (statementReminderDays.present) {
+      map['statement_reminder_days'] = Variable<int>(
+        statementReminderDays.value,
+      );
+    }
     return map;
   }
 
@@ -475,7 +600,9 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
           ..write('statementDay: $statementDay, ')
           ..write('dueDay: $dueDay, ')
           ..write('shiftDueToBusinessDay: $shiftDueToBusinessDay, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('statementReminderEnabled: $statementReminderEnabled, ')
+          ..write('statementReminderDays: $statementReminderDays')
           ..write(')'))
         .toString();
   }
@@ -4773,6 +4900,8 @@ typedef $$SourcesTableCreateCompanionBuilder = SourcesCompanion Function({
   Value<int?> dueDay,
   Value<bool> shiftDueToBusinessDay,
   Value<DateTime> createdAt,
+  Value<bool> statementReminderEnabled,
+  Value<int> statementReminderDays,
 });
 typedef $$SourcesTableUpdateCompanionBuilder = SourcesCompanion Function({
   Value<int> id,
@@ -4782,6 +4911,8 @@ typedef $$SourcesTableUpdateCompanionBuilder = SourcesCompanion Function({
   Value<int?> dueDay,
   Value<bool> shiftDueToBusinessDay,
   Value<DateTime> createdAt,
+  Value<bool> statementReminderEnabled,
+  Value<int> statementReminderDays,
 });
 
 class $$SourcesTableFilterComposer
@@ -4826,6 +4957,16 @@ class $$SourcesTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get statementReminderEnabled => $composableBuilder(
+    column: $table.statementReminderEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get statementReminderDays => $composableBuilder(
+    column: $table.statementReminderDays,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4873,6 +5014,16 @@ class $$SourcesTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get statementReminderEnabled => $composableBuilder(
+    column: $table.statementReminderEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get statementReminderDays => $composableBuilder(
+    column: $table.statementReminderDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SourcesTableAnnotationComposer
@@ -4908,6 +5059,16 @@ class $$SourcesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get statementReminderEnabled => $composableBuilder(
+    column: $table.statementReminderEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get statementReminderDays => $composableBuilder(
+    column: $table.statementReminderDays,
+    builder: (column) => column,
+  );
 }
 
 class $$SourcesTableTableManager
@@ -4945,6 +5106,8 @@ class $$SourcesTableTableManager
                 Value<int?> dueDay = const Value.absent(),
                 Value<bool> shiftDueToBusinessDay = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> statementReminderEnabled = const Value.absent(),
+                Value<int> statementReminderDays = const Value.absent(),
               }) => SourcesCompanion(
                 id: id,
                 name: name,
@@ -4953,6 +5116,8 @@ class $$SourcesTableTableManager
                 dueDay: dueDay,
                 shiftDueToBusinessDay: shiftDueToBusinessDay,
                 createdAt: createdAt,
+                statementReminderEnabled: statementReminderEnabled,
+                statementReminderDays: statementReminderDays,
               ),
           createCompanionCallback:
               ({
@@ -4963,6 +5128,8 @@ class $$SourcesTableTableManager
                 Value<int?> dueDay = const Value.absent(),
                 Value<bool> shiftDueToBusinessDay = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<bool> statementReminderEnabled = const Value.absent(),
+                Value<int> statementReminderDays = const Value.absent(),
               }) => SourcesCompanion.insert(
                 id: id,
                 name: name,
@@ -4971,6 +5138,8 @@ class $$SourcesTableTableManager
                 dueDay: dueDay,
                 shiftDueToBusinessDay: shiftDueToBusinessDay,
                 createdAt: createdAt,
+                statementReminderEnabled: statementReminderEnabled,
+                statementReminderDays: statementReminderDays,
               ),
           withReferenceMapper: (p0) => p0
               .map(

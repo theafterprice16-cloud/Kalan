@@ -26,6 +26,8 @@ class SourceRepository {
     int? statementDay,
     int? dueDay,
     bool shiftDueToBusinessDay = true,
+    bool statementReminderEnabled = false,
+    int statementReminderDays = 2,
   }) => _db
       .into(_db.sources)
       .insert(
@@ -35,6 +37,12 @@ class SourceRepository {
           statementDay: Value(kind == SourceKind.card ? statementDay : null),
           dueDay: Value(kind == SourceKind.card ? dueDay : null),
           shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
+          statementReminderEnabled: Value(
+            kind == SourceKind.card &&
+                statementDay != null &&
+                statementReminderEnabled,
+          ),
+          statementReminderDays: Value(statementReminderDays),
         ),
       );
 
@@ -59,6 +67,7 @@ class SourceRepository {
         : updated.copyWith(
             statementDay: const Value(null),
             dueDay: const Value(null),
+            statementReminderEnabled: false,
           );
     await _db.update(_db.sources).replace(normalized);
     final oldTerms = old?.cardTerms;
