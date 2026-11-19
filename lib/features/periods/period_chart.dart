@@ -91,6 +91,7 @@ class ComingBar extends StatelessWidget {
   final double barWidth;
 
   static const double _line = 2;
+  static const double _lineOverhang = KalanSpace.xxs;
 
   @override
   Widget build(BuildContext context) {
@@ -136,15 +137,22 @@ class ComingBar extends StatelessWidget {
               ),
             ),
           ),
-          // Wider than the bar, so it reads on the background too.
+          // A little wider than the bar, so it reads on the background
+          // too, but clear of the column's selection frame.
           if (g.incomeLine != null)
             Positioned(
-              key: const ValueKey('coming-bar-income-line'),
               left: 0,
               right: 0,
               bottom: math.max(0, g.incomeLine! - _line / 2),
               height: _line,
-              child: ColoredBox(color: colors.text),
+              child: Center(
+                child: SizedBox(
+                  key: const ValueKey('coming-bar-income-line'),
+                  width: barWidth + 2 * _lineOverhang,
+                  height: _line,
+                  child: ColoredBox(color: colors.text),
+                ),
+              ),
             ),
         ],
       ),
