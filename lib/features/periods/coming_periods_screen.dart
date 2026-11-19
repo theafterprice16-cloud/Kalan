@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
+import '../../core/date/local_date.dart';
 import '../../core/design/widgets.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../home/past_due.dart';
@@ -25,7 +26,10 @@ class ComingPeriodsScreen extends ConsumerStatefulWidget {
 }
 
 class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
-  late int _selected = widget.initialSelected;
+  /// The selected period, by its first day: when the day turns and the
+  /// periods move on, the same period stays selected (or, once it is in
+  /// the past, the current one).
+  LocalDate? _selectedStart;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +52,12 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
     final l10n = context.l10n;
     final colors = context.colors;
     final theme = Theme.of(context);
-    final index = _selected.clamp(0, periods.length - 1);
+    _selectedStart ??=
+        periods[widget.initialSelected.clamp(0, periods.length - 1)]
+            .period
+            .start;
+    final found = periods.indexWhere((p) => p.period.start == _selectedStart);
+    final index = found < 0 ? 0 : found;
     final p = periods[index];
     final left = p.leftMinor;
     final total = ref.money(context, p.spokenForMinor);
@@ -69,7 +78,8 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
               child: ComingPeriodsChart(
                 periods: periods,
                 selected: index,
-                onSelect: (i) => setState(() => _selected = i),
+                onSelect: (i) =>
+                    setState(() => _selectedStart = periods[i].period.start),
               ),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
+import 'package:kalan/features/home/payment_tile.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -281,5 +282,32 @@ void main() {
     await tester.pumpAndSettle();
     expect(badges, findsOneWidget);
     expect(find.text('Günü geçen 1 ödeme'), findsOneWidget);
+  });
+
+  testWidgets('a past-due row opens its plan from a screen reader too', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    tallPhone(tester);
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 5000000);
+        await seedPayIn4(db, first: LocalDate(2026, 10, 30), source: 'Zip');
+      },
+    );
+    final row = find.bySemanticsLabel(RegExp('21 gün önce geçti'));
+    expect(row, findsOneWidget);
+    expect(
+      tester.getSemantics(row),
+      isSemantics(isButton: true, hasTapAction: true),
+    );
+    semantics.dispose();
+  });
+
+  test('the amount only shrinks when the name would get too narrow', () {
+    // A 360-wide phone: the row left of the paid button is about 308.
+    expect(PaymentTile.maxAmountWidth(308), 308 - 40 - 12 - 8 - 96);
+    expect(PaymentTile.maxAmountWidth(100), 0);
   });
 }
