@@ -221,46 +221,51 @@ class _StatementRow extends ConsumerWidget {
               KalanSpace.xs,
               KalanSpace.xs,
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: KalanSpace.xs,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            l10n.cardStatementTitle(
-                              context.shortDate(statement.statementDate),
+            child: LayoutBuilder(
+              builder: (context, constraints) => Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Wrap(
+                          spacing: KalanSpace.xs,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              l10n.cardStatementTitle(
+                                context.shortDate(statement.statementDate),
+                              ),
+                              style: theme.textTheme.bodyLarge,
                             ),
-                            style: theme.textTheme.bodyLarge,
-                          ),
-                          if (statement.isClosed)
-                            StatementClosedNote(style: muted),
-                        ],
-                      ),
-                      Text(
-                        statement.isEmpty
-                            ? l10n.cardStatementEmptyDue(due)
-                            : l10n.cardStatementCountDue(statement.count, due),
-                        style: muted,
-                      ),
-                    ],
+                            if (statement.isClosed)
+                              StatementClosedNote(style: muted),
+                          ],
+                        ),
+                        Text(
+                          statement.isEmpty
+                              ? l10n.cardStatementEmptyDue(due)
+                              : l10n.cardStatementCountDue(
+                                  statement.count,
+                                  due,
+                                ),
+                          style: muted,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (!statement.isEmpty) ...[
-                  const SizedBox(width: KalanSpace.xs),
-                  AmountText(
-                    ref.money(context, statement.totalMinor),
-                    size: AmountSize.small,
+                  if (!statement.isEmpty) ...[
+                    const SizedBox(width: KalanSpace.xs),
+                    FittedAmount(
+                      ref.money(context, statement.totalMinor),
+                      maxWidth: constraints.maxWidth / 2,
+                    ),
+                  ],
+                  ExcludeSemantics(
+                    child: Icon(Icons.chevron_right, color: colors.textMuted),
                   ),
                 ],
-                ExcludeSemantics(
-                  child: Icon(Icons.chevron_right, color: colors.textMuted),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -290,8 +295,33 @@ class StatementClosedNote extends StatelessWidget {
           ),
         ),
         const SizedBox(width: KalanSpace.xxs),
-        Text(context.l10n.cardStatementClosed, style: style),
+        Flexible(child: Text(context.l10n.cardStatementClosed, style: style)),
       ],
     );
   }
+}
+
+/// A total that keeps to [maxWidth], shrinking only when it would not fit
+/// (very large text on a narrow phone).
+class FittedAmount extends StatelessWidget {
+  const FittedAmount(
+    this.text, {
+    required this.maxWidth,
+    super.key,
+    this.color,
+  });
+
+  final String text;
+  final double maxWidth;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+    constraints: BoxConstraints(maxWidth: maxWidth),
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerEnd,
+      child: AmountText(text, size: AmountSize.small, color: color),
+    ),
+  );
 }

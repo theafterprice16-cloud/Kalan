@@ -8,8 +8,9 @@ import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/models.dart';
+import '../home/payment_tile.dart' show PaymentTile;
 import 'card_statements.dart';
-import 'sources_screen.dart' show StatementClosedNote;
+import 'sources_screen.dart' show FittedAmount, StatementClosedNote;
 
 /// One statement of a card: its dates, how many installments and their
 /// total, and the installments one by one (decision 8). Installments paid
@@ -203,16 +204,13 @@ class _InstallmentRow extends ConsumerWidget {
             children: [
               Icon(Icons.check, size: 16, color: colors.textMuted),
               const SizedBox(width: KalanSpace.xxs),
-              Text(l10n.paidLabel, style: secondary),
+              Flexible(child: Text(l10n.paidLabel, style: secondary)),
             ],
           ),
       ],
       name: name,
-      trailing: AmountText(
-        ref.money(context, i.amountMinor),
-        size: AmountSize.small,
-        color: i.isPaid ? colors.textMuted : null,
-      ),
+      amount: ref.money(context, i.amountMinor),
+      amountColor: i.isPaid ? colors.textMuted : null,
     );
   }
 }
@@ -251,13 +249,15 @@ class _Row extends StatelessWidget {
     required this.name,
     required this.details,
     super.key,
-    this.trailing,
+    this.amount,
+    this.amountColor,
   });
 
   final PlanWithPayments plan;
   final String name;
   final List<Widget> details;
-  final Widget? trailing;
+  final String? amount;
+  final Color? amountColor;
 
   @override
   Widget build(BuildContext context) {
@@ -273,34 +273,42 @@ class _Row extends StatelessWidget {
               horizontal: KalanSpace.md,
               vertical: KalanSpace.sm,
             ),
-            child: Row(
-              children: [
-                LetterBadge(name),
-                const SizedBox(width: KalanSpace.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: KalanSpace.xxs),
-                      Wrap(
-                        spacing: KalanSpace.sm,
-                        runSpacing: KalanSpace.xxs,
-                        children: details,
-                      ),
-                    ],
+            child: LayoutBuilder(
+              builder: (context, constraints) => Row(
+                children: [
+                  LetterBadge(name),
+                  const SizedBox(width: KalanSpace.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: KalanSpace.xxs),
+                        Wrap(
+                          spacing: KalanSpace.sm,
+                          runSpacing: KalanSpace.xxs,
+                          children: details,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                if (trailing != null) ...[
-                  const SizedBox(width: KalanSpace.xs),
-                  trailing!,
+                  if (amount != null) ...[
+                    const SizedBox(width: KalanSpace.xs),
+                    FittedAmount(
+                      amount!,
+                      maxWidth: PaymentTile.maxAmountWidth(
+                        constraints.maxWidth,
+                      ),
+                      color: amountColor,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

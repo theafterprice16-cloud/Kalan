@@ -30,6 +30,7 @@ import '../helpers/app_harness.dart';
 import '../helpers/calendar_seed.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
+import '../helpers/statement_seed.dart';
 
 /// Real fonts from the Flutter SDK so screenshots are readable.
 Future<void> loadFonts() async {
@@ -356,6 +357,36 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(const ValueKey('coming-period-3')));
           await shoot(tester, '58-shortfall-ahead-$lang-$theme');
+        });
+      }
+
+      // Card statements (16), Examples 1-4: two cards with statements
+      // (Ada Kart's 14 Nov statement cut, ₺4.150) and the statement open.
+      for (final (lang, locale, plans, sources) in [
+        ('tr', const Locale('tr', 'TR'), 'Planlar', 'Kaynaklar ve kartlar'),
+        ('en', const Locale('en', 'US'), 'Plans', 'Sources and cards'),
+      ]) {
+        Future<void> openSources(WidgetTester tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: seedStatements,
+            today: statementToday,
+          );
+          await openTab(tester, plans);
+          await tester.tap(find.byTooltip(sources));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('card statements, $lang', (tester) async {
+          await openSources(tester);
+          await shoot(tester, '59-card-statements-$lang-$theme');
+        });
+
+        testWidgets('card statement detail, $lang', (tester) async {
+          await openSources(tester);
+          await tester.tap(find.byKey(const ValueKey('card-statement-1-0')));
+          await shoot(tester, '60-card-statement-$lang-$theme');
         });
       }
 

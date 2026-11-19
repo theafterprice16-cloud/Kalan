@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
 import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/data/db/app_database.dart';
-import 'package:kalan/core/engine/engine.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -110,7 +110,10 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.byKey(ValueKey('card-statements-${cards.yedek}')), findsNothing);
+    expect(
+      find.byKey(ValueKey('card-statements-${cards.yedek}')),
+      findsNothing,
+    );
     expect(find.byKey(ValueKey('card-statements-${cards.gece}')), findsOne);
     expect(find.textContaining('Klarna'), findsOneWidget); // its own card
     expect(find.text("Yalnızca Kalan'a girdiğin taksitler."), findsNWidgets(2));
@@ -230,4 +233,21 @@ void main() {
       findsOneWidget,
     );
   });
+
+  for (final (name, route) in [
+    ('sources', Routes.sources),
+    ('statement', Routes.cardStatement(1, LocalDate(2026, 11, 14).epochDay)),
+  ]) {
+    testWidgets('large text on a small phone does not overflow: $name', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await open(tester, route: route);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
