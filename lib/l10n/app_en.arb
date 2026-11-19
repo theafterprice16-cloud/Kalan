@@ -1410,9 +1410,9 @@
       }
     }
   },
-  "reminderPaydayShort": "{body} This period looks {amount} short.",
+  "reminderPaydayShort": "{body} This period is {amount} short.",
   "@reminderPaydayShort": {
-    "description": "Payday summary when the payments are more than the income. Calm, no warning words.",
+    "description": "Payday summary when the payments are more than the income. It is sent on the first day of the period, so the period is the current one: the same sentence as the home screen (homeNegative). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.",
     "placeholders": {
       "body": {
         "type": "String",

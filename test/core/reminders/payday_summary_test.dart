@@ -243,12 +243,12 @@ void main() {
       expect(
         body(s),
         'Yeni dönem başladı. Bu dönem 4 ödeme, toplam ₺9.200. '
-        'Bu dönem ₺1.200 eksik görünüyor.',
+        'Bu dönem ₺1.200 eksik kalıyor.',
       );
       expect(
         body(s, lang: 'en'),
         'A new pay period has started. 4 payments this period, ₺9,200 in '
-        'total. This period looks ₺1,200 short.',
+        'total. This period is ₺1,200 short.',
       );
     });
 
