@@ -8,6 +8,15 @@ abstract final class Routes {
   static String plan(int id) => '/plan/$id';
   static String planEdit(int id) => '/plan/$id/edit';
   static const sources = '/sources';
+
+  /// The sources screen scrolled to card [cardId]'s statements (16; a
+  /// notification opens it in 17).
+  static String cardStatements(int cardId) => '$sources?card=$cardId';
+
+  /// One statement of card [cardId], by its statement date as an epoch
+  /// day.
+  static String cardStatement(int cardId, int statementDay) =>
+      '/source/$cardId/statement/$statementDay';
   static String newSource({bool card = false}) =>
       card ? '/source/new?kind=card' : '/source/new';
   static String source(int id) => '/source/$id';
