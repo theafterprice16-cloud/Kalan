@@ -561,3 +561,43 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Ekstresi olmayan ay | Girilen tarihin ayında hiçbir ekstrenin son ödemesi yoksa (şubat) o tarihten sonraki ilk ekstre. |
 | Önerilen sıradaki tarih | Bugünden sonraki ilk ekstre son ödeme günü; o kartta 28 Şubat önerilmez. |
 | Kayıtlı veri | Değişmez; şema ve göç yok. Yalnızca yeni hesaplar (yeni plan, düzenleme, kart günü değişimi) yeni kuralı izler. |
+
+## Hesap kesim hatırlatması (17) (19 Kasım 2026)
+
+Hesap kesiminden önce ve sonra yapılan alışveriş farklı ekstrelere düşer; kullanıcı kesim gününü önceden bilsin.
+
+Ürün sahibi kararları (yeniden sorulmaz):
+
+| Konu | Karar |
+|---|---|
+| Anahtar | Kart bazında "Hesap kesim hatırlatması"; varsayılan kapalı (mevcut kartlarda da). Mürekkep renginde (mevcut adaptif anahtar), açıklama `textMuted`. Brifteki "accent" yerine mürekkep: accent yalnızca "kalan" içindir. |
+| Kaç gün önce | 1 ya da 2; varsayılan 2. |
+| Metin | "{card} kartının hesabı {days} gün sonra, {date} tarihinde kesiliyor. Bu tarihten sonraki taksitler {next} ekstresine girer." EN: "Your {card} statement closes in {days} days, on {date}. Installments after that go on the {next} statement." ICU çoğul; tarihler intl `MMMMd` ("14 Kasım", "November 14"). |
+| Tutar ve düğme | Yok. |
+| 60 sınırı | En son sıradadır: önce bütün ödeme hatırlatmaları, sonra maaş günü özeti; yer kalırsa kesim hatırlatmaları en yakından başlayarak. Ödeme hatırlatmalarının yerini hiç almaz. |
+| Dokunma | O kartın ekstre görünümü (16, `/sources?card=ID`). |
+
+Uygulanan kararlar (prompt'ta gerekçeli verildi):
+
+| Konu | Karar |
+|---|---|
+| Saat | Genel hatırlatma saati (varsayılan 09:00). |
+| Görünürlük | Anahtar yalnızca ekstre günü seçili kartta görünür; sağlayıcıda ve günü seçilmemiş yeni kartta yok. |
+| Kesim tarihi | Motordan: ilk ekstre `CardTerms.statementFor(bugün)`, sonrakiler `statementInMonth` (ay sonuna sıkıştırılır: 31 → 30 Kasım, 28 Şubat). Motor kesim tarihini hafta sonu ya da tatile göre kaydırmıyor; bildirim de kaydırmaz (14 Kasım 2026 cumartesi, bildirim "14 Kasım" der). Brifteki "kaydırmaya uyar" maddesi bu yüzden uygulanmadı; yeni tarih kuralı yazılmadı. |
+| Birden çok kart | Aynı gün iki kartın hatırlatması iki ayrı bildirimdir. |
+| Tutarı göster ayarı | Etkilemez (bildirimde tutar yok). |
+
+Teknik kararlar (Claude, 19 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Kayıt | Şema v13: `sources.statement_reminder_enabled` (varsayılan false) ve `sources.statement_reminder_days` (varsayılan 2, yalnızca 1 ya da 2). Göçte mevcut kartlar kapalı ve 2 gün; testli. Kart sağlayıcıya çevrilirse anahtar kapanır. |
+| Planlayıcı | Ayrı adım `withStatementClosings` (`lib/core/reminders/reminder_planner.dart`), maaş günü özetinden sonra. Kart başına sıradaki 12 ekstre (bir yıl); tetiklenme anı geçmiş olanlar atlanır (kesim 14, saat 09:00'u geçmişse 12'sinde: sonraki ay). Aynı anda başka bildirim varsa onlardan sonra sıralanır. Anahtar kapalıyken liste nesnesi bile aynı döner. |
+| Kimlik | `2^28 + (kart kimliği mod 2^18) × 1024 + tetiklenme günü mod 1024`: ödeme kimliklerinin (gün × 2, ~41.000) üstünde, ısrarlı hatırlatma kimliklerinin (2^29+) altında. Aynı kartta 1024 gün içinde tekrar etmez. |
+| Payload | `card:ID`; düğme verisi yok. Ödeme bildirimi ve maaş günü özeti `home` olarak kalır. |
+| Dokunma | Uygulama açıkken kartın ekstreleri o anki ekranın üstüne açılır (geri, önceki ekrana döner). Uygulama kapalıyken bildirimin açtığı ilk açılışta ana ekranın üstüne açılır (`launchPayloadProvider`). |
+| Yeniden kurma | `ReminderSync` artık kaynak (kart) akışını da dinler: kart günleri, anahtar ya da gün değişince bildirimler yeniden kurulur. Arka plandaki yeniden kurma aynı yolu (`rescheduleAll`) kullanır. |
+| Gün seçimi | Anahtar açıkken görünür (mevcut seçenek bileşeni, seçili seçenekte onay işareti); seçenek adları mevcut "1 gün önce" / "2 gün önce" metinleri. Başlık "Kaç gün önce" / "Days before" (Ayarlar'daki mevcut İngilizce karşılıkla aynı). |
+| İzin ve ana anahtar | Yeni izin isteği yok. Hatırlatmalar ana anahtarı kapalıyken kesim hatırlatması da kurulmaz; kart ayarındaki anahtar yine değiştirilebilir. |
+| Metinler | Yeni anahtarlar `statementReminder*` ve `reminderStatementClosing` (TR ve EN); çevirmen açıklamalarında "Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma." notu. Başka dil dosyasına dokunulmadı. |
+
