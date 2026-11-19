@@ -258,6 +258,9 @@ class PastDueRow extends ConsumerWidget {
           child: Semantics(
             button: true,
             label: l10n.pastDueRowSemantics(entry.label(l10n), amount, days),
+            // The tap is read out with the label (the InkWell's own is
+            // excluded), so screen readers can open the plan too.
+            onTap: () => context.push(Routes.plan(entry.planId!)),
             excludeSemantics: true,
             child: InkWell(
               onTap: () => context.push(Routes.plan(entry.planId!)),

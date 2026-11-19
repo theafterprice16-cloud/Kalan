@@ -410,8 +410,9 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Dar ekran | Sütun en az 56 px; sığmazsa satır yatay kayar (yön Directionality'yi izler, sağdan sola dilde ilk dönem sağda). |
 | Ana ekran şeridi | Etiket yok; tek dokunma hedefi; 6 dönemin hiçbirinde ödeme yoksa şerit gizli, ekran "Önümüzdeki 6 dönemde ödeme yok." der. |
 | Günü geçenler | Ekranda bu dönemin günü geçmiş ödemeleri ana ekrandaki satırla ("Günü geçen N ödeme", "Ödendi" → "Ne zaman ödedin?") gösterilir; böylece işaretleme iki ekranda aynı veriyi üretir. Diğer satırlar ana ekranın ödeme satırı. |
-| Gün değişimi | Seçili dönem sırayla tutulur; uygulama açıkken gün dönüp dönem kayarsa seçim aynı sırada kalır (ana ekran da gün değişimini uygulama öne gelince alır). Bilinen küçük eksik. |
+| Gün değişimi | Seçili dönem başlangıç gününe göre tutulur: gün dönüp dönemler kayınca aynı dönem seçili kalır; o dönem geçmişte kaldıysa bu dönem seçilir (19 Kasım 2026 düzeltmesi). |
 | Gelir daveti | Ayarlar'daki net tutar penceresini doğrudan açar (`editNetIncome`); kaydedince grafik kendiliğinden güncellenir. |
 | Animasyon | Yok. |
-| Ödeme satırı | Büyük yazıda (2x) taşma düzeltildi: "Bugün/Yarın" notu satır kaydırır, tutar satır genişliğinin en çok %40'ına sığacak kadar küçülür. Normal boyutta görünüm değişmedi (golden'lar aynı). |
+| Ödeme satırı | Büyük yazıda (2x) taşma düzeltildi: "Bugün/Yarın" notu satır kaydırır. Tutar kendi genişliğinde kalır; yalnızca ad sütunu 96 px'in altına inecekse küçülür (ilk sürümdeki %40 sınırı, dar telefonda uzun tutarları gereksiz küçültüyordu; 19 Kasım 2026 düzeltmesi). Golden'lar aynı. |
+| Günü geçen satırı | Ekran okuyucu satıra çift dokununca plan açılır (Semantics'e dokunma eylemi eklendi; 19 Kasım 2026). |
 

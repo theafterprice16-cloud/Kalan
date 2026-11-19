@@ -51,7 +51,9 @@ enum AmountSize { large, medium, small }
 
 /// Neutral letter badge in place of provider or bank logos.
 class LetterBadge extends StatelessWidget {
-  const LetterBadge(this.name, {super.key, this.size = 40});
+  const LetterBadge(this.name, {super.key, this.size = defaultSize});
+
+  static const double defaultSize = 40;
 
   final String name;
   final double size;

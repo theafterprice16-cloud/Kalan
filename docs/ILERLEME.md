@@ -23,7 +23,7 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 11. Pro satın alma (18 Kasım 2026): tek ürün ömür boyu Kalan Pro; fiyat mağazadan; 5. planda sakin alt sayfa, satın alınca plan aynı alanlarla kaydedilir; Ayarlar'da Kalan Pro ve geri yükleme; Pro yalnızca mağazanın açık sinyaliyle kalkar; durum cihazda (veritabanı değil); iOS için StoreKit test dosyası. Panel işleri (App Store Connect, Google Play Console) ürün sahibinde
 
-- 12. İleriki dönemlerin grafiği (19 Kasım 2026): ana ekranda büyük sayının altında küçük 6 çubuklu "İleriki dönemler" şeridi; dokununca ayrı ekran, bu dönem seçili; her çubukta söz verilmiş (safran) ve kalan (lacivert), eksi dönemde gelir çizgisi ve "−… eksik"; çubuğa dokununca o dönemin özeti ve ödemeleri; gelir yoksa yalnızca söz verilmiş ve gelir daveti; herkese 6 dönem, ücretsiz; hesap ana ekranla aynı yerden; şema değişmedi
+- 12. İleriki dönemlerin grafiği (19 Kasım 2026): ana ekranda büyük sayının altında küçük 6 çubuklu "İleriki dönemler" şeridi; dokununca ayrı ekran, bu dönem seçili; her çubukta söz verilmiş (safran) ve kalan (lacivert), eksi dönemde gelir çizgisi ve "−… eksik"; çubuğa dokununca o dönemin özeti ve ödemeleri; gelir yoksa yalnızca söz verilmiş ve gelir daveti; herkese 6 dönem, ücretsiz; hesap ana ekranla aynı yerden; şema değişmedi. Ardından üç küçük düzeltme: gün dönünce seçili dönem korunur, uzun tutar ödeme satırında gereksiz küçülmez, günü geçen satırı ekran okuyucuyla açılır
 
 Ara işler:
 

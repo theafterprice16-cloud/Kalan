@@ -16,8 +16,21 @@ import 'past_due.dart';
 class PaymentTile extends ConsumerWidget {
   const PaymentTile({required this.entry, super.key});
 
-  /// The most of the row's width the amount takes.
-  static const double _maxAmountShare = 0.4;
+  /// The name column never gets narrower than this because of the amount.
+  static const double _minNameWidth = KalanSpace.xl * 3;
+
+  /// Room the amount may take in a row of [rowWidth]: its natural width
+  /// unless that would squeeze the name below [_minNameWidth] (very large
+  /// text, very long amounts on a narrow phone); then it shrinks.
+  static double maxAmountWidth(double rowWidth) {
+    final room =
+        rowWidth -
+        LetterBadge.defaultSize -
+        KalanSpace.sm -
+        KalanSpace.xs -
+        _minNameWidth;
+    return room > 0 ? room : 0;
+  }
 
   final HomeEntry entry;
 
@@ -147,11 +160,11 @@ class PaymentTile extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(width: KalanSpace.xs),
-                      // At large text sizes a long amount shrinks to fit
-                      // instead of pushing the row past the screen.
+                      // A long amount shrinks only when the name would get
+                      // too narrow, never pushing the row past the screen.
                       ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxWidth: constraints.maxWidth * _maxAmountShare,
+                          maxWidth: maxAmountWidth(constraints.maxWidth),
                         ),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,

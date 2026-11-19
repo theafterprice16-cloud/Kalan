@@ -7,6 +7,7 @@ import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/features/periods/coming_periods.dart';
+import 'package:kalan/features/periods/coming_periods_screen.dart';
 import 'package:kalan/features/periods/period_chart.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -279,6 +280,55 @@ void main() {
     expect(ltrFirst, lessThan(ltrLast));
     final (rtlFirst, rtlLast) = await xs(TextDirection.rtl);
     expect(rtlFirst, greaterThan(rtlLast));
+  });
+
+  testWidgets('when the day turns, the same period stays selected', (
+    tester,
+  ) async {
+    // Six periods with one ₺1.000 payment each, income ₺50.000.
+    List<ComingPeriod> periodsOn(LocalDate today) => [
+      for (final period in const PaySchedule.monthly(15).periodsFrom(today, 6))
+        ComingPeriod(
+          summary: PeriodSummary(
+            period: period,
+            spokenForMinor: 100000,
+            itemCount: 1,
+            incomeMinor: 5000000,
+            status: PeriodStatus.comfortable,
+          ),
+          entries: const [],
+          pastDue: const [],
+        ),
+    ];
+    Future<void> show(LocalDate today) async {
+      await pumpLocalized(
+        tester,
+        ProviderScope(
+          overrides: [
+            currencyProvider.overrideWithValue(Currency.byCode('TRY')!),
+            todayProvider.overrideWithValue(today),
+            comingPeriodsProvider.overrideWithValue(periodsOn(today)),
+          ],
+          child: const ComingPeriodsScreen(initialSelected: 2),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // From 15 Nov: the third period (15 Jan) is selected.
+    await show(testToday);
+    expect(summary('15 Oca – 14 Şub'), findsOneWidget);
+    // A month later the periods start on 15 Dec: 15 Jan is still selected,
+    // now as the second bar.
+    await show(LocalDate(2026, 12, 20));
+    expect(summary('15 Oca – 14 Şub'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byKey(const ValueKey('coming-period-1'))),
+      isSemantics(isSelected: true),
+    );
+    // Once the selected period is past, the current one is selected.
+    await show(LocalDate(2027, 2, 20));
+    expect(summary('15 Şub – 14 Mar'), findsOneWidget);
   });
 
   group('BarGeometry', () {
