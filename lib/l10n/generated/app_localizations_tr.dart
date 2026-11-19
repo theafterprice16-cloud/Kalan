@@ -1556,7 +1556,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String reminderPaydayShort(String body, String amount) {
-    return '$body Bu dönem $amount eksik görünüyor.';
+    return '$body Bu dönem $amount eksik kalıyor.';
   }
 
   @override

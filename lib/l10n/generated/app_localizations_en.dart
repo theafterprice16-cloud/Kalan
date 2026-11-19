@@ -1541,7 +1541,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String reminderPaydayShort(String body, String amount) {
-    return '$body This period looks $amount short.';
+    return '$body This period is $amount short.';
   }
 
   @override

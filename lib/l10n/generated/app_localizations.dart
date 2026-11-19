@@ -2089,10 +2089,10 @@ abstract class AppLocalizations {
   /// **'{body} {left} left.'**
   String reminderPaydayLeft(String body, String left);
 
-  /// Payday summary when the payments are more than the income. Calm, no warning words.
+  /// Payday summary when the payments are more than the income. It is sent on the first day of the period, so the period is the current one: the same sentence as the home screen (homeNegative). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.
   ///
   /// In en, this message translates to:
-  /// **'{body} This period looks {amount} short.'**
+  /// **'{body} This period is {amount} short.'**
   String reminderPaydayShort(String body, String amount);
 
   /// Settings switch: one notification on payday with the period's payments.

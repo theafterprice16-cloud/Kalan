@@ -135,7 +135,7 @@ void main() {
     expect(
       (await summary())!.body,
       'Yeni dönem başladı. Bu dönem 3 ödeme, toplam ₺300. '
-      'Bu dönem ₺100 eksik görünüyor.',
+      'Bu dönem ₺100 eksik kalıyor.',
     );
 
     // Payday on the 1st: 1 Dec - 31 Dec.
