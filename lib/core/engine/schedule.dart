@@ -136,13 +136,9 @@ class CardTerms {
   /// The statement a purchase on [purchase] lands on. A purchase on the
   /// statement day itself is included in that statement.
   LocalDate statementFor(LocalDate purchase) {
-    final thisMonth = LocalDate.clamped(
-      purchase.year,
-      purchase.month,
-      statementDay,
-    );
+    final thisMonth = statementInMonth(purchase.year, purchase.month);
     if (purchase <= thisMonth) return thisMonth;
-    return LocalDate.clamped(purchase.year, purchase.month + 1, statementDay);
+    return statementInMonth(purchase.year, purchase.month + 1);
   }
 
   /// Nominal (unshifted) due date in [year]/[month].
@@ -163,6 +159,47 @@ class CardTerms {
 
   /// Due date for the month [year]/[month], shifted if enabled.
   LocalDate dueInMonth(int year, int month) => _shift(nominalDue(year, month));
+
+  /// The statement cut in [year]/[month] (clamped in short months).
+  LocalDate statementInMonth(int year, int month) =>
+      LocalDate.clamped(year, month, statementDay);
+
+  /// The statement a card installment due on [due] belongs to: the one
+  /// whose due date ([dueFor]) is nearest to [due], the earlier one on a
+  /// tie.
+  ///
+  /// The engine's one statement rule for installments, the inverse of
+  /// [dueFor]: every date [cardInstallmentDates] gives maps back to its own
+  /// statement (distance 0), and a date moved a few days (an edited
+  /// payment, a paid one kept after the card's days or weekend setting
+  /// changed, a plan started midway) stays with the statement it was
+  /// moved from.
+  LocalDate statementForDue(LocalDate due) {
+    LocalDate? best;
+    var bestDistance = 0;
+    // dueFor(statement) falls in the statement's month, the next one, or
+    // (shifted past a month end) the one after.
+    for (var offset = -3; offset <= 1; offset++) {
+      final statement = statementInMonth(due.year, due.month + offset);
+      final distance = due.daysUntil(dueFor(statement)).abs();
+      if (best == null || distance < bestDistance) {
+        best = statement;
+        bestDistance = distance;
+      }
+    }
+    return best!;
+  }
+
+  /// The statement still to pay on [today]: the earliest one whose due
+  /// date is [today] or later, already cut or not.
+  LocalDate nextStatement(LocalDate today) {
+    // dueFor(statement) is at most two months after the statement.
+    var statement = statementInMonth(today.year, today.month - 2);
+    while (dueFor(statement) < today) {
+      statement = statementInMonth(statement.year, statement.month + 1);
+    }
+    return statement;
+  }
 }
 
 /// Card installments: installment `i` (0-based) lands on the statement
@@ -178,11 +215,7 @@ List<LocalDate> cardInstallmentDates({
   return [
     for (var i = 0; i < count; i++)
       terms.dueFor(
-        LocalDate.clamped(
-          first.year,
-          first.month + i + deferMonths,
-          terms.statementDay,
-        ),
+        terms.statementInMonth(first.year, first.month + i + deferMonths),
       ),
   ];
 }

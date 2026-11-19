@@ -1732,5 +1732,103 @@
   "calendarCellBusyWeek": "busy week",
   "@calendarCellBusyWeek": {
     "description": "Screen reader: the day is inside a busy week of plan payments. Joined with a comma. Gözlem bildirir, uyarı değildir. 'Sıkışık dönem' ile karıştırma."
+  },
+  "cardStatementsTitle": "Statements",
+  "@cardStatementsTitle": {
+    "description": "Sources and cards screen, heading of a card's coming statements. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)"
+  },
+  "cardStatementTitle": "{date} statement",
+  "@cardStatementTitle": {
+    "description": "A card statement named by its statement (closing) date, e.g. 'Nov 14 statement'. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 14",
+        "description": "Statement date, short"
+      }
+    }
+  },
+  "cardStatementClosed": "Closed",
+  "@cardStatementClosed": {
+    "description": "Beside a statement whose statement date has passed but is not due yet (the bank has cut it). Calm note, not a warning. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)"
+  },
+  "cardStatementCountDue": "{count, plural, =1{1 installment} other{{count} installments}} · Due {date}",
+  "@cardStatementCountDue": {
+    "description": "Statement row: how many Kalan installments are on it and its due date. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "example": "3",
+        "description": "Number of installments"
+      },
+      "date": {
+        "type": "String",
+        "example": "Nov 24",
+        "description": "Due date, short"
+      }
+    }
+  },
+  "cardStatementEmptyDue": "No installments · Due {date}",
+  "@cardStatementEmptyDue": {
+    "description": "Statement row without installments; no total is shown. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Dec 24",
+        "description": "Due date, short"
+      }
+    }
+  },
+  "cardStatementsNote": "Only installments you added to Kalan.",
+  "@cardStatementsNote": {
+    "description": "Under a card's statements: the totals are not the card's whole balance, only the installments entered in Kalan. 'Kalan' is the app name; do not translate it. Calm, factual."
+  },
+  "cardStatementCutOn": "Statement date {date}",
+  "@cardStatementCutOn": {
+    "description": "Statement detail: the statement (closing) date. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 14, 2026",
+        "description": "Statement date, long"
+      }
+    }
+  },
+  "cardStatementDueOn": "Due {date}",
+  "@cardStatementDueOn": {
+    "description": "Statement detail: the statement's due date. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 24, 2026",
+        "description": "Due date, long"
+      }
+    }
+  },
+  "cardStatementCountTotal": "{count, plural, =1{1 installment} other{{count} installments}} · {amount}",
+  "@cardStatementCountTotal": {
+    "description": "Statement detail: how many Kalan installments are on the statement and their total. Not the card balance. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern",
+        "example": "3",
+        "description": "Number of installments"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺4,150",
+        "description": "Their total, formatted"
+      }
+    }
+  },
+  "cardStatementEmpty": "No installments",
+  "@cardStatementEmpty": {
+    "description": "Statement detail without installments. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura / fechamento / vencimento, es-419 Mexico estado de cuenta / fecha de corte / fecha límite de pago.)"
+  },
+  "cardStatementNotComing": "This statement is not among your card's coming statements.",
+  "@cardStatementNotComing": {
+    "description": "Statement detail opened for a statement that is no longer one of the six coming ones (or a removed card). Calm, factual. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura, es-419 Mexico estado de cuenta.)"
   }
 }

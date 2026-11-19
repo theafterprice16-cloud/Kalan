@@ -508,3 +508,41 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Test değişikliği | `coming_periods_screen_test.dart`'ta bu dönemin çubuk etiketi beklentisi yeni metne, `BarGeometry` eksi dönem testi yeni çizime göre güncellendi. Ana ekran testleri değişmedi. Golden 03 ve 52 (eksi) yeni çizimle yenilendi; 58 yeni (Örnek 1, TR/EN, açık/koyu). |
 | Çubuk altı tutar | 12'deki "Kısa tutar" kararının yerini alır (19 Kasım 2026, ürün sahibinin düzeltme isteği). Altı tutarın hepsi sütununa tam biçimde, kullanıcının yazı boyutunda, tek satırda ve seçim çerçevesinden içeride pay bırakarak sığıyorsa hepsi tam yazılır ("-₺1.200 eksik"). Biri bile sığmıyorsa hepsi kısa yazılır ("-₺1,2 B eksik"). Satırda iki biçim karışmaz; tutar kesilmez, bölünmez, küçültülmez. Ölçüm `ComingPeriodsChart` içinde, aynı yazı stiliyle. Standart iPhone genişliğinde (390) beş haneli tutarlar kısa kalır; tam tutar özette. |
 | Maaş günü bildirimi | Dönemin ilk günü gönderildiği için içinde bulunulan dönemdir: cümle ana ekranla aynı, "Bu dönem X eksik kalıyor." / "This period is X short." (önceden "görünüyor" / "looks"; 10. maddeden kalan tutarsızlık, ürün sahibinin düzeltme isteği). |
+
+## Kart ekstre tahmini (16) (19 Kasım 2026)
+
+Kart taksidinde kullanıcı taksiti değil ekstreyi öder. Kaynaklar ve kartlar ekranında her kart, sıradaki ve sonraki beş ekstresine düşen taksitleri gösterir.
+
+Ürün sahibi kararları (yeniden sorulmaz):
+
+| Konu | Karar |
+|---|---|
+| Yer | Mevcut Kaynaklar ve kartlar ekranı; her kartın kendi kartında. |
+| Kaç ekstre | Sıradaki ve sonraki 5 ekstre (toplam 6). |
+| Hangi planlar | Yalnızca o kartın kart taksidi planları. Karttan çekilen diğer planlar (sonra öde gibi) bu görünümde yok. |
+| Ödenmiş taksit | Ekstre toplamına girer (ekstre tutarı ödenip ödenmediğinden bağımsızdır). |
+| Ücret ve renk | Ücretsiz. Toplamlar `text`; `accent` kullanılmaz. |
+| Sıradaki ekstre | Son ödeme günü bugün ya da sonra olan ilk ekstre. Hesap kesim tarihi geçmişse "Kesildi" notu (`textMuted`, kilit ikonu). |
+| Satır | "14 Kas ekstresi", "3 taksit · Son ödeme 24 Kas" ve toplam; taksiti olmayan ekstre "Taksit yok · Son ödeme …", toplam yazılmaz. |
+| Ayrıntı | Ekstreye dokununca: plan adı, taksit sırası ("3/10"), tutar ve "Ödendi". |
+| Not | Kartın altında `textMuted`: "Yalnızca Kalan'a girdiğin taksitler." (toplam kart borcu değildir). |
+| Bölüm görünmez | Kartın altı ekstresinin hiçbirinde taksit yoksa. |
+| Terimler | Ekstre, hesap kesim, son ödeme ayrı ARB anahtarları; çevirmen açıklamalarında pazar karşılığı notu. Çeviri bu maddede yok. |
+| Rota | 17. maddenin bildirimi için karta özel rota (kart kimliğiyle). |
+
+Teknik kararlar (Claude, 19 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Taksitin ekstresi | Tek saf fonksiyon: `CardTerms.statementForDue(due)`. Kaydedilmiş son ödeme gününe, son ödeme günü (`dueFor`) en yakın olan ekstre; eşitlikte önceki. Motorun ürettiği her tarih kendi ekstresine birebir döner (tüm 31×31 gün çifti, hafta sonu açık/kapalı, iki yıl testli). Elle kaydırılmış, ortasından eklenmiş ya da kart günleri değiştikten sonra eski tarihte kalmış (ödenmiş) bir taksit de birkaç gün kaysa geldiği ekstrede kalır. Gerekçe: "son ödeme günü bu tarihe eşit ya da sonra olan ilk ekstre" kuralı tek günlük kaymada taksiti sonraki aya atıyor ve o ayı iki kez sayıyordu (mimar incelemesi). |
+| Sıradaki ekstre | Ayrı fonksiyon: `CardTerms.nextStatement(today)`, son ödeme günü bugün ya da sonra olan ilk ekstre. "Kesildi": hesap kesim tarihi bugünden önce. Kesim günü kendisi "Kesildi" değildir (o günkü alışveriş o ekstreye girer, DECISIONS 4). |
+| Altı ekstre | `cardStatements` (motor, `lib/core/engine/card_statement.dart`): sıradaki ekstreden başlayarak her ay `statementInMonth` (ay sonuna sıkıştırılmış kesim günü). Ekstre tarihi hesabı `cardInstallmentDates` ile aynı yerden (`statementInMonth`); davranış değişmedi. |
+| Aynı son ödeme günlü iki ekstre | Kesim 28-30 ve son ödeme ondan 1-3 gün sonra gibi nadir ayarlarda kısa ay iki ekstreye aynı son ödeme gününü verir (ör. 28 Şub ve 28 Mar ekstreleri ikisi de 30 Mar). Tarih tek başına ayıramaz; aynı planın ardışık taksitleri ardışık ekstrelere konur (motorun kuralı). Tek ödemeli bir kayıt önceki ekstrede kalır; ikisinin son ödeme günü zaten aynıdır. Elle birkaç gün kaydırılmış ortak günlü taksit de ileri taşınır (uzaklık eşitse); sonraki taksidin tarihi elle değiştirilmişse önceki taksit ona bakılarak taşınmaz (mimar incelemesi, testli). |
+| Sıradaki ekstreler dışında kalan ekstre | Ayrıntı ekranı yüklenirken bekleme göstergesi. Açılan ekstre artık sıradaki altı ekstreden biri değilse (eski bağlantı, silinmiş kart) "Bu ekstre kartının sıradaki ekstreleri arasında değil." yazar; "Taksit yok" denmez (bilinmeyen şey söylenmez). |
+| Bilinen eksik (kapsam dışı) | "Bu plan zaten sürüyor" ile eklenen kart planı, ayın her son ödeme gününe bir tarih koyar (`underwayDates` / `cardDatesFromNextDue`); ileri yön (`cardInstallmentDates`) ise kesim 28-30, son ödeme 1-3 gün sonra olan kartta kısa ayı atlar. Böyle bir kartta ve yalnızca ortasından eklenmiş planda iki taksit bir ekstrede, sonraki ekstre boş görünebilir; altı ekstrenin toplamı doğrudur. Tarih kuralı bu maddede değiştirilmedi: madde yeni tarih kuralını yasaklıyor ve böyle bir kart gerçekte neredeyse yok (bankalarda son ödeme kesimden ~10 gün sonra). Gerekirse ayrı, küçük bir motor işi olarak yapılır. |
+| Kalan'dan önce ödenmiş | Sayıya ve toplama girer; ayrıntıda tek tek listelenmez ve tarihi yazılmaz: planın adıyla tek satır "1 taksit Kalan'dan önce ödendi · ₺1.200" (mevcut metin). |
+| Rotalar | `/sources?card=ID` ekranı o karta kaydırarak açar (17. madde bildirimi bunu kullanacak). `/source/ID/statement/GÜN` tek ekstreyi açar (GÜN: hesap kesim tarihinin epoch günü). |
+| Ekran düzeni | Kaynaklar ve kartlar ekranında her kaynak artık kendi `surface` kartında (önce düz liste satırıydı); kart başlığı, bölünmüş çizgi, "Ekstreler", altı satır, not. Ekstre satırı en az 48 yüksekliğinde, sonda `chevron_right`. Ayrıntı ekranı plan ayrıntısındaki başlık kartı desenini izler; büyük sayı yok (ana sayı "kalan"dır). Büyük yazıda tutar sığmazsa küçülür (ödeme satırıyla aynı ölçü). |
+| Sıralama | Ekstre içinde son ödeme gününe, sonra plana, sonra taksit sırasına göre. |
+| Metinler | Yeni anahtarlar `cardStatement*` (TR ve EN). Plural: "{count} taksit". Başka dil dosyasına dokunulmadı. |
+| Şema | Değişmedi. |

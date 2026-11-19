@@ -1795,4 +1795,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarCellBusyWeek => 'busy week';
+
+  @override
+  String get cardStatementsTitle => 'Statements';
+
+  @override
+  String cardStatementTitle(String date) {
+    return '$date statement';
+  }
+
+  @override
+  String get cardStatementClosed => 'Closed';
+
+  @override
+  String cardStatementCountDue(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString installments',
+      one: '1 installment',
+    );
+    return '$_temp0 · Due $date';
+  }
+
+  @override
+  String cardStatementEmptyDue(String date) {
+    return 'No installments · Due $date';
+  }
+
+  @override
+  String get cardStatementsNote => 'Only installments you added to Kalan.';
+
+  @override
+  String cardStatementCutOn(String date) {
+    return 'Statement date $date';
+  }
+
+  @override
+  String cardStatementDueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String cardStatementCountTotal(int count, String amount) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString installments',
+      one: '1 installment',
+    );
+    return '$_temp0 · $amount';
+  }
+
+  @override
+  String get cardStatementEmpty => 'No installments';
+
+  @override
+  String get cardStatementNotComing =>
+      'This statement is not among your card\'s coming statements.';
 }

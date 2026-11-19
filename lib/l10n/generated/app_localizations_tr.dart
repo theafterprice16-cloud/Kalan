@@ -1807,4 +1807,68 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get calendarCellBusyWeek => 'yoğun hafta';
+
+  @override
+  String get cardStatementsTitle => 'Ekstreler';
+
+  @override
+  String cardStatementTitle(String date) {
+    return '$date ekstresi';
+  }
+
+  @override
+  String get cardStatementClosed => 'Kesildi';
+
+  @override
+  String cardStatementCountDue(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit',
+    );
+    return '$_temp0 · Son ödeme $date';
+  }
+
+  @override
+  String cardStatementEmptyDue(String date) {
+    return 'Taksit yok · Son ödeme $date';
+  }
+
+  @override
+  String get cardStatementsNote => 'Yalnızca Kalan\'a girdiğin taksitler.';
+
+  @override
+  String cardStatementCutOn(String date) {
+    return 'Hesap kesim $date';
+  }
+
+  @override
+  String cardStatementDueOn(String date) {
+    return 'Son ödeme $date';
+  }
+
+  @override
+  String cardStatementCountTotal(int count, String amount) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit',
+    );
+    return '$_temp0 · $amount';
+  }
+
+  @override
+  String get cardStatementEmpty => 'Taksit yok';
+
+  @override
+  String get cardStatementNotComing =>
+      'Bu ekstre kartının sıradaki ekstreleri arasında değil.';
 }

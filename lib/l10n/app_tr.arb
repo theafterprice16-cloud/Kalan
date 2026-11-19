@@ -383,5 +383,16 @@
   "busyWeekTag": "yoğun",
   "busyWeekSummary": "{count, plural, other{Yoğun hafta: {range} · {count} ödeme · {amount}}}",
   "busyWeekRangeSameMonth": "{startDay}–{endDay} {month}",
-  "calendarCellBusyWeek": "yoğun hafta"
+  "calendarCellBusyWeek": "yoğun hafta",
+  "cardStatementsTitle": "Ekstreler",
+  "cardStatementTitle": "{date} ekstresi",
+  "cardStatementClosed": "Kesildi",
+  "cardStatementCountDue": "{count, plural, other{{count} taksit}} · Son ödeme {date}",
+  "cardStatementEmptyDue": "Taksit yok · Son ödeme {date}",
+  "cardStatementsNote": "Yalnızca Kalan'a girdiğin taksitler.",
+  "cardStatementCutOn": "Hesap kesim {date}",
+  "cardStatementDueOn": "Son ödeme {date}",
+  "cardStatementCountTotal": "{count, plural, other{{count} taksit}} · {amount}",
+  "cardStatementEmpty": "Taksit yok",
+  "cardStatementNotComing": "Bu ekstre kartının sıradaki ekstreleri arasında değil."
 }

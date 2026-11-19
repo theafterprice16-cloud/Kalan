@@ -17,6 +17,7 @@ import '../../features/reminders/reminders_help_screen.dart';
 import '../../features/roadmap/roadmap_screen.dart';
 import '../../features/settings/pay_settings_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/sources/card_statement_screen.dart';
 import '../../features/sources/source_edit_screen.dart';
 import '../../features/sources/sources_screen.dart';
 import 'routes.dart';
@@ -87,7 +88,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             PlanEditScreen(planId: int.parse(state.pathParameters['id']!)),
       ),
-      GoRoute(path: Routes.sources, builder: (_, _) => const SourcesScreen()),
+      GoRoute(
+        path: Routes.sources,
+        builder: (_, state) => SourcesScreen(
+          focusCardId: int.tryParse(state.uri.queryParameters['card'] ?? ''),
+        ),
+      ),
       GoRoute(
         path: '/source/new',
         builder: (_, state) => SourceEditScreen(
@@ -98,6 +104,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/source/:id',
         builder: (_, state) =>
             SourceEditScreen(sourceId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/source/:id/statement/:day',
+        builder: (_, state) => CardStatementScreen(
+          cardId: int.parse(state.pathParameters['id']!),
+          statementDay: int.parse(state.pathParameters['day']!),
+        ),
       ),
       GoRoute(
         path: Routes.newRecurring,
