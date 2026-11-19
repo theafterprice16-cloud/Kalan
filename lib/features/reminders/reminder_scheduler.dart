@@ -77,7 +77,8 @@ class ReminderScheduler {
 
   /// Everything that would be handed to the system right now: payment
   /// reminders first, then the payday summary, then statement closing
-  /// reminders, each only in the room the ones before it leave.
+  /// reminders, each only in the room the ones before it leave. For tests
+  /// and diagnostics; [rescheduleAll] schedules the same list.
   Future<List<PlannedReminder>> buildAll() async {
     final input = await _input();
     if (input == null) return const [];

@@ -91,11 +91,16 @@ class _KalanAppState extends ConsumerState<KalanApp> {
   }
 
   /// A statement closing reminder's [payload]: its card's statements
-  /// (16) open over the current screen, so back returns there.
+  /// (16) open over the current screen, so back returns there; not a
+  /// second time when they are already on top (a second tap).
   bool _openCard(String? payload) {
     final card = cardIdOfPayload(payload);
     if (card == null) return false;
-    unawaited(ref.read(routerProvider).push(Routes.cardStatements(card)));
+    final router = ref.read(routerProvider);
+    final route = Routes.cardStatements(card);
+    if (router.state.uri.toString() != route) {
+      unawaited(router.push(route));
+    }
     return true;
   }
 

@@ -192,14 +192,17 @@ void main() {
     ) async {
       await open(tester);
       expect(find.byKey(const ValueKey('sources-list')), findsNothing);
-      notificationTaps.add(
-        NotificationResponse(
-          notificationResponseType:
-              NotificationResponseType.selectedNotification,
-          payload: cardStatementPayload(cards.gece),
-        ),
-      );
-      await tester.pumpAndSettle();
+      // Tapped twice: the statements open once.
+      for (var i = 0; i < 2; i++) {
+        notificationTaps.add(
+          NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            payload: cardStatementPayload(cards.gece),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
       expectCardOnScreen(tester, cards.gece);
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
