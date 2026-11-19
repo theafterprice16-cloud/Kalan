@@ -31,6 +31,7 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
     if (_focused || widget.focusCardId == null) return;
     _focused = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final target = _focusKey.currentContext;
       if (target == null || !target.mounted) return;
       Scrollable.ensureVisible(
