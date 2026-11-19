@@ -305,11 +305,17 @@ void main() {
     expect(firstWeekdayFor('tr', 'TR'), DateTime.monday);
     expect(firstWeekdayFor('en', 'GB'), DateTime.monday);
     expect(firstWeekdayFor('tr'), DateTime.monday);
-    // A Turkish phone in the US: the region's data (en_US), Sunday.
+    // A Turkish phone in the US: Sunday, as the region.
     expect(firstWeekdayFor('tr', 'US'), DateTime.sunday);
     expect(firstWeekdayFor('tr', 'us'), DateTime.sunday);
-    // Unknown region: falls back to the language.
-    expect(firstWeekdayFor('en', 'ZZ'), firstWeekdayFor('en'));
+    // No intl locale for language and region: the region's CLDR day.
+    expect(firstWeekdayFor('en', 'TR'), DateTime.monday);
+    expect(firstWeekdayFor('en', 'BR'), DateTime.sunday);
+    expect(firstWeekdayFor('en', 'EG'), DateTime.saturday);
+    expect(firstWeekdayFor('en', 'MV'), DateTime.friday);
+    // A region the table does not list: Monday (CLDR 001).
+    expect(firstWeekdayFor('en', 'ZZ'), DateTime.monday);
+    // No region: the language's intl data; unknown language: null.
     expect(firstWeekdayFor('xx'), isNull);
   });
 

@@ -261,6 +261,15 @@ void main() {
     expect(tester.getCenter(cell(1)).dy, tester.getCenter(cell(2)).dy);
   });
 
+  testWidgets('English phone in Turkey: Monday first', (tester) async {
+    await openCalendar(tester, locale: const Locale('en', 'TR'));
+    expect(find.text('November 2026'), findsOneWidget);
+    expect(
+      tester.getCenter(cell(1)).dx,
+      greaterThan(tester.getCenter(cell(2)).dx),
+    );
+  });
+
   testWidgets('months: 12 back, forward to the last payment, "Today"', (
     tester,
   ) async {

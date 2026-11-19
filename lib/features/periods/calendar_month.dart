@@ -202,27 +202,43 @@ Map<LocalDate, CalendarDay> calendarMonth({
   };
 }
 
+/// CLDR `weekData` first days by region (supplementalData.xml), for
+/// regions whose language and region intl has no locale for (an English
+/// phone in Turkey). Every other region starts on Monday (CLDR `001`).
+/// Taken verbatim from the standard, not chosen by hand (product owner
+/// decision, 19 November 2026).
+const _cldrFirstDayByRegion = <int, String>{
+  DateTime.sunday:
+      'AG AS BD BR BS BT BW BZ CA CO DM DO ET GT GU HK HN ID IL IN JM JP KE '
+      'KH KR LA MH MM MO MT MX MZ NI NP PA PE PH PK PR PT PY SA SG SV TH TT '
+      'TW UM US VE VI WS YE ZA ZW',
+  DateTime.saturday: 'AE AF BH DJ DZ EG IQ IR JO KW LY OM QA SD SY',
+  DateTime.friday: 'MV',
+};
+
+int _cldrFirstDay(String region) {
+  for (final MapEntry(:key, :value) in _cldrFirstDayByRegion.entries) {
+    if (value.split(' ').contains(region)) return key;
+  }
+  return DateTime.monday;
+}
+
 /// The first day of the week for a region, as a [DateTime] weekday
-/// (1 Monday ... 7 Sunday), from intl's locale data: Sunday for the US,
-/// Monday for Turkey. Tries language and region, then another language
-/// of the same region (an English phone in Turkey: Monday, from `tr`'s
-/// regional data when intl has `tr_TR`, otherwise any `xx_TR`), then the
-/// language alone; null when intl knows none of them.
+/// (1 Monday ... 7 Sunday): intl's locale data for the language and region
+/// ("en_US": Sunday, "en_GB": Monday); when intl has no such locale, the
+/// region's CLDR first day ("en" + "TR": Monday); without a region, the
+/// language's intl data; null when intl does not know the language.
 int? firstWeekdayFor(String languageCode, [String? countryCode]) {
   final symbols = dateTimeSymbolMap();
   final region = countryCode == null || countryCode.isEmpty
       ? null
       : countryCode.toUpperCase();
-  final data =
-      (region == null ? null : symbols['${languageCode}_$region']) ??
-      (region == null
-          ? null
-          : ([
-              for (final k in symbols.keys)
-                if (k.endsWith('_$region')) k,
-            ]..sort()).map((k) => symbols[k]).firstOrNull) ??
-      symbols[languageCode];
-  // intl counts from Monday = 0.
+  if (region != null) {
+    final local = symbols['${languageCode}_$region'];
+    // intl counts from Monday = 0.
+    return local == null ? _cldrFirstDay(region) : local.FIRSTDAYOFWEEK + 1;
+  }
+  final data = symbols[languageCode];
   return data == null ? null : data.FIRSTDAYOFWEEK + 1;
 }
 
