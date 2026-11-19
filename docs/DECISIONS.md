@@ -445,3 +445,38 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Seçim bileşeni | Plan eklemedeki "Toplam \| Taksit" ile aynı `SegmentedButton` ve tema (seçili parça: mürekkep yazı, onay işareti, yükseltilmiş yüzey). Yeni tema rengi yazılmadı. |
 | Düzen | Seçim ekranın ilk satırı, içerikle birlikte kayar. Ay başlığı satırında ay adı, "Bugün", önceki ve sonraki ay. Gün hücresi 56 px yüksek; iPhone genişliğinde 53 px geniş (48x48 testli). Dar ekranda yan boşluk küçülür; 336 dp'ye kadar hücre 48 geniş kalır (testli), daha dar ekranda yedi sütun 48'e sığmaz. Ekran okuyucu güne çift dokunarak bölümü açar. Gün sayısı büyük yazıda en çok 1,3 kat büyür, hücre taşmaz. Diğer ayın günleri `textMuted`, işaretsiz, dokunulmaz. |
 | Test değişikliği | `coming_periods_screen_test.dart`'ta bir satır: seçim üstte durduğu için "4/4" satırı ekranın altında kalıyor; `skipOffstage: false` ile aranıyor. Mantık değişmedi. 52 ve 53 numaralı golden'lar seçimle yenilendi. |
+
+
+## Yoğun hafta (14) (19 Kasım 2026)
+
+"Yoğun hafta" (busy week) plan ödemelerinin bir haftaya yığılmasıdır; bir gözlemdir, uyarı değildir. "Sıkışık dönem" (tight, kalanın eşiğin altına düşmesi) ayrı kavramdır; kodda (`BusyWeek`) ve metinde ayrı adlar.
+
+Ürün sahibi kararları (yeniden sorulmaz):
+
+| Konu | Karar |
+|---|---|
+| Tanım | 7 günlük bir aralıkta en az 3 plan ödemesi VE bunlar o dönemin plan ödemelerinin en az yarısı. İki koşul birlikte. |
+| Eşik | Sabit; kullanıcı değiştiremez. Tek yer: `BusyWeekRule` (`lib/core/engine/busy_week.dart`, saf Dart). |
+| Yer | Yalnızca İleriki dönemler grafiği ve takvim; ana ekranda yok. |
+| Sabit ödemeler | Sayılmaz; yalnızca plan ödemeleri. |
+| Pencere | Dönem içindeki her günden başlayan 7 günlük kayan pencere; dönem sonunu aşmaz. Birden çok pencere koşulu sağlarsa en çok ödemeli olan, eşitlikte en erken başlayan. Dönemde en çok bir yoğun hafta. |
+| Gösterilen aralık | İlk ve son ödeme günü ("17–21 Ara"), 7 günün tamamı değil. |
+| Ödenmiş ödemeler | Sayılır (yığılma ödeme durumundan bağımsız). |
+| Grafik | Çubuğun altında (üstünde değil) küçük simge ve "yoğun"; dönem özetinde tek satır "Yoğun hafta: 17–21 Ara · 4 ödeme · ₺5.200", `surfaceRaised` kutuda. |
+| Takvim | Yoğun haftanın günleri gün sayılarının altında ince mürekkep çizgiyle birleşik; ilk günde aynı simge; ekran okuyucu "yoğun hafta" der. |
+
+Teknik kararlar (Claude, 19 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Hangi tarih | Plan ödemesinin motorun sakladığı etkin son ödeme günü; dönemi de bu gün belirler (takvimdeki noktalarla aynı yer). Günü geçmiş ödenmemiş bir ödeme bu dönemin toplamına girse de (`countingDate`) yığılmada kendi gününde sayılır; böylece takvim çizgisi noktalarla örtüşür. Dönem toplamı ve sayısı değişmedi. |
+| Kalan'dan önce ödenenler | Sayılmaz: tarihleri hiçbir yerde gösterilmez (ortasından eklenen plan kuralı). |
+| Tek veri yolu | `busyWeekIn` (`coming_periods.dart`): grafik `ComingPeriod.busyWeek`, takvim `calendarBusyWeeks` aynı fonksiyonu kullanır. Beklemedeki/kapatılmış plan (19) henüz yok; geldiğinde `plans` listesine ne girerse o sayılır. |
+| Simge | `Icons.layers_outlined` (üst üste katmanlar), her yerde `text` renginde. `late`, `negative` kullanılmaz (testli). |
+| Dokununca | Grafikte simge çubuğun sütunundadır: sütuna ya da simgeye dokunmak dönemi seçer ve özetteki açıklama kutusunu gösterir (ayrı açılır kutu yok; ikinci dokunma hedefi 48x48'e sığmazdı). Takvimde yoğun haftanın herhangi bir gününe dokununca gün bölümünde aynı kutu. |
+| Kutu | `surfaceRaised`, ince `border` çizgisi (kart üstünde de seçilsin diye), metin `text`, tarih `textMuted`. Tarih çevrilmiş cümlenin içinde bulunup soluk yazılır; sözcük sırası çevirmende kalır. |
+| Ekran okuyucu | Grafik sütununun etiketine açıklama cümlesi eklenir; takvim gününün etiketine ", yoğun hafta" (bugün'den önce). 13. maddenin üç takvim testindeki beklenen etiketler bu yüzden güncellendi (örnek veride 10–14 Kasım yoğun hafta). |
+| Tarih aralığı | `dayRange` (`format.dart`): aynı ayda "17–21 Ara" / "Dec 17–21" (ARB'de sıra), aylar arasında "29 Ara – 2 Oca", tek günde "17 Ara". |
+| Takvim çizgisi | Gün sayısının hemen altında, işaret satırının üstünde (bugün ve seçili gün çerçevesinin alt kenarıyla çakışmasın diye); ilk ve son günde hücre ortasından başlar/biter, hafta satırı değişince kendiliğinden kesilir. |
+| İki haftalık ve haftalık maaş | Aynı kural. Haftalık maaşta dönem 7 gün olduğundan 3 ve üstü plan ödemesi olan her dönem yoğun haftadır (tanımın doğal sonucu). |
+

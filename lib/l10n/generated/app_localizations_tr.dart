@@ -1772,4 +1772,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get calendarCellToday => 'bugün';
+
+  @override
+  String get busyWeekTag => 'yoğun';
+
+  @override
+  String busyWeekSummary(String range, int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Yoğun hafta: $range · $count ödeme · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String busyWeekRangeSameMonth(String month, String startDay, String endDay) {
+    return '$startDay–$endDay $month';
+  }
+
+  @override
+  String get calendarCellBusyWeek => 'yoğun hafta';
 }

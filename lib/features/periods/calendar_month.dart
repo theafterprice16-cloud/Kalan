@@ -3,6 +3,7 @@ import 'package:intl/date_symbol_data_local.dart' show dateTimeSymbolMap;
 import '../../core/engine/engine.dart';
 import '../../data/models.dart';
 import '../home/home_view.dart';
+import 'coming_periods.dart' show busyWeekIn;
 
 /// How one payment looks on the calendar.
 enum CalendarStatus { pending, paid, late }
@@ -200,6 +201,26 @@ Map<LocalDate, CalendarDay> calendarMonth({
         isPayday: paydays.contains(d),
       ),
   };
+}
+
+/// The busy weeks of the pay periods that overlap [month], by date: the
+/// same ones the chart shows ([busyWeekIn]). Only those with a day in
+/// [month] are returned.
+List<BusyWeek> calendarBusyWeeks({
+  required Iterable<PlanWithPayments> plans,
+  required PaySchedule schedule,
+  required CalendarMonth month,
+}) {
+  final start = month.first;
+  final end = month.add(1).first;
+  final weeks = <BusyWeek>[];
+  var period = schedule.periodContaining(start);
+  while (period.start < end) {
+    final w = busyWeekIn(plans: plans, period: period);
+    if (w != null && w.last >= start && w.first < end) weeks.add(w);
+    period = schedule.next(period);
+  }
+  return weeks;
 }
 
 /// CLDR `weekData` first days by region (supplementalData.xml), for

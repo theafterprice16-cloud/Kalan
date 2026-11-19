@@ -377,5 +377,9 @@
   "calendarCellAllPaid": "ödendi",
   "calendarCellSomePaid": "{count, plural, other{{count} tanesi ödendi}}",
   "calendarCellPayday": "maaş günü",
-  "calendarCellToday": "bugün"
+  "calendarCellToday": "bugün",
+  "busyWeekTag": "yoğun",
+  "busyWeekSummary": "{count, plural, other{Yoğun hafta: {range} · {count} ödeme · {amount}}}",
+  "busyWeekRangeSameMonth": "{startDay}–{endDay} {month}",
+  "calendarCellBusyWeek": "yoğun hafta"
 }

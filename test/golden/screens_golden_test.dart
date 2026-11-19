@@ -303,6 +303,26 @@ void main() {
         });
       }
 
+      // Busy week (14): Example 1, the December period selected: the tag
+      // beside its bar and the one line in its summary.
+      for (final (lang, locale) in [
+        ('tr', const Locale('tr', 'TR')),
+        ('en', const Locale('en', 'US')),
+      ]) {
+        testWidgets('busy week, chart, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: seedBusyWeek,
+            today: busyWeekToday,
+          );
+          await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('coming-period-1')));
+          await shoot(tester, '57-busy-week-chart-$lang-$theme');
+        });
+      }
+
       testWidgets('add plan', (tester) async {
         await start(tester);
         await tester.tap(find.text('Plan ekle'));

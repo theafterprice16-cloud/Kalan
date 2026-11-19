@@ -1759,4 +1759,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendarCellToday => 'today';
+
+  @override
+  String get busyWeekTag => 'busy';
+
+  @override
+  String busyWeekSummary(String range, int count, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Busy week: $range · $count payments · $amount',
+      one: 'Busy week: $range · 1 payment · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String busyWeekRangeSameMonth(String month, String startDay, String endDay) {
+    return '$month $startDay–$endDay';
+  }
+
+  @override
+  String get calendarCellBusyWeek => 'busy week';
 }

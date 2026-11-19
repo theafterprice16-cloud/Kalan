@@ -41,6 +41,22 @@ extension L10nX on BuildContext {
   String dayMonth(LocalDate date) =>
       DateFormat.MMMMd(localeName).format(date.toDateTime());
 
+  /// A short span of days: "17–21 Ara" / "Dec 17–21" in one month,
+  /// "29 Ara – 2 Oca" / "Dec 29 – Jan 2" across months, "17 Ara" for one
+  /// day.
+  String dayRange(LocalDate first, LocalDate last) {
+    if (first == last) return shortDate(first);
+    if (first.year == last.year && first.month == last.month) {
+      final day = DateFormat.d(localeName);
+      return l10n.busyWeekRangeSameMonth(
+        DateFormat.MMM(localeName).format(first.toDateTime()),
+        day.format(first.toDateTime()),
+        day.format(last.toDateTime()),
+      );
+    }
+    return l10n.periodRange(shortDate(first), shortDate(last));
+  }
+
   /// "Ağustos 2027" / "August 2027".
   String monthYear(int year, int month) =>
       DateFormat.yMMMM(localeName).format(DateTime(year, month));
