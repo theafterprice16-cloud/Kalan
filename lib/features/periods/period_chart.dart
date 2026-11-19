@@ -33,6 +33,10 @@ class BarGeometry {
   /// The shortest a bar part with a nonzero amount is drawn.
   static const double minVisible = 4;
 
+  /// The shortest the part over income is drawn: the bar's top rounding,
+  /// which would otherwise swallow it.
+  static const double minOver = KalanRadius.input;
+
   /// The amount the full [height] stands for: the largest spoken for or
   /// income among [periods], so every bar shares one scale.
   static int scaleOf(List<ComingPeriod> periods) => periods.fold(
@@ -58,9 +62,13 @@ class BarGeometry {
     final spent = math.min(height, part(spokenForMinor));
     if (incomeMinor == null) return BarGeometry(spokenFor: spent, left: 0);
     if (isShort) {
-      // The part over income is never hidden, even one minor unit; the
+      // The part over income is never hidden, even one minor unit: at
+      // least the bar's top rounding, so it reads as its own band. The
       // part up to income gives way when the bar is short of room.
-      final over = math.min(height, part(spokenForMinor - incomeMinor));
+      final over = math.min(
+        height,
+        math.max(minOver, part(spokenForMinor - incomeMinor)),
+      );
       final upToIncome = math.min(height - over, part(incomeMinor));
       return BarGeometry(
         spokenFor: upToIncome,

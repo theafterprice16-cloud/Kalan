@@ -467,8 +467,9 @@ void main() {
         height: 156,
         isShort: true,
       );
-      expect(g.spokenFor, closeTo(150, 0.001));
-      expect(g.over, closeTo(6, 0.001));
+      expect(g.spokenFor, closeTo(148, 0.001));
+      // ₺1.200 is 6 px on this scale; drawn at the top rounding's 8.
+      expect(g.over, BarGeometry.minOver);
       expect(g.left, 0);
       expect(g.incomeLine, g.spokenFor);
       expect(g.spokenFor + g.over, closeTo(156, 0.001));
@@ -482,7 +483,7 @@ void main() {
         height: 100,
         isShort: true,
       );
-      expect(g.over, BarGeometry.minVisible);
+      expect(g.over, BarGeometry.minOver);
       expect(g.spokenFor + g.over, closeTo(100, 0.001));
       expect(g.incomeLine, g.spokenFor);
     });
