@@ -216,6 +216,29 @@ void main() {
       expect(await db.select(db.payments).get(), isEmpty);
     });
 
+    test('plan put on hold or closed afterwards: that payment is not '
+        'marked; the rest of "All paid" is (19)', () async {
+      final tabby = await seedOne(db, 'Tabby', d(11, 14));
+      final klarna = await seedOne(db, 'Klarna', d(11, 14));
+      await scheduler.rescheduleAll();
+      final onDay = pending(d(11, 14), ReminderKind.onDay);
+      final repo = PlanRepository(db);
+      await repo.hold((await paymentOf(db, tabby)).planId, today: d(11, 13));
+      clock = at(d(11, 14), 9, 1);
+      final result = await press(ReminderAction.allPaid, onDay);
+      expect(result.marked, 1);
+      expect((await paymentOf(db, tabby)).paidAt, isNull);
+      expect((await paymentOf(db, klarna)).paidAt, isNotNull);
+
+      await repo.close(
+        (await paymentOf(db, tabby)).planId,
+        reason: CloseReason.cancel,
+        today: d(11, 14),
+      );
+      expect((await press(ReminderAction.paid, onDay)).marked, 0);
+      expect((await paymentOf(db, tabby)).paidAt, isNull);
+    });
+
     test('pressed twice at once: marked once', () async {
       final tabby = await seedOne(db, 'Tabby', d(11, 14));
       await scheduler.rescheduleAll();

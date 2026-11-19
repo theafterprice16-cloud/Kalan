@@ -143,7 +143,7 @@ class _PlanList extends ConsumerWidget {
                               // One payment: the due date and days left,
                               // never "0/1".
                               PayLaterDueLine(
-                                due: p.payments.first.date,
+                                due: p.allPayments.first.date,
                                 showDaysLeft: p.isOpen,
                                 short: true,
                               )

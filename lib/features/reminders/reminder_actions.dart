@@ -2,6 +2,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../core/date/local_date.dart';
 import '../../core/engine/past_due.dart';
+import '../../core/engine/plan_status.dart';
 import '../../core/reminders/reminder_models.dart';
 import '../../core/reminders/reminder_planner.dart';
 import '../../core/reminders/reminder_time.dart';
@@ -118,6 +119,14 @@ class ReminderActionHandler {
               db.payments,
             )..where((p) => p.id.equals(paymentId))).getSingleOrNull();
             if (row == null || row.paidAt != null) continue;
+            // A notification still on screen after the plan was put on
+            // hold or closed (19): that payment no longer counts.
+            final plan = await (db.select(
+              db.plans,
+            )..where((p) => p.id.equals(row.planId))).getSingleOrNull();
+            if (plan == null || !countsInTotals(plan.status, isPaid: false)) {
+              continue;
+            }
             final due = LocalDate.fromEpochDay(row.dueDay);
             if (isPastDue(dueDate: due, isPaid: false, today: today)) {
               await plans.setPaidOn(paymentId, today, now: stamp);

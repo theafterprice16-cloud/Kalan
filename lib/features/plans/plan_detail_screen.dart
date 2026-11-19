@@ -77,7 +77,7 @@ class PlanDetailScreen extends ConsumerWidget {
       color: context.colors.textMuted,
     );
     // Plans added with only their remaining payments (before v4).
-    final midwayCount = plan.payments.first.seq - 1;
+    final midwayCount = plan.allPayments.first.seq - 1;
 
     return Scaffold(
       appBar: AppBar(

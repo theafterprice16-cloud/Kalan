@@ -20,7 +20,7 @@ String payLaterAutoName(AppLocalizations l10n, LocalDate due) =>
 
 /// A plan's name in [l10n]'s language: its own name, or the automatic one.
 String planNameIn(AppLocalizations l10n, PlanWithPayments plan) =>
-    plan.ownName ?? payLaterAutoName(l10n, plan.payments.first.date);
+    plan.ownName ?? payLaterAutoName(l10n, plan.allPayments.first.date);
 
 extension L10nX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);

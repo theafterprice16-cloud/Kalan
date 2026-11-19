@@ -25,21 +25,24 @@ class PlanRepository {
       ]);
 
   List<PlanWithPayments> _group(List<TypedResult> rows) {
-    final byPlan = <int, PlanWithPayments>{};
+    final plans = <int, (PlanRow, SourceRow?)>{};
     final payments = <int, List<PaymentRow>>{};
     for (final row in rows) {
       final plan = row.readTable(_db.plans);
-      byPlan.putIfAbsent(
+      plans.putIfAbsent(
         plan.id,
-        () => PlanWithPayments(
-          plan: plan,
-          source: row.readTableOrNull(_db.sources),
-          payments: payments.putIfAbsent(plan.id, () => []),
-        ),
+        () => (plan, row.readTableOrNull(_db.sources)),
       );
-      payments[plan.id]!.add(row.readTable(_db.payments));
+      payments.putIfAbsent(plan.id, () => []).add(row.readTable(_db.payments));
     }
-    return byPlan.values.toList();
+    return [
+      for (final MapEntry(key: id, value: (plan, source)) in plans.entries)
+        PlanWithPayments(
+          plan: plan,
+          source: source,
+          allPayments: payments[id]!,
+        ),
+    ];
   }
 
   /// Every plan with its source and payments. Re-emits on any change to
@@ -56,11 +59,18 @@ class PlanRepository {
     return null;
   });
 
+  /// Plans with an unpaid payment that are not closed: plans on hold
+  /// count (Decision 1). The same as `PlanWithPayments.isOpen`.
   Future<int> countOpenPlans() async {
-    final unpaid = _db.payments.paidAt.isNull();
-    final query = _db.selectOnly(_db.payments, distinct: true)
-      ..addColumns([_db.payments.planId])
-      ..where(unpaid);
+    final query =
+        _db.selectOnly(_db.payments, distinct: true).join([
+            innerJoin(_db.plans, _db.plans.id.equalsExp(_db.payments.planId)),
+          ])
+          ..addColumns([_db.payments.planId])
+          ..where(
+            _db.payments.paidAt.isNull() &
+                _db.plans.status.equalsValue(PlanStatus.closed).not(),
+          );
     return (await query.get()).length;
   }
 
@@ -114,8 +124,12 @@ class PlanRepository {
     return planId;
   });
 
+  /// Nothing is marked or unmarked on a closed plan: its history stays as
+  /// it was when it was closed (19).
   Future<void> setPaid(int paymentId, {required bool paid, DateTime? now}) =>
-      (_db.update(_db.payments)..where((p) => p.id.equals(paymentId))).write(
+      (_db.update(
+        _db.payments,
+      )..where((p) => p.id.equals(paymentId) & _onUnclosedPlan(p))).write(
         PaymentsCompanion(
           paidAt: Value(paid ? (now ?? DateTime.now()) : null),
           // Unmarking forgets the past-due choice too.
@@ -126,12 +140,123 @@ class PlanRepository {
   /// "Paid" from the past-due list: [paidOn] is today (counts in this
   /// period) or the due date (counts in its own period).
   Future<void> setPaidOn(int paymentId, LocalDate paidOn, {DateTime? now}) =>
-      (_db.update(_db.payments)..where((p) => p.id.equals(paymentId))).write(
+      (_db.update(
+        _db.payments,
+      )..where((p) => p.id.equals(paymentId) & _onUnclosedPlan(p))).write(
         PaymentsCompanion(
           paidAt: Value(now ?? DateTime.now()),
           paidOnDay: Value(paidOn.epochDay),
         ),
       );
+
+  Expression<bool> _onUnclosedPlan($PaymentsTable p) => p.planId.isInQuery(
+    _db.selectOnly(_db.plans)
+      ..addColumns([_db.plans.id])
+      ..where(_db.plans.status.equalsValue(PlanStatus.closed).not()),
+  );
+
+  Future<PlanRow> _plan(int planId) =>
+      (_db.select(_db.plans)..where((p) => p.id.equals(planId))).getSingle();
+
+  /// Closed plans are read-only (closing cannot be undone).
+  Future<void> _requireNotClosed(int planId) async {
+    if ((await _plan(planId)).status == PlanStatus.closed) {
+      throw StateError('plan $planId is closed');
+    }
+  }
+
+  Future<List<PaymentRow>> _rows(int planId) =>
+      (_db.select(_db.payments)
+            ..where((p) => p.planId.equals(planId))
+            ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
+          .get();
+
+  /// "Put on hold" (19): the unpaid payments leave every total, period,
+  /// past-due list and reminder until the plan is reopened or closed.
+  Future<void> hold(int planId, {required LocalDate today}) =>
+      _db.transaction(() async {
+        final plan = await _plan(planId);
+        if (plan.status != PlanStatus.open) {
+          throw StateError('plan $planId is not open');
+        }
+        await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+          PlansCompanion(
+            status: const Value(PlanStatus.onHold),
+            heldSinceDay: Value(today.epochDay),
+            holdCheckDay: Value(today.epochDay),
+            reopenedDay: const Value(null),
+          ),
+        );
+      });
+
+  /// "Reopen": undoes "Put on hold". Payments come back on their own
+  /// dates; the hold day stays, so payments whose date passed meanwhile
+  /// can be counted ([PlanWithPayments.passedWhileHeld]).
+  Future<void> reopen(int planId, {required LocalDate today}) =>
+      _db.transaction(() async {
+        final plan = await _plan(planId);
+        if (plan.status != PlanStatus.onHold) {
+          throw StateError('plan $planId is not on hold');
+        }
+        await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+          PlansCompanion(
+            status: const Value(PlanStatus.open),
+            holdCheckDay: const Value(null),
+            reopenedDay: Value(today.epochDay),
+          ),
+        );
+      });
+
+  /// "Keep on hold": the 30 days start again from [today].
+  Future<void> keepOnHold(int planId, {required LocalDate today}) =>
+      (_db.update(_db.plans)..where(
+            (p) =>
+                p.id.equals(planId) & p.status.equalsValue(PlanStatus.onHold),
+          ))
+          .write(PlansCompanion(holdCheckDay: Value(today.epochDay)));
+
+  /// "Close" (19), from open or on hold: the plan goes to the archive with
+  /// its [reason]. Unpaid payments leave every total and reminder; paid
+  /// ones stay in their periods. Nothing is deleted.
+  Future<void> close(
+    int planId, {
+    required CloseReason reason,
+    required LocalDate today,
+  }) => _db.transaction(() async {
+    await _requireNotClosed(planId);
+    await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+      PlansCompanion(
+        status: const Value(PlanStatus.closed),
+        closeReason: Value(reason),
+        closedDay: Value(today.epochDay),
+        holdCheckDay: const Value(null),
+      ),
+    );
+  });
+
+  /// "Adjust amount" (19): a lower total for an open or held plan
+  /// ([adjustPlanTotal]). Only unpaid amounts change; the status does not.
+  /// Returns the reason when nothing is stored.
+  Future<AdjustRejection?> adjustTotal(int planId, int newTotalMinor) =>
+      _db.transaction(() async {
+        await _requireNotClosed(planId);
+        final rows = await _rows(planId);
+        final result = adjustPlanTotal([
+          for (final r in rows) r.toState(),
+        ], newTotalMinor);
+        switch (result) {
+          case AdjustRejected(:final reason):
+            return reason;
+          case AdjustApplied(:final payments):
+            for (final (i, r) in rows.indexed) {
+              final amount = payments[i].amountMinor;
+              if (amount == r.amountMinor) continue;
+              await (_db.update(_db.payments)..where((p) => p.id.equals(r.id)))
+                  .write(PaymentsCompanion(amountMinor: Value(amount)));
+            }
+            return null;
+        }
+      });
 
   /// Changes one payment; returns the reason when the edit is not allowed.
   Future<EditRejection?> editPayment({
@@ -140,6 +265,7 @@ class PlanRepository {
     required LocalDate date,
     required int amountMinor,
   }) => _db.transaction(() async {
+    await _requireNotClosed(planId);
     final rows =
         await (_db.select(_db.payments)
               ..where((p) => p.planId.equals(planId))
@@ -199,6 +325,7 @@ class PlanRepository {
     required PayLaterRule rule,
     LocalDate? chosenDate,
   }) => _db.transaction(() async {
+    await _requireNotClosed(planId);
     final payment = await (_db.select(
       _db.payments,
     )..where((p) => p.planId.equals(planId))).getSingle();
@@ -397,6 +524,7 @@ class PlanRepository {
         if (paidBefore < 0 || paidBefore >= count) {
           throw ArgumentError.value(paidBefore, 'paidBefore');
         }
+        await _requireNotClosed(planId);
         final current = await (_db.select(
           _db.plans,
         )..where((p) => p.id.equals(planId))).getSingle();

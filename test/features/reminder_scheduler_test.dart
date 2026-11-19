@@ -6,7 +6,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/date/local_date.dart';
 import 'package:kalan/core/engine/engine.dart'
-    show PaymentMethod, PlanKind, underwayPlan;
+    show CloseReason, PaymentMethod, PlanKind, underwayPlan;
 import 'package:kalan/core/reminders/reminder_models.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
@@ -204,6 +204,60 @@ void main() {
       }
       await schedulerFor(db, gateway).rescheduleAll();
       expect(gateway.pending, hasLength(60));
+    });
+
+    test('put on hold: the plan\'s reminders go, reopen brings them back '
+        '(19)', () async {
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, hasLength(7));
+      final planId = (await db.select(db.plans).getSingle()).id;
+      final repo = PlanRepository(db);
+      await repo.hold(planId, today: LocalDate(2026, 11, 20));
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, isEmpty);
+      await repo.reopen(planId, today: LocalDate(2026, 11, 20));
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, hasLength(7));
+    });
+
+    test('closed: the plan\'s reminders go for good (19)', () async {
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
+      final planId = (await db.select(db.plans).getSingle()).id;
+      await PlanRepository(db).close(
+        planId,
+        reason: CloseReason.refund,
+        today: LocalDate(2026, 11, 20),
+      );
+      await scheduler.rescheduleAll();
+      expect(gateway.pending, isEmpty);
+    });
+
+    test('a held plan\'s place among the 60 goes to the next payments '
+        '(19)', () async {
+      for (var i = 0; i < 30; i++) {
+        await seedPayIn4(
+          db,
+          first: LocalDate(2026, 11, 21).addDays(i * 3),
+          source: 'P$i',
+        );
+      }
+      final scheduler = schedulerFor(db, gateway);
+      await scheduler.rescheduleAll();
+      final before = [for (final n in gateway.pending) n.id];
+      expect(before, hasLength(60));
+      final first = (await db.select(db.plans).get()).first.id;
+      await PlanRepository(db).hold(first, today: LocalDate(2026, 11, 20));
+      await scheduler.rescheduleAll();
+      final after = [for (final n in gateway.pending) n.id];
+      expect(after, hasLength(60));
+      // Later reminders moved in: not just the old list minus the plan.
+      expect(after.toSet().difference(before.toSet()), isNotEmpty);
+      expect(
+        gateway.pending.where((n) => n.fireDate == LocalDate(2026, 11, 20)),
+        isEmpty,
+      );
     });
 
     test('web or unsupported: nothing is touched', () async {
