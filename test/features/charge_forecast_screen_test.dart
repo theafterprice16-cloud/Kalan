@@ -351,7 +351,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.getSemantics(f),
-        containsSemantics(isExpanded: true, hasExpandedState: true),
+        isSemantics(isExpanded: true, hasExpandedState: true),
       );
     }
     handle.dispose();
