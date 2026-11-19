@@ -806,6 +806,12 @@ abstract class AppLocalizations {
   /// **'Credit card'**
   String get sourceKindCard;
 
+  /// Source type: a bank account automatic payments are taken from (for example a salary account). Kalan never connects to it and never asks for its balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank account'**
+  String get sourceKindAccount;
+
   /// No description provided for @fieldStatementDay.
   ///
   /// In en, this message translates to:
@@ -2515,6 +2521,96 @@ abstract class AppLocalizations {
     String date,
     String next,
   );
+
+  /// Section title on a bank account in Sources and cards: the automatic payments that will be taken from it this pay period, so the money should be there. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Keep in account'**
+  String get chargeTitleAccount;
+
+  /// Section title on a credit card in Sources and cards: other plans charged automatically to this card (not the card's own installments, which are on its statements). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Coming to this card'**
+  String get chargeTitleCard;
+
+  /// Section title on a pay later provider chosen as where automatic payments are taken from. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Coming out of this source'**
+  String get chargeTitleProvider;
+
+  /// The next day automatic payments come out of this source and that day's total. Shown larger and bolder, never in a warning colour. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Next withdrawal: {date} · {amount}'**
+  String chargeNext(String date, String amount);
+
+  /// Running total: everything that comes out of this source from the start of the pay period up to and including this day. Avoid grammar that changes with the date (no Turkish 'a/'e suffix). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'By {date} · {amount}'**
+  String chargeBy(String date, String amount);
+
+  /// A day whose automatic payments are already marked paid: shown muted with a tick, not added to the running total. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {amount} paid'**
+  String chargePaid(String date, String amount);
+
+  /// Screen reader label of the clock icon on today's row when an unpaid payment past its due date is counted today. Calm, no urgency. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Includes a payment past its due date'**
+  String get chargePastDue;
+
+  /// Opens or closes the day-by-day list of this pay period's automatic payments. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get chargeDetails;
+
+  /// Collapsed row; opens the same list for the next pay period (next payday to the one after). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Next period'**
+  String get chargeNextPeriod;
+
+  /// One calm line when nothing automatic is left to come out of this source in the current pay period. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'No automatic payments to come out of this source this period.'**
+  String get chargeEmpty;
+
+  /// Shown when the next pay period list is opened and it is empty. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'No automatic payments from this source next period.'**
+  String get chargeNextEmpty;
+
+  /// Title of a separate card listing automatic plans whose account or card was not chosen. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic payments without a source'**
+  String get chargeUnassignedTitle;
+
+  /// Under a plan's name in the card of automatic payments without a source: its next unpaid payment. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {date} · {amount}'**
+  String chargeUnassignedRow(String date, String amount);
+
+  /// Note under the list of automatic payments without a source. Informal 'you' in Turkish (sen). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'You can choose where each is taken from in its plan details.'**
+  String get chargeUnassignedNote;
+
+  /// Added to the reminder before a payment when every payment in it is taken automatically from the same bank account and amounts are shown. Replaces the general 'taken automatically' note. The account name is as the user typed it, so the Turkish text uses no case suffix on it. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s taken automatically. Keep {amount} in {account}.'**
+  String reminderNoteAccount(String account, String amount);
 }
 
 class _AppLocalizationsDelegate

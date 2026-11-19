@@ -194,6 +194,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                     options: [
                       (SourceKind.provider, l10n.sourceKindProvider),
                       (SourceKind.card, l10n.sourceKindCard),
+                      (SourceKind.account, l10n.sourceKindAccount),
                     ],
                     onSelected: (k) => setState(() => _kind = k),
                   ),

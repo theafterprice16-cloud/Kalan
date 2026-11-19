@@ -426,6 +426,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sourceKindCard => 'Credit card';
 
   @override
+  String get sourceKindAccount => 'Bank account';
+
+  @override
   String get fieldStatementDay => 'Statement date';
 
   @override
@@ -1888,5 +1891,63 @@ class AppLocalizationsEn extends AppLocalizations {
           'Your $card statement closes in 1 day, on $date. Installments after that go on the $next statement.',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get chargeTitleAccount => 'Keep in account';
+
+  @override
+  String get chargeTitleCard => 'Coming to this card';
+
+  @override
+  String get chargeTitleProvider => 'Coming out of this source';
+
+  @override
+  String chargeNext(String date, String amount) {
+    return 'Next withdrawal: $date · $amount';
+  }
+
+  @override
+  String chargeBy(String date, String amount) {
+    return 'By $date · $amount';
+  }
+
+  @override
+  String chargePaid(String date, String amount) {
+    return '$date · $amount paid';
+  }
+
+  @override
+  String get chargePastDue => 'Includes a payment past its due date';
+
+  @override
+  String get chargeDetails => 'Details';
+
+  @override
+  String get chargeNextPeriod => 'Next period';
+
+  @override
+  String get chargeEmpty =>
+      'No automatic payments to come out of this source this period.';
+
+  @override
+  String get chargeNextEmpty =>
+      'No automatic payments from this source next period.';
+
+  @override
+  String get chargeUnassignedTitle => 'Automatic payments without a source';
+
+  @override
+  String chargeUnassignedRow(String date, String amount) {
+    return 'Next: $date · $amount';
+  }
+
+  @override
+  String get chargeUnassignedNote =>
+      'You can choose where each is taken from in its plan details.';
+
+  @override
+  String reminderNoteAccount(String account, String amount) {
+    return 'It\'s taken automatically. Keep $amount in $account.';
   }
 }
