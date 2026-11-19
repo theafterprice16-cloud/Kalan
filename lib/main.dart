@@ -31,11 +31,16 @@ Future<void> main() async {
   if (!kIsWeb) {
     await refreshLocalTimeZone();
     // A tapped reminder that launches the app opens the home screen,
-    // which is where the app starts anyway.
+    // which is where the app starts anyway; a statement closing reminder
+    // opens its card over it (KalanApp).
     final gateway = await LocalNotificationsGateway.initialize(
       l10n: lookupAppLocalizations(appLocale(null)),
     );
-    overrides.add(notificationGatewayProvider.overrideWithValue(gateway));
+    overrides
+      ..add(notificationGatewayProvider.overrideWithValue(gateway))
+      ..add(
+        launchPayloadProvider.overrideWithValue(await gateway.launchPayload()),
+      );
   }
   runApp(ProviderScope(overrides: overrides, child: const KalanApp()));
 }

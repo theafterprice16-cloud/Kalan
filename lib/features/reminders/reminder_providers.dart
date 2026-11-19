@@ -14,6 +14,11 @@ final notificationGatewayProvider = Provider<NotificationGateway>(
   (ref) => const NoopNotificationGateway(),
 );
 
+/// The payload of the notification whose tap launched the app (main()
+/// reads it); null otherwise. A payment reminder opens home, where the
+/// app starts anyway; a statement closing reminder opens its card.
+final launchPayloadProvider = Provider<String?>((ref) => null);
+
 /// Wall clock "now"; overridden in tests.
 final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
