@@ -107,7 +107,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
       return l10n.errorCountInvalid;
     }
     final min = minInstallmentCount([
-      for (final p in plan.payments) p.toState(),
+      for (final p in plan.allPayments) p.toState(),
     ]);
     if (n < min) return l10n.errorCountMin(min);
     return _countError;
@@ -116,8 +116,8 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   /// The payment the "next payment date" belongs to, when it may move.
   PaymentRow? _nextPayment(PlanWithPayments plan) {
     final n = _paidCount(plan);
-    if (n == null || n < 0 || n >= plan.payments.length) return null;
-    final p = plan.payments[n];
+    if (n == null || n < 0 || n >= plan.allPayments.length) return null;
+    final p = plan.allPayments[n];
     return p.isPaid && !p.paidBeforeKalan ? null : p;
   }
 
@@ -129,10 +129,10 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     if (n >= count) return l10n.errorPaidAll;
     // New payments at the end are unpaid too, so a plan with nothing
     // marked in Kalan can count up to the new total.
-    final run = leadingRunOf(plan.payments);
-    final max = run == plan.payments.length
+    final run = leadingRunOf(plan.allPayments);
+    final max = run == plan.allPayments.length
         ? count - 1
-        : maxPaidBeforeOf(plan.payments);
+        : maxPaidBeforeOf(plan.allPayments);
     if (n > max) return l10n.errorPaidMax(max);
     return null;
   }
@@ -224,7 +224,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     // "Pay later": its own short form, no "underway".
     if (plan.isPayLater) return _PayLaterEdit(plan: plan);
     _load(plan);
-    final max = maxPaidBeforeOf(plan.payments);
+    final max = maxPaidBeforeOf(plan.allPayments);
     final payIn4 = _isPayIn4(plan);
     final next = _nextPayment(plan);
     final showDate = _pattern(plan) != null && next != null;
@@ -384,7 +384,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
   void initState() {
     super.initState();
     final plan = widget.plan;
-    final payment = plan.payments.first;
+    final payment = plan.allPayments.first;
     _input = PayLaterInput(
       purchaseDate: plan.purchaseDate ?? payment.date,
       rule: plan.payLaterRule ?? const PayLaterRule.chosenDate(),
@@ -414,9 +414,9 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     final plan = widget.plan;
-    final paid = plan.payments.first.isPaid;
+    final paid = plan.allPayments.first.isPaid;
     final amount = paid
-        ? plan.payments.first.amountMinor
+        ? plan.allPayments.first.amountMinor
         : ref.parseMoney(context, _input.amount.text);
     final rule = _input.rule;
     if (amount == null || rule == null) return;
@@ -483,7 +483,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
               PayLaterFields(
                 input: _input,
                 onChanged: _refresh,
-                locked: widget.plan.payments.first.isPaid,
+                locked: widget.plan.allPayments.first.isPaid,
               ),
               const SizedBox(height: KalanSpace.md),
               PaymentMethodFields(

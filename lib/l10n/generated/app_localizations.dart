@@ -2617,6 +2617,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It\'s taken automatically. Keep {amount} in {account}.'**
   String reminderNoteAccount(String account, String amount);
+
+  /// Plan details: the one entry point for 'Put on hold', 'Adjust amount' and 'Close' (19). Also the title of the sheet it opens. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Return or cancellation'**
+  String get refundAction;
+
+  /// Option in the 'Return or cancellation' sheet: leaves the remaining payments out while the user waits. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Put on hold'**
+  String get holdOption;
+
+  /// Explanation under 'Put on hold'. The only place 'dispute' (itiraz) may appear, as a neutral side clause. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'While you wait for a return, cancellation or dispute, remaining payments are left out.'**
+  String get holdOptionHint;
+
+  /// Undoes 'Put on hold'; shown only on a plan on hold. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen'**
+  String get reopenOption;
+
+  /// Explanation under 'Reopen'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining payments come back on their own dates.'**
+  String get reopenOptionHint;
+
+  /// Option in the 'Return or cancellation' sheet and title of its screen: lowers the plan total after a partial return. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust amount'**
+  String get adjustOption;
+
+  /// Explanation under 'Adjust amount'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'If you returned part of it, remaining payments are split to match the new total.'**
+  String get adjustOptionHint;
+
+  /// Option in the 'Return or cancellation' sheet and in the 30-day line; also the confirm button of the close dialog. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get closeOption;
+
+  /// Explanation under 'Close'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'The plan moves to the archive. What you paid stays in your history.'**
+  String get closeOptionHint;
+
+  /// Label of a plan on hold (plan list, plan details) and of each payment on hold. Always shown with a pause icon; never in the error color. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'On hold'**
+  String get planOnHold;
+
+  /// Plan details of a plan on hold, under the amounts. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment on hold, left out of totals and reminders.} other{{count} payments on hold, left out of totals and reminders.}}'**
+  String planOnHoldNote(int count);
+
+  /// Line on a plan that has been on hold for 30 days, shown only when the plan is opened. No notification. Options: Close / Reopen / Keep on hold. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Still waiting on the return?'**
+  String get holdCheckTitle;
+
+  /// Under 'Still waiting on the return?'. Turkish: the date takes no case suffix of its own ('tarihinden'). Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'On hold since {date}.'**
+  String holdCheckSince(String date);
+
+  /// Option in the 30-day line: the plan stays on hold and asks again 30 days later. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Keep on hold'**
+  String get keepOnHold;
+
+  /// Plan details after 'Reopen', while payments whose date passed during the hold are unpaid. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment\'s date passed while it was on hold. If you paid it, you can mark it.} other{{count} payments\' dates passed while they were on hold. If you paid them, you can mark them.}}'**
+  String passedWhileHeld(int count);
+
+  /// Snackbar after 'Put on hold'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Plan is on hold.'**
+  String get planHeldDone;
+
+  /// Snackbar after 'Reopen'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Plan reopened.'**
+  String get planReopenedDone;
+
+  /// Snackbar after closing a plan. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Plan closed.'**
+  String get planClosedDone;
+
+  /// Snackbar after 'Keep on hold'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Plan stays on hold.'**
+  String get planKeptOnHold;
+
+  /// Snackbar after 'Adjust amount' is saved. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Amount adjusted.'**
+  String get amountAdjustedDone;
+
+  /// Title of the close dialog; also the button offered when an adjustment would leave no payment. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Close plan'**
+  String get closeTitle;
+
+  /// Body of the close dialog. Closing is not deleting. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Unpaid payments leave your totals and reminders. What you paid stays in your history. A closed plan can\'t be reopened.'**
+  String get closeBody;
+
+  /// Heading above the two reasons in the close dialog. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get closeReasonTitle;
+
+  /// Close reason: the item was returned. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get closeReasonRefund;
+
+  /// Close reason: the purchase was cancelled. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation'**
+  String get closeReasonCancel;
+
+  /// Label of a closed plan in the archive and its details. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, refund{Closed · Return} other{Closed · Cancellation}}'**
+  String closedWithReason(String reason);
+
+  /// Closed plan in the archive: what was paid (screen reader label of the amount). Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Paid {amount}'**
+  String planPaidAmount(String amount);
+
+  /// Amount field on the 'Adjust amount' screen. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'New total'**
+  String get adjustNewTotal;
+
+  /// 'Adjust amount' screen, above the field. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Current total {amount}'**
+  String adjustCurrentTotal(String amount);
+
+  /// 'Adjust amount' screen, above the field. Paid before Kalan included. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve paid {amount}'**
+  String adjustPaidSoFar(String amount);
+
+  /// 'Adjust amount' screen, under the field. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'Paid payments don\'t change. What\'s left is split evenly across unpaid payments; dates stay the same.'**
+  String get adjustHint;
+
+  /// Heading of the preview list on the 'Adjust amount' screen, shown before saving. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'New payments'**
+  String get adjustPreviewTitle;
+
+  /// Validation on the 'Adjust amount' screen; nothing is saved. Turkish: the amount is in parentheses so it needs no case suffix. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'The new total can\'t be less than what you\'ve paid ({amount}).'**
+  String adjustBelowPaid(String amount);
+
+  /// Validation on the 'Adjust amount' screen: an adjustment only lowers the total. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'The new total can\'t be more than the current total ({amount}).'**
+  String adjustAboveTotal(String amount);
+
+  /// Note on the 'Adjust amount' screen when the typed total equals the current one; nothing to save. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s the current total.'**
+  String get adjustUnchanged;
+
+  /// Validation on the 'Adjust amount' screen: each payment needs at least the smallest unit of the currency. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This amount can\'t be split into 1 payment.} other{This amount can\'t be split into {count} payments.}}'**
+  String adjustCannotSplit(int count);
+
+  /// 'Adjust amount' screen when the new total equals what is paid. Offers 'Close plan'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)
+  ///
+  /// In en, this message translates to:
+  /// **'No payments would be left. Do you want to close the plan?'**
+  String get adjustNothingLeft;
 }
 
 class _AppLocalizationsDelegate

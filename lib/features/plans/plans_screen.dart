@@ -5,12 +5,14 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/widgets.dart';
+import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/models.dart';
 import '../reminders/repeat_mode_ui.dart';
 import 'pay_later_form.dart';
 import 'plan_labels.dart';
+import 'refund_actions.dart';
 
 /// Open plans, recurring payments and the archive of finished plans.
 class PlansScreen extends ConsumerStatefulWidget {
@@ -126,7 +128,9 @@ class _PlanList extends ConsumerWidget {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ),
-                            if (p.isOpen && planRepeats(p.plan, global)) ...[
+                            if (p.isOpen &&
+                                !p.isOnHold &&
+                                planRepeats(p.plan, global)) ...[
                               const SizedBox(width: KalanSpace.xxs),
                               const RepeatIcon(),
                             ],
@@ -139,11 +143,15 @@ class _PlanList extends ConsumerWidget {
                               planKindLabel(context, p.plan),
                               style: secondary,
                             ),
-                            if (p.isPayLater)
+                            // On hold (19): the label and pause icon in
+                            // place of the next date and days left.
+                            if (p.isOnHold)
+                              OnHoldTag(style: secondary)
+                            else if (p.isPayLater)
                               // One payment: the due date and days left,
                               // never "0/1".
                               PayLaterDueLine(
-                                due: p.payments.first.date,
+                                due: p.allPayments.first.date,
                                 showDaysLeft: p.isOpen,
                                 short: true,
                               )
@@ -153,7 +161,14 @@ class _PlanList extends ConsumerWidget {
                                 total: p.plan.installmentCount,
                                 style: secondary,
                               ),
-                            if (p.nextUnpaid != null && !p.isPayLater)
+                            if (p.plan.closeReason case final reason?)
+                              Text(
+                                l10n.closedWithReason(reason.name),
+                                style: secondary,
+                              ),
+                            if (p.status == PlanStatus.open &&
+                                p.nextUnpaid != null &&
+                                !p.isPayLater)
                               Text(
                                 l10n.planNext(
                                   context.shortDate(p.nextUnpaid!.date),
@@ -167,13 +182,13 @@ class _PlanList extends ConsumerWidget {
                   ),
                   const SizedBox(width: KalanSpace.xs),
                   AmountText(
-                    ref.money(
-                      context,
-                      p.isOpen ? p.remainingMinor : p.totalMinor,
-                    ),
+                    ref.money(context, _amountOf(p)),
                     size: AmountSize.small,
+                    color: p.isOnHold ? context.colors.textMuted : null,
                     semanticsLabel: p.isOpen
                         ? l10n.planToPay(ref.money(context, p.remainingMinor))
+                        : p.isClosed
+                        ? l10n.planPaidAmount(ref.money(context, p.paidMinor))
                         : l10n.planTotal(ref.money(context, p.totalMinor)),
                   ),
                 ],
@@ -184,6 +199,14 @@ class _PlanList extends ConsumerWidget {
     );
   }
 }
+
+/// Open (and on hold): what is left to pay. Finished: the total. Closed
+/// (19): what was paid, since the rest is no longer owed.
+int _amountOf(PlanWithPayments p) => p.isOpen
+    ? p.remainingMinor
+    : p.isClosed
+    ? p.paidMinor
+    : p.totalMinor;
 
 class _RecurringList extends ConsumerWidget {
   const _RecurringList({required this.items});

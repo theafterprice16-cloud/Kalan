@@ -8,6 +8,7 @@ import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/payment_method.dart';
 import '../../core/engine/plan_draft.dart';
+import '../../core/engine/plan_status.dart';
 import '../../core/engine/recurring.dart';
 import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 
@@ -100,6 +101,30 @@ class Plans extends Table {
     #id,
     onDelete: KeyAction.setNull,
   )();
+
+  /// Open, on hold or closed (schema v14, 19). Every existing plan is
+  /// open: a plan whose payments are all paid is in the archive as before.
+  TextColumn get status =>
+      textEnum<PlanStatus>().withDefault(const Constant('open'))();
+
+  /// Why a closed plan was closed: return or cancellation. Null for every
+  /// other plan, finished (all paid) plans included.
+  TextColumn get closeReason => textEnum<CloseReason>().nullable()();
+
+  /// The day the plan was put on hold (epoch day). Kept after "Reopen",
+  /// with [reopenedDay], to count payments whose date passed meanwhile.
+  IntColumn get heldSinceDay => integer().nullable()();
+
+  /// Where the 30 days before "Still waiting on the return?" start: the
+  /// hold day, or the day "Keep on hold" was last chosen.
+  IntColumn get holdCheckDay => integer().nullable()();
+
+  /// The day a plan on hold was reopened; null while on hold or never held.
+  IntColumn get reopenedDay => integer().nullable()();
+
+  /// The day a plan was closed; null for every other plan. Closing cannot
+  /// be undone.
+  IntColumn get closedDay => integer().nullable()();
 }
 
 @DataClassName('PaymentRow')

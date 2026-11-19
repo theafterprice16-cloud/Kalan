@@ -68,7 +68,7 @@ Kısaltmalar: **Plan M** = önce `kalan-mimar` planı. **İnc M** = bitirmeden `
 | 16 | Kart bazında ekstre tahmini | Orta | Plan M · Ana · İnc M | Hesap kesim mantığı. |
 | 17 | Hesap kesim öncesi uyarı | Küçük | Ana | |
 | 18 | Hazır tutulacak tutar | Küçük | Ana | |
-| 19 | İade, iptal, itiraz | Orta | Plan M · Ana · İnc M | 1. soru (sınıra sayılır mı) açık; sorulacak. |
+| 19 | İade, iptal, itiraz | Orta | Plan M · Ana · İnc M | Tamamlandı (19 Kasım 2026); sınır sorusu cevaplandı (sayılır). |
 | 20 | Taksit erteleme | Küçük | Ana · İnc M | Dönem kayması. |
 | 21 | Gecikme ücreti kaydı | Küçük | Ana | |
 | 22 | Taksit başı ücret | Küçük | Ana | |

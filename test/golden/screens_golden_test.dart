@@ -1147,6 +1147,116 @@ void main() {
           await shoot(tester, '37-home-payment-method-$lang-$theme');
         });
       }
+
+      // Return or cancellation (19): Mont (Afterpay, 4 x 450 from 30 Oct)
+      // with its first two payments paid.
+      for (final (lang, locale, plansTab, finishedTab, adjustLabel) in [
+        ('tr', const Locale('tr', 'TR'), 'Planlar', 'Biten', 'Tutarı düzelt'),
+        ('en', const Locale('en', 'US'), 'Plans', 'Finished', 'Adjust amount'),
+      ]) {
+        Future<int> withMont(AppDatabase db) async {
+          await seedRich(db, incomeMinor: 4500000);
+          final mont = await (db.select(
+            db.plans,
+          )..where((p) => p.title.equals('Mont'))).getSingle();
+          final rows = await (db.select(
+            db.payments,
+          )..where((p) => p.planId.equals(mont.id))).get();
+          final repo = PlanRepository(db);
+          for (final r in rows.take(2)) {
+            await repo.setPaid(r.id, paid: true, now: DateTime(2026, 11, 1));
+          }
+          return mont.id;
+        }
+
+        Future<void> heldMont(AppDatabase db) async {
+          final id = await withMont(db);
+          await PlanRepository(db).hold(id, today: LocalDate(2026, 11, 18));
+        }
+
+        Future<void> openMont(WidgetTester tester) async {
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Mont'));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('refund sheet, $lang', (tester) async {
+          await start(tester, locale: locale, seed: withMont);
+          await openMont(tester);
+          await tester.tap(find.byKey(const ValueKey('refund-action')));
+          await tester.pumpAndSettle();
+          await shoot(tester, '66-refund-sheet-$lang-$theme');
+        });
+
+        testWidgets('plan on hold, $lang', (tester) async {
+          await start(tester, locale: locale, seed: heldMont);
+          await openMont(tester);
+          await shoot(tester, '67-plan-on-hold-$lang-$theme');
+        });
+
+        testWidgets('plan on hold for 30 days, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: (db) async {
+              final id = await withMont(db);
+              await PlanRepository(db).hold(id, today: LocalDate(2026, 10, 22));
+            },
+          );
+          await openMont(tester);
+          await shoot(tester, '68-plan-hold-check-$lang-$theme');
+        });
+
+        testWidgets('plans list with a plan on hold, $lang', (tester) async {
+          await start(tester, locale: locale, seed: heldMont);
+          await openTab(tester, plansTab);
+          await shoot(tester, '69-plans-on-hold-$lang-$theme');
+        });
+
+        testWidgets('adjust amount, $lang', (tester) async {
+          await start(tester, locale: locale, seed: withMont);
+          await openMont(tester);
+          await tester.tap(find.byKey(const ValueKey('refund-action')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(adjustLabel));
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const ValueKey('adjust-total')),
+            '1500',
+          );
+          FocusManager.instance.primaryFocus?.unfocus();
+          await shoot(tester, '70-adjust-amount-$lang-$theme');
+        });
+
+        testWidgets('close dialog, $lang', (tester) async {
+          await start(tester, locale: locale, seed: heldMont);
+          await openMont(tester);
+          await tester.tap(find.byKey(const ValueKey('refund-action')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('refund-close')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('close-reason-refund')));
+          await shoot(tester, '71-close-dialog-$lang-$theme');
+        });
+
+        testWidgets('archive with a closed plan, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: (db) async {
+              final id = await withMont(db);
+              await PlanRepository(db).close(
+                id,
+                reason: CloseReason.refund,
+                today: LocalDate(2026, 11, 19),
+              );
+            },
+          );
+          await openTab(tester, plansTab);
+          await tester.tap(find.text(finishedTab));
+          await shoot(tester, '72-archive-closed-$lang-$theme');
+        });
+      }
     });
   }
 }

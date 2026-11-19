@@ -332,8 +332,9 @@ class PayLaterSummary extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         PayLaterDueLine(
-          due: plan.payments.first.date,
-          showDaysLeft: plan.isOpen,
+          due: plan.allPayments.first.date,
+          // On hold (19): never "x days ago" or "x days left".
+          showDaysLeft: plan.isOpen && !plan.isOnHold,
         ),
         if (rule != null)
           Text(

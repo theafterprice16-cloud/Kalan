@@ -6,6 +6,7 @@ import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/payment_method.dart';
 import '../../core/engine/plan_draft.dart';
+import '../../core/engine/plan_status.dart';
 import '../../core/engine/recurring.dart';
 import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'app_database.steps.dart';
@@ -52,7 +53,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -190,6 +191,23 @@ class AppDatabase extends _$AppDatabase {
           schema.sources.statementReminderEnabled,
         );
         await m.addColumn(schema.sources, schema.sources.statementReminderDays);
+      },
+      // v14: plan status for returns and cancellations (19). Every
+      // existing plan is open (the column's default); finished plans stay
+      // in the archive because all their payments are paid. No amount or
+      // date changes.
+      from13To14: (m, schema) async {
+        final p = schema.plans;
+        for (final column in [
+          p.status,
+          p.closeReason,
+          p.heldSinceDay,
+          p.holdCheckDay,
+          p.reopenedDay,
+          p.closedDay,
+        ]) {
+          await m.addColumn(p, column);
+        }
       },
     ),
     beforeOpen: (details) async {

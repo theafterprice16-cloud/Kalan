@@ -47,17 +47,68 @@ extension PaymentRowX on PaymentRow {
 
 /// A plan with its source and payments ordered by seq.
 class PlanWithPayments {
-  const PlanWithPayments({
+  /// [allPayments] is every stored payment of the plan; [payments] is
+  /// derived from it by the plan's status ([countsInTotals]).
+  PlanWithPayments({
     required this.plan,
     required this.source,
-    required this.payments,
-  });
+    required List<PaymentRow> allPayments,
+  }) : allPayments = List.unmodifiable(allPayments),
+       payments = List.unmodifiable([
+         for (final p in allPayments)
+           if (countsInTotals(plan.status, isPaid: p.isPaid)) p,
+       ]);
 
   final PlanRow plan;
 
   /// Null only for a "Pay later" plan saved without one.
   final SourceRow? source;
+
+  /// The payments that count (19): every payment of an open plan; only the
+  /// paid ones of a plan on hold or closed. The one place the status rule
+  /// is applied: everything that sums money, lists payments by date or
+  /// reminds (home, periods, calendar, statements, charges, notifications)
+  /// reads this list and so never sees a held or closed payment.
+  /// Plan-level screens (the plan, its edit screen, the plan list) read
+  /// [allPayments].
   final List<PaymentRow> payments;
+
+  /// Every stored payment, held and closed ones included.
+  final List<PaymentRow> allPayments;
+
+  PlanStatus get status => plan.status;
+  bool get isOnHold => status == PlanStatus.onHold;
+  bool get isClosed => status == PlanStatus.closed;
+
+  /// Unpaid payments left out while the plan is on hold or closed.
+  List<PaymentRow> get setAside => [
+    for (final p in allPayments)
+      if (!p.isPaid && status != PlanStatus.open) p,
+  ];
+
+  /// "Still waiting on the return?" is due on [today] (Decision 2).
+  bool holdCheckDueOn(LocalDate today) =>
+      isOnHold &&
+      plan.holdCheckDay != null &&
+      holdCheckDue(
+        since: LocalDate.fromEpochDay(plan.holdCheckDay!),
+        today: today,
+      );
+
+  /// Unpaid payments whose date passed while the plan was on hold, after
+  /// "Reopen" (Decision 7); 0 otherwise.
+  int get passedWhileHeld {
+    final since = plan.heldSinceDay;
+    final reopened = plan.reopenedDay;
+    if (status != PlanStatus.open || since == null || reopened == null) {
+      return 0;
+    }
+    return passedDuringHold(
+      payments: [for (final p in allPayments) (date: p.date, isPaid: p.isPaid)],
+      heldSince: LocalDate.fromEpochDay(since),
+      reopenedOn: LocalDate.fromEpochDay(reopened),
+    );
+  }
 
   /// The plan's own name: its title, or its source's name when untitled.
   /// Null for an untitled "Pay later" plan: screens and notifications show
@@ -107,23 +158,28 @@ class PlanWithPayments {
       : LocalDate.fromEpochDay(plan.purchaseDay!);
 
   /// A plan is open while any payment is unpaid; then it moves to the
-  /// archive.
-  bool get isOpen => payments.any((p) => !p.isPaid);
+  /// archive. A plan on hold stays open (it counts toward the free limit,
+  /// Decision 1); a closed plan is in the archive.
+  bool get isOpen => !isClosed && allPayments.any((p) => !p.isPaid);
 
-  int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
+  int get totalMinor => allPayments.fold(0, (sum, p) => sum + p.amountMinor);
 
-  int get remainingMinor =>
-      payments.where((p) => !p.isPaid).fold(0, (sum, p) => sum + p.amountMinor);
+  int get remainingMinor => allPayments
+      .where((p) => !p.isPaid)
+      .fold(0, (sum, p) => sum + p.amountMinor);
+
+  /// What was paid, paid before Kalan included.
+  int get paidMinor => totalMinor - remainingMinor;
 
   /// Paid before Kalan plus paid in Kalan.
   int get paidCount =>
-      (payments.isEmpty ? 0 : payments.first.seq - 1) +
-      payments.where((p) => p.isPaid).length;
+      (allPayments.isEmpty ? 0 : allPayments.first.seq - 1) +
+      allPayments.where((p) => p.isPaid).length;
 
   /// Payments paid before the plan was added to Kalan: shown only as one
   /// summary line, never one by one.
   List<PaymentRow> get paidBefore => [
-    for (final p in payments)
+    for (final p in allPayments)
       if (p.paidBeforeKalan) p,
   ];
 
@@ -132,16 +188,17 @@ class PlanWithPayments {
 
   /// The payments to list: everything except those paid before Kalan.
   List<PaymentRow> get listedPayments => [
-    for (final p in payments)
+    for (final p in allPayments)
       if (!p.paidBeforeKalan) p,
   ];
 
   /// Plans added with only their remaining payments (before schema v4) do
   /// not have the earlier ones; they cannot be edited as "underway".
-  bool get startsAtFirstPayment => payments.isEmpty || payments.first.seq == 1;
+  bool get startsAtFirstPayment =>
+      allPayments.isEmpty || allPayments.first.seq == 1;
 
   PaymentRow? get nextUnpaid {
-    for (final p in payments) {
+    for (final p in allPayments) {
       if (!p.isPaid) return p;
     }
     return null;

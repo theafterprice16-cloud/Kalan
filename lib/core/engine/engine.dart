@@ -2,6 +2,7 @@
 library;
 
 export '../date/local_date.dart';
+export 'adjust_total.dart';
 export 'amount_entry.dart';
 export 'busy_week.dart';
 export 'card_statement.dart';
@@ -15,6 +16,7 @@ export 'period_summary.dart';
 export 'plan_calculator.dart';
 export 'plan_draft.dart';
 export 'plan_resize.dart';
+export 'plan_status.dart';
 export 'recurring.dart';
 export 'schedule.dart';
 export 'split.dart';

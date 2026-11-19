@@ -1955,4 +1955,165 @@ class AppLocalizationsEn extends AppLocalizations {
   String reminderNoteAccount(String account, String amount) {
     return 'It\'s taken automatically. Keep $amount in $account.';
   }
+
+  @override
+  String get refundAction => 'Return or cancellation';
+
+  @override
+  String get holdOption => 'Put on hold';
+
+  @override
+  String get holdOptionHint =>
+      'While you wait for a return, cancellation or dispute, remaining payments are left out.';
+
+  @override
+  String get reopenOption => 'Reopen';
+
+  @override
+  String get reopenOptionHint =>
+      'Remaining payments come back on their own dates.';
+
+  @override
+  String get adjustOption => 'Adjust amount';
+
+  @override
+  String get adjustOptionHint =>
+      'If you returned part of it, remaining payments are split to match the new total.';
+
+  @override
+  String get closeOption => 'Close';
+
+  @override
+  String get closeOptionHint =>
+      'The plan moves to the archive. What you paid stays in your history.';
+
+  @override
+  String get planOnHold => 'On hold';
+
+  @override
+  String planOnHoldNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments on hold, left out of totals and reminders.',
+      one: '1 payment on hold, left out of totals and reminders.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get holdCheckTitle => 'Still waiting on the return?';
+
+  @override
+  String holdCheckSince(String date) {
+    return 'On hold since $date.';
+  }
+
+  @override
+  String get keepOnHold => 'Keep on hold';
+
+  @override
+  String passedWhileHeld(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count payments\' dates passed while they were on hold. If you paid them, you can mark them.',
+      one: '1 payment\'s date passed while it was on hold. If you paid it, you can mark it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planHeldDone => 'Plan is on hold.';
+
+  @override
+  String get planReopenedDone => 'Plan reopened.';
+
+  @override
+  String get planClosedDone => 'Plan closed.';
+
+  @override
+  String get planKeptOnHold => 'Plan stays on hold.';
+
+  @override
+  String get amountAdjustedDone => 'Amount adjusted.';
+
+  @override
+  String get closeTitle => 'Close plan';
+
+  @override
+  String get closeBody =>
+      'Unpaid payments leave your totals and reminders. What you paid stays in your history. A closed plan can\'t be reopened.';
+
+  @override
+  String get closeReasonTitle => 'Reason';
+
+  @override
+  String get closeReasonRefund => 'Return';
+
+  @override
+  String get closeReasonCancel => 'Cancellation';
+
+  @override
+  String closedWithReason(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'refund': 'Closed · Return',
+      'other': 'Closed · Cancellation',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String planPaidAmount(String amount) {
+    return 'Paid $amount';
+  }
+
+  @override
+  String get adjustNewTotal => 'New total';
+
+  @override
+  String adjustCurrentTotal(String amount) {
+    return 'Current total $amount';
+  }
+
+  @override
+  String adjustPaidSoFar(String amount) {
+    return 'You\'ve paid $amount';
+  }
+
+  @override
+  String get adjustHint =>
+      'Paid payments don\'t change. What\'s left is split evenly across unpaid payments; dates stay the same.';
+
+  @override
+  String get adjustPreviewTitle => 'New payments';
+
+  @override
+  String adjustBelowPaid(String amount) {
+    return 'The new total can\'t be less than what you\'ve paid ($amount).';
+  }
+
+  @override
+  String adjustAboveTotal(String amount) {
+    return 'The new total can\'t be more than the current total ($amount).';
+  }
+
+  @override
+  String get adjustUnchanged => 'That\'s the current total.';
+
+  @override
+  String adjustCannotSplit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This amount can\'t be split into $count payments.',
+      one: 'This amount can\'t be split into 1 payment.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adjustNothingLeft =>
+      'No payments would be left. Do you want to close the plan?';
 }

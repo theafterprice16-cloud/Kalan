@@ -18,7 +18,7 @@ Kalan, taksitleri, "şimdi al, sonra öde" planlarını ve sabit ödemeleri tek 
 - Puan, seri, rozet, konfeti, kutlama ekranı yok.
 - Ücretsiz sürümde en fazla 4 açık plan; Pro ile sınırsız. Bu sınıra dokunma.
   - Sabit ödemeler sınıra sayılmaz; tek ödemeli "sonra öde" kayıtları sayılır (Karar 4).
-  - İade nedeniyle bekletilen planın sayılıp sayılmayacağı açık karardır (19. madde); varsayım yapma, sor.
+  - İade nedeniyle bekletilen (beklemedeki) plan sınıra sayılır; kapatılan plan sayılmaz (19. madde, ürün sahibi kararı 19 Kasım 2026, `docs/DECISIONS.md`).
 - Sabit ödemeler kapsamdadır (Karar 7). Tahmini tutar yalnızca 41. maddedeki kurallarla ve "tahmini" etiketiyle gösterilir.
 - Cihazlar arası taşıma yalnızca dışa aktarma ve yedekten geri yükleme dosyasıyla yapılır (29-30. maddeler).
 - Sağlayıcı ve banka logoları kullanılmaz; ad düz metinle ve nötr harf rozetiyle gösterilir.
@@ -100,5 +100,4 @@ Okuma cihazda, işletim sisteminin kendi metin tanımasıyla yapılır (Karar 3)
 
 ## Açık kararlar (varsayım yapma, ürün sahibine sor)
 
-- İade nedeniyle bekletilen plan 4 açık plan sınırına sayılır mı? (19. madde, 1. soru)
 - İlk yayının zamanı ve kapsamı. Süre uydurulmaz.

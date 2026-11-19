@@ -15,6 +15,7 @@ import 'package:kalan/core/engine/pay_later.dart';
 import 'package:kalan/core/engine/pay_period.dart';
 import 'package:kalan/core/engine/payment_method.dart';
 import 'package:kalan/core/engine/plan_draft.dart';
+import 'package:kalan/core/engine/plan_status.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'package:kalan/data/db/app_database.dart';
@@ -554,6 +555,61 @@ void main() {
     );
     await db.close();
   });
+
+  test(
+    'v13 -> current: open and finished plans stay as they were (open)',
+    () async {
+      final schema = await verifier.schemaAt(13);
+      seedCommon(schema);
+      // A finished plan (every payment paid): the archive.
+      schema.rawDatabase.execute(
+        'INSERT INTO plans (id, source_id, kind, installment_count, origin) '
+        "VALUES (2, 1, 'monthly', 2, 'template')",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at) '
+        'VALUES (2, 1, 20300, 7500, 1700000000), '
+        '(2, 2, 20330, 7501, 1700000000)',
+      );
+      final before = schema.rawDatabase.select(
+        'SELECT plan_id, seq, due_day, amount_minor, paid_at FROM payments '
+        'ORDER BY plan_id, seq',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final plans = await (db.select(
+        db.plans,
+      )..orderBy([(p) => OrderingTerm.asc(p.id)])).get();
+      expect(
+        plans.map(
+          (p) => (
+            p.id,
+            p.status,
+            p.closeReason,
+            p.heldSinceDay,
+            p.holdCheckDay,
+            p.reopenedDay,
+            p.closedDay,
+          ),
+        ),
+        [
+          (1, PlanStatus.open, null, null, null, null, null),
+          (2, PlanStatus.open, null, null, null, null, null),
+        ],
+      );
+      final after = await db
+          .customSelect(
+            'SELECT plan_id, seq, due_day, amount_minor, paid_at FROM payments '
+            'ORDER BY plan_id, seq',
+          )
+          .get();
+      expect(
+        [for (final r in after) r.data],
+        [for (final r in before) Map<String, Object?>.of(r)],
+      );
+      await db.close();
+    },
+  );
 
   test('statement reminder days outside 1 and 2 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
