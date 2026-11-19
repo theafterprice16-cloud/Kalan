@@ -10,20 +10,32 @@ import 'busy_week_view.dart';
 import 'coming_periods.dart';
 
 /// Pixel heights of one bar, from the bottom: spoken for, left above it,
-/// and (short periods only) the income level.
+/// and (short periods only) the part over income above spoken for, with
+/// the income level between them.
 class BarGeometry {
   const BarGeometry({
     required this.spokenFor,
     required this.left,
+    this.over = 0,
     this.incomeLine,
   });
 
+  /// Spoken for up to income (the whole of it when not short).
   final double spokenFor;
   final double left;
+
+  /// Short periods only: spoken for above income.
+  final double over;
+
+  /// Short periods only: the income level, where [spokenFor] meets [over].
   final double? incomeLine;
 
   /// The shortest a bar part with a nonzero amount is drawn.
   static const double minVisible = 4;
+
+  /// The shortest the part over income is drawn: the bar's top rounding,
+  /// which would otherwise swallow it.
+  static const double minOver = KalanRadius.input;
 
   /// The amount the full [height] stands for: the largest spoken for or
   /// income among [periods], so every bar shares one scale.
@@ -35,7 +47,8 @@ class BarGeometry {
   /// Heights in a bar of [height] on [scale]. Nonzero parts are at least
   /// [minVisible]; left is never drawn when spoken for exceeds income.
   /// [isShort]: the period's status is negative ([ComingPeriod.isNegative],
-  /// the engine's rule), so the bar is all spoken for with an income line.
+  /// the engine's rule): spoken for up to income, the part over income
+  /// above it and the income line between them.
   static BarGeometry of({
     required int spokenForMinor,
     required int? incomeMinor,
@@ -49,10 +62,19 @@ class BarGeometry {
     final spent = math.min(height, part(spokenForMinor));
     if (incomeMinor == null) return BarGeometry(spokenFor: spent, left: 0);
     if (isShort) {
+      // The part over income is never hidden, even one minor unit: at
+      // least the bar's top rounding, so it reads as its own band. The
+      // part up to income gives way when the bar is short of room.
+      final over = math.min(
+        height,
+        math.max(minOver, part(spokenForMinor - incomeMinor)),
+      );
+      final upToIncome = math.min(height - over, part(incomeMinor));
       return BarGeometry(
-        spokenFor: spent,
+        spokenFor: upToIncome,
         left: 0,
-        incomeLine: incomeMinor <= 0 ? 0 : incomeMinor / scale * height,
+        over: over,
+        incomeLine: upToIncome,
       );
     }
     final left = math.min(height - spent, part(incomeMinor - spokenForMinor));
@@ -61,7 +83,8 @@ class BarGeometry {
 }
 
 /// One bar: spoken for in chartCommitted at the bottom, left in accent
-/// above it; in a short period a thin negative line at the income level.
+/// above it. In a short period the part over income is negative above
+/// spoken for, with a thin text line at the income level between them.
 /// No text is ever drawn on it.
 class ComingBar extends StatelessWidget {
   const ComingBar({
@@ -76,6 +99,7 @@ class ComingBar extends StatelessWidget {
   final double barWidth;
 
   static const double _line = 2;
+  static const double _lineOverhang = KalanSpace.xxs;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +122,12 @@ class ComingBar extends StatelessWidget {
                   // Stretch so the colored parts take the bar's width.
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (g.over > 0)
+                      SizedBox(
+                        key: const ValueKey('coming-bar-over'),
+                        height: g.over,
+                        child: ColoredBox(color: colors.negative),
+                      ),
                     if (g.left > 0)
                       SizedBox(
                         key: const ValueKey('coming-bar-left'),
@@ -115,14 +145,22 @@ class ComingBar extends StatelessWidget {
               ),
             ),
           ),
+          // A little wider than the bar, so it reads on the background
+          // too, but clear of the column's selection frame.
           if (g.incomeLine != null)
             Positioned(
-              key: const ValueKey('coming-bar-income-line'),
               left: 0,
               right: 0,
               bottom: math.max(0, g.incomeLine! - _line / 2),
               height: _line,
-              child: ColoredBox(color: colors.negative),
+              child: Center(
+                child: SizedBox(
+                  key: const ValueKey('coming-bar-income-line'),
+                  width: barWidth + 2 * _lineOverhang,
+                  height: _line,
+                  child: ColoredBox(color: colors.text),
+                ),
+              ),
             ),
         ],
       ),
@@ -257,12 +295,13 @@ class _ColumnState extends ConsumerState<_Column> {
     final String label;
     if (left == null) {
       label = l10n.comingPeriodsBarLabelNoIncome(range, spokenFor);
-    } else if (p.isNegative) {
-      label = l10n.comingPeriodsBarLabelShort(
-        range,
-        spokenFor,
-        ref.money(context, left),
-      );
+    } else if (p.shortMinor case final short?) {
+      // "Short" and the amount in words, never the color alone: certain
+      // this period, "looks short" for one still to come.
+      final amount = ref.money(context, short);
+      label = p.isCurrent
+          ? l10n.comingPeriodsBarLabelShortNow(range, spokenFor, amount)
+          : l10n.comingPeriodsBarLabelShortAhead(range, spokenFor, amount);
     } else {
       label = l10n.comingPeriodsBarLabel(
         range,

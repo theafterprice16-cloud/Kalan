@@ -18,6 +18,7 @@ class ComingPeriod {
     required this.entries,
     required this.pastDue,
     this.busyWeek,
+    this.isCurrent = false,
   });
 
   final PeriodSummary summary;
@@ -32,11 +33,19 @@ class ComingPeriod {
   /// An observation, not the tight status ([PeriodStatus.tight]).
   final BusyWeek? busyWeek;
 
+  /// The period containing today (the first one). Its shortfall is
+  /// certain ("short"); a later one's "looks short" until it comes.
+  final bool isCurrent;
+
   PayPeriod get period => summary.period;
   int get spokenForMinor => summary.spokenForMinor;
   int? get incomeMinor => summary.incomeMinor;
   int? get leftMinor => summary.leftMinor;
   bool get isNegative => summary.status == PeriodStatus.negative;
+
+  /// How much spoken for exceeds income; null without income or when
+  /// nothing is short ([PeriodSummary.shortMinor]).
+  int? get shortMinor => summary.shortMinor;
 
   /// What the period's list shows: past-due ones first, oldest first.
   List<HomeEntry> get rows => [...pastDue, ...entries];
@@ -54,7 +63,7 @@ List<ComingPeriod> comingPeriods({
   int? tightThresholdMinor,
   int count = comingPeriodCount,
 }) => [
-  for (final period in schedule.periodsFrom(today, count))
+  for (final (i, period) in schedule.periodsFrom(today, count).indexed)
     () {
       final rows = homeEntriesFor(
         plans: plans,
@@ -74,6 +83,7 @@ List<ComingPeriod> comingPeriods({
         entries: rows.entries,
         pastDue: rows.pastDue,
         busyWeek: busyWeekIn(plans: plans, period: period),
+        isCurrent: i == 0,
       );
     }(),
 ];

@@ -43,6 +43,14 @@ class PeriodSummary {
   /// Income minus spoken for; null when no income is set.
   int? get leftMinor =>
       incomeMinor == null ? null : incomeMinor! - spokenForMinor;
+
+  /// How much spoken for exceeds income, as a positive amount; null when
+  /// no income is set or nothing is short (left zero or above). Nonnull
+  /// exactly when [status] is [PeriodStatus.negative].
+  int? get shortMinor {
+    final left = leftMinor;
+    return left != null && left < 0 ? -left : null;
+  }
 }
 
 /// Sums the items that fall in [period].

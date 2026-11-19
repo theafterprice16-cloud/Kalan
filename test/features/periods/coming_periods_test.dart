@@ -258,6 +258,76 @@ void main() {
     }
   });
 
+  group('shortfall (15)', () {
+    test('Example 1: income 30.000, February 31.200: 1.200 short there '
+        'only', () async {
+      await seedSettings(db, incomeMinor: 3000000);
+      // Period 3 is 15 Feb - 14 Mar 2027.
+      await addSingle(db, d(2027, 2, 20), 3120000);
+      await open();
+      final periods = coming();
+      expect(periods[3].period.start, d(2027, 2, 15));
+      expect(periods[3].shortMinor, 120000);
+      expect(periods[3].isNegative, isTrue);
+      expect(periods[3].isCurrent, isFalse);
+      for (final i in [0, 1, 2, 4, 5]) {
+        expect(periods[i].shortMinor, isNull);
+      }
+    });
+
+    test('only the first period is the current one', () async {
+      await seedSettings(db, incomeMinor: 3000000);
+      await open();
+      expect(
+        [for (final p in coming()) p.isCurrent],
+        [true, false, false, false, false, false],
+      );
+    });
+
+    test('Example 3: no income, nothing is ever short', () async {
+      await seedSettings(db);
+      await addSingle(db, d(2027, 2, 20), 3120000);
+      await open();
+      for (final p in coming()) {
+        expect(p.shortMinor, isNull);
+        expect(p.isNegative, isFalse);
+      }
+    });
+
+    test('Example 4: an unpaid past-due payment counts only in this '
+        'period', () async {
+      await seedSettings(db, incomeMinor: 100000);
+      // Due 10 Nov (before the current period), unpaid, 1.500 > income.
+      await addSingle(db, d(2026, 11, 10), 150000);
+      await addSingle(db, d(2026, 12, 20), 40000); // period 1
+      await open();
+      final periods = coming();
+      expect(periods[0].shortMinor, 50000);
+      expect(periods[0].isCurrent, isTrue);
+      expect(periods[1].spokenForMinor, 40000);
+      expect(periods[1].shortMinor, isNull);
+      for (final p in periods.skip(1)) {
+        expect(p.isNegative, isFalse);
+      }
+    });
+
+    test(
+      'boundaries: equal to income is not short, one kuruş over is',
+      () async {
+        await seedSettings(db, incomeMinor: 100000);
+        await addSingle(db, d(2026, 12, 20), 100000); // period 1: equal
+        await addSingle(db, d(2027, 1, 20), 100001); // period 2: 1 over
+        await open();
+        final periods = coming();
+        expect(periods[1].leftMinor, 0);
+        expect(periods[1].shortMinor, isNull);
+        expect(periods[1].isNegative, isFalse);
+        expect(periods[2].shortMinor, 1);
+        expect(periods[2].isNegative, isTrue);
+      },
+    );
+  });
+
   test('no payments: every period is empty', () async {
     await seedSettings(db, incomeMinor: 50000);
     await open();

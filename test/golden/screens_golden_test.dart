@@ -139,6 +139,27 @@ Future<void> seedPastDue(AppDatabase db, {bool more = false}) async {
   }
 }
 
+/// Shortfall (15), Example 1: income ₺30.000, payday 15, rent ₺15.000 on
+/// the 1st, a phone ₺4.250 a month from 5 Dec and a holiday ₺16.200 on
+/// 20 Feb: the 15 Feb – 14 Mar period is ₺31.200, ₺1.200 short; every
+/// other period has room left.
+Future<void> seedShortfall(AppDatabase db) async {
+  await seedSettings(db, incomeMinor: 3000000);
+  await seedRent(db);
+  final plans = PlanRepository(db);
+  final sources = SourceRepository(db, plans);
+  await plans.saveDraft(
+    PlanCalculator.monthly(
+      firstDate: LocalDate(2026, 12, 5),
+      totalMinor: 1275000,
+      count: 3,
+    ),
+    sourceId: await sources.findOrCreateProvider('Telefon'),
+    origin: PlanOrigin.template,
+  );
+  await seedOne(db, 'Tatil', LocalDate(2027, 2, 20), 1620000);
+}
+
 /// A phone already 3 of 10 installments in when it was added.
 Future<void> seedUnderway(AppDatabase db) async {
   final plans = PlanRepository(db);
@@ -320,6 +341,21 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(find.byKey(const ValueKey('coming-period-1')));
           await shoot(tester, '57-busy-week-chart-$lang-$theme');
+        });
+      }
+
+      // Shortfall (15), Example 1: the February period selected: its bar
+      // in two parts with the income line, "looks short" in its summary.
+      for (final (lang, locale) in [
+        ('tr', const Locale('tr', 'TR')),
+        ('en', const Locale('en', 'US')),
+      ]) {
+        testWidgets('shortfall ahead, $lang', (tester) async {
+          await start(tester, locale: locale, seed: seedShortfall);
+          await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('coming-period-3')));
+          await shoot(tester, '58-shortfall-ahead-$lang-$theme');
         });
       }
 

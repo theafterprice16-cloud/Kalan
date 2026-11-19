@@ -480,3 +480,29 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Takvim çizgisi | Gün sayısının hemen altında, işaret satırının üstünde (bugün ve seçili gün çerçevesinin alt kenarıyla çakışmasın diye); ilk ve son günde hücre ortasından başlar/biter, hafta satırı değişince kendiliğinden kesilir. |
 | İki haftalık ve haftalık maaş | Aynı kural. Haftalık maaşta dönem 7 gün olduğundan 3 ve üstü plan ödemesi olan her dönem yoğun haftadır (tanımın doğal sonucu). |
 
+
+## Dönem açığı (15) (19 Kasım 2026)
+
+Bir dönemin ödemeleri geliri aşıyorsa kullanıcı bunu dönem gelmeden, yargısız bir notla görür. Gelir girilmemişse hiçbir iz yoktur.
+
+Ürün sahibi kararları (yeniden sorulmaz):
+
+| Konu | Karar |
+|---|---|
+| Metin | İçinde bulunulan dönem: "Bu dönem X eksik kalıyor." (ana ekranın cümlesi, aynen). Gelecek dönemler: "Bu dönem X eksik görünüyor." İngilizcede "This period is X short." / "This period looks X short." |
+| Bildirim | Yok. |
+| Grafik | Eksi dönemde çubuğun gelire kadar olan kısmı `chartCommitted`, geliri aşan kısmı `negative`; arada gelir seviyesinde ince `text` çizgi; çubuk altında "−… eksik" (`negativeText`). 12'deki "çubuğun tamamı safran, `negative` çizgi" çiziminin yerini alır (DESIGN_TOKENS kural 10). |
+| Geciken ödemeler | Yalnızca bu dönemin hesabına girer (motordaki `countingDate`); gelecek dönemlere sızmaz. Yeni kural yok. |
+| Yerler | Ana ekran değişmedi. İleriki dönemler grafiği (ana ekran şeridi dahil) yeni çizimle. Dönem özeti gelecek dönemde "eksik görünüyor". Takvim değişmedi. |
+| Ekran okuyucu | Eksi çubuğun etiketi "eksik" kelimesini ve tutarı söyler. |
+
+Teknik kararlar (Claude, 19 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Hesap | `PeriodSummary.shortMinor` (saf Dart, motor): gelirin aşıldığı tutar, artı işaretli; gelir yoksa ya da kalan 0 ve üstüyse null. Durum `negative` olduğunda ve yalnızca o zaman dolu. Gelire eşit olan dönem eksi değildir; bir kuruş fazlası eksidir (testli). |
+| Bu dönem mi | `ComingPeriod.isCurrent`: `comingPeriods` listesindeki ilk dönem (bugünü içeren). "kalıyor" / "görünüyor" seçimi yalnızca buna bakar. |
+| Çizim ölçüsü | Aşan kısım en az 8 px, çubuğun tepe yuvarlaklığı kadar (bir kuruş fazla bile ayrı bir bant olarak görünür; inceleme önerisi); yer daralırsa gelire kadar olan kısım kısalır. Gelir 0 ise çubuğun tamamı `negative`, çizgi tabanda. Çizgi 2 px, çubuktan her yanda 4 px geniş: zemin üstünde de görünür, seçili sütunun çerçevesine değmez (12'de çizgi sütun boyunca uzanıyordu). |
+| Eksi işareti | Dönem özetinde cümlenin yanında ana ekrandaki eksi ikonu (`remove_circle_outline`, `negative`) ve cümle `negativeText`; cümledeki tutar işaretsiz (ana ekranla aynı). Çubuk altında "−₺1,2 B eksik" 12'deki kısa biçimle kaldı. |
+| Ekran okuyucu metni | "15 Şubat – 14 Mart: söz verilmiş ₺31.200, ₺1.200 eksik görünüyor." (bu dönemde "eksik kalıyor"). Tutar işaretsiz okunur ("eksi … eksik" tekrarı olmasın diye). Eski `comingPeriodsBarLabelShort` anahtarı kaldırıldı; yerine `comingPeriodsBarLabelShortNow` ve `comingPeriodsBarLabelShortAhead`. Özet: `comingPeriodsShortAhead`. |
+| Test değişikliği | `coming_periods_screen_test.dart`'ta bu dönemin çubuk etiketi beklentisi yeni metne, `BarGeometry` eksi dönem testi yeni çizime göre güncellendi. Ana ekran testleri değişmedi. Golden 03 ve 52 (eksi) yeni çizimle yenilendi; 58 yeni (Örnek 1, TR/EN, açık/koyu). |

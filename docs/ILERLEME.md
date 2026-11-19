@@ -29,13 +29,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 14. Yoğun hafta işareti (19 Kasım 2026): bir dönemin plan ödemeleri 7 güne yığıldığında (en az 3 ödeme ve dönemin en az yarısı) İleriki dönemler grafiğinde çubuğun altında küçük simge ve "yoğun"; dönem özetinde tek satır "Yoğun hafta: 17–21 Ara · 4 ödeme · ₺5.200"; takvimde o günler ince mürekkep çizgiyle birleşik, ilk günde simge, güne dokununca aynı satır; sabit ödemeler sayılmaz; ana ekranda yok; eşik sabit; şema değişmedi
 
+- 15. Dönem açığı (19 Kasım 2026): gelir girilmişse eksi dönemin çubuğunda gelire kadar safran, aşan kısım koyu safran, arada ince mürekkep çizgi (ana ekran şeridi dahil); gelecek dönemin özetinde "Bu dönem X eksik görünüyor.", bu dönemde ana ekranla aynı "eksik kalıyor"; ekran okuyucu "eksik" ve tutarı söyler; gelir yoksa iz yok; geciken ödemeler yalnızca bu döneme; bildirim yok; şema değişmedi
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 15. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 16. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 
