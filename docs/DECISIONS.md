@@ -405,10 +405,12 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Çubuk altı | Dönem adı olarak maaş günü (kısa tarih, "15 Ara"): haftalık ve iki haftalık maaşta da ayırt edilir. Altında dönemin ana sayısı: gelir varsa kalan, yoksa söz verilmiş; eksi dönemde "−₺1,2 B eksik" (`negativeText`). |
 | Kısa tutar | `formatMoneyShort` (`money_format.dart`): 1.000 birimin altında tam biçim, üstünde intl compact ("₺12,4 B", "$12.4K", "Rp1.25M"); küçük basamak gösterilmez. Ekranlar `ref.moneyShort` kullanır. |
 | Ölçek | 6 çubuk tek ölçekte: en yüksek değer = en büyük söz verilmiş ya da gelir. Sıfır olmayan kısım en az 4 px. |
-| Eksi dönem | Çubuğun tamamı `chartCommitted`; gelir seviyesinde 2 px `negative` çizgi (çubuktan geniş, zemin üstünde de görünür); altında "eksik" yazısı; özet altında ana ekrandaki gibi eksi işaretli not. Kırmızı ve `late` yok. |
+| Eksi dönem | Ürün sahibinin bu madde için verdiği çizim: çubuğun tamamı `chartCommitted`, gelir seviyesinde ince `negative` çizgi (2 px, çubuktan geniş, zemin üstünde de görünür), çubuk altında eksi işaretli "−₺1,2 B eksik". DESIGN_TOKENS kural 10'a istisna olarak yazıldı. Seçili dönemin özetinde ana ekranla aynı cümle: "Bu dönem ₺1.200 eksik kalıyor." Kırmızı ve `late` yok. |
 | Seçim ve odak | Seçili çubuk `text` renginde ince çerçeve; klavye odağında `focus` halkası. Her çubuk tek Semantics düğümü (düğme, seçili bilgisi, dönem ve tutarlar). |
 | Dar ekran | Sütun en az 56 px; sığmazsa satır yatay kayar (yön Directionality'yi izler, sağdan sola dilde ilk dönem sağda). |
 | Ana ekran şeridi | Etiket yok; tek dokunma hedefi; 6 dönemin hiçbirinde ödeme yoksa şerit gizli, ekran "Önümüzdeki 6 dönemde ödeme yok." der. |
+| Günü geçenler | Ekranda bu dönemin günü geçmiş ödemeleri ana ekrandaki satırla ("Günü geçen N ödeme", "Ödendi" → "Ne zaman ödedin?") gösterilir; böylece işaretleme iki ekranda aynı veriyi üretir. Diğer satırlar ana ekranın ödeme satırı. |
+| Gün değişimi | Seçili dönem sırayla tutulur; uygulama açıkken gün dönüp dönem kayarsa seçim aynı sırada kalır (ana ekran da gün değişimini uygulama öne gelince alır). Bilinen küçük eksik. |
 | Gelir daveti | Ayarlar'daki net tutar penceresini doğrudan açar (`editNetIncome`); kaydedince grafik kendiliğinden güncellenir. |
 | Animasyon | Yok. |
 | Ödeme satırı | Büyük yazıda (2x) taşma düzeltildi: "Bugün/Yarın" notu satır kaydırır, tutar satır genişliğinin en çok %40'ına sığacak kadar küçülür. Normal boyutta görünüm değişmedi (golden'lar aynı). |

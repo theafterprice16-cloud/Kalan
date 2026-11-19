@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
+import '../../app/providers.dart';
 import '../../core/design/widgets.dart';
 import '../../core/theme/kalan_theme.dart';
+import '../home/past_due.dart';
 import '../home/payment_tile.dart';
 import '../settings/settings_screen.dart' show editNetIncome;
 import 'coming_periods.dart';
@@ -50,7 +52,6 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
     final p = periods[index];
     final left = p.leftMinor;
     final total = ref.money(context, p.spokenForMinor);
-    final rows = p.rows;
 
     return ListView(
       padding: const EdgeInsets.only(bottom: KalanSpace.xl),
@@ -115,7 +116,8 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
                   icon: Icons.remove_circle_outline,
                   color: colors.negative,
                   textColor: colors.negativeText,
-                  text: l10n.comingPeriodsShort(ref.money(context, left!)),
+                  // The same sentence as on the home screen.
+                  text: l10n.homeNegative(ref.money(context, -left!)),
                 ),
               ],
             ],
@@ -133,9 +135,29 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
               ),
             ),
           ),
-        if (rows.isNotEmpty) ...[
+        // Past-due payments (current period only) as on the home screen:
+        // "Paid" asks when, so the payment keeps counting where it should.
+        if (p.pastDue.isNotEmpty) ...[
+          SectionTitle(l10n.pastDueTitle(p.pastDue.length)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.md),
+            child: Card(
+              key: const ValueKey('coming-period-past-due'),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  for (final (i, e) in p.pastDue.indexed) ...[
+                    if (i > 0) const Divider(height: 1),
+                    PastDueRow(entry: e, today: ref.watch(todayProvider)),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+        if (p.entries.isNotEmpty) ...[
           SectionTitle(l10n.homePaymentsTitle),
-          for (final e in rows)
+          for (final e in p.entries)
             PaymentTile(
               key: ValueKey('${e.paymentId}-${e.recurringId}-${e.date}'),
               entry: e,

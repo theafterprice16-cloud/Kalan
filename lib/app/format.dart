@@ -59,7 +59,7 @@ extension MoneyRefX on WidgetRef {
   String money(BuildContext context, int minor) =>
       formatMoney(minor, currency, localeName: context.localeName);
 
-  /// A short amount for narrow labels ("₺12,4 B"); see [formatMoneyShort].
+  /// A short amount for narrow labels (12,4 B); see [formatMoneyShort].
   String moneyShort(BuildContext context, int minor) =>
       formatMoneyShort(minor, currency, localeName: context.localeName);
 

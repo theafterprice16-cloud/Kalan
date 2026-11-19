@@ -69,6 +69,20 @@ void main() {
       );
     });
 
+    test('a right-to-left symbol stays isolated', () {
+      final text = formatMoneyShort(1240000, c('SAR'), localeName: 'en');
+      expect(text, contains(isolateRtl(c('SAR').symbol)));
+      expect(text, compact('en', c('SAR'), 12400));
+    });
+
+    test('rounding at the edge stays intl compact', () {
+      // TRY 999.999,50: whole units 999.999, intl rounds to one million.
+      expect(
+        formatMoneyShort(99999950, c('TRY'), localeName: 'en'),
+        compact('en', c('TRY'), 999999),
+      );
+    });
+
     test('keeps the minus sign', () {
       final text = formatMoneyShort(-1240000, c('TRY'), localeName: 'tr');
       expect(text, compact('tr', c('TRY'), -12400));

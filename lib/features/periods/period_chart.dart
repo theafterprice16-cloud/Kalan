@@ -33,18 +33,21 @@ class BarGeometry {
 
   /// Heights in a bar of [height] on [scale]. Nonzero parts are at least
   /// [minVisible]; left is never drawn when spoken for exceeds income.
+  /// [isShort]: the period's status is negative ([ComingPeriod.isNegative],
+  /// the engine's rule), so the bar is all spoken for with an income line.
   static BarGeometry of({
     required int spokenForMinor,
     required int? incomeMinor,
     required int scale,
     required double height,
+    bool isShort = false,
   }) {
     if (scale <= 0) return const BarGeometry(spokenFor: 0, left: 0);
     double part(int minor) =>
         minor <= 0 ? 0 : math.max(minVisible, minor / scale * height);
     final spent = math.min(height, part(spokenForMinor));
     if (incomeMinor == null) return BarGeometry(spokenFor: spent, left: 0);
-    if (spokenForMinor > incomeMinor) {
+    if (isShort) {
       return BarGeometry(
         spokenFor: spent,
         left: 0,
@@ -85,7 +88,7 @@ class ComingBar extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(KalanRadius.input / 2),
+                top: Radius.circular(KalanRadius.input),
               ),
               child: SizedBox(
                 width: barWidth,
@@ -152,6 +155,7 @@ class ComingPeriodsMiniBars extends StatelessWidget {
                   incomeMinor: p.incomeMinor,
                   scale: scale,
                   height: height,
+                  isShort: p.isNegative,
                 ),
               ),
             ),
@@ -280,6 +284,8 @@ class _ColumnState extends ConsumerState<_Column> {
       button: true,
       selected: widget.selected,
       label: label,
+      // The tap is read out with the label (the InkWell's own is excluded).
+      onTap: widget.onTap,
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
@@ -309,6 +315,7 @@ class _ColumnState extends ConsumerState<_Column> {
                         incomeMinor: p.incomeMinor,
                         scale: widget.scale,
                         height: ComingPeriodsChart.barHeight,
+                        isShort: p.isNegative,
                       ),
                     ),
                     Divider(height: 1, thickness: 1, color: colors.textMuted),

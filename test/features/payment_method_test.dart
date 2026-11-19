@@ -259,6 +259,11 @@ void main() {
 
   testWidgets('home: an icon per method, read out as its word; none when '
       'not set', (tester) async {
+    // A tall phone: every row of the period on screen at once, under the
+    // coming pay periods strip.
+    tester.view.physicalSize = const Size(800, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final semantics = tester.ensureSemantics();
     final db = await pumpApp(
       tester,

@@ -118,7 +118,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/periods',
+        path: Routes.comingPeriodsPath,
         builder: (_, state) => ComingPeriodsScreen(
           initialSelected:
               int.tryParse(state.uri.queryParameters['selected'] ?? '') ?? 0,

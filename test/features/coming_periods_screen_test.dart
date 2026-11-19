@@ -53,11 +53,11 @@ void main() {
     );
     expect(
       tester.getSemantics(find.byKey(const ValueKey('coming-period-0'))),
-      containsSemantics(isSelected: true, isButton: true),
+      isSemantics(isSelected: true, isButton: true, hasTapAction: true),
     );
     expect(
       tester.getSemantics(find.byKey(const ValueKey('coming-period-1'))),
-      containsSemantics(isSelected: false, isButton: true),
+      isSemantics(isSelected: false, isButton: true, hasTapAction: true),
     );
     semantics.dispose();
   });
@@ -116,9 +116,10 @@ void main() {
     final semantics = tester.ensureSemantics();
     await pumpApp(tester, seed: (db) => seed(db, income: 1500000));
     await openStrip(tester);
-    // Periods 0 and 1 are both ₺200 short: under both bars and in the
-    // selected period's note.
-    expect(find.text('-₺200 eksik'), findsNWidgets(3));
+    // Periods 0 and 1 are both ₺200 short: under both bars, with the
+    // minus sign; the note under the summary reads as on the home screen.
+    expect(find.text('-₺200 eksik'), findsNWidgets(2));
+    expect(find.text('Bu dönem ₺200 eksik kalıyor.'), findsWidgets);
     final note = tester.widget<Text>(
       find.descendant(
         of: find.byKey(const ValueKey('coming-period-short')),
@@ -134,6 +135,31 @@ void main() {
       findsOneWidget,
     );
     semantics.dispose();
+  });
+
+  testWidgets('past due in this period: "Paid" asks when, as on home', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await seed(db);
+        // Klarna's first payment, due 6 Nov (before today), still unpaid.
+        await seedPayIn4(db, first: LocalDate(2026, 11, 6), source: 'Zip');
+      },
+    );
+    await scrollTo(tester, find.byKey(const ValueKey('coming-periods-strip')));
+    await openStrip(tester);
+    expect(find.text('Günü geçen 1 ödeme'), findsOneWidget);
+    final paid = find.descendant(
+      of: find.byKey(const ValueKey('coming-period-past-due')),
+      matching: find.text('Ödendi'),
+    );
+    await tester.ensureVisible(paid);
+    await tester.pumpAndSettle();
+    await tester.tap(paid);
+    await tester.pumpAndSettle();
+    expect(find.text('Ne zaman ödedin?'), findsOneWidget);
   });
 
   testWidgets('every bar reads out its period and amounts', (tester) async {
@@ -192,7 +218,7 @@ void main() {
   });
 
   testWidgets('the strip follows new data', (tester) async {
-    final db = await pumpApp(tester, seed: (db) => seedSettings(db));
+    final db = await pumpApp(tester, seed: seedSettings);
     expect(find.byKey(const ValueKey('coming-periods-strip')), findsNothing);
     await tester.runAsync(() => seedRent(db));
     await tester.pumpAndSettle();
@@ -296,6 +322,7 @@ void main() {
         incomeMinor: 20000,
         scale: 20300,
         height: 203,
+        isShort: true,
       );
       expect(g.spokenFor, 203);
       expect(g.left, 0);
