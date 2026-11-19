@@ -130,13 +130,103 @@ void main() {
     );
     expect(note.style!.color, KalanColors.light.negativeText);
     expect(find.byKey(const ValueKey('coming-bar-income-line')), findsWidgets);
+    // The bar reads "short" and the amount: certain this period, "looks
+    // short" for the next one.
     expect(
       find.bySemanticsLabel(
-        '15 Kasım – 14 Aralık: söz verilmiş ₺15.200, -₺200 eksik.',
+        '15 Kasım – 14 Aralık: söz verilmiş ₺15.200, ₺200 eksik kalıyor.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel(
+        '15 Aralık – 14 Ocak: söz verilmiş ₺15.200, ₺200 eksik görünüyor.',
       ),
       findsOneWidget,
     );
     semantics.dispose();
+  });
+
+  testWidgets('a coming short period "looks short", in negativeText', (
+    tester,
+  ) async {
+    await pumpApp(tester, seed: (db) => seed(db, income: 1500000));
+    await openStrip(tester);
+    await tester.tap(find.byKey(const ValueKey('coming-period-1')));
+    await tester.pumpAndSettle();
+    expect(summary('Bu dönem ₺200 eksik görünüyor.'), findsOneWidget);
+    expect(summary('Bu dönem ₺200 eksik kalıyor.'), findsNothing);
+    final short = find.byKey(const ValueKey('coming-period-short'));
+    final note = tester.widget<Text>(
+      find.descendant(of: short, matching: find.byType(Text)),
+    );
+    expect(note.style!.color, KalanColors.light.negativeText);
+    // The minus icon goes with the word: never the color alone.
+    final icon = tester.widget<Icon>(
+      find.descendant(of: short, matching: find.byType(Icon)),
+    );
+    expect(icon.icon, Icons.remove_circle_outline);
+    expect(icon.color, isNot(KalanColors.light.late));
+  });
+
+  testWidgets('short bar: spoken for to income, over it negative, a text '
+      'line between', (tester) async {
+    await pumpApp(tester, seed: (db) => seed(db, income: 1500000));
+    await openStrip(tester);
+    final bar = find.byKey(const ValueKey('coming-period-0'));
+    Color colorOf(String key) => tester
+        .widget<ColoredBox>(
+          find.descendant(
+            of: find.descendant(of: bar, matching: find.byKey(ValueKey(key))),
+            matching: find.byType(ColoredBox),
+          ),
+        )
+        .color;
+    expect(colorOf('coming-bar-spoken-for'), KalanColors.light.chartCommitted);
+    expect(colorOf('coming-bar-over'), KalanColors.light.negative);
+    expect(colorOf('coming-bar-income-line'), KalanColors.light.text);
+    expect(
+      find.descendant(
+        of: bar,
+        matching: find.byKey(const ValueKey('coming-bar-left')),
+      ),
+      findsNothing,
+    );
+    // The line sits where the two parts meet.
+    final over = tester.getRect(
+      find.descendant(
+        of: bar,
+        matching: find.byKey(const ValueKey('coming-bar-over')),
+      ),
+    );
+    final line = tester.getRect(
+      find.descendant(
+        of: bar,
+        matching: find.byKey(const ValueKey('coming-bar-income-line')),
+      ),
+    );
+    expect(line.center.dy, closeTo(over.bottom, 0.01));
+  });
+
+  testWidgets('without income: no part over income, no line, no note', (
+    tester,
+  ) async {
+    await pumpApp(tester, seed: (db) => seed(db, income: null));
+    await openStrip(tester);
+    expect(find.byKey(const ValueKey('coming-bar-over')), findsNothing);
+    expect(find.byKey(const ValueKey('coming-bar-income-line')), findsNothing);
+    expect(find.byKey(const ValueKey('coming-period-short')), findsNothing);
+    expect(find.textContaining('eksik'), findsNothing);
+  });
+
+  testWidgets('a period with room left: no part over income, no line', (
+    tester,
+  ) async {
+    await pumpApp(tester, seed: seed);
+    await openStrip(tester);
+    expect(find.byKey(const ValueKey('coming-bar-over')), findsNothing);
+    expect(find.byKey(const ValueKey('coming-bar-income-line')), findsNothing);
+    expect(find.byKey(const ValueKey('coming-period-short')), findsNothing);
   });
 
   testWidgets('past due in this period: "Paid" asks when, as on home', (
@@ -367,17 +457,59 @@ void main() {
       expect(g.left, 0);
     });
 
-    test('short: whole bar spoken for, a line at the income level', () {
+    test('short: spoken for up to income, the rest over it, a line '
+        'between', () {
+      // Example 1: income 30.000, spoken for 31.200.
       final g = BarGeometry.of(
-        spokenForMinor: 20300,
-        incomeMinor: 20000,
-        scale: 20300,
-        height: 203,
+        spokenForMinor: 3120000,
+        incomeMinor: 3000000,
+        scale: 3120000,
+        height: 156,
         isShort: true,
       );
-      expect(g.spokenFor, 203);
+      expect(g.spokenFor, closeTo(150, 0.001));
+      expect(g.over, closeTo(6, 0.001));
       expect(g.left, 0);
-      expect(g.incomeLine, closeTo(200, 0.001));
+      expect(g.incomeLine, g.spokenFor);
+      expect(g.spokenFor + g.over, closeTo(156, 0.001));
+    });
+
+    test('short by one minor unit: the part over income still shows', () {
+      final g = BarGeometry.of(
+        spokenForMinor: 100001,
+        incomeMinor: 100000,
+        scale: 100001,
+        height: 100,
+        isShort: true,
+      );
+      expect(g.over, BarGeometry.minVisible);
+      expect(g.spokenFor + g.over, closeTo(100, 0.001));
+      expect(g.incomeLine, g.spokenFor);
+    });
+
+    test('short without any income: all over, the line at the bottom', () {
+      final g = BarGeometry.of(
+        spokenForMinor: 5000,
+        incomeMinor: 0,
+        scale: 5000,
+        height: 100,
+        isShort: true,
+      );
+      expect(g.spokenFor, 0);
+      expect(g.over, 100);
+      expect(g.incomeLine, 0);
+    });
+
+    test('not short: nothing over income, no line', () {
+      final g = BarGeometry.of(
+        spokenForMinor: 100000,
+        incomeMinor: 100000,
+        scale: 100000,
+        height: 100,
+      );
+      expect(g.over, 0);
+      expect(g.incomeLine, isNull);
+      expect(g.spokenFor, 100);
     });
 
     test('nothing to draw on an empty scale', () {

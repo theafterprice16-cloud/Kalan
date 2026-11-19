@@ -146,15 +146,19 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
                       ),
                 style: theme.textTheme.bodyLarge,
               ),
-              if (p.isNegative) ...[
+              // Short: the minus icon and "short" in words, never the
+              // color alone. This period: the home screen's sentence; a
+              // period still to come "looks short".
+              if (p.shortMinor case final short?) ...[
                 const SizedBox(height: KalanSpace.xs),
                 StatusNote(
                   key: const ValueKey('coming-period-short'),
                   icon: Icons.remove_circle_outline,
                   color: colors.negative,
                   textColor: colors.negativeText,
-                  // The same sentence as on the home screen.
-                  text: l10n.homeNegative(ref.money(context, -left!)),
+                  text: p.isCurrent
+                      ? l10n.homeNegative(ref.money(context, short))
+                      : l10n.comingPeriodsShortAhead(ref.money(context, short)),
                 ),
               ],
               // Busy week: an observation in its own box, apart from the

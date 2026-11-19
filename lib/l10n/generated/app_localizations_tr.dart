@@ -1692,12 +1692,26 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String comingPeriodsBarLabelShort(
+  String comingPeriodsShortAhead(String amount) {
+    return 'Bu dönem $amount eksik görünüyor.';
+  }
+
+  @override
+  String comingPeriodsBarLabelShortNow(
     String range,
     String spokenFor,
     String amount,
   ) {
-    return '$range: söz verilmiş $spokenFor, $amount eksik.';
+    return '$range: söz verilmiş $spokenFor, $amount eksik kalıyor.';
+  }
+
+  @override
+  String comingPeriodsBarLabelShortAhead(
+    String range,
+    String spokenFor,
+    String amount,
+  ) {
+    return '$range: söz verilmiş $spokenFor, $amount eksik görünüyor.';
   }
 
   @override

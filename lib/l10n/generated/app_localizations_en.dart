@@ -1679,12 +1679,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String comingPeriodsBarLabelShort(
+  String comingPeriodsShortAhead(String amount) {
+    return 'This period looks $amount short.';
+  }
+
+  @override
+  String comingPeriodsBarLabelShortNow(
     String range,
     String spokenFor,
     String amount,
   ) {
     return '$range: $spokenFor spoken for, $amount short.';
+  }
+
+  @override
+  String comingPeriodsBarLabelShortAhead(
+    String range,
+    String spokenFor,
+    String amount,
+  ) {
+    return '$range: $spokenFor spoken for, looks $amount short.';
   }
 
   @override

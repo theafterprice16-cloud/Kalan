@@ -1565,18 +1565,49 @@
       }
     }
   },
-  "comingPeriodsBarLabelShort": "{range}: {spokenFor} spoken for, {amount} short.",
-  "@comingPeriodsBarLabelShort": {
-    "description": "Screen reader text of one bar when spoken for exceeds income. amount is negative with its minus sign.",
+  "comingPeriodsShortAhead": "This period looks {amount} short.",
+  "@comingPeriodsShortAhead": {
+    "description": "Summary of a coming pay period (not the current one) when its payments exceed income. amount is positive, without a minus sign; the minus icon sits beside the sentence. The current period uses homeNegative ('This period is {amount} short.'). States a fact; do not use words like 'risk', 'danger' or 'warning'. Keep the difference between 'is short' (this period, certain) and 'looks short' (a coming period: not a guess, but not here yet). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "₺1,200"
+      }
+    }
+  },
+  "comingPeriodsBarLabelShortNow": "{range}: {spokenFor} spoken for, {amount} short.",
+  "@comingPeriodsBarLabelShortNow": {
+    "description": "Screen reader text of the current period's bar when its payments exceed income. amount is positive, without a minus sign. States a fact; do not use words like 'risk', 'danger' or 'warning'. Keep the difference between 'is short' (this period, certain) and 'looks short' (a coming period: not a guess, but not here yet). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.",
     "placeholders": {
       "range": {
-        "type": "String"
+        "type": "String",
+        "example": "15 February – 14 March"
       },
       "spokenFor": {
-        "type": "String"
+        "type": "String",
+        "example": "₺31,200"
       },
       "amount": {
-        "type": "String"
+        "type": "String",
+        "example": "₺1,200"
+      }
+    }
+  },
+  "comingPeriodsBarLabelShortAhead": "{range}: {spokenFor} spoken for, looks {amount} short.",
+  "@comingPeriodsBarLabelShortAhead": {
+    "description": "Screen reader text of a coming period's bar when its payments exceed income. amount is positive, without a minus sign. States a fact; do not use words like 'risk', 'danger' or 'warning'. Keep the difference between 'is short' (this period, certain) and 'looks short' (a coming period: not a guess, but not here yet). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.",
+    "placeholders": {
+      "range": {
+        "type": "String",
+        "example": "15 February – 14 March"
+      },
+      "spokenFor": {
+        "type": "String",
+        "example": "₺31,200"
+      },
+      "amount": {
+        "type": "String",
+        "example": "₺1,200"
       }
     }
   },

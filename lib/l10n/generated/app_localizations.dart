@@ -2275,11 +2275,27 @@ abstract class AppLocalizations {
   /// **'{range}: {spokenFor} spoken for.'**
   String comingPeriodsBarLabelNoIncome(String range, String spokenFor);
 
-  /// Screen reader text of one bar when spoken for exceeds income. amount is negative with its minus sign.
+  /// Summary of a coming pay period (not the current one) when its payments exceed income. amount is positive, without a minus sign; the minus icon sits beside the sentence. The current period uses homeNegative ('This period is {amount} short.'). States a fact; do not use words like 'risk', 'danger' or 'warning'. Keep the difference between 'is short' (this period, certain) and 'looks short' (a coming period: not a guess, but not here yet). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.
+  ///
+  /// In en, this message translates to:
+  /// **'This period looks {amount} short.'**
+  String comingPeriodsShortAhead(String amount);
+
+  /// Screen reader text of the current period's bar when its payments exceed income. amount is positive, without a minus sign. States a fact; do not use words like 'risk', 'danger' or 'warning'. Keep the difference between 'is short' (this period, certain) and 'looks short' (a coming period: not a guess, but not here yet). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.
   ///
   /// In en, this message translates to:
   /// **'{range}: {spokenFor} spoken for, {amount} short.'**
-  String comingPeriodsBarLabelShort(
+  String comingPeriodsBarLabelShortNow(
+    String range,
+    String spokenFor,
+    String amount,
+  );
+
+  /// Screen reader text of a coming period's bar when its payments exceed income. amount is positive, without a minus sign. States a fact; do not use words like 'risk', 'danger' or 'warning'. Keep the difference between 'is short' (this period, certain) and 'looks short' (a coming period: not a guess, but not here yet). Durum bildirir; 'risk', 'tehlike', 'dikkat' gibi kelimeler kullanma. 'kalıyor' (bu dönem, kesin) ile 'görünüyor' (gelecek, tahmine dayalı değil ama henüz gelmemiş) farkını koru.
+  ///
+  /// In en, this message translates to:
+  /// **'{range}: {spokenFor} spoken for, looks {amount} short.'**
+  String comingPeriodsBarLabelShortAhead(
     String range,
     String spokenFor,
     String amount,
