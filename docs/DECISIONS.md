@@ -349,3 +349,37 @@ Mevcut ekranlar `flutter-cross-ui` kurallarına bağlandı; iş mantığı, veri
 | Ölçüler | Boşluk `KalanSpace` (4, 8, 12, 16, 24, 32; liste altı FAB payı 96), köşe `KalanRadius` (8, 12, 16): `lib/core/theme/kalan_spacing.dart`. 4'ün katı olmayanlar en yakın kata yuvarlandı, eşitlikte küçüğe; 2 sıfır olmasın diye 4 (2→4, 6→4, 10→8, 20→16; ana kartın iç boşluğu diğer kartlarla aynı 16 oldu). |
 | Titreşim | Yalnızca `KalanHaptics.success()` (hafif): "ödendi" işaretleme (ana ekran, günü geçenler, plan ayrıntısı) ve plan / sabit ödeme kaydı. Geri alma, işareti kaldırma ve bildirim düğmesinde yok. |
 | Bekçi | `test/app/ui_guard_test.dart`: `lib/features` altında cam, platform dallanması, çıplak `showDialog`, `HapticFeedback`, adaptif olmayan anahtar, sayıyla köşe ve boşluk yakalanır. Bildirim ağ geçidindeki iOS metin seçimi istisna. iPhone penceresinde düğmeler büyük yazıda alt alta dizilir; başlık ekran okuyucuya başlık olarak bildirilir. |
+
+## Pro satın alma (11) (18 Kasım 2026)
+
+Ürün sahibi kararları (Karar 2 ve 18 Kasım 2026; brifteki "abonelik + tek seferlik" önerisi geçersiz):
+
+| Konu | Karar |
+|---|---|
+| Model | Tek ürün, ömür boyu "Kalan Pro" (non-consumable). Abonelik, deneme, indirim, tanıtım fiyatı, geri sayım yok. |
+| Fiyat | ABD 14,99 $, Türkiye 249,99 ₺; diğer bölgeler mağazanın yerel fiyatı. Uygulama fiyatı yalnızca mağazadan okur (`ProductDetails.price`); okunamazsa "Fiyat şu an alınamadı." ve "Yeniden dene". Fiyat kodda ve ARB'de yok (bekçi testi). |
+| Kütüphane | Yalnızca resmi `in_app_purchase` (+ aynı ailenin `in_app_purchase_android` ve `in_app_purchase_storekit` paketleri, doğrudan bağımlılık olarak; ağaçta zaten vardı, yalnızca platforma özel sorgular için doğrudan import ediliyor). RevenueCat ya da sunucu doğrulaması yok. Kullanıcı kimliği (applicationUserName) verilmez. |
+| İade / iptal | Planlar silinmez, görünür ve düzenlenebilir kalır; açık plan 4'ün altına inene kadar yeni plan eklenemez. Pro yalnızca mağazanın açık sinyaliyle kalkar; ağ hatası, zaman aşımı, ulaşılamama ve hata Pro'yu asla kaldırmaz. Kural tek saf fonksiyonda (`verdictFor`, `lib/entitlement/pro_rules.dart`) ve tablo testinde. |
+| Aile paylaşımı | Açık (App Store Connect ayarı; StoreKit test dosyasında da açık). |
+| Pro ekranı listesi | "Yakında" listesi yok; bugün yalnızca "Sınırsız açık plan". Diğer Pro maddeleri (32, 35, 36, 43, 44, 45) satırlarını tek kaynağa ekler: `lib/features/pro/pro_features.dart`. |
+| 5. plan | Kayıt sırasında sınıra gelince alt sayfa: [Pro'ya bak] [Şimdi değil]. "Şimdi değil" alanları korur. |
+| Görünüm | "Pro'yu al" accent dolgu + onAccent; "Satın alımı geri yükle" accentText metin düğmesi; fiyat `text`; ekran zemini `surface`. Rozet, parıltı, degrade, taç yok. |
+| iOS testi | StoreKit yapılandırma dosyası `ios/Runner/Kalan.storekit`, Runner şemasının Çalıştır adımına bağlı. Ürün kimliği `kalan_pro_lifetime` (tek sabit: `proProductId`, iOS ve Android aynı, paket kimliğine bağlı değil). |
+
+Teknik kararlar (Claude, 18 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Saklama | Son bilinen durum (`notPro` / `pending` / `pro`) cihazda `shared_preferences` ile (`pro.status`), tema seçimiyle aynı yol. Veritabanına konmadı: onboarding'den önce de mağaza olayı gelebilir (yeniden kurulum, ebeveyn onayı, aile paylaşımı) ve o sırada ayar satırı yok; Pro kullanıcı verisi olmadığından yedeğe ve dışa aktarmaya da girmemeli. Şema değişmedi. Okunamayan değer "ücretsiz" sayılır. |
+| Açılış | Saklanan durum ilk karede geçerli (çevrimdışı Pro çalışır); mağaza arka planda sorgulanır. Satın alma akışı uygulama açılınca dinlenmeye başlar (onboarding öncesi dahil). |
+| Android sinyali | Google Play satın alma sorgusu (`queryPastPurchases`) başarılı ve ürün yoksa "sahip değil" sayılır; iade edilen satın alma listeden düşer. Hata kodu ya da istisna: koru. Hesap değişince Play "yok" der ve Pro kalkar; aynı hesapla "geri yükle" geri getirir (karar 4'ün sonucu). |
+| iOS sinyali | Açılışta StoreKit 2'nin cihazdaki yetki listesi okunur; liste boşsa "bilinmiyor" sayılır ve Pro korunur (eklenti iade bilgisini taşımıyor). Kullanıcı "Satın alımı geri yükle"ye dokunduğunda App Store ile eşitleme (`AppStore.sync`) başarılıysa boş liste "sahip değil" sayılır ve Pro kalkar. Yani iPhone'da iade, geri yüklemede fark edilir. |
+| Dışarıdan gelen satın alma olayı | Satın alma sürmüyorken gelen "satın alındı" olayı doğrudan Pro vermez; mağazanın listesi sorulur (App Store eklentisi iadeleri de "satın alındı" diye iletiyor). Ebeveyn onayı ve aile paylaşımı bu yolla açılır. |
+| Sıra | Önce durum cihaza yazılır, sonra `completePurchase`. Onaylanmamış satın alma (Android 3 gün kuralı) her açılışta yeniden tamamlanır. |
+| Satın alma sonrası | Pro açılınca Pro ekranı kendiliğinden kapanır ve kullanıcının başlattığı kayıt aynı alanlarla sürer (plan eklenir, ana ekranda "Plan eklendi."). Kullanıcı "Kaydet"e zaten dokunmuştu; önizleme ekrandaydı. |
+| Fiyat yokken | Fiyat okunamadıysa "Pro'yu al" pasif: kullanıcı fiyatı görmeden satın alma başlatmaz. |
+| Bekleyen ödeme | "Ödeme onay bekliyor. Onaylanınca Pro açılır." notu; Pro sayılmaz; "Pro'yu al" yine dokunulabilir (reddedilen istek takılı kalmasın). |
+| Hata dili | İptal sessiz. Satın alma hatası Pro ekranında tek satır, `late` yalnızca ikonda. Geri yükleme sonucu kısa bildirim: "Pro açıldı." / "Bu mağaza hesabında Pro bulunamadı." / "Mağazaya şu an ulaşılamadı. Sonra yeniden dene." |
+| Ayarlar | "Kalan Pro" satırı (Ücretsiz / Pro / Onay bekliyor) ve "Satın alımı geri yükle" satırı, Tema'dan sonra. Debug derlemedeki Pro anahtarı kaldı; yayın derlemesinde etkisiz (`KalanEntitlement.debugBuild`). |
+| Bekçi | `test/app/purchase_guard_test.dart`: `lib/features`, `lib/core`, `lib/app` içinde mağaza paketi import'u yok; kullanıcı kimliği alanları yok; fiyat kodda ve ARB'de yok. CI, birleşik yayın manifest'inde INTERNET izni varsa kırmızı olur. |
+| Ağ izni | Google Play Billing, Google'ın `datatransport` kütüphanesini getiriyor; bu kütüphane kendi tanı verisi için `INTERNET` ve `ACCESS_NETWORK_STATE` izni ekliyor. Ürün sahibi kararı (19 Kasım 2026): ikisi de yayın derlemesinden `android/app/src/release/AndroidManifest.xml` içinde `tools:node="remove"` ile çıkarılır. Satın alma Play Store uygulaması üzerinden (`com.android.vending.BILLING`, IPC) yürür; Kalan'ın kendi ağ isteği yok. Debug ve profile derlemeleri Flutter aracı için `INTERNET`i korur. Açık iş: Google Play iç test sürümünde satın almanın izinsiz çalıştığı doğrulanacak (Play geliştirici hesabı gerekiyor). |

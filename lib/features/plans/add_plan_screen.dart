@@ -14,6 +14,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
+import '../pro/pro_limit_sheet.dart';
 import '../reminders/reminder_prompt.dart';
 import 'interval_field.dart';
 import 'pay_later_form.dart';
@@ -386,7 +387,10 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     final tabs = ref.read(tabMessengersProvider);
     final l10n = context.l10n;
     final router = GoRouter.of(context);
-    if (!_canAdd) return;
+    if (!_canAdd) {
+      await _offerPro();
+      return;
+    }
     setState(() => _saving = true);
     final int? sourceId;
     final payLater = _mode == AddMode.payLater;
@@ -431,6 +435,17 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       fallback: messenger,
       tabs: tabs,
     );
+  }
+
+  /// The fifth open plan on the free version: a calm note. "Not now"
+  /// keeps everything typed; once Pro is on, the save the user started
+  /// carries on with the same fields.
+  Future<void> _offerPro() async {
+    final seePro = await showProLimitSheet(context);
+    if (!seePro || !mounted) return;
+    await context.push<bool>(Routes.pro(returnOnUnlock: true));
+    if (!mounted || !ref.read(entitlementProvider).isPro) return;
+    await _save();
   }
 
   bool get _canAdd {
@@ -508,78 +523,72 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     final l10n = context.l10n;
     // Keep sources loaded for name matching.
     ref.watch(sourcesProvider);
-    final plans = ref.watch(plansProvider).value;
-    final openPlans = plans?.where((p) => p.isOpen).length ?? 0;
-    final allowed = canAddPlan(
-      openPlans: openPlans,
-      entitlement: ref.watch(entitlementProvider),
-    );
+    // Kept loaded so the free limit is known when saving.
+    ref.watch(plansProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.addPlanTitle)),
-      body: !allowed
-          ? Center(child: EmptyState(l10n.freeLimitReached(freeOpenPlanLimit)))
-          : Form(
-              key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  KalanSpace.md,
-                  KalanSpace.xs,
-                  KalanSpace.md,
-                  KalanSpace.xl,
-                ),
-                children: [
-                  ChoiceField<AddMode>(
-                    label: l10n.addPlanTypeLabel,
-                    selected: _mode,
-                    options: [
-                      (AddMode.payIn4, l10n.kindPayIn4),
-                      (AddMode.monthly, l10n.kindMonthly),
-                      (AddMode.card, l10n.kindCard),
-                      (AddMode.manual, l10n.kindManual),
-                      (AddMode.payLater, l10n.kindPayLater),
-                    ],
-                    onSelected: (m) => setState(() {
-                      _mode = m;
-                      _suggestNextDate();
-                    }),
-                  ),
-                  if (_mode == AddMode.payLater) ...[
-                    const SizedBox(height: KalanSpace.xs),
-                    Text(
-                      l10n.kindPayLaterHint,
-                      key: const ValueKey('pay-later-hint'),
-                      style: Theme.of(context).textTheme.bodyMedium
-                          ?.copyWith(color: context.colors.textMuted),
-                    ),
-                  ],
-                  const SizedBox(height: KalanSpace.md),
-                  if (_mode == AddMode.payLater)
-                  // One payment: the due date line is the preview.
-                  ...[
-                    PayLaterFields(input: _payLater, onChanged: _refresh),
-                    const SizedBox(height: KalanSpace.xs),
-                    _details(context),
-                  ] else ...[
-                    ..._fields(context),
-                    const SizedBox(height: KalanSpace.xs),
-                    _details(context),
-                    const SizedBox(height: KalanSpace.xs),
-                    _Preview(draft: _buildDraft()),
-                  ],
-                  const SizedBox(height: KalanSpace.md),
-                  FilledButton(
-                    key: const ValueKey('save-plan'),
-                    onPressed:
-                        _saving ||
-                            (_mode == AddMode.payLater && !_payLaterAmountValid)
-                        ? null
-                        : _save,
-                    child: Text(l10n.actionSave),
-                  ),
-                ],
-              ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            KalanSpace.md,
+            KalanSpace.xs,
+            KalanSpace.md,
+            KalanSpace.xl,
+          ),
+          children: [
+            ChoiceField<AddMode>(
+              label: l10n.addPlanTypeLabel,
+              selected: _mode,
+              options: [
+                (AddMode.payIn4, l10n.kindPayIn4),
+                (AddMode.monthly, l10n.kindMonthly),
+                (AddMode.card, l10n.kindCard),
+                (AddMode.manual, l10n.kindManual),
+                (AddMode.payLater, l10n.kindPayLater),
+              ],
+              onSelected: (m) => setState(() {
+                _mode = m;
+                _suggestNextDate();
+              }),
             ),
+            if (_mode == AddMode.payLater) ...[
+              const SizedBox(height: KalanSpace.xs),
+              Text(
+                l10n.kindPayLaterHint,
+                key: const ValueKey('pay-later-hint'),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: context.colors.textMuted),
+              ),
+            ],
+            const SizedBox(height: KalanSpace.md),
+            if (_mode == AddMode.payLater)
+            // One payment: the due date line is the preview.
+            ...[
+              PayLaterFields(input: _payLater, onChanged: _refresh),
+              const SizedBox(height: KalanSpace.xs),
+              _details(context),
+            ] else ...[
+              ..._fields(context),
+              const SizedBox(height: KalanSpace.xs),
+              _details(context),
+              const SizedBox(height: KalanSpace.xs),
+              _Preview(draft: _buildDraft()),
+            ],
+            const SizedBox(height: KalanSpace.md),
+            FilledButton(
+              key: const ValueKey('save-plan'),
+              onPressed:
+                  _saving ||
+                      (_mode == AddMode.payLater && !_payLaterAmountValid)
+                  ? null
+                  : _save,
+              child: Text(l10n.actionSave),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

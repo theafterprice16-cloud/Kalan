@@ -10,6 +10,7 @@ import '../../features/plans/add_plan_screen.dart';
 import '../../features/plans/plan_detail_screen.dart';
 import '../../features/plans/plan_edit_screen.dart';
 import '../../features/plans/plans_screen.dart';
+import '../../features/pro/pro_screen.dart';
 import '../../features/recurring/recurring_edit_screen.dart';
 import '../../features/reminders/reminders_help_screen.dart';
 import '../../features/roadmap/roadmap_screen.dart';
@@ -109,6 +110,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: Routes.pay, builder: (_, _) => const PaySettingsScreen()),
       GoRoute(path: Routes.roadmap, builder: (_, _) => const RoadmapScreen()),
+      GoRoute(
+        path: '/pro',
+        builder: (_, state) => ProScreen(
+          returnOnUnlock: state.uri.queryParameters['then'] == 'back',
+        ),
+      ),
       GoRoute(
         path: Routes.remindersHelp,
         builder: (_, _) => const RemindersHelpScreen(),

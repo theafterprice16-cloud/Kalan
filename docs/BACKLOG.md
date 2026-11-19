@@ -9,7 +9,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 5. **Tutarları gizle** düğmesi (BillWise); Face ID ve parmak izi kilidi (Bobby); aylık takvim görünümü (Bills Monitor); durum filtresi ve arama (Tortol).
 6. **Dosyaya dışa aktarma ve dosyadan geri yükleme** (ücretsiz; kimlik dosyası B bölümü: "dışa aktarma her zaman açıktır").
 7. **Ekran görüntüsünden ve yapıştırılan metinden plan ekleme** (Pro; PayDown). Bulut AI + küçük ara sunucu, açık rıza ve onay ekranı. `PlanDraft` → onay → kayıt yolunu kullanır.
-8. **Pro satın alma**: aylık, yıllık, ömür boyu. `EntitlementService` arkasına bağlanır.
+8. ~~**Pro satın alma**~~ Tamamlandı (18 Kasım 2026, yol haritası 11): yalnızca ömür boyu tek ürün (Karar 2); aylık ve yıllık yok. `Entitlement` arkasında, resmi `in_app_purchase` ile.
 9. **Ana ekran widget'ı**, iOS ve Android (Subby).
 10. **Türkiye resmi tatil kaydırması**; mağaza hazırlığı.
 11. **8 dili ekle** (docs/ceviriler-beklemede/ dosyalarından başla): İspanyolca, Fransızca, Almanca, Portekizce-Brezilya, Rusça, Çince Basitleştirilmiş, İtalyanca, Endonezce.
