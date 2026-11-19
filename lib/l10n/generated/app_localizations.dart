@@ -2552,11 +2552,17 @@ abstract class AppLocalizations {
   /// **'By {date} · {amount}'**
   String chargeBy(String date, String amount);
 
-  /// A day whose automatic payments are already marked paid: shown muted with a tick, not added to the running total. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  /// A row of the day-by-day list; the running total (everything that comes out of this source from the start of the pay period up to and including this day) is shown at the end of the row. Avoid grammar that changes with the date (no Turkish 'a/'e suffix). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
   ///
   /// In en, this message translates to:
-  /// **'{date} · {amount} paid'**
-  String chargePaid(String date, String amount);
+  /// **'By {date}'**
+  String chargeByDate(String date);
+
+  /// A day whose automatic payments are already marked paid: shown muted with a tick and that day's sum at the end of the row; not added to the running total. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · paid'**
+  String chargePaidOn(String date);
 
   /// Screen reader label of the clock icon on today's row when an unpaid payment past its due date is counted today. Calm, no urgency. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)
   ///

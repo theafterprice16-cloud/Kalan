@@ -7,6 +7,7 @@ import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
+import 'sources_screen.dart' show FittedAmount;
 
 /// "Keep in account" / "Coming to this card" (18) on a source's card: the
 /// next withdrawal, the period's total, the day-by-day list ("Details")
@@ -236,8 +237,8 @@ class _Toggle extends StatelessWidget {
 const double _rowIconSize = 18;
 const double _rowIconSlot = 24;
 
-/// One day: "By 25 Nov · ₺3.900" (running total) with the names below; a
-/// paid day muted with a tick; today's row with a clock when it holds a
+/// One day: "By 25 Nov" with the names below and the running total on the
+/// end; a paid day muted with a tick and its own sum; today's row with a clock when it holds a
 /// payment past its due date. Icons in ink, never a warning colour.
 class _ChargeRowTile extends ConsumerWidget {
   const _ChargeRowTile({required this.row, super.key});
@@ -274,43 +275,52 @@ class _ChargeRowTile extends ConsumerWidget {
           KalanSpace.md,
           KalanSpace.xxs,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // The icon sits on the first line's centre.
-            SizedBox.square(
-              dimension: _rowIconSlot,
-              child: Center(child: icon),
-            ),
-            const SizedBox(width: KalanSpace.xs),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    row.isPaid
-                        ? l10n.chargePaid(
-                            date,
-                            ref.money(context, row.amountMinor),
-                          )
-                        : l10n.chargeBy(
-                            date,
-                            ref.money(context, row.cumulativeMinor),
-                          ),
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: row.isPaid ? colors.textMuted : colors.text,
-                    ),
-                  ),
-                  Text(
-                    names,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.textMuted,
-                    ),
-                  ),
-                ],
+        // Amounts on the end, tabular, one under the other: like the
+        // statement rows below.
+        child: LayoutBuilder(
+          builder: (context, constraints) => Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // The icon sits on the first line's centre.
+              SizedBox.square(
+                dimension: _rowIconSlot,
+                child: Center(child: icon),
               ),
-            ),
-          ],
+              const SizedBox(width: KalanSpace.xs),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      row.isPaid
+                          ? l10n.chargePaidOn(date)
+                          : l10n.chargeByDate(date),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: row.isPaid ? colors.textMuted : colors.text,
+                      ),
+                    ),
+                    Text(
+                      names,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: KalanSpace.xs),
+              FittedAmount(
+                ref.money(
+                  context,
+                  row.isPaid ? row.amountMinor : row.cumulativeMinor,
+                ),
+                maxWidth: constraints.maxWidth / 2,
+                color: row.isPaid ? colors.textMuted : null,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -388,6 +398,8 @@ class UnassignedChargesCard extends ConsumerWidget {
                               Text(
                                 item.name ??
                                     payLaterAutoName(l10n, item.dueDate),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyLarge,
                               ),
                               Text(

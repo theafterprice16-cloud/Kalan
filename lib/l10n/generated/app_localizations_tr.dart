@@ -1923,8 +1923,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String chargePaid(String date, String amount) {
-    return '$date · $amount ödendi';
+  String chargeByDate(String date) {
+    return '$date tarihine kadar';
+  }
+
+  @override
+  String chargePaidOn(String date) {
+    return '$date · ödendi';
   }
 
   @override

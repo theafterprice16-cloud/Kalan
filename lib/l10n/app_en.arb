@@ -1916,19 +1916,25 @@
       }
     }
   },
-  "chargePaid": "{date} · {amount} paid",
-  "@chargePaid": {
-    "description": "A day whose automatic payments are already marked paid: shown muted with a tick, not added to the running total. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+  "chargeByDate": "By {date}",
+  "@chargeByDate": {
+    "description": "A row of the day-by-day list; the running total (everything that comes out of this source from the start of the pay period up to and including this day) is shown at the end of the row. Avoid grammar that changes with the date (no Turkish 'a/'e suffix). Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
     "placeholders": {
       "date": {
         "type": "String",
         "example": "18 Kas",
         "description": "Short date, day and month (intl MMMd)"
-      },
-      "amount": {
+      }
+    }
+  },
+  "chargePaidOn": "{date} · paid",
+  "@chargePaidOn": {
+    "description": "A day whose automatic payments are already marked paid: shown muted with a tick and that day's sum at the end of the row; not added to the running total. Bu, bakiye uyarısı değil; çıkacak tutarı gösteren sakin bir hatırlatmadır. (This is not a balance warning; it is a calm reminder of the amount that will come out. Kalan never knows a balance.)",
+    "placeholders": {
+      "date": {
         "type": "String",
-        "example": "₺2.400",
-        "description": "Amount from the shared money formatter"
+        "example": "18 Kas",
+        "description": "Short date, day and month (intl MMMd)"
       }
     }
   },

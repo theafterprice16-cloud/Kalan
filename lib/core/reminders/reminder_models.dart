@@ -277,7 +277,7 @@ abstract interface class ReminderTexts {
   /// With a [method] ([reminderMethodOf]) the text says what that method
   /// needs: the money in the account, or going to pay. Null: the text as
   /// before payment methods existed. With an [account] ([reminderAccountOf])
-  /// the automatic note names it and the total ("Keep ₺2,400 in ..."),
+  /// the automatic note names it and the total ("Keep {amount} in ..."),
   /// only while amounts are shown.
   ReminderText describe({
     required ReminderKind kind,

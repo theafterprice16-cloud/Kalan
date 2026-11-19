@@ -72,10 +72,11 @@ void main() {
     await tapKey(tester, 'charge-details-${ids.maas}');
     final first = find.byKey(ValueKey('charge-row-${ids.maas}-0'));
     expect(
-      find.descendant(
-        of: first,
-        matching: find.text('18 Kas tarihine kadar · ${tl(240000)}'),
-      ),
+      find.descendant(of: first, matching: find.text('18 Kas tarihine kadar')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: first, matching: find.text(tl(240000))),
       findsOneWidget,
     );
     expect(
@@ -86,7 +87,14 @@ void main() {
       findsOneWidget,
     );
     expect(
-      inSection(ids.maas, find.text('25 Kas tarihine kadar · ${tl(390000)}')),
+      inSection(ids.maas, find.text('25 Kas tarihine kadar')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(ValueKey('charge-row-${ids.maas}-1')),
+        matching: find.text(tl(390000)),
+      ),
       findsOneWidget,
     );
     // Paid by hand: in no total, in no list.
@@ -125,10 +133,11 @@ void main() {
     await tapKey(tester, 'charge-details-${ids.maas}');
     final paid = find.byKey(ValueKey('charge-row-${ids.maas}-0'));
     expect(
-      find.descendant(
-        of: paid,
-        matching: find.text('18 Kas · ${tl(240000)} ödendi'),
-      ),
+      find.descendant(of: paid, matching: find.text('18 Kas · ödendi')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: paid, matching: find.text(tl(240000))),
       findsOneWidget,
     );
     expect(
@@ -136,7 +145,14 @@ void main() {
       findsOneWidget,
     );
     expect(
-      inSection(ids.maas, find.text('25 Kas tarihine kadar · ${tl(150000)}')),
+      inSection(ids.maas, find.text('25 Kas tarihine kadar')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(ValueKey('charge-row-${ids.maas}-1')),
+        matching: find.text(tl(150000)),
+      ),
       findsOneWidget,
     );
   });
@@ -148,10 +164,11 @@ void main() {
     await tapKey(tester, 'charge-details-${ids.maas}');
     final today = find.byKey(ValueKey('charge-row-${ids.maas}-0'));
     expect(
-      find.descendant(
-        of: today,
-        matching: find.text('20 Kas tarihine kadar · ${tl(240000)}'),
-      ),
+      find.descendant(of: today, matching: find.text('20 Kas tarihine kadar')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: today, matching: find.text(tl(240000))),
       findsOneWidget,
     );
     final clock = tester.widget<Icon>(
@@ -191,10 +208,11 @@ void main() {
     await tapKey(tester, 'charge-next-period-${ids.maas}');
     final row = find.byKey(ValueKey('charge-next-row-${ids.maas}-0'));
     expect(
-      find.descendant(
-        of: row,
-        matching: find.text('18 Ara tarihine kadar · ${tl(140000)}'),
-      ),
+      find.descendant(of: row, matching: find.text('18 Ara tarihine kadar')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: row, matching: find.text(tl(140000))),
       findsOneWidget,
     );
     // An account with nothing: one calm line, next period empty too.
@@ -385,5 +403,20 @@ void main() {
       find.text('Çekildiği yeri planın ayrıntısından seçebilirsin.'),
       findsNothing,
     );
+  });
+
+  testWidgets('twice the text size: nothing overflows', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await open(tester);
+    for (final key in [
+      'charge-details-${ids.maas}',
+      'charge-next-period-${ids.maas}',
+    ]) {
+      await tapKey(tester, key);
+    }
+    await tester.ensureVisible(find.byKey(const ValueKey('charge-unassigned')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
