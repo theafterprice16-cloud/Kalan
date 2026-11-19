@@ -43,6 +43,7 @@ class L10nReminderTexts implements ReminderTexts {
     required List<LocalDate> dueDates,
     required bool showAmounts,
     PaymentMethod? method,
+    String? account,
   }) {
     final count = payments.length;
     final name = payments.first.name;
@@ -87,6 +88,9 @@ class L10nReminderTexts implements ReminderTexts {
       ),
     };
     final note = switch (method) {
+      // One bank account, amounts shown (18): the same note, naming it.
+      PaymentMethod.automatic when account != null && showAmounts =>
+        l10n.reminderNoteAccount(account, total),
       PaymentMethod.automatic => l10n.reminderNoteAutomatic(count),
       PaymentMethod.manual => l10n.reminderNoteManual(count),
       null => null,
