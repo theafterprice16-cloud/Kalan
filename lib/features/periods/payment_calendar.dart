@@ -31,9 +31,9 @@ class ComingViewController extends Notifier<ComingView> {
 /// The first day of the week (1 Monday ... 7 Sunday) from the device's
 /// region (intl's locale data); the app language's Material default only
 /// when intl does not know the region.
-int firstWeekdayOf(BuildContext context) {
+int firstWeekdayOf(BuildContext context, String? region) {
   final device = View.of(context).platformDispatcher.locale;
-  final fromRegion = firstWeekdayFor(device.languageCode, device.countryCode);
+  final fromRegion = firstWeekdayFor(device.languageCode, region);
   if (fromRegion != null) return fromRegion;
   // Material counts from Sunday = 0.
   final index = MaterialLocalizations.of(context).firstDayOfWeekIndex;
@@ -73,6 +73,9 @@ class PaymentCalendar extends ConsumerStatefulWidget {
   /// Height of a day cell; with the side padding a cell is at least 48
   /// wide on phones 352 dp and wider.
   static const double cellHeight = 56;
+
+  /// Between day frames, and between a mark's dot and its icon.
+  static const double hairGap = KalanSpace.xxs / 2;
 
   @override
   ConsumerState<PaymentCalendar> createState() => _PaymentCalendarState();
@@ -179,15 +182,25 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
             if (forward && canForward) _show(month.add(1));
             if (!forward && canBack) _show(month.add(-1));
           },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xs),
-            child: _MonthGrid(
-              month: month,
-              days: days,
-              today: today,
-              selected: selected,
-              firstWeekday: firstWeekdayOf(context),
-              onTap: (d) => setState(() => _selected = d),
+          // Side room only while seven cells still get 48 each.
+          child: LayoutBuilder(
+            builder: (context, constraints) => Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal:
+                    ((constraints.maxWidth - 7 * kMinInteractiveDimension) / 2)
+                        .clamp(0, KalanSpace.xs),
+              ),
+              child: _MonthGrid(
+                month: month,
+                days: days,
+                today: today,
+                selected: selected,
+                firstWeekday: firstWeekdayOf(
+                  context,
+                  ref.watch(deviceRegionProvider),
+                ),
+                onTap: (d) => setState(() => _selected = d),
+              ),
             ),
           ),
         ),
@@ -354,6 +367,8 @@ class _DayCell extends StatelessWidget {
         day,
         isToday: isToday,
       ),
+      // The tap is read out with the label (the InkWell's own is excluded).
+      onTap: onTap,
       excludeSemantics: true,
       child: InkWell(
         key: ValueKey('calendar-cell-${date.day}'),
@@ -361,7 +376,8 @@ class _DayCell extends StatelessWidget {
         borderRadius: BorderRadius.circular(KalanRadius.input),
         child: Container(
           height: PaymentCalendar.cellHeight,
-          margin: const EdgeInsets.all(1),
+          // Inside the InkWell: frames keep apart, the tap area stays whole.
+          margin: const EdgeInsets.all(PaymentCalendar.hairGap),
           decoration: BoxDecoration(
             border: frame,
             borderRadius: BorderRadius.circular(KalanRadius.input),
@@ -393,7 +409,7 @@ class _DayCell extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: KalanSpace.xxs),
               SizedBox(
                 height: 12,
                 child: CalendarMarkView(mark: day?.mark ?? CalendarMark.none),
@@ -431,7 +447,7 @@ class CalendarMarkView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _Dot(outline: colors.textMuted),
-          const SizedBox(width: 1),
+          const SizedBox(width: PaymentCalendar.hairGap),
           Icon(Icons.check, size: 11, color: colors.textMuted),
         ],
       ),
@@ -441,7 +457,7 @@ class CalendarMarkView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _Dot(fill: colors.late),
-          const SizedBox(width: 1),
+          const SizedBox(width: PaymentCalendar.hairGap),
           Icon(Icons.schedule, size: 11, color: colors.late),
         ],
       ),

@@ -25,13 +25,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 12. İleriki dönemlerin grafiği (19 Kasım 2026): ana ekranda büyük sayının altında küçük 6 çubuklu "İleriki dönemler" şeridi; dokununca ayrı ekran, bu dönem seçili; her çubukta söz verilmiş (safran) ve kalan (lacivert), eksi dönemde gelir çizgisi ve "−… eksik"; çubuğa dokununca o dönemin özeti ve ödemeleri; gelir yoksa yalnızca söz verilmiş ve gelir daveti; herkese 6 dönem, ücretsiz; hesap ana ekranla aynı yerden; şema değişmedi. Ardından üç küçük düzeltme: gün dönünce seçili dönem korunur, uzun tutar ödeme satırında gereksiz küçülmez, günü geçen satırı ekran okuyucuyla açılır
 
+- 13. Takvim görünümü (19 Kasım 2026): İleriki dönemler ekranında "Grafik | Takvim" seçimi (varsayılan Grafik, uygulama açıkken hatırlanır); ay görünümünde bekleyen dolu nokta, ödenmiş içi boş nokta ve tik, gecikmiş vişne nokta ve saat, maaş günü halka, bugün çerçeve; güne dokununca o günün ödemeleri, toplamı, "Maaş günü" ve ana ekranla aynı "ödendi"; 12 ay geri, son ödemenin ayına kadar ileri (en az 6), "Bugün"; hafta cihaz bölgesine göre başlar; şema değişmedi
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 13. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 14. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 

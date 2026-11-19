@@ -305,6 +305,9 @@ void main() {
     expect(firstWeekdayFor('tr', 'TR'), DateTime.monday);
     expect(firstWeekdayFor('en', 'GB'), DateTime.monday);
     expect(firstWeekdayFor('tr'), DateTime.monday);
+    // A Turkish phone in the US: the region's data (en_US), Sunday.
+    expect(firstWeekdayFor('tr', 'US'), DateTime.sunday);
+    expect(firstWeekdayFor('tr', 'us'), DateTime.sunday);
     // Unknown region: falls back to the language.
     expect(firstWeekdayFor('en', 'ZZ'), firstWeekdayFor('en'));
     expect(firstWeekdayFor('xx'), isNull);

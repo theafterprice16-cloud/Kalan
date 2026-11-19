@@ -145,6 +145,24 @@ void main() {
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
   });
 
+  testWidgets('336 dp wide: cells still 48 wide', (tester) async {
+    await openCalendar(tester);
+    tester.view.physicalSize = const Size(672, 1688);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(cell(14)).width, greaterThanOrEqualTo(48));
+  });
+
+  testWidgets('screen readers can tap a day', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await openCalendar(tester);
+    tester.semantics.tap(find.semantics.byLabel('14 Kasım, 2 ödeme'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('calendar-day-section')), findsOneWidget);
+    semantics.dispose();
+  });
+
   testWidgets('Example 2: a day\'s payments, total and one-tap paid', (
     tester,
   ) async {

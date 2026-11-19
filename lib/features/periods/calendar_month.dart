@@ -204,14 +204,23 @@ Map<LocalDate, CalendarDay> calendarMonth({
 
 /// The first day of the week for a region, as a [DateTime] weekday
 /// (1 Monday ... 7 Sunday), from intl's locale data: Sunday for the US,
-/// Monday for Turkey. Tries language and region, then language alone;
-/// null when intl does not know either.
+/// Monday for Turkey. Tries language and region, then another language
+/// of the same region (an English phone in Turkey: Monday, from `tr`'s
+/// regional data when intl has `tr_TR`, otherwise any `xx_TR`), then the
+/// language alone; null when intl knows none of them.
 int? firstWeekdayFor(String languageCode, [String? countryCode]) {
   final symbols = dateTimeSymbolMap();
+  final region = countryCode == null || countryCode.isEmpty
+      ? null
+      : countryCode.toUpperCase();
   final data =
-      (countryCode == null || countryCode.isEmpty
+      (region == null ? null : symbols['${languageCode}_$region']) ??
+      (region == null
           ? null
-          : symbols['${languageCode}_$countryCode']) ??
+          : ([
+              for (final k in symbols.keys)
+                if (k.endsWith('_$region')) k,
+            ]..sort()).map((k) => symbols[k]).firstOrNull) ??
       symbols[languageCode];
   // intl counts from Monday = 0.
   return data == null ? null : data.FIRSTDAYOFWEEK + 1;
