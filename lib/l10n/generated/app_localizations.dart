@@ -2284,6 +2284,102 @@ abstract class AppLocalizations {
     String spokenFor,
     String amount,
   );
+
+  /// Label of the Chart | Calendar choice on the Coming pay periods screen. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get comingViewLabel;
+
+  /// Segment that shows the bar chart of coming pay periods. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart'**
+  String get comingViewChart;
+
+  /// Segment that shows the month calendar of payments. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get comingViewCalendar;
+
+  /// Button that returns the calendar to the current month. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get calendarToday;
+
+  /// Tooltip of the button that shows the previous month. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get calendarPreviousMonth;
+
+  /// Tooltip of the button that shows the next month. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get calendarNextMonth;
+
+  /// Total of the selected day's payments, paid or not. amount: formatted money. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Total {amount}'**
+  String calendarDayTotal(String amount);
+
+  /// Row in the selected day's section when a pay period starts that day. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'Payday'**
+  String get calendarPayday;
+
+  /// Shown when the tapped day has no payments. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'No payments on this day.'**
+  String get calendarNoPayments;
+
+  /// Screen reader: how many payments a calendar day has. First part of the day's label, after the date. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payments} =1{1 payment} other{{count} payments}}'**
+  String calendarCellPayments(int count);
+
+  /// Screen reader: every payment of the day is late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'late'**
+  String get calendarCellAllLate;
+
+  /// Screen reader: some of the day's payments are late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} late}}'**
+  String calendarCellSomeLate(int count);
+
+  /// Screen reader: every payment of the day is paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'paid'**
+  String get calendarCellAllPaid;
+
+  /// Screen reader: some of the day's payments are paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} paid}}'**
+  String calendarCellSomePaid(int count);
+
+  /// Screen reader: a pay period starts this day. Joined with a comma. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'payday'**
+  String get calendarCellPayday;
+
+  /// Screen reader: the day is today. Joined with a comma. Takvim etiketi; kısa ve sakin.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get calendarCellToday;
 }
 
 class _AppLocalizationsDelegate

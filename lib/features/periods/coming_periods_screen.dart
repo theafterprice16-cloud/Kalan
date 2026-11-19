@@ -10,6 +10,7 @@ import '../home/past_due.dart';
 import '../home/payment_tile.dart';
 import '../settings/settings_screen.dart' show editNetIncome;
 import 'coming_periods.dart';
+import 'payment_calendar.dart';
 import 'period_chart.dart';
 
 /// "Coming pay periods": six bars on one scale, the selected period's
@@ -35,20 +36,44 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final periods = ref.watch(comingPeriodsProvider);
+    final view = ref.watch(comingViewProvider);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.comingPeriodsTitle)),
       body: switch (periods) {
         null => const Center(child: CircularProgressIndicator()),
-        final ps when ps.every((p) => p.summary.itemCount == 0) => EmptyState(
-          key: const ValueKey('coming-periods-empty'),
-          l10n.comingPeriodsEmpty(ps.length),
-        ),
-        final ps => _body(context, ps),
+        final ps => () {
+          // The choice scrolls with the content, as the screen's first row.
+          final choice = _ViewChoice(
+            view: view,
+            onChanged: ref.read(comingViewProvider.notifier).set,
+          );
+          return switch (view) {
+            ComingView.calendar => PaymentCalendar(header: choice),
+            ComingView.chart when ps.every((p) => p.summary.itemCount == 0) =>
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  choice,
+                  Expanded(
+                    child: EmptyState(
+                      key: const ValueKey('coming-periods-empty'),
+                      l10n.comingPeriodsEmpty(ps.length),
+                    ),
+                  ),
+                ],
+              ),
+            ComingView.chart => _body(context, ps, choice),
+          };
+        }(),
       },
     );
   }
 
-  Widget _body(BuildContext context, List<ComingPeriod> periods) {
+  Widget _body(
+    BuildContext context,
+    List<ComingPeriod> periods,
+    Widget header,
+  ) {
     final l10n = context.l10n;
     final colors = context.colors;
     final theme = Theme.of(context);
@@ -65,6 +90,7 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
     return ListView(
       padding: const EdgeInsets.only(bottom: KalanSpace.xl),
       children: [
+        header,
         Padding(
           padding: const EdgeInsets.fromLTRB(
             KalanSpace.md,
@@ -174,6 +200,46 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
             ),
         ],
       ],
+    );
+  }
+}
+
+/// "Chart | Calendar", with the app's own segmented control.
+class _ViewChoice extends StatelessWidget {
+  const _ViewChoice({required this.view, required this.onChanged});
+
+  final ComingView view;
+  final ValueChanged<ComingView> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        KalanSpace.md,
+        KalanSpace.xs,
+        KalanSpace.md,
+        KalanSpace.xs,
+      ),
+      child: Semantics(
+        label: l10n.comingViewLabel,
+        container: true,
+        child: SegmentedButton<ComingView>(
+          key: const ValueKey('coming-view'),
+          segments: [
+            ButtonSegment(
+              value: ComingView.chart,
+              label: Text(l10n.comingViewChart),
+            ),
+            ButtonSegment(
+              value: ComingView.calendar,
+              label: Text(l10n.comingViewCalendar),
+            ),
+          ],
+          selected: {view},
+          onSelectionChanged: (s) => onChanged(s.single),
+        ),
+      ),
     );
   }
 }

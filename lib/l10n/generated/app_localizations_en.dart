@@ -1686,4 +1686,77 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return '$range: $spokenFor spoken for, $amount short.';
   }
+
+  @override
+  String get comingViewLabel => 'View';
+
+  @override
+  String get comingViewChart => 'Chart';
+
+  @override
+  String get comingViewCalendar => 'Calendar';
+
+  @override
+  String get calendarToday => 'Today';
+
+  @override
+  String get calendarPreviousMonth => 'Previous month';
+
+  @override
+  String get calendarNextMonth => 'Next month';
+
+  @override
+  String calendarDayTotal(String amount) {
+    return 'Total $amount';
+  }
+
+  @override
+  String get calendarPayday => 'Payday';
+
+  @override
+  String get calendarNoPayments => 'No payments on this day.';
+
+  @override
+  String calendarCellPayments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+      zero: 'No payments',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarCellAllLate => 'late';
+
+  @override
+  String calendarCellSomeLate(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count late',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarCellAllPaid => 'paid';
+
+  @override
+  String calendarCellSomePaid(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paid',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calendarCellPayday => 'payday';
+
+  @override
+  String get calendarCellToday => 'today';
 }

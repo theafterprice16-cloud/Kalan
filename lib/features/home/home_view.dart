@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/engine/engine.dart';
+import '../../data/db/app_database.dart' show PaymentRow;
 import '../../data/models.dart';
 import '../../data/period_totals.dart';
 import '../../l10n/generated/app_localizations.dart';
@@ -76,6 +77,23 @@ class HomeView {
   final int? tightThresholdMinor;
 }
 
+/// The row of one plan payment, dated on its stored (effective) due day.
+HomeEntry planEntryOf(PlanWithPayments p, PaymentRow pay) => HomeEntry(
+  name: p.ownName,
+  date: LocalDate.fromEpochDay(pay.dueDay),
+  amountMinor: pay.amountMinor,
+  isPaid: pay.paidAt != null,
+  paymentId: pay.id,
+  planId: p.plan.id,
+  seq: pay.seq,
+  installmentCount: p.plan.installmentCount,
+  isPayLater: p.isPayLater,
+  paymentMethod: p.plan.paymentMethod,
+);
+
+/// Home order: by date, then name.
+int compareHomeEntries(HomeEntry a, HomeEntry b) => _byDateThenName(a, b);
+
 int _byDateThenName(HomeEntry a, HomeEntry b) {
   final c = a.date.compareTo(b.date);
   return c != 0
@@ -116,18 +134,7 @@ int _byDateThenName(HomeEntry a, HomeEntry b) {
         today: today,
       );
       if (pay.paidBeforeKalan) continue;
-      final entry = HomeEntry(
-        name: p.ownName,
-        date: due,
-        amountMinor: pay.amountMinor,
-        isPaid: isPaid,
-        paymentId: pay.id,
-        planId: p.plan.id,
-        seq: pay.seq,
-        installmentCount: p.plan.installmentCount,
-        isPayLater: p.isPayLater,
-        paymentMethod: p.plan.paymentMethod,
-      );
+      final entry = planEntryOf(p, pay);
       // Past due: only in its own section, never twice, and only in the
       // current period (where it counts).
       if (isPastDue(dueDate: due, isPaid: isPaid, today: today)) {

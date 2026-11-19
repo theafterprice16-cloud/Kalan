@@ -79,7 +79,8 @@ void main() {
     expect(find.text('20 Kas'), findsNothing);
     expect(find.text('18 Ara'), findsOneWidget);
     expect(find.text('3/4'), findsOneWidget);
-    expect(find.text('4/4'), findsOneWidget);
+    // Below the fold since the Chart | Calendar choice sits on top.
+    expect(find.text('4/4', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('without income: spoken-for bars, no left, an invite', (

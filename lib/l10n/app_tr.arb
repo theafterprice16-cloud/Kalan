@@ -361,5 +361,21 @@
   "comingPeriodsEmpty": "{count, plural, =1{Önümüzdeki dönemde ödeme yok.} other{Önümüzdeki {count} dönemde ödeme yok.}}",
   "comingPeriodsBarLabel": "{range}: söz verilmiş {spokenFor}, kalan {left}.",
   "comingPeriodsBarLabelNoIncome": "{range}: söz verilmiş {spokenFor}.",
-  "comingPeriodsBarLabelShort": "{range}: söz verilmiş {spokenFor}, {amount} eksik."
+  "comingPeriodsBarLabelShort": "{range}: söz verilmiş {spokenFor}, {amount} eksik.",
+  "comingViewLabel": "Görünüm",
+  "comingViewChart": "Grafik",
+  "comingViewCalendar": "Takvim",
+  "calendarToday": "Bugün",
+  "calendarPreviousMonth": "Önceki ay",
+  "calendarNextMonth": "Sonraki ay",
+  "calendarDayTotal": "Toplam {amount}",
+  "calendarPayday": "Maaş günü",
+  "calendarNoPayments": "Bu gün ödeme yok.",
+  "calendarCellPayments": "{count, plural, =0{Ödeme yok} =1{1 ödeme} other{{count} ödeme}}",
+  "calendarCellAllLate": "gecikmiş",
+  "calendarCellSomeLate": "{count, plural, other{{count} tanesi gecikmiş}}",
+  "calendarCellAllPaid": "ödendi",
+  "calendarCellSomePaid": "{count, plural, other{{count} tanesi ödendi}}",
+  "calendarCellPayday": "maaş günü",
+  "calendarCellToday": "bugün"
 }
