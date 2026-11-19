@@ -582,7 +582,7 @@ Uygulanan kararlar (prompt'ta gerekçeli verildi):
 | Konu | Karar |
 |---|---|
 | Saat | Genel hatırlatma saati (varsayılan 09:00). |
-| Görünürlük | Anahtar yalnızca ekstre günü seçili kartta görünür; sağlayıcıda ve günü seçilmemiş yeni kartta yok. |
+| Görünürlük | Anahtar yalnızca ekstre günü (ve kaydetmek için zaten zorunlu olan son ödeme günü) seçili kartta görünür; sağlayıcıda ve günleri seçilmemiş yeni kartta yok. Günleri eksik kart kaydedilirse anahtar kapanır (mimar incelemesi). |
 | Kesim tarihi | Motordan: ilk ekstre `CardTerms.statementFor(bugün)`, sonrakiler `statementInMonth` (ay sonuna sıkıştırılır: 31 → 30 Kasım, 28 Şubat). Motor kesim tarihini hafta sonu ya da tatile göre kaydırmıyor; bildirim de kaydırmaz (14 Kasım 2026 cumartesi, bildirim "14 Kasım" der). Brifteki "kaydırmaya uyar" maddesi bu yüzden uygulanmadı; yeni tarih kuralı yazılmadı. |
 | Birden çok kart | Aynı gün iki kartın hatırlatması iki ayrı bildirimdir. |
 | Tutarı göster ayarı | Etkilemez (bildirimde tutar yok). |

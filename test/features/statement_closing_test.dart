@@ -138,7 +138,7 @@ void main() {
       expect(row.statementReminderDays, 1);
     });
 
-    testWidgets('only with a statement day: not for a new card or provider', (
+    testWidgets('only with the card days: not before, not for a provider', (
       tester,
     ) async {
       await pumpApp(
@@ -151,6 +151,9 @@ void main() {
       final toggle = find.byKey(const ValueKey('statement-reminder'));
       expect(toggle, findsNothing);
       await pickDropdown(tester, const ValueKey('statement-day'), '14');
+      // The statement day alone is not enough: the due day too.
+      expect(toggle, findsNothing);
+      await pickDropdown(tester, const ValueKey('due-day'), '24');
       await scrollTo(tester, toggle);
       expect(toggle, findsOneWidget);
       await scrollTo(tester, find.text('Sonra öde sağlayıcısı'));

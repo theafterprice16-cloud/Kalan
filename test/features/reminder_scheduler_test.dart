@@ -271,6 +271,21 @@ void main() {
       expect(gateway.statements, isEmpty);
     });
 
+    test('saving a card without its days turns the switch off', () async {
+      final repo = SourceRepository(db, PlanRepository(db));
+      final id = await card();
+      final row = (await repo.byId(id))!;
+      await repo.update(row.copyWith(dueDay: const Value(null)));
+      expect((await repo.byId(id))!.statementReminderEnabled, isFalse);
+      final none = await repo.create(
+        name: 'Yarım',
+        kind: SourceKind.card,
+        statementDay: 14,
+        statementReminderEnabled: true,
+      );
+      expect((await repo.byId(none))!.statementReminderEnabled, isFalse);
+    });
+
     test('60 payment reminders: no statement reminder', () async {
       await card();
       for (var i = 0; i < 30; i++) {

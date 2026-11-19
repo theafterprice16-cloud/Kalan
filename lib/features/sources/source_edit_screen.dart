@@ -64,6 +64,10 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
     });
   }
 
+  /// The statement closing reminder needs the card's days (as its
+  /// statements do).
+  bool get _hasCardDays => _statementDay != null && _dueDay != null;
+
   @override
   void dispose() {
     _name.dispose();
@@ -98,7 +102,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
           statementDay: Value(_statementDay),
           dueDay: Value(_dueDay),
           shiftDueToBusinessDay: _shift,
-          statementReminderEnabled: _closingReminder && _statementDay != null,
+          statementReminderEnabled: _closingReminder && _hasCardDays,
           statementReminderDays: _closingDays,
         ),
       );
@@ -222,8 +226,9 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                         style: Theme.of(context).textTheme.bodyMedium
                             ?.copyWith(color: context.colors.textMuted),
                       ),
-                    // Only with a statement day: the reminder is about it.
-                    if (_statementDay != null) ...[
+                    // Only with the card's days: the reminder is about its
+                    // statement date.
+                    if (_hasCardDays) ...[
                       const SizedBox(height: KalanSpace.xs),
                       SwitchListTile.adaptive(
                         key: const ValueKey('statement-reminder'),
