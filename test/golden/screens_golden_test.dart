@@ -284,10 +284,8 @@ void main() {
         await start(
           tester,
           extra: [roadmapSourceProvider.overrideWith((ref) async => example)],
+          route: Routes.roadmap,
         );
-        await openTab(tester, 'Ayarlar');
-        await scrollTo(tester, find.text('Yol Haritası'));
-        await tester.tap(find.text('Yol Haritası'));
         await shoot(tester, '09-roadmap-$theme');
       });
 
