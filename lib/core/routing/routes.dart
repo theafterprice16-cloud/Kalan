@@ -16,4 +16,9 @@ abstract final class Routes {
   static const pay = '/pay';
   static const roadmap = '/roadmap';
   static const remindersHelp = '/reminders-help';
+
+  /// Kalan Pro. [returnOnUnlock]: back to the screen that opened it once
+  /// Pro is on (the half-filled fifth plan).
+  static String pro({bool returnOnUnlock = false}) =>
+      returnOnUnlock ? '/pro?then=back' : '/pro';
 }

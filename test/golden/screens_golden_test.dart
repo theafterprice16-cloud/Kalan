@@ -16,6 +16,10 @@ import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
+import 'package:kalan/entitlement/pro_controller.dart';
+import 'package:kalan/entitlement/pro_rules.dart';
+import 'package:kalan/entitlement/pro_status_store.dart';
+import 'package:kalan/entitlement/store_gateway.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -24,6 +28,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../helpers/app_harness.dart';
 import '../helpers/fake_notifications.dart';
+import '../helpers/fake_store.dart';
 
 /// Real fonts from the Flutter SDK so screenshots are readable.
 Future<void> loadFonts() async {
@@ -742,6 +747,96 @@ void main() {
         await scrollTo(tester, find.text('Tema'));
         await tester.tap(find.text('Tema'));
         await shoot(tester, '43-ios-theme-choice-$theme');
+      });
+
+      // Kalan Pro: the store's price (a fake store here), the note when
+      // the price cannot be loaded, Pro on, and the fifth-plan sheet.
+      Future<void> fourPlans(AppDatabase db) async {
+        await seedRich(db, incomeMinor: 4500000);
+        await seedPayIn4(db, source: 'Zip', title: 'Ayakkabı');
+      }
+
+      List<Override> proStore({
+        String? price = '249,99 ₺',
+        ProStatus status = ProStatus.notPro,
+      }) => [
+        storeGatewayProvider.overrideWithValue(
+          FakeStoreGateway()
+            ..price = price == null
+                ? const PriceUnavailable()
+                : PriceLoaded(price),
+        ),
+        proStatusStoreProvider.overrideWithValue(MemoryProStatusStore(status)),
+      ];
+
+      Future<void> limitSheet(WidgetTester tester, Locale locale) async {
+        await start(
+          tester,
+          locale: locale,
+          seed: fourPlans,
+          extra: proStore(),
+          route: Routes.addPlan,
+        );
+        await tester.enterText(find.byKey(const ValueKey('source')), 'Klarna');
+        await tester.enterText(find.byKey(const ValueKey('total')), '400');
+        await tester.pumpAndSettle();
+        await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+        await tester.tap(find.byKey(const ValueKey('save-plan')));
+      }
+
+      for (final (lang, locale, price) in [
+        ('tr', const Locale('tr', 'TR'), '249,99 ₺'),
+        ('en', const Locale('en', 'US'), r'$14.99'),
+      ]) {
+        testWidgets('pro screen, free, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            extra: proStore(price: price),
+            route: Routes.pro(),
+          );
+          await shoot(tester, '44-pro-free-$lang-$theme');
+        });
+
+        testWidgets('fifth plan sheet, $lang', (tester) async {
+          await limitSheet(tester, locale);
+          await shoot(tester, '47-pro-limit-sheet-$lang-$theme');
+        });
+      }
+
+      testWidgets('pro screen, price not loaded', (tester) async {
+        await start(tester, extra: proStore(price: null), route: Routes.pro());
+        await shoot(tester, '45-pro-price-unavailable-$theme');
+      });
+
+      testWidgets('pro screen, Pro on', (tester) async {
+        await start(
+          tester,
+          extra: proStore(status: ProStatus.pro),
+          route: Routes.pro(),
+        );
+        await shoot(tester, '46-pro-active-$theme');
+      });
+
+      testWidgets('settings, Kalan Pro rows', (tester) async {
+        await start(tester, extra: proStore());
+        await openTab(tester, 'Ayarlar');
+        const key = ValueKey('settings-restore');
+        await scrollTo(tester, find.byKey(key));
+        final top = tester.getTopLeft(find.byKey(key)).dy;
+        await tester.drag(find.byType(Scrollable).first, Offset(0, 400 - top));
+        await tester.pump(const Duration(milliseconds: 400));
+        await shoot(tester, '48-settings-pro-$theme');
+      });
+
+      testWidgets('ios, pro screen', variant: ios, (tester) async {
+        await start(tester, extra: proStore(), route: Routes.pro());
+        await shoot(tester, '49-ios-pro-free-$theme');
+      });
+
+      testWidgets('ios, fifth plan sheet', variant: ios, (tester) async {
+        await limitSheet(tester, const Locale('tr', 'TR'));
+        await shoot(tester, '50-ios-pro-limit-sheet-$theme');
       });
 
       // Payment method: add plan (More details open), plan details, home.

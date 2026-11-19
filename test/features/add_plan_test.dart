@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/design/form_fields.dart';
 import 'package:kalan/core/engine/engine.dart';
@@ -237,36 +236,5 @@ void main() {
     expect(find.text('Bir ad yaz.'), findsOneWidget);
     expect(find.text('Bu alan gerekli.'), findsOneWidget);
     expect(await db.select(db.plans).get(), isEmpty);
-  });
-
-  testWidgets('free tier stops at four open plans; debug Pro lifts it', (
-    tester,
-  ) async {
-    final db = await pumpApp(
-      tester,
-      seed: (db) async {
-        await seedSettings(db);
-        for (final name in ['A', 'B', 'C', 'D']) {
-          await seedPayIn4(db, source: name);
-        }
-        await seedRent(db);
-      },
-    );
-    await tester.tap(find.text('Plan ekle'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'Ücretsiz sürümde en çok 4 açık plan olur. '
-        'Bir plan bitince yenisini ekleyebilirsin.',
-      ),
-      findsOneWidget,
-    );
-    expect(find.text('Plan türü'), findsNothing);
-
-    await db
-        .update(db.appSettings)
-        .write(const AppSettingsCompanion(debugPro: Value(true)));
-    await tester.pumpAndSettle();
-    expect(find.text('Plan türü'), findsOneWidget);
   });
 }

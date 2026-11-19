@@ -10,6 +10,7 @@ import '../data/repositories/recurring_repository.dart';
 import '../data/repositories/settings_repository.dart';
 import '../data/repositories/source_repository.dart';
 import '../entitlement/entitlement.dart';
+import '../entitlement/pro_controller.dart';
 
 /// Overridden in tests with an in-memory database.
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -66,7 +67,8 @@ final currencyProvider = Provider<Currency>((ref) {
 });
 
 final entitlementProvider = Provider<Entitlement>(
-  (ref) => DebugEntitlement(
+  (ref) => KalanEntitlement(
+    status: ref.watch(proControllerProvider.select((s) => s.status)),
     debugProSwitch: ref.watch(settingsProvider).value?.debugPro ?? false,
   ),
 );

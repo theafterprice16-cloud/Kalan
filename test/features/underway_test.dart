@@ -314,14 +314,19 @@ void main() {
       },
     );
     await openAddPlan(tester);
+    await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+    await tester.enterText(find.byKey(const ValueKey('total')), '400');
+    await tester.pumpAndSettle();
+    await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+    await tester.tap(find.byKey(const ValueKey('save-plan')));
+    await tester.pumpAndSettle();
     expect(
       find.text(
-        'Ücretsiz sürümde en çok 4 açık plan olur. '
-        'Bir plan bitince yenisini ekleyebilirsin.',
+        'Ücretsiz sürümde 4 açık plan var. Bir planı bitirdiğinde ya da Pro '
+        'ile yenisini ekleyebilirsin.',
       ),
       findsOneWidget,
     );
-    expect(find.byKey(const ValueKey('underway')), findsNothing);
   });
 
   group('editing', () {

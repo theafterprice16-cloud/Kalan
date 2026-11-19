@@ -1,0 +1,16 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Kalan makes no network requests of its own (no bank link, no cloud,
+         no analytics). Google Play Billing pulls in Google's datatransport
+         library, which declares INTERNET and ACCESS_NETWORK_STATE for its own
+         diagnostics. Purchases go through the Play Store app over IPC
+         (com.android.vending.BILLING), so the release build strips both
+         permissions. Debug and profile builds keep INTERNET for the Flutter
+         tool. CI fails if INTERNET is merged back in. -->
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"
+        tools:node="remove" />
+</manifest>

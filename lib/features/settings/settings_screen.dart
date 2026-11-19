@@ -17,8 +17,11 @@ import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../core/theme/theme_mode.dart';
 import '../../data/db/app_database.dart';
+import '../../entitlement/pro_controller.dart';
+import '../../entitlement/pro_rules.dart';
 import '../currency/currency_picker.dart';
 import '../onboarding/pay_form.dart';
+import '../pro/pro_screen.dart';
 import '../reminders/reminders_section.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -134,6 +137,12 @@ class SettingsScreen extends ConsumerWidget {
     final currency = Currency.fromCode(s.currencyCode);
     final currencyLabel =
         '${currency.pickerLabel} · ${currencyName(context, currency)}';
+    final pro = ref.watch(proControllerProvider);
+    final proLabel = ref.watch(entitlementProvider).isPro
+        ? l10n.settingsProOn
+        : pro.status == ProStatus.pending
+        ? l10n.settingsProPending
+        : l10n.settingsProFree;
     final languageLabel = switch (s.localeCode) {
       'tr' => l10n.languageTurkish,
       'en' => l10n.languageEnglish,
@@ -202,6 +211,30 @@ class SettingsScreen extends ConsumerWidget {
               ThemeMode.dark => l10n.themeDark,
             }, style: secondary),
             onTap: () => _pickTheme(context, ref),
+          ),
+          const Divider(),
+          ListTile(
+            key: const ValueKey('settings-pro'),
+            title: Text(l10n.proTitle),
+            subtitle: Text(proLabel, style: secondary),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(Routes.pro()),
+          ),
+          ListTile(
+            key: const ValueKey('settings-restore'),
+            title: Text(l10n.proRestore),
+            trailing: pro.busy == ProBusy.restoring
+                ? SizedBox.square(
+                    dimension: KalanSpace.md,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: context.colors.textMuted,
+                    ),
+                  )
+                : null,
+            onTap: pro.busy == ProBusy.none
+                ? () => restoreProPurchase(context, ref)
+                : null,
           ),
           const Divider(),
           ListTile(

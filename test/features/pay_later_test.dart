@@ -274,7 +274,19 @@ void main() {
       );
       await tester.tap(find.text('Plan ekle'));
       await tester.pumpAndSettle();
-      expect(find.textContaining('en çok 4 açık plan olur'), findsOneWidget);
+      // The fifth plan: the form opens, saving shows the free-limit sheet.
+      await tester.enterText(find.byKey(const ValueKey('source')), 'Zip');
+      await tester.enterText(find.byKey(const ValueKey('total')), '400');
+      await tester.pumpAndSettle();
+      await scrollTo(tester, find.byKey(const ValueKey('save-plan')));
+      await tester.tap(find.byKey(const ValueKey('save-plan')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Ücretsiz sürümde 4 açık plan var.'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const ValueKey('pro-limit-not-now')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       // Paid: off the limit, in the archive.

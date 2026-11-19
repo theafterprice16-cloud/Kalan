@@ -251,11 +251,6 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String freeLimitReached(int limit) {
-    return 'Ücretsiz sürümde en çok $limit açık plan olur. Bir plan bitince yenisini ekleyebilirsin.';
-  }
-
-  @override
   String get addRecurring => 'Sabit ödeme ekle';
 
   @override
@@ -1570,4 +1565,72 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get reminderPaydayToggleHint =>
       'Maaş gününde, hatırlatma saatinde: bu dönemin ödemeleri, toplamı ve kalanı.';
+
+  @override
+  String get proTitle => 'Kalan Pro';
+
+  @override
+  String proIntro(int limit) {
+    return 'Ücretsiz sürümde $limit açık plan var. Pro ile sınır kalkar ve şunlar açılır:';
+  }
+
+  @override
+  String get proFeatureUnlimitedPlans => 'Sınırsız açık plan';
+
+  @override
+  String proPriceLine(String price) {
+    return '$price · bir kez ödenir. Abonelik yok, yenileme yok.';
+  }
+
+  @override
+  String get proPriceUnavailable => 'Fiyat şu an alınamadı.';
+
+  @override
+  String get proRetry => 'Yeniden dene';
+
+  @override
+  String get proBuy => 'Pro\'yu al';
+
+  @override
+  String get proRestore => 'Satın alımı geri yükle';
+
+  @override
+  String get proActive => 'Pro açık. Teşekkürler.';
+
+  @override
+  String get proPending => 'Ödeme onay bekliyor. Onaylanınca Pro açılır.';
+
+  @override
+  String get proTurnedOn => 'Pro açıldı.';
+
+  @override
+  String get proRestoreNotFound => 'Bu mağaza hesabında Pro bulunamadı.';
+
+  @override
+  String get proStoreUnreachable =>
+      'Mağazaya şu an ulaşılamadı. Sonra yeniden dene.';
+
+  @override
+  String get proPurchaseFailed =>
+      'Satın alma tamamlanamadı. Sonra yeniden dene.';
+
+  @override
+  String get settingsProFree => 'Ücretsiz';
+
+  @override
+  String get settingsProOn => 'Pro';
+
+  @override
+  String get settingsProPending => 'Onay bekliyor';
+
+  @override
+  String limitSheetBody(int limit) {
+    return 'Ücretsiz sürümde $limit açık plan var. Bir planı bitirdiğinde ya da Pro ile yenisini ekleyebilirsin.';
+  }
+
+  @override
+  String get limitSheetSeePro => 'Pro\'ya bak';
+
+  @override
+  String get limitSheetNotNow => 'Şimdi değil';
 }
