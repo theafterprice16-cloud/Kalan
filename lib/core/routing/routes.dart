@@ -7,6 +7,7 @@ abstract final class Routes {
   static const addPlan = '/add-plan';
   static String plan(int id) => '/plan/$id';
   static String planEdit(int id) => '/plan/$id/edit';
+  static String planAdjust(int id) => '/plan/$id/adjust';
   static const sources = '/sources';
 
   /// The sources screen scrolled to card [cardId]'s statements (16; a

@@ -1997,5 +1997,223 @@
         "description": "Total of the payments in this notification, from the shared money formatter"
       }
     }
+  },
+  "refundAction": "Return or cancellation",
+  "@refundAction": {
+    "description": "Plan details: the one entry point for 'Put on hold', 'Adjust amount' and 'Close' (19). Also the title of the sheet it opens. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "holdOption": "Put on hold",
+  "@holdOption": {
+    "description": "Option in the 'Return or cancellation' sheet: leaves the remaining payments out while the user waits. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "holdOptionHint": "While you wait for a return, cancellation or dispute, remaining payments are left out.",
+  "@holdOptionHint": {
+    "description": "Explanation under 'Put on hold'. The only place 'dispute' (itiraz) may appear, as a neutral side clause. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "reopenOption": "Reopen",
+  "@reopenOption": {
+    "description": "Undoes 'Put on hold'; shown only on a plan on hold. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "reopenOptionHint": "Remaining payments come back on their own dates.",
+  "@reopenOptionHint": {
+    "description": "Explanation under 'Reopen'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "adjustOption": "Adjust amount",
+  "@adjustOption": {
+    "description": "Option in the 'Return or cancellation' sheet and title of its screen: lowers the plan total after a partial return. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "adjustOptionHint": "If you returned part of it, remaining payments are split to match the new total.",
+  "@adjustOptionHint": {
+    "description": "Explanation under 'Adjust amount'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeOption": "Close",
+  "@closeOption": {
+    "description": "Option in the 'Return or cancellation' sheet and in the 30-day line; also the confirm button of the close dialog. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeOptionHint": "The plan moves to the archive. What you paid stays in your history.",
+  "@closeOptionHint": {
+    "description": "Explanation under 'Close'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "planOnHold": "On hold",
+  "@planOnHold": {
+    "description": "Label of a plan on hold (plan list, plan details) and of each payment on hold. Always shown with a pause icon; never in the error color. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "planOnHoldNote": "{count, plural, =1{1 payment on hold, left out of totals and reminders.} other{{count} payments on hold, left out of totals and reminders.}}",
+  "@planOnHoldNote": {
+    "description": "Plan details of a plan on hold, under the amounts. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3",
+        "description": "Unpaid payments on hold"
+      }
+    }
+  },
+  "holdCheckTitle": "Still waiting on the return?",
+  "@holdCheckTitle": {
+    "description": "Line on a plan that has been on hold for 30 days, shown only when the plan is opened. No notification. Options: Close / Reopen / Keep on hold. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "holdCheckSince": "On hold since {date}.",
+  "@holdCheckSince": {
+    "description": "Under 'Still waiting on the return?'. Turkish: the date takes no case suffix of its own ('tarihinden'). Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "14 Kas",
+        "description": "Short date (intl MMMd)"
+      }
+    }
+  },
+  "keepOnHold": "Keep on hold",
+  "@keepOnHold": {
+    "description": "Option in the 30-day line: the plan stays on hold and asks again 30 days later. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "passedWhileHeld": "{count, plural, =1{1 payment's date passed while it was on hold. If you paid it, you can mark it.} other{{count} payments' dates passed while they were on hold. If you paid them, you can mark them.}}",
+  "@passedWhileHeld": {
+    "description": "Plan details after 'Reopen', while payments whose date passed during the hold are unpaid. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2",
+        "description": "Unpaid payments whose date passed while on hold"
+      }
+    }
+  },
+  "planHeldDone": "Plan is on hold.",
+  "@planHeldDone": {
+    "description": "Snackbar after 'Put on hold'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "planReopenedDone": "Plan reopened.",
+  "@planReopenedDone": {
+    "description": "Snackbar after 'Reopen'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "planClosedDone": "Plan closed.",
+  "@planClosedDone": {
+    "description": "Snackbar after closing a plan. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "planKeptOnHold": "Plan stays on hold.",
+  "@planKeptOnHold": {
+    "description": "Snackbar after 'Keep on hold'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "amountAdjustedDone": "Amount adjusted.",
+  "@amountAdjustedDone": {
+    "description": "Snackbar after 'Adjust amount' is saved. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeTitle": "Close plan",
+  "@closeTitle": {
+    "description": "Title of the close dialog; also the button offered when an adjustment would leave no payment. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeBody": "Unpaid payments leave your totals and reminders. What you paid stays in your history. A closed plan can't be reopened.",
+  "@closeBody": {
+    "description": "Body of the close dialog. Closing is not deleting. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeReasonTitle": "Reason",
+  "@closeReasonTitle": {
+    "description": "Heading above the two reasons in the close dialog. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeReasonRefund": "Return",
+  "@closeReasonRefund": {
+    "description": "Close reason: the item was returned. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closeReasonCancel": "Cancellation",
+  "@closeReasonCancel": {
+    "description": "Close reason: the purchase was cancelled. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "closedWithReason": "{reason, select, refund{Closed · Return} other{Closed · Cancellation}}",
+  "@closedWithReason": {
+    "description": "Label of a closed plan in the archive and its details. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "reason": {
+        "type": "String",
+        "example": "refund",
+        "description": "refund or cancel"
+      }
+    }
+  },
+  "planPaidAmount": "Paid {amount}",
+  "@planPaidAmount": {
+    "description": "Closed plan in the archive: what was paid (screen reader label of the amount). Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "₺600",
+        "description": "From the shared money formatter"
+      }
+    }
+  },
+  "adjustNewTotal": "New total",
+  "@adjustNewTotal": {
+    "description": "Amount field on the 'Adjust amount' screen. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "adjustCurrentTotal": "Current total {amount}",
+  "@adjustCurrentTotal": {
+    "description": "'Adjust amount' screen, above the field. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "₺3.000",
+        "description": "From the shared money formatter"
+      }
+    }
+  },
+  "adjustPaidSoFar": "You've paid {amount}",
+  "@adjustPaidSoFar": {
+    "description": "'Adjust amount' screen, above the field. Paid before Kalan included. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "₺750",
+        "description": "From the shared money formatter"
+      }
+    }
+  },
+  "adjustHint": "Paid payments don't change. What's left is split evenly across unpaid payments; dates stay the same.",
+  "@adjustHint": {
+    "description": "'Adjust amount' screen, under the field. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "adjustPreviewTitle": "New payments",
+  "@adjustPreviewTitle": {
+    "description": "Heading of the preview list on the 'Adjust amount' screen, shown before saving. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "adjustBelowPaid": "The new total can't be less than what you've paid ({amount}).",
+  "@adjustBelowPaid": {
+    "description": "Validation on the 'Adjust amount' screen; nothing is saved. Turkish: the amount is in parentheses so it needs no case suffix. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "75,00 €",
+        "description": "Total already paid, from the shared money formatter"
+      }
+    }
+  },
+  "adjustAboveTotal": "The new total can't be more than the current total ({amount}).",
+  "@adjustAboveTotal": {
+    "description": "Validation on the 'Adjust amount' screen: an adjustment only lowers the total. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "300,00 €",
+        "description": "Current plan total, from the shared money formatter"
+      }
+    }
+  },
+  "adjustUnchanged": "That's the current total.",
+  "@adjustUnchanged": {
+    "description": "Note on the 'Adjust amount' screen when the typed total equals the current one; nothing to save. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "adjustCannotSplit": "{count, plural, =1{This amount can't be split into 1 payment.} other{This amount can't be split into {count} payments.}}",
+  "@adjustCannotSplit": {
+    "description": "Validation on the 'Adjust amount' screen: each payment needs at least the smallest unit of the currency. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3",
+        "description": "Unpaid payments"
+      }
+    }
+  },
+  "adjustNothingLeft": "No payments would be left. Do you want to close the plan?",
+  "@adjustNothingLeft": {
+    "description": "'Adjust amount' screen when the new total equals what is paid. Offers 'Close plan'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
   }
 }

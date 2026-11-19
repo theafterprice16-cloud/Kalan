@@ -24,6 +24,7 @@ import '../reminders/repeat_mode_ui.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
 import 'plan_labels.dart';
+import 'refund_actions.dart';
 
 class PlanDetailScreen extends ConsumerWidget {
   const PlanDetailScreen({required this.planId, super.key});
@@ -78,12 +79,26 @@ class PlanDetailScreen extends ConsumerWidget {
     );
     // Plans added with only their remaining payments (before v4).
     final midwayCount = plan.allPayments.first.seq - 1;
+    final today = ref.watch(todayProvider);
+    final passedWhileHeld = plan.passedWhileHeld;
+    // A closed plan shows what was paid; its other payments are out.
+    final heroMinor = plan.isClosed ? plan.paidMinor : plan.remainingMinor;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(context.planName(plan)),
         actions: [
-          if (plan.startsAtFirstPayment)
+          // The one entry point for returns and cancellations (19); in
+          // the bar, so the payments stay where they are.
+          if (plan.isOpen)
+            IconButton(
+              key: const ValueKey('refund-action'),
+              tooltip: l10n.refundAction,
+              onPressed: () => openRefundActions(context, ref, plan),
+              icon: const Icon(Icons.assignment_return_outlined),
+            ),
+          // A closed plan is read-only (19).
+          if (plan.startsAtFirstPayment && !plan.isClosed)
             IconButton(
               key: const ValueKey('plan-edit'),
               tooltip: l10n.planEdit,
@@ -100,6 +115,16 @@ class PlanDetailScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.only(bottom: KalanSpace.xl),
         children: [
+          if (plan.holdCheckDueOn(today))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KalanSpace.md,
+                KalanSpace.xs,
+                KalanSpace.md,
+                0,
+              ),
+              child: HoldCheckCard(plan: plan),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(
               KalanSpace.md,
@@ -146,6 +171,13 @@ class PlanDetailScreen extends ConsumerWidget {
                                 planKindLabel(context, plan.plan),
                                 style: secondary,
                               ),
+                              if (plan.isOnHold) const OnHoldTag(),
+                              if (plan.plan.closeReason case final reason?)
+                                Text(
+                                  l10n.closedWithReason(reason.name),
+                                  key: const ValueKey('closed-reason'),
+                                  style: secondary,
+                                ),
                             ],
                           ),
                         ),
@@ -153,13 +185,25 @@ class PlanDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: KalanSpace.md),
                     AmountText(
-                      ref.money(context, plan.remainingMinor),
+                      ref.money(context, heroMinor),
                       size: AmountSize.medium,
+                      // Held or closed: not part of any total.
+                      color: plan.status == PlanStatus.open
+                          ? null
+                          : context.colors.textMuted,
                     ),
                     Text(
-                      l10n.planToPay(ref.money(context, plan.remainingMinor)),
+                      plan.isClosed
+                          ? l10n.planPaidAmount(ref.money(context, heroMinor))
+                          : l10n.planToPay(ref.money(context, heroMinor)),
                       style: secondary,
                     ),
+                    if (plan.isOnHold && plan.setAside.isNotEmpty)
+                      Text(
+                        l10n.planOnHoldNote(plan.setAside.length),
+                        key: const ValueKey('on-hold-note'),
+                        style: secondary,
+                      ),
                     const SizedBox(height: KalanSpace.xs),
                     Wrap(
                       spacing: KalanSpace.md,
@@ -188,6 +232,13 @@ class PlanDetailScreen extends ConsumerWidget {
                       const SizedBox(height: KalanSpace.xs),
                       PayLaterSummary(plan: plan),
                     ],
+                    if (passedWhileHeld > 0) ...[
+                      const SizedBox(height: KalanSpace.xs),
+                      Text(
+                        l10n.passedWhileHeld(passedWhileHeld),
+                        key: const ValueKey('passed-while-held'),
+                      ),
+                    ],
                     if (midwayCount > 0) ...[
                       const SizedBox(height: KalanSpace.xs),
                       Text(
@@ -200,33 +251,35 @@ class PlanDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              KalanSpace.xxs,
-              KalanSpace.xs,
-              KalanSpace.xxs,
-              0,
-            ),
-            child: ReminderChoiceTile(
-              method: plan.plan.paymentMethod,
-              value: reminderChoiceOf(
-                enabled: plan.plan.remindersEnabled,
-                leadDays: plan.plan.reminderLeadDays,
+          // A closed plan is read-only: nothing to remind or set (19).
+          if (!plan.isClosed)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KalanSpace.xxs,
+                KalanSpace.xs,
+                KalanSpace.xxs,
+                0,
               ),
-              onChanged: (choice) {
-                final (enabled, leadDays) = reminderColumnsOf(choice);
-                return unawaited(
-                  ref
-                      .read(planRepositoryProvider)
-                      .setReminderChoice(
-                        plan.plan.id,
-                        enabled: enabled,
-                        leadDays: leadDays,
-                      ),
-                );
-              },
+              child: ReminderChoiceTile(
+                method: plan.plan.paymentMethod,
+                value: reminderChoiceOf(
+                  enabled: plan.plan.remindersEnabled,
+                  leadDays: plan.plan.reminderLeadDays,
+                ),
+                onChanged: (choice) {
+                  final (enabled, leadDays) = reminderColumnsOf(choice);
+                  return unawaited(
+                    ref
+                        .read(planRepositoryProvider)
+                        .setReminderChoice(
+                          plan.plan.id,
+                          enabled: enabled,
+                          leadDays: leadDays,
+                        ),
+                  );
+                },
+              ),
             ),
-          ),
           SectionTitle(l10n.planPaymentsTitle),
           // Paid before Kalan: one line, no dates, nothing to open.
           if (plan.paidBefore.isNotEmpty)
@@ -247,25 +300,28 @@ class PlanDetailScreen extends ConsumerWidget {
               ),
             ),
           for (final p in plan.listedPayments)
-            _PaymentRow(plan: plan, payment: p),
+            // A closed plan lists only what was paid.
+            if (!plan.isClosed || p.isPaid) _PaymentRow(plan: plan, payment: p),
           // Below the payments, so they stay at the top of the screen.
           const Divider(height: KalanSpace.lg),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
-            child: PaymentMethodTile(plan: plan),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
-            child: RepeatChoiceTile(
-              value: plan.plan.repeatMode,
-              enabled: plan.plan.remindersEnabled,
-              onChanged: (mode) => unawaited(
-                ref
-                    .read(planRepositoryProvider)
-                    .setRepeatMode(plan.plan.id, mode),
+          if (!plan.isClosed) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
+              child: PaymentMethodTile(plan: plan),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
+              child: RepeatChoiceTile(
+                value: plan.plan.repeatMode,
+                enabled: plan.plan.remindersEnabled,
+                onChanged: (mode) => unawaited(
+                  ref
+                      .read(planRepositoryProvider)
+                      .setRepeatMode(plan.plan.id, mode),
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -321,14 +377,17 @@ class _PaymentRow extends ConsumerWidget {
       color: colors.textMuted,
     );
     final today = ref.watch(todayProvider);
-    final pastDue = isPastDue(
-      dueDate: payment.date,
-      isPaid: payment.isPaid,
-      today: today,
-    );
+    // On hold (19): never past due, shown muted with the pause icon.
+    final held = plan.isOnHold && !payment.isPaid;
+    final readOnly = plan.isClosed;
+    final pastDue =
+        !held &&
+        isPastDue(dueDate: payment.date, isPaid: payment.isPaid, today: today);
     return InkWell(
       // "Pay later": amount and dates change together, on the edit screen.
-      onTap: plan.isPayLater
+      onTap: readOnly
+          ? null
+          : plan.isPayLater
           ? () => context.push(Routes.planEdit(plan.plan.id))
           : () => _edit(context, ref),
       child: Padding(
@@ -356,10 +415,14 @@ class _PaymentRow extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(context.longDate(payment.date)),
+                  Text(
+                    context.longDate(payment.date),
+                    style: held ? TextStyle(color: colors.textMuted) : null,
+                  ),
                   Wrap(
                     spacing: KalanSpace.xs,
                     children: [
+                      if (held) const OnHoldTag(),
                       if (payment.isPaid)
                         Text(l10n.paidLabel, style: secondary),
                       if (pastDue)
@@ -379,32 +442,35 @@ class _PaymentRow extends ConsumerWidget {
             AmountText(
               ref.money(context, payment.amountMinor),
               size: AmountSize.small,
-              color: payment.isPaid ? colors.textMuted : null,
+              color: payment.isPaid || held ? colors.textMuted : null,
             ),
-            IconButton(
-              tooltip: payment.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
-              // A past-due payment asks when it was paid, as on home.
-              onPressed: pastDue
-                  ? () => markPastDuePaid(
-                      context,
-                      ref,
-                      paymentId: payment.id,
-                      dueDate: payment.date,
-                    )
-                  : () async {
-                      final paid = !payment.isPaid;
-                      await ref
-                          .read(planRepositoryProvider)
-                          .setPaid(payment.id, paid: paid);
-                      if (paid) KalanHaptics.success();
-                    },
-              icon: Icon(
-                payment.isPaid
-                    ? Icons.check_circle
-                    : Icons.radio_button_unchecked,
-                color: payment.isPaid ? colors.accentText : null,
+            if (readOnly)
+              const SizedBox(width: KalanSpace.md)
+            else
+              IconButton(
+                tooltip: payment.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,
+                // A past-due payment asks when it was paid, as on home.
+                onPressed: pastDue
+                    ? () => markPastDuePaid(
+                        context,
+                        ref,
+                        paymentId: payment.id,
+                        dueDate: payment.date,
+                      )
+                    : () async {
+                        final paid = !payment.isPaid;
+                        await ref
+                            .read(planRepositoryProvider)
+                            .setPaid(payment.id, paid: paid);
+                        if (paid) KalanHaptics.success();
+                      },
+                icon: Icon(
+                  payment.isPaid
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  color: payment.isPaid ? colors.accentText : null,
+                ),
               ),
-            ),
           ],
         ),
       ),

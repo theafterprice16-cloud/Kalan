@@ -1964,4 +1964,165 @@ class AppLocalizationsTr extends AppLocalizations {
   String reminderNoteAccount(String account, String amount) {
     return 'Otomatik çekilir. $account: $amount bulunsun.';
   }
+
+  @override
+  String get refundAction => 'İade ya da iptal';
+
+  @override
+  String get holdOption => 'Beklet';
+
+  @override
+  String get holdOptionHint =>
+      'İade, iptal ya da itirazın sonucunu beklerken kalan taksitler hesaba girmez.';
+
+  @override
+  String get reopenOption => 'Yeniden aç';
+
+  @override
+  String get reopenOptionHint =>
+      'Kalan taksitler kendi tarihleriyle hesaba geri gelir.';
+
+  @override
+  String get adjustOption => 'Tutarı düzelt';
+
+  @override
+  String get adjustOptionHint =>
+      'Bir kısmını iade ettiysen kalan taksitler yeni toplama göre bölünür.';
+
+  @override
+  String get closeOption => 'Kapat';
+
+  @override
+  String get closeOptionHint =>
+      'Plan arşive gider. Ödediklerin geçmişte kalır.';
+
+  @override
+  String get planOnHold => 'Beklemede';
+
+  @override
+  String planOnHoldNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count taksit beklemede; hesaba ve hatırlatmalara girmiyor.',
+      one: '1 taksit beklemede; hesaba ve hatırlatmalara girmiyor.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get holdCheckTitle => 'Hâlâ iadeyi mi bekliyorsun?';
+
+  @override
+  String holdCheckSince(String date) {
+    return '$date tarihinden beri beklemede.';
+  }
+
+  @override
+  String get keepOnHold => 'Beklemeye devam';
+
+  @override
+  String passedWhileHeld(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Bekleme sırasında tarihi geçen $count taksit var. Ödediysen işaretleyebilirsin.',
+      one: 'Bekleme sırasında tarihi geçen 1 taksit var. Ödediysen işaretleyebilirsin.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get planHeldDone => 'Plan beklemede.';
+
+  @override
+  String get planReopenedDone => 'Plan yeniden açıldı.';
+
+  @override
+  String get planClosedDone => 'Plan kapatıldı.';
+
+  @override
+  String get planKeptOnHold => 'Plan beklemede kalıyor.';
+
+  @override
+  String get amountAdjustedDone => 'Tutar düzeltildi.';
+
+  @override
+  String get closeTitle => 'Planı kapat';
+
+  @override
+  String get closeBody =>
+      'Ödenmemiş taksitler hesaptan ve hatırlatmalardan çıkar. Ödediklerin geçmişte kalır. Kapatılan plan yeniden açılmaz.';
+
+  @override
+  String get closeReasonTitle => 'Neden';
+
+  @override
+  String get closeReasonRefund => 'İade';
+
+  @override
+  String get closeReasonCancel => 'İptal';
+
+  @override
+  String closedWithReason(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'refund': 'Kapatıldı · İade',
+      'other': 'Kapatıldı · İptal',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String planPaidAmount(String amount) {
+    return 'Ödenen $amount';
+  }
+
+  @override
+  String get adjustNewTotal => 'Yeni toplam';
+
+  @override
+  String adjustCurrentTotal(String amount) {
+    return 'Şimdiki toplam $amount';
+  }
+
+  @override
+  String adjustPaidSoFar(String amount) {
+    return 'Ödediğin $amount';
+  }
+
+  @override
+  String get adjustHint =>
+      'Ödenmiş taksitler değişmez. Kalan tutar ödenmemiş taksitlere eşit bölünür; tarihler aynı kalır.';
+
+  @override
+  String get adjustPreviewTitle => 'Yeni taksitler';
+
+  @override
+  String adjustBelowPaid(String amount) {
+    return 'Yeni toplam, ödediğin tutardan ($amount) az olamaz.';
+  }
+
+  @override
+  String adjustAboveTotal(String amount) {
+    return 'Yeni toplam, şimdiki toplamdan ($amount) fazla olamaz.';
+  }
+
+  @override
+  String get adjustUnchanged => 'Şimdiki toplamla aynı.';
+
+  @override
+  String adjustCannotSplit(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bu tutar $count taksite bölünemiyor.',
+      one: 'Bu tutar 1 taksite bölünemiyor.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adjustNothingLeft =>
+      'Kalan taksit kalmıyor. Planı kapatmak ister misin?';
 }
