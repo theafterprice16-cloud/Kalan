@@ -383,3 +383,35 @@ Teknik kararlar (Claude, 18 Kasım 2026):
 | Ayarlar | "Kalan Pro" satırı (Ücretsiz / Pro / Onay bekliyor) ve "Satın alımı geri yükle" satırı, Tema'dan sonra. Debug derlemedeki Pro anahtarı kaldı; yayın derlemesinde etkisiz (`KalanEntitlement.debugBuild`). |
 | Bekçi | `test/app/purchase_guard_test.dart`: `lib/features`, `lib/core`, `lib/app` içinde mağaza paketi import'u yok; kullanıcı kimliği alanları yok; fiyat kodda ve ARB'de yok. CI, birleşik yayın manifest'inde INTERNET izni varsa kırmızı olur. |
 | Ağ izni | Google Play Billing, Google'ın `datatransport` kütüphanesini getiriyor; bu kütüphane kendi tanı verisi için `INTERNET` ve `ACCESS_NETWORK_STATE` izni ekliyor. Ürün sahibi kararı (19 Kasım 2026): ikisi de yayın derlemesinden `android/app/src/release/AndroidManifest.xml` içinde `tools:node="remove"` ile çıkarılır. Satın alma Play Store uygulaması üzerinden (`com.android.vending.BILLING`, IPC) yürür; Kalan'ın kendi ağ isteği yok. Debug ve profile derlemeleri Flutter aracı için `INTERNET`i korur. Açık iş: Google Play iç test sürümünde satın almanın izinsiz çalıştığı doğrulanacak (Play geliştirici hesabı gerekiyor). |
+
+## İleriki dönemler (12) (19 Kasım 2026)
+
+Ürün sahibi kararları (yeniden sorulmaz):
+
+| Konu | Karar |
+|---|---|
+| Dönem sayısı | Herkese aynı 6 dönem, bu dönem dahil; ücretsiz (Karar 4). Brifteki 3 / 12 ve "Pro'da daha çok" seçenekleri geçersiz. |
+| Yer | Ana ekranda büyük kalan kartının hemen altında küçük 6 çubuklu şerit; dokununca ayrı "İleriki dönemler" ekranı, bu dönem seçili. |
+| Gelir yoksa | Çubuklar yalnızca söz verilmiş kısımla çizilir; ekranda tek satır davet: "Gelirini girersen her dönemde ne kaldığını da görürsün." Grafik gizlenmez. |
+| Çizim | Paket yok (fl_chart vb. eklenmez); basit widget'larla. |
+| Dönem | Maaş dönemi (takvim ayı değil). Dönem sınırları ve bir ödemenin hangi döneme girdiği yalnızca mevcut hesaptan (`countingDate`, `periodSummaryOn`); grafikteki bu dönem ana ekranla birebir aynı. |
+
+Teknik kararlar (Claude, 19 Kasım 2026):
+
+| Konu | Karar |
+|---|---|
+| Veri | `comingPeriods` (`lib/features/periods/coming_periods.dart`): her dönem için `periodSummaryOn` (toplam, gelir, kalan, durum) ve ana ekranın satır kuralı `homeEntriesFor` (ana ekran sağlayıcısından çıkarıldı, ana ekran da onu kullanır). Günü geçmiş ödenmemiş ödemeler yalnızca bu dönemde listelenir ve sayılır. Motor değişmedi. |
+| Sayı | Özetteki ödeme sayısı ana ekrandaki gibi `itemCount` (Kalan'dan önce ödenmiş taksitler sayıya ve toplama girer, listede görünmez; ana ekranla aynı). |
+| Çubuk altı | Dönem adı olarak maaş günü (kısa tarih, "15 Ara"): haftalık ve iki haftalık maaşta da ayırt edilir. Altında dönemin ana sayısı: gelir varsa kalan, yoksa söz verilmiş; eksi dönemde "−₺1,2 B eksik" (`negativeText`). |
+| Kısa tutar | `formatMoneyShort` (`money_format.dart`): 1.000 birimin altında tam biçim, üstünde intl compact ("₺12,4 B", "$12.4K", "Rp1.25M"); küçük basamak gösterilmez. Ekranlar `ref.moneyShort` kullanır. |
+| Ölçek | 6 çubuk tek ölçekte: en yüksek değer = en büyük söz verilmiş ya da gelir. Sıfır olmayan kısım en az 4 px. |
+| Eksi dönem | Ürün sahibinin bu madde için verdiği çizim: çubuğun tamamı `chartCommitted`, gelir seviyesinde ince `negative` çizgi (2 px, çubuktan geniş, zemin üstünde de görünür), çubuk altında eksi işaretli "−₺1,2 B eksik". DESIGN_TOKENS kural 10'a istisna olarak yazıldı. Seçili dönemin özetinde ana ekranla aynı cümle: "Bu dönem ₺1.200 eksik kalıyor." Kırmızı ve `late` yok. |
+| Seçim ve odak | Seçili çubuk `text` renginde ince çerçeve; klavye odağında `focus` halkası. Her çubuk tek Semantics düğümü (düğme, seçili bilgisi, dönem ve tutarlar). |
+| Dar ekran | Sütun en az 56 px; sığmazsa satır yatay kayar (yön Directionality'yi izler, sağdan sola dilde ilk dönem sağda). |
+| Ana ekran şeridi | Etiket yok; tek dokunma hedefi; 6 dönemin hiçbirinde ödeme yoksa şerit gizli, ekran "Önümüzdeki 6 dönemde ödeme yok." der. |
+| Günü geçenler | Ekranda bu dönemin günü geçmiş ödemeleri ana ekrandaki satırla ("Günü geçen N ödeme", "Ödendi" → "Ne zaman ödedin?") gösterilir; böylece işaretleme iki ekranda aynı veriyi üretir. Diğer satırlar ana ekranın ödeme satırı. |
+| Gün değişimi | Seçili dönem sırayla tutulur; uygulama açıkken gün dönüp dönem kayarsa seçim aynı sırada kalır (ana ekran da gün değişimini uygulama öne gelince alır). Bilinen küçük eksik. |
+| Gelir daveti | Ayarlar'daki net tutar penceresini doğrudan açar (`editNetIncome`); kaydedince grafik kendiliğinden güncellenir. |
+| Animasyon | Yok. |
+| Ödeme satırı | Büyük yazıda (2x) taşma düzeltildi: "Bugün/Yarın" notu satır kaydırır, tutar satır genişliğinin en çok %40'ına sığacak kadar küçülür. Normal boyutta görünüm değişmedi (golden'lar aynı). |
+

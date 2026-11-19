@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/engine/engine.dart';
+import '../../data/models.dart';
 import '../../data/period_totals.dart';
 import '../../l10n/generated/app_localizations.dart';
 
@@ -82,17 +83,21 @@ int _byDateThenName(HomeEntry a, HomeEntry b) {
       : (a.name ?? '').toLowerCase().compareTo((b.name ?? '').toLowerCase());
 }
 
-/// Null while data loads or before onboarding.
-final homeViewProvider = Provider<HomeView?>((ref) {
-  final settings = ref.watch(settingsProvider).value;
-  final plans = ref.watch(plansProvider).value;
-  final recurring = ref.watch(recurringProvider).value;
-  if (settings == null || plans == null || recurring == null) return null;
-  final today = ref.watch(todayProvider);
-  final period = payScheduleOf(settings).periodContaining(today);
-
+/// The rows of [period] as seen on [today]: its dated payments (plan
+/// payments by [countingDate], recurring occurrences) and, only when
+/// [period] is the current one, the unpaid past-due plan payments, which
+/// all count in it. Payments paid before Kalan are never listed. Both
+/// lists by date, then name. The one row rule for the home screen and the
+/// coming pay periods.
+({List<HomeEntry> entries, List<HomeEntry> pastDue}) homeEntriesFor({
+  required Iterable<PlanWithPayments> plans,
+  required Iterable<RecurringWithMarks> recurring,
+  required PayPeriod period,
+  required LocalDate today,
+}) {
   final entries = <HomeEntry>[];
   final pastDue = <HomeEntry>[];
+  final isCurrent = period.contains(today);
   // Every plan payment counts on [countingDate]: past-due ones in this
   // period, payments paid "today" from the past-due list on that day,
   // everything else on its due date. Paid before Kalan: counted like any
@@ -123,9 +128,10 @@ final homeViewProvider = Provider<HomeView?>((ref) {
         isPayLater: p.isPayLater,
         paymentMethod: p.plan.paymentMethod,
       );
-      // Past due: only in its own section, never twice.
+      // Past due: only in its own section, never twice, and only in the
+      // current period (where it counts).
       if (isPastDue(dueDate: due, isPaid: isPaid, today: today)) {
-        pastDue.add(entry);
+        if (isCurrent) pastDue.add(entry);
       } else if (period.contains(countsOn)) {
         entries.add(entry);
       }
@@ -133,18 +139,36 @@ final homeViewProvider = Provider<HomeView?>((ref) {
   }
   for (final r in recurring) {
     for (final date in r.occurrences(period.start, period.end)) {
-      final entry = HomeEntry(
-        name: r.item.name,
-        date: date,
-        amountMinor: r.item.amountMinor,
-        isPaid: r.paidDays.contains(date.epochDay),
-        recurringId: r.item.id,
+      entries.add(
+        HomeEntry(
+          name: r.item.name,
+          date: date,
+          amountMinor: r.item.amountMinor,
+          isPaid: r.paidDays.contains(date.epochDay),
+          recurringId: r.item.id,
+        ),
       );
-      entries.add(entry);
     }
   }
   entries.sort(_byDateThenName);
   pastDue.sort(_byDateThenName);
+  return (entries: entries, pastDue: pastDue);
+}
+
+/// Null while data loads or before onboarding.
+final homeViewProvider = Provider<HomeView?>((ref) {
+  final settings = ref.watch(settingsProvider).value;
+  final plans = ref.watch(plansProvider).value;
+  final recurring = ref.watch(recurringProvider).value;
+  if (settings == null || plans == null || recurring == null) return null;
+  final today = ref.watch(todayProvider);
+  final period = payScheduleOf(settings).periodContaining(today);
+  final rows = homeEntriesFor(
+    plans: plans,
+    recurring: recurring,
+    period: period,
+    today: today,
+  );
 
   return HomeView(
     summary: periodSummaryOn(
@@ -155,8 +179,8 @@ final homeViewProvider = Provider<HomeView?>((ref) {
       incomeMinor: settings.netIncomeMinor,
       tightThresholdMinor: settings.tightThresholdMinor,
     ),
-    entries: entries,
-    pastDue: pastDue,
+    entries: rows.entries,
+    pastDue: rows.pastDue,
     today: today,
     tightThresholdMinor: settings.tightThresholdMinor,
   );

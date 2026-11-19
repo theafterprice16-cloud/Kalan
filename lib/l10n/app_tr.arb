@@ -352,5 +352,14 @@
   "settingsProPending": "Onay bekliyor",
   "limitSheetBody": "Ücretsiz sürümde {limit} açık plan var. Bir planı bitirdiğinde ya da Pro ile yenisini ekleyebilirsin.",
   "limitSheetSeePro": "Pro'ya bak",
-  "limitSheetNotNow": "Şimdi değil"
+  "limitSheetNotNow": "Şimdi değil",
+  "comingPeriodsTitle": "İleriki dönemler",
+  "comingPeriodsSummary": "{count, plural, =0{Bu dönem ödeme yok. Kalan {left}.} =1{Bu dönem 1 ödeme. Toplam {total}. Kalan {left}.} other{Bu dönem {count} ödeme. Toplam {total}. Kalan {left}.}}",
+  "comingPeriodsSummaryNoLeft": "{count, plural, =0{Bu dönem ödeme yok.} =1{Bu dönem 1 ödeme. Toplam {total}.} other{Bu dönem {count} ödeme. Toplam {total}.}}",
+  "comingPeriodsShort": "{amount} eksik",
+  "comingPeriodsIncomeInvite": "Gelirini girersen her dönemde ne kaldığını da görürsün.",
+  "comingPeriodsEmpty": "{count, plural, =1{Önümüzdeki dönemde ödeme yok.} other{Önümüzdeki {count} dönemde ödeme yok.}}",
+  "comingPeriodsBarLabel": "{range}: söz verilmiş {spokenFor}, kalan {left}.",
+  "comingPeriodsBarLabelNoIncome": "{range}: söz verilmiş {spokenFor}.",
+  "comingPeriodsBarLabelShort": "{range}: söz verilmiş {spokenFor}, {amount} eksik."
 }

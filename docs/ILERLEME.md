@@ -23,13 +23,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 11. Pro satın alma (18 Kasım 2026): tek ürün ömür boyu Kalan Pro; fiyat mağazadan; 5. planda sakin alt sayfa, satın alınca plan aynı alanlarla kaydedilir; Ayarlar'da Kalan Pro ve geri yükleme; Pro yalnızca mağazanın açık sinyaliyle kalkar; durum cihazda (veritabanı değil); iOS için StoreKit test dosyası. Panel işleri (App Store Connect, Google Play Console) ürün sahibinde
 
+- 12. İleriki dönemlerin grafiği (19 Kasım 2026): ana ekranda büyük sayının altında küçük 6 çubuklu "İleriki dönemler" şeridi; dokununca ayrı ekran, bu dönem seçili; her çubukta söz verilmiş (safran) ve kalan (lacivert), eksi dönemde gelir çizgisi ve "−… eksik"; çubuğa dokununca o dönemin özeti ve ödemeleri; gelir yoksa yalnızca söz verilmiş ve gelir daveti; herkese 6 dönem, ücretsiz; hesap ana ekranla aynı yerden; şema değişmedi
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 12. İleriki dönemlerin grafiği
+- 13. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 

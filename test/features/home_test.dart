@@ -5,6 +5,14 @@ import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
 
+/// A tall phone: the whole period fits under the coming pay periods
+/// strip, so rows are on screen without scrolling.
+void tallPhone(WidgetTester tester) {
+  tester.view.physicalSize = const Size(800, 1400);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   // Period: 15 Nov - 14 Dec 2026. Klarna payments on 20 Nov and 4 Dec fall
   // inside (₺100 each), rent on 1 Dec (₺15.000).
@@ -12,6 +20,7 @@ void main() {
   testWidgets('shows left, the summary sentence and dated rows', (
     tester,
   ) async {
+    tallPhone(tester);
     final semantics = tester.ensureSemantics();
     await pumpApp(
       tester,
@@ -92,6 +101,7 @@ void main() {
   });
 
   testWidgets('"not paid" has no "Undo"', (tester) async {
+    tallPhone(tester);
     await pumpApp(
       tester,
       seed: (db) async {
@@ -251,6 +261,8 @@ void main() {
         await seedPayIn4(db, first: LocalDate(2026, 10, 30), source: 'Zip');
       },
     );
+    tallPhone(tester);
+    await tester.pumpAndSettle();
     final badges = find.byKey(const ValueKey('overdue-badge'));
     expect(badges, findsNWidgets(2));
     final label = tester.widget<Text>(

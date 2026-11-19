@@ -38,6 +38,34 @@ String formatMoney(int minor, Currency currency, {required String localeName}) {
       '${text.substring(lastDigit + 1)}';
 }
 
+/// A short amount for narrow places (labels under chart bars): below 1,000
+/// whole units exactly [formatMoney]; from 1,000 on, intl's compact form
+/// in the app language, without minor digits.
+///
+/// tr, TRY, 1240000 → ₺12,4 B · en, USD, 123456789 → $1.23M ·
+/// en, JPY, 999 → ¥999 · en, IDR, 120000000 → Rp120M.
+String formatMoneyShort(
+  int minor,
+  Currency currency, {
+  required String localeName,
+}) {
+  final whole = minor.abs() ~/ currency.minorPerMajor;
+  if (whole < 1000) {
+    return formatMoney(minor, currency, localeName: localeName);
+  }
+  final format = _compactFormats.putIfAbsent(
+    '$localeName|${currency.code}',
+    () => NumberFormat.compactCurrency(
+      locale: localeName,
+      name: currency.code,
+      symbol: isolateRtl(currency.symbol),
+    ),
+  );
+  return format.format(minor < 0 ? -whole : whole);
+}
+
+final _compactFormats = <String, NumberFormat>{};
+
 final _formats = <String, NumberFormat>{};
 
 NumberFormat _currencyFormat(String locale, String code, String symbol) =>

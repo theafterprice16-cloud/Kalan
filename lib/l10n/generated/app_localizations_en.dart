@@ -1620,4 +1620,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get limitSheetNotNow => 'Not now';
+
+  @override
+  String get comingPeriodsTitle => 'Coming pay periods';
+
+  @override
+  String comingPeriodsSummary(int count, String total, String left) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments this period. $total in total. $left left.',
+      one: '1 payment this period. $total in total. $left left.',
+      zero: 'No payments this period. $left left.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String comingPeriodsSummaryNoLeft(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments this period. $total in total.',
+      one: '1 payment this period. $total in total.',
+      zero: 'No payments this period.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String comingPeriodsShort(String amount) {
+    return '$amount short';
+  }
+
+  @override
+  String get comingPeriodsIncomeInvite =>
+      'Add your income to see what\'s left in each period.';
+
+  @override
+  String comingPeriodsEmpty(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No payments in the next $count pay periods.',
+      one: 'No payments in the next pay period.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String comingPeriodsBarLabel(String range, String spokenFor, String left) {
+    return '$range: $spokenFor spoken for, $left left.';
+  }
+
+  @override
+  String comingPeriodsBarLabelNoIncome(String range, String spokenFor) {
+    return '$range: $spokenFor spoken for.';
+  }
+
+  @override
+  String comingPeriodsBarLabelShort(
+    String range,
+    String spokenFor,
+    String amount,
+  ) {
+    return '$range: $spokenFor spoken for, $amount short.';
+  }
 }

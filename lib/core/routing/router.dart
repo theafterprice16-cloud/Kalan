@@ -6,6 +6,7 @@ import '../../app/providers.dart';
 import '../../app/shell.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/periods/coming_periods_screen.dart';
 import '../../features/plans/add_plan_screen.dart';
 import '../../features/plans/plan_detail_screen.dart';
 import '../../features/plans/plan_edit_screen.dart';
@@ -114,6 +115,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pro',
         builder: (_, state) => ProScreen(
           returnOnUnlock: state.uri.queryParameters['then'] == 'back',
+        ),
+      ),
+      GoRoute(
+        path: Routes.comingPeriodsPath,
+        builder: (_, state) => ComingPeriodsScreen(
+          initialSelected:
+              int.tryParse(state.uri.queryParameters['selected'] ?? '') ?? 0,
         ),
       ),
       GoRoute(

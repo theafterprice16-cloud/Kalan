@@ -2226,6 +2226,64 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get limitSheetNotNow;
+
+  /// Title of the chart of the next 6 pay periods (home strip and its screen).
+  ///
+  /// In en, this message translates to:
+  /// **'Coming pay periods'**
+  String get comingPeriodsTitle;
+
+  /// Summary of the selected pay period when income is set and nothing is short. total: spoken for; left: income minus spoken for.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payments this period. {left} left.} =1{1 payment this period. {total} in total. {left} left.} other{{count} payments this period. {total} in total. {left} left.}}'**
+  String comingPeriodsSummary(int count, String total, String left);
+
+  /// Summary of the selected pay period without the left amount (no income set, or the period is short).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No payments this period.} =1{1 payment this period. {total} in total.} other{{count} payments this period. {total} in total.}}'**
+  String comingPeriodsSummaryNoLeft(int count, String total);
+
+  /// Under a bar and in the summary when spoken for exceeds income. amount is negative and carries its minus sign, e.g. -1,200.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} short'**
+  String comingPeriodsShort(String amount);
+
+  /// Link shown when no income is set; opens the income field.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your income to see what\'s left in each period.'**
+  String get comingPeriodsIncomeInvite;
+
+  /// Shown instead of the chart when no period has a payment.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{No payments in the next pay period.} other{No payments in the next {count} pay periods.}}'**
+  String comingPeriodsEmpty(int count);
+
+  /// Screen reader text of one bar. range: e.g. December 15 – January 14.
+  ///
+  /// In en, this message translates to:
+  /// **'{range}: {spokenFor} spoken for, {left} left.'**
+  String comingPeriodsBarLabel(String range, String spokenFor, String left);
+
+  /// Screen reader text of one bar when no income is set.
+  ///
+  /// In en, this message translates to:
+  /// **'{range}: {spokenFor} spoken for.'**
+  String comingPeriodsBarLabelNoIncome(String range, String spokenFor);
+
+  /// Screen reader text of one bar when spoken for exceeds income. amount is negative with its minus sign.
+  ///
+  /// In en, this message translates to:
+  /// **'{range}: {spokenFor} spoken for, {amount} short.'**
+  String comingPeriodsBarLabelShort(
+    String range,
+    String spokenFor,
+    String amount,
+  );
 }
 
 class _AppLocalizationsDelegate

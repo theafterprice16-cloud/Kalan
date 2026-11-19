@@ -50,6 +50,9 @@ Future<AppDatabase> pumpZeynep(
 Finder get section => find.byKey(const ValueKey('past-due'));
 
 Future<void> openSheet(WidgetTester tester) async {
+  // The coming pay periods strip sits above the section: scroll it in.
+  await tester.ensureVisible(find.text('Ödendi').first);
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Ödendi').first);
   await tester.pumpAndSettle();
   expect(find.text('Ne zaman ödedin?'), findsOneWidget);
