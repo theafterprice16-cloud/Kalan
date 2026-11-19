@@ -33,6 +33,8 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 16. Kart ekstre tahmini (19 Kasım 2026): Kaynaklar ve kartlar ekranında her kart kendi kartında; kart taksidi olan kartta sıradaki ve sonraki 5 ekstre: "14 Kas ekstresi", "Kesildi" (kesilmiş ama son ödemesi gelmemiş), taksit sayısı, toplam (text), son ödeme günü; taksitsiz ekstre "Taksit yok"; kart altında "Yalnızca Kalan'a girdiğin taksitler."; ekstreye dokununca plan adı, "3/10", tutar, "Ödendi"; yalnızca kartın kendi kart taksitleri, ödenmişler dahil; taksiti olmayan kartta bölüm yok; karta kaydıran rota (17 için) ve tek ekstre rotası; ücretsiz; şema değişmedi
 
+- 16 ardından (19 Kasım 2026): "zaten sürüyor" ve ortasından eklenen kart planları ekstre ekstre tarihlenir; ekstre günü 28-30, son ödeme ondan sonra olan nadir kartlarda şubat gibi boş aya tarih düşmez, ekstre görünümü doğru böler; normal kartlarda hiçbir tarih değişmedi
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)

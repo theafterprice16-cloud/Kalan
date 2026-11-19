@@ -539,10 +539,24 @@ Teknik kararlar (Claude, 19 Kasım 2026):
 | Altı ekstre | `cardStatements` (motor, `lib/core/engine/card_statement.dart`): sıradaki ekstreden başlayarak her ay `statementInMonth` (ay sonuna sıkıştırılmış kesim günü). Ekstre tarihi hesabı `cardInstallmentDates` ile aynı yerden (`statementInMonth`); davranış değişmedi. |
 | Aynı son ödeme günlü iki ekstre | Kesim 28-30 ve son ödeme ondan 1-3 gün sonra gibi nadir ayarlarda kısa ay iki ekstreye aynı son ödeme gününü verir (ör. 28 Şub ve 28 Mar ekstreleri ikisi de 30 Mar). Tarih tek başına ayıramaz; aynı planın ardışık taksitleri ardışık ekstrelere konur (motorun kuralı). Tek ödemeli bir kayıt önceki ekstrede kalır; ikisinin son ödeme günü zaten aynıdır. Elle birkaç gün kaydırılmış ortak günlü taksit de ileri taşınır (uzaklık eşitse); sonraki taksidin tarihi elle değiştirilmişse önceki taksit ona bakılarak taşınmaz (mimar incelemesi, testli). |
 | Sıradaki ekstreler dışında kalan ekstre | Ayrıntı ekranı yüklenirken bekleme göstergesi. Açılan ekstre artık sıradaki altı ekstreden biri değilse (eski bağlantı, silinmiş kart) "Bu ekstre kartının sıradaki ekstreleri arasında değil." yazar; "Taksit yok" denmez (bilinmeyen şey söylenmez). |
-| Bilinen eksik (kapsam dışı) | "Bu plan zaten sürüyor" ile eklenen kart planı, ayın her son ödeme gününe bir tarih koyar (`underwayDates` / `cardDatesFromNextDue`); ileri yön (`cardInstallmentDates`) ise kesim 28-30, son ödeme 1-3 gün sonra olan kartta kısa ayı atlar. Böyle bir kartta ve yalnızca ortasından eklenmiş planda iki taksit bir ekstrede, sonraki ekstre boş görünebilir; altı ekstrenin toplamı doğrudur. Tarih kuralı bu maddede değiştirilmedi: madde yeni tarih kuralını yasaklıyor ve böyle bir kart gerçekte neredeyse yok (bankalarda son ödeme kesimden ~10 gün sonra). Gerekirse ayrı, küçük bir motor işi olarak yapılır. |
+| Ortasından eklenen kart planı | Önce "bilinen eksik" olarak bırakılmıştı; aynı gün ürün sahibinin isteğiyle düzeltildi (aşağıdaki "Kart tarihleri ekstre ekstre" bölümü). |
 | Kalan'dan önce ödenmiş | Sayıya ve toplama girer; ayrıntıda tek tek listelenmez ve tarihi yazılmaz: planın adıyla tek satır "1 taksit Kalan'dan önce ödendi · ₺1.200" (mevcut metin). |
 | Rotalar | `/sources?card=ID` ekranı o karta kaydırarak açar (17. madde bildirimi bunu kullanacak). `/source/ID/statement/GÜN` tek ekstreyi açar (GÜN: hesap kesim tarihinin epoch günü). |
 | Ekran düzeni | Kaynaklar ve kartlar ekranında her kaynak artık kendi `surface` kartında (önce düz liste satırıydı); kart başlığı, bölünmüş çizgi, "Ekstreler", altı satır, not. Ekstre satırı en az 48 yüksekliğinde, sonda `chevron_right`. Ayrıntı ekranı plan ayrıntısındaki başlık kartı desenini izler; büyük sayı yok (ana sayı "kalan"dır). Büyük yazıda tutar sığmazsa küçülür (ödeme satırıyla aynı ölçü). |
 | Sıralama | Ekstre içinde son ödeme gününe, sonra plana, sonra taksit sırasına göre. |
 | Metinler | Yeni anahtarlar `cardStatement*` (TR ve EN). Plural: "{count} taksit". Başka dil dosyasına dokunulmadı. |
 | Şema | Değişmedi. |
+
+## Kart tarihleri ekstre ekstre (16 ardından) (19 Kasım 2026)
+
+Ürün sahibinin isteği: 16'da bilerek bırakılan eksik kurallara göre düzeltilsin. CLAUDE.md "geriye tarih ileri yön kuralıyla tutarlı" der; kart planında ileri yön kuralı her ekstreye bir taksittir (`cardInstallmentDates`).
+
+| Konu | Karar |
+|---|---|
+| Sorun | "Bu plan zaten sürüyor", ortasından eklenen kart planı, kart günleri değişince alışveriş tarihsiz planın yeniden hesabı ve önerilen "sıradaki ödeme" tarihi, kartın her ayki son ödeme gününü kullanıyordu. Ekstre günü 28-30 ve son ödeme günü bundan sonra olan kartta kısa ay iki ekstreye aynı son ödeme gününü verir ve bir ayı boş bırakır (28 Şub ve 28 Mar ekstreleri ikisi de 30 Mar'da, şubatta hiçbir ekstrenin son ödemesi yok). Eski düzen "28 Şubat" gibi hiçbir alışverişin almayacağı bir tarih üretiyor, ekstre görünümü de bu planları yanlış bölüyordu. |
+| Kural | Tek fonksiyon `dueAfterStatements` (motor): girilen tarihin ayındaki son ödemenin ekstresinden ekstre ekstre ilerler, tarih `dueFor(ekstre)`. Girilen tarih aynen kalır. |
+| Normal kartlar | Tarihler birebir aynı (ortak son ödeme günü olmayan bütün kartlar: 31×31 gün çifti, hafta sonu açık/kapalı, iki yıllık her tarih; testli). Yalnızca 28/29, 28/30, 28/31, 29/30, 29/31, 30/31 ayarlı kartlarda değişir. |
+| Ortak son ödeme günü girilirse | Girilen ödeme sonraki ekstreye ait sayılır; ileriki ödemeler ayda bir düşer, aynı güne ikinci bir ödeme çıkmaz. Önceki (Kalan'dan önce ödenmiş) taksitler ileri yön kuralındaki gibi önceki ekstrelere yerleşir. |
+| Ekstresi olmayan ay | Girilen tarihin ayında hiçbir ekstrenin son ödemesi yoksa (şubat) o tarihten sonraki ilk ekstre. |
+| Önerilen sıradaki tarih | Bugünden sonraki ilk ekstre son ödeme günü; o kartta 28 Şubat önerilmez. |
+| Kayıtlı veri | Değişmez; şema ve göç yok. Yalnızca yeni hesaplar (yeni plan, düzenleme, kart günü değişimi) yeni kuralı izler. |

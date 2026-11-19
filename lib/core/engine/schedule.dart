@@ -232,16 +232,49 @@ List<LocalDate> cardInstallmentDates({
   return (year: due.year, month: due.month);
 }
 
+/// The due date [offset] statements after (negative: before) the
+/// statement a card payment due on [due] is paid with: the forward rule
+/// ([cardInstallmentDates], one installment per statement) stepped from a
+/// date the user entered. Plans already underway and plans started midway
+/// get every date but the entered one from here.
+///
+/// The entered date's statement comes from the month whose due date it is
+/// ([dueMonthOf]). On almost every card each month has exactly one
+/// statement due in it, so this is the card's due date of each month, as
+/// before. Only when the statement day is 28-30 and the due day a few days
+/// later do short months give two statements one due date (28 Feb and
+/// 28 Mar statements both due 30 Mar) and leave a month without one (no
+/// statement is due in February): the dates then follow the statements,
+/// never a due date in February no purchase would get. On a shared due
+/// date the entered payment is the later statement's, so the payments
+/// after it fall one a month.
+LocalDate dueAfterStatements(LocalDate due, CardTerms terms, int offset) {
+  final month = dueMonthOf(due, terms);
+  final monthDue = terms.dueInMonth(month.year, month.month);
+  LocalDate? statement;
+  for (final back in const [0, -1]) {
+    final candidate = terms.statementInMonth(month.year, month.month + back);
+    if (terms.dueFor(candidate) == monthDue) {
+      statement = candidate;
+      break;
+    }
+  }
+  // No statement is due in that month (February above): the entered
+  // date is paid with the first statement due after it.
+  statement ??= terms.nextStatement(monthDue);
+  return terms.dueFor(
+    terms.statementInMonth(statement.year, statement.month + offset),
+  );
+}
+
 /// Card plan started midway: the next payment is on [nextDue] as the user
-/// entered it; later payments follow the card's due day.
+/// entered it; later payments follow the card's statements
+/// ([dueAfterStatements]).
 List<LocalDate> cardDatesFromNextDue({
   required LocalDate nextDue,
   required CardTerms terms,
   required int count,
-}) {
-  final base = dueMonthOf(nextDue, terms);
-  return [
-    for (var i = 0; i < count; i++)
-      i == 0 ? nextDue : terms.dueInMonth(base.year, base.month + i),
-  ];
-}
+}) => [
+  for (var i = 0; i < count; i++)
+    i == 0 ? nextDue : dueAfterStatements(nextDue, terms, i),
+];

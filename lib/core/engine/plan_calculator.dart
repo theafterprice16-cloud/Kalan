@@ -221,11 +221,14 @@ abstract final class PlanCalculator {
       );
       return {for (final p in payments) p.seq: dates[p.seq - 1]};
     }
+    // The first tracked payment's due month stays; the new days' due date
+    // in it, then statement by statement ([dueAfterStatements]).
     final first = payments.first;
     final base = dueMonthOf(first.date, oldTerms);
+    final anchor = newTerms.dueInMonth(base.year, base.month);
     return {
       for (final p in payments)
-        p.seq: newTerms.dueInMonth(base.year, base.month + p.seq - first.seq),
+        p.seq: dueAfterStatements(anchor, newTerms, p.seq - first.seq),
     };
   }
 }

@@ -49,8 +49,8 @@ class CardPattern extends UnderwayPattern {
 /// Built so that a plan set up going forward from the first date would
 /// land on the same dates: monthly plans keep [nextDate]'s day of month
 /// (clamped at month end, without drifting), day intervals step N days
-/// (Pay in 4: 14), card plans use the card's due date of each month
-/// ([CardTerms.dueInMonth] and [dueMonthOf], as for any card plan).
+/// (Pay in 4: 14), card plans step statement by statement from
+/// [nextDate] ([dueAfterStatements], as for any card plan).
 /// [nextDate] itself is kept as given.
 List<LocalDate> underwayDates({
   required LocalDate nextDate,
@@ -70,26 +70,20 @@ List<LocalDate> underwayDates({
           interval.dateAt(nextDate, i - paidCount),
       ];
     case CardPattern(:final terms):
-      final base = dueMonthOf(nextDate, terms);
       return [
         for (var i = 0; i < totalCount; i++)
           i == paidCount
               ? nextDate
-              : terms.dueInMonth(base.year, base.month + i - paidCount),
+              : dueAfterStatements(nextDate, terms, i - paidCount),
       ];
   }
 }
 
 /// The card's first due date after [today] (weekend shift applied): the
-/// suggested "next payment date" for a card plan already underway.
-LocalDate nextCardDueAfter(LocalDate today, CardTerms terms) {
-  for (var k = 0; k < 3; k++) {
-    final due = terms.dueInMonth(today.year, today.month + k);
-    if (due > today) return due;
-  }
-  // Unreachable: a due date exists every month.
-  return terms.dueInMonth(today.year, today.month + 3);
-}
+/// suggested "next payment date" for a card plan already underway. The
+/// due date of a statement, as any card plan's dates.
+LocalDate nextCardDueAfter(LocalDate today, CardTerms terms) =>
+    terms.dueFor(terms.nextStatement(today.addDays(1)));
 
 /// Builds the draft of a plan that is already underway: every payment from
 /// the first one, the first [paidCount] paid before Kalan. Amounts are
