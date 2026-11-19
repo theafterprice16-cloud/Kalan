@@ -32,6 +32,7 @@ Future<void> openChart(
   Locale locale = const Locale('tr', 'TR'),
 }) async {
   await pumpApp(tester, today: busyWeekToday, seed: seed, locale: locale);
+  await scrollTo(tester, find.byKey(const ValueKey('coming-periods-strip')));
   await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
   await tester.pumpAndSettle();
 }
@@ -198,6 +199,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(note, findsNothing);
     });
+  });
+
+  testWidgets('large text on a small phone: the tag and line fit', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await openChart(tester, seedBusyWeek);
+    expect(tester.takeException(), isNull);
+    await scrollTo(tester, tagIn(1));
+    await tester.tap(tagIn(1));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await scrollTo(tester, note);
+    expect(tester.takeException(), isNull);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 2000));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Takvim'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('calendar-next')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(lineIn(17), findsOneWidget);
   });
 
   testWidgets('the home screen shows no busy week', (tester) async {
