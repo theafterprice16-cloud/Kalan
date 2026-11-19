@@ -336,6 +336,40 @@ void main() {
     expect(find.textContaining(RegExp(r'^\d+ gün önce$')), findsNothing);
   });
 
+  testWidgets('twice the text size: nothing overflows', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        final id = await seedMont(db);
+        await PlanRepository(db).hold(id, today: LocalDate(2026, 10, 22));
+      },
+    );
+    // Plan list with "On hold", then the plan with the 30-day line.
+    await openMont(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('hold-check')), findsOneWidget);
+    // The sheet.
+    await openSheet(tester);
+    expect(tester.takeException(), isNull);
+    // The close dialog (the sheet scrolls at this size).
+    await tester.ensureVisible(find.byKey(const ValueKey('refund-close')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('refund-close')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Vazgeç'));
+    await tester.pumpAndSettle();
+    // Adjust amount with its preview.
+    await openSheet(tester);
+    await tester.tap(find.byKey(const ValueKey('refund-adjust')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('adjust-total')), '200');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('English', (tester) async {
     await pumpApp(tester, seed: seedMont, locale: const Locale('en', 'US'));
     await openTab(tester, 'Plans');
