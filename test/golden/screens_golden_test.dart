@@ -27,6 +27,7 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../helpers/app_harness.dart';
+import '../helpers/calendar_seed.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
 
@@ -259,6 +260,48 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('coming-period-1')));
         await shoot(tester, '53-coming-periods-next-en-$theme');
       });
+
+      // Calendar (13): November 2026 with Examples 1 and 3, a day open,
+      // a day without payments. Turkish and English (US: Sunday first).
+      for (final (lang, locale) in [
+        ('tr', const Locale('tr', 'TR')),
+        ('en', const Locale('en', 'US')),
+      ]) {
+        Future<void> openCalendar(WidgetTester tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: seedCalendar,
+            today: calendarToday,
+          );
+          await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text(lang == 'tr' ? 'Takvim' : 'Calendar'));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('calendar, november, $lang', (tester) async {
+          await openCalendar(tester);
+          await shoot(tester, '54-calendar-november-$lang-$theme');
+        });
+
+        testWidgets('calendar, day open, $lang', (tester) async {
+          await openCalendar(tester);
+          await tester.tap(find.byKey(const ValueKey('calendar-cell-14')));
+          await tester.pumpAndSettle();
+          await tester.drag(
+            find.byKey(const ValueKey('payment-calendar')),
+            const Offset(0, -400),
+          );
+          await shoot(tester, '55-calendar-day-$lang-$theme');
+        });
+
+        testWidgets('calendar, day without payments, $lang', (tester) async {
+          await openCalendar(tester);
+          await tester.tap(find.byKey(const ValueKey('calendar-cell-15')));
+          await shoot(tester, '56-calendar-empty-day-$lang-$theme');
+        });
+      }
 
       testWidgets('add plan', (tester) async {
         await start(tester);

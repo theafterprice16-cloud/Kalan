@@ -49,6 +49,10 @@ extension L10nX on BuildContext {
   String dayMonthWeekday(LocalDate date) =>
       DateFormat.MMMMEEEEd(localeName).format(date.toDateTime());
 
+  /// "Cum" / "Fri".
+  String shortWeekdayName(LocalDate date) =>
+      DateFormat.E(localeName).format(date.toDateTime());
+
   /// "Cuma" / "Friday".
   String weekdayName(LocalDate date) =>
       DateFormat.EEEE(localeName).format(date.toDateTime());

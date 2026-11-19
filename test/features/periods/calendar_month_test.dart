@@ -242,9 +242,12 @@ void main() {
     final jan = await month(2027, 1, today: today, schedule: s);
     expect(jan[d(2027, 1, 1)]!.isPayday, isTrue);
     expect(jan[d(2027, 1, 31)]!.payments, hasLength(1));
-    expect(CalendarMonth(2026, 12).add(1), CalendarMonth(2027, 1));
-    expect(CalendarMonth(2027, 1).add(-1), CalendarMonth(2026, 12));
-    expect(CalendarMonth(2026, 11).add(-12), CalendarMonth(2025, 11));
+    expect(const CalendarMonth(2026, 12).add(1), const CalendarMonth(2027, 1));
+    expect(const CalendarMonth(2027, 1).add(-1), const CalendarMonth(2026, 12));
+    expect(
+      const CalendarMonth(2026, 11).add(-12),
+      const CalendarMonth(2025, 11),
+    );
   });
 
   test('biweekly: three paydays in a month; weekly: five', () async {
@@ -285,15 +288,15 @@ void main() {
       var (plans, recurring) = await load();
       final today = d(2026, 11, 19);
       var r = calendarRange(plans: plans, recurring: recurring, today: today);
-      expect(r.first, CalendarMonth(2025, 11));
-      expect(r.last, CalendarMonth(2027, 5));
+      expect(r.first, const CalendarMonth(2025, 11));
+      expect(r.last, const CalendarMonth(2027, 5));
 
       await addSingle(db, d(2028, 3, 4), 100, title: 'Uzak');
       // An open-ended recurring payment does not stretch the range.
       await addRecurring(db, 'Kira', d(2026, 1, 1));
       (plans, recurring) = await load();
       r = calendarRange(plans: plans, recurring: recurring, today: today);
-      expect(r.last, CalendarMonth(2028, 3));
+      expect(r.last, const CalendarMonth(2028, 3));
     },
   );
 
@@ -309,11 +312,17 @@ void main() {
 
   test('grid: whole weeks from the first weekday', () {
     // 1 Nov 2026 is a Sunday.
-    final mon = calendarGridDays(CalendarMonth(2026, 11), DateTime.monday);
+    final mon = calendarGridDays(
+      const CalendarMonth(2026, 11),
+      DateTime.monday,
+    );
     expect(mon.first, d(2026, 10, 26));
     expect(mon.length % 7, 0);
     expect(mon.last, d(2026, 12, 6));
-    final sun = calendarGridDays(CalendarMonth(2026, 11), DateTime.sunday);
+    final sun = calendarGridDays(
+      const CalendarMonth(2026, 11),
+      DateTime.sunday,
+    );
     expect(sun.first, d(2026, 11, 1));
     expect(sun.last, d(2026, 12, 5));
   });

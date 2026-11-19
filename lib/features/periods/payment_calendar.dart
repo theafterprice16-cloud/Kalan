@@ -123,16 +123,16 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
       padding: const EdgeInsets.only(bottom: KalanSpace.xl),
       children: [
         ?widget.header,
+        // Month name, then "Today" and the arrows, on one line.
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: KalanSpace.xxs),
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            KalanSpace.md,
+            0,
+            KalanSpace.xxs,
+            0,
+          ),
           child: Row(
             children: [
-              IconButton(
-                key: const ValueKey('calendar-previous'),
-                tooltip: l10n.calendarPreviousMonth,
-                onPressed: canBack ? () => _show(month.add(-1)) : null,
-                icon: const Icon(Icons.chevron_left),
-              ),
               Expanded(
                 child: Semantics(
                   header: true,
@@ -140,10 +140,25 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
                   child: Text(
                     context.monthYear(month.year, month.month),
                     key: const ValueKey('calendar-month'),
-                    textAlign: TextAlign.center,
                     style: theme.textTheme.titleMedium,
                   ),
                 ),
+              ),
+              TextButton(
+                key: const ValueKey('calendar-today'),
+                onPressed: month == current
+                    ? null
+                    : () => setState(() {
+                        _month = null;
+                        _selected = null;
+                      }),
+                child: Text(l10n.calendarToday),
+              ),
+              IconButton(
+                key: const ValueKey('calendar-previous'),
+                tooltip: l10n.calendarPreviousMonth,
+                onPressed: canBack ? () => _show(month.add(-1)) : null,
+                icon: const Icon(Icons.chevron_left),
               ),
               IconButton(
                 key: const ValueKey('calendar-next'),
@@ -152,18 +167,6 @@ class _PaymentCalendarState extends ConsumerState<PaymentCalendar> {
                 icon: const Icon(Icons.chevron_right),
               ),
             ],
-          ),
-        ),
-        Align(
-          child: TextButton(
-            key: const ValueKey('calendar-today'),
-            onPressed: month == current
-                ? null
-                : () => setState(() {
-                    _month = null;
-                    _selected = null;
-                  }),
-            child: Text(l10n.calendarToday),
           ),
         ),
         // Swipe between months; the direction follows the reading order.
@@ -219,11 +222,8 @@ class _MonthGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final material = MaterialLocalizations.of(context);
     final colors = context.colors;
     final grid = calendarGridDays(month, firstWeekday);
-    // Material's lists start on Sunday (DateTime.sunday is 7).
-    String weekdayName(int weekday) => material.narrowWeekdays[weekday % 7];
     final header = ExcludeSemantics(
       child: Row(
         children: [
@@ -232,7 +232,8 @@ class _MonthGrid extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: KalanSpace.xs),
                 child: Text(
-                  weekdayName((firstWeekday - 1 + i) % 7 + 1),
+                  // "Pzt" / "Mon": the first week's days give the order.
+                  context.shortWeekdayName(grid[i]),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.labelMedium
                       ?.copyWith(color: colors.textMuted),
