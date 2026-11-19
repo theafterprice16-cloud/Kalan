@@ -2486,6 +2486,35 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This statement is not among your card\'s coming statements.'**
   String get cardStatementNotComing;
+
+  /// Card settings switch: a notification some days before the card's statement date (hesap kesim). Off by default. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan (e.g. pt-BR fatura / fechamento, es-419 Mexico fecha de corte). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)
+  ///
+  /// In en, this message translates to:
+  /// **'Statement closing reminder'**
+  String get statementReminderToggle;
+
+  /// Under the statement closing reminder switch, muted. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan (e.g. pt-BR fatura / fechamento, es-419 Mexico fecha de corte). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)
+  ///
+  /// In en, this message translates to:
+  /// **'A notification before the statement date, at your reminder time.'**
+  String get statementReminderToggleHint;
+
+  /// Card settings: label above the 1 / 2 days choice of the statement closing reminder (the choices reuse reminderLeadDaysValue). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)
+  ///
+  /// In en, this message translates to:
+  /// **'Days before'**
+  String get statementReminderDays;
+
+  /// Statement closing reminder notification. No amount, no button; a tap opens the card's statements. 'After that' means purchases after the statement date. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan (e.g. pt-BR fatura / fechamento, es-419 Mexico fecha de corte). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Your {card} statement closes in 1 day, on {date}. Installments after that go on the {next} statement.} other{Your {card} statement closes in {days} days, on {date}. Installments after that go on the {next} statement.}}'**
+  String reminderStatementClosing(
+    int days,
+    String card,
+    String date,
+    String next,
+  );
 }
 
 class _AppLocalizationsDelegate

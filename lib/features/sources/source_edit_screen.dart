@@ -8,6 +8,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/design/form_fields.dart';
+import '../../core/reminders/reminder_models.dart'
+    show initialStatementLeadDays, statementLeadDayChoices;
 import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
@@ -30,6 +32,8 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
   int? _statementDay;
   int? _dueDay;
   bool _shift = true;
+  bool _closingReminder = false;
+  int _closingDays = initialStatementLeadDays;
   SourceRow? _existing;
   bool _loaded = false;
 
@@ -54,9 +58,15 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
       _statementDay = s.statementDay;
       _dueDay = s.dueDay;
       _shift = s.shiftDueToBusinessDay;
+      _closingReminder = s.statementReminderEnabled;
+      _closingDays = s.statementReminderDays;
       _loaded = true;
     });
   }
+
+  /// The statement closing reminder needs the card's days (as its
+  /// statements do).
+  bool get _hasCardDays => _statementDay != null && _dueDay != null;
 
   @override
   void dispose() {
@@ -80,6 +90,8 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
         statementDay: _statementDay,
         dueDay: _dueDay,
         shiftDueToBusinessDay: _shift,
+        statementReminderEnabled: _closingReminder,
+        statementReminderDays: _closingDays,
       );
     } else {
       id = existing.id;
@@ -90,6 +102,8 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
           statementDay: Value(_statementDay),
           dueDay: Value(_dueDay),
           shiftDueToBusinessDay: _shift,
+          statementReminderEnabled: _closingReminder && _hasCardDays,
+          statementReminderDays: _closingDays,
         ),
       );
     }
@@ -212,6 +226,36 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                         style: Theme.of(context).textTheme.bodyMedium
                             ?.copyWith(color: context.colors.textMuted),
                       ),
+                    // Only with the card's days: the reminder is about its
+                    // statement date.
+                    if (_hasCardDays) ...[
+                      const SizedBox(height: KalanSpace.xs),
+                      SwitchListTile.adaptive(
+                        key: const ValueKey('statement-reminder'),
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.statementReminderToggle),
+                        subtitle: Text(
+                          l10n.statementReminderToggleHint,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.colors.textMuted),
+                        ),
+                        value: _closingReminder,
+                        onChanged: (v) => setState(() => _closingReminder = v),
+                      ),
+                      if (_closingReminder) ...[
+                        const SizedBox(height: KalanSpace.xs),
+                        ChoiceField<int>(
+                          key: const ValueKey('statement-reminder-days'),
+                          label: l10n.statementReminderDays,
+                          selected: _closingDays,
+                          options: [
+                            for (final days in statementLeadDayChoices)
+                              (days, l10n.reminderLeadDaysValue(days)),
+                          ],
+                          onSelected: (d) => setState(() => _closingDays = d),
+                        ),
+                      ],
+                    ],
                   ],
                   const SizedBox(height: KalanSpace.lg),
                   FilledButton(

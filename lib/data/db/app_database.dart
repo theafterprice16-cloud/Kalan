@@ -52,7 +52,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -181,6 +181,15 @@ class AppDatabase extends _$AppDatabase {
           schema.appSettings,
           schema.appSettings.paydaySummaryEnabled,
         );
+      },
+      // v13: the statement closing reminder per card, off for every
+      // existing card, two days before (the columns' defaults).
+      from12To13: (m, schema) async {
+        await m.addColumn(
+          schema.sources,
+          schema.sources.statementReminderEnabled,
+        );
+        await m.addColumn(schema.sources, schema.sources.statementReminderDays);
       },
     ),
     beforeOpen: (details) async {

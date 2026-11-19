@@ -157,6 +157,104 @@ List<PlannedReminder> withPaydaySummary(
   ]);
 }
 
+/// [planned] (payment reminders and the payday summary) with the
+/// statement closing reminders of [cards] added in time order, last in
+/// priority: only in the room [planned] leaves under [limit], the
+/// soonest first. Each card's reminder is its own notification, never
+/// merged; at the same moment it comes after the others. Only with
+/// reminders on.
+List<PlannedReminder> withStatementClosings(
+  List<PlannedReminder> planned, {
+  required Iterable<StatementCard> cards,
+  required ReminderSettings settings,
+  required tz.TZDateTime now,
+  required ReminderTexts texts,
+  int limit = maxScheduledReminders,
+}) {
+  if (!settings.enabled || planned.length >= limit) return planned;
+  final closings = statementClosingReminders(
+    cards,
+    settings: settings,
+    now: now,
+    texts: texts,
+  ).take(limit - planned.length).toList();
+  if (closings.isEmpty) return planned;
+  final merged = <PlannedReminder>[];
+  var i = 0;
+  for (final c in closings) {
+    while (i < planned.length && !planned[i].fireAt.isAfter(c.fireAt)) {
+      merged.add(planned[i++]);
+    }
+    merged.add(c);
+  }
+  merged.addAll(planned.skip(i));
+  return List.unmodifiable(merged);
+}
+
+/// Every statement closing reminder still ahead of [now] for [cards],
+/// soonest first (then by card id): for each of a card's next
+/// [statementClosingHorizon] statements, [StatementCard.leadDays] days
+/// before its statement date, at the reminder time. No amount, no
+/// buttons.
+///
+/// The statement dates are the engine's ([CardTerms.statementFor] for
+/// the first, [CardTerms.statementInMonth] after it): clamped in short
+/// months, never moved off a weekend or holiday. The planner writes no
+/// date rule of its own.
+List<PlannedReminder> statementClosingReminders(
+  Iterable<StatementCard> cards, {
+  required ReminderSettings settings,
+  required tz.TZDateTime now,
+  required ReminderTexts texts,
+}) {
+  final today = LocalDate(now.year, now.month, now.day);
+  final list = <(int, PlannedReminder)>[];
+  for (final card in cards) {
+    final days = statementLeadDayChoices.contains(card.leadDays)
+        ? card.leadDays
+        : initialStatementLeadDays;
+    final terms = card.terms;
+    final first = terms.statementFor(today);
+    for (var i = 0; i < statementClosingHorizon; i++) {
+      final statement = terms.statementInMonth(first.year, first.month + i);
+      final fireDate = statement.addDays(-days);
+      final fireAt = localWallClock(
+        fireDate,
+        settings.minuteOfDay,
+        now.location,
+      );
+      if (!fireAt.isAfter(now)) continue;
+      final body = texts.statementClosing(
+        card: card.name,
+        days: days,
+        date: statement,
+        next: terms.statementInMonth(statement.year, statement.month + 1),
+      );
+      list.add((
+        card.id,
+        PlannedReminder(
+          id: PlannedReminder.idForStatementClosing(card.id, fireDate),
+          kind: ReminderKind.ahead,
+          isStatementClosing: true,
+          fireDate: fireDate,
+          fireAt: fireAt,
+          payments: const [],
+          dueDates: const [],
+          title: texts.title,
+          body: body,
+          expandedBody: body,
+          payload: cardStatementPayload(card.id),
+        ),
+      ));
+    }
+  }
+  list.sort((a, b) {
+    final byTime = a.$2.fireAt.compareTo(b.$2.fireAt);
+    return byTime != 0 ? byTime : a.$1.compareTo(b.$1);
+  });
+  return [for (final (_, r) in list) r];
+}
+
 /// The pay period whose payday summary comes next: the current one when
 /// today is its first day and the reminder time has not passed yet,
 /// otherwise the one after it. The payday is the schedule's own day, never

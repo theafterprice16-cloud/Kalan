@@ -26,6 +26,8 @@ class SourceRepository {
     int? statementDay,
     int? dueDay,
     bool shiftDueToBusinessDay = true,
+    bool statementReminderEnabled = false,
+    int statementReminderDays = 2,
   }) => _db
       .into(_db.sources)
       .insert(
@@ -35,6 +37,13 @@ class SourceRepository {
           statementDay: Value(kind == SourceKind.card ? statementDay : null),
           dueDay: Value(kind == SourceKind.card ? dueDay : null),
           shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
+          statementReminderEnabled: Value(
+            kind == SourceKind.card &&
+                statementDay != null &&
+                dueDay != null &&
+                statementReminderEnabled,
+          ),
+          statementReminderDays: Value(statementReminderDays),
         ),
       );
 
@@ -54,12 +63,17 @@ class SourceRepository {
   /// payments of its card plans are moved to the new dates.
   Future<void> update(SourceRow updated) => _db.transaction(() async {
     final old = await byId(updated.id);
-    final normalized = updated.kind == SourceKind.card
+    var normalized = updated.kind == SourceKind.card
         ? updated
         : updated.copyWith(
             statementDay: const Value(null),
             dueDay: const Value(null),
+            statementReminderEnabled: false,
           );
+    // The closing reminder needs the card's days.
+    if (normalized.cardTerms == null) {
+      normalized = normalized.copyWith(statementReminderEnabled: false);
+    }
     await _db.update(_db.sources).replace(normalized);
     final oldTerms = old?.cardTerms;
     final newTerms = normalized.cardTerms;

@@ -35,13 +35,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 16 ardından (19 Kasım 2026): "zaten sürüyor" ve ortasından eklenen kart planları ekstre ekstre tarihlenir; ekstre günü 28-30, son ödeme ondan sonra olan nadir kartlarda şubat gibi boş aya tarih düşmez, ekstre görünümü doğru böler; normal kartlarda hiçbir tarih değişmedi
 
+- 17. Hesap kesim öncesi uyarı (19 Kasım 2026): kart ayarlarında "Hesap kesim hatırlatması" anahtarı (yalnızca ekstre günü seçili kartta, varsayılan kapalı) ve "Kaç gün önce" 1 / 2 (varsayılan 2); bildirim genel hatırlatma saatinde: "Maximum kartının hesabı 2 gün sonra, 14 Kasım tarihinde kesiliyor. Bu tarihten sonraki taksitler 14 Aralık ekstresine girer."; tutar ve düğme yok; her kart ayrı bildirim; 60 sınırında ödeme hatırlatmaları ve maaş günü özetinden sonra; kesim tarihi motordan, hafta sonuna göre kaymaz; dokununca o kartın ekstreleri (uygulama kapalıyken de); şema v13
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 17. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 18. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 

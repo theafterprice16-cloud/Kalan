@@ -1861,4 +1861,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get cardStatementNotComing =>
       'This statement is not among your card\'s coming statements.';
+
+  @override
+  String get statementReminderToggle => 'Statement closing reminder';
+
+  @override
+  String get statementReminderToggleHint =>
+      'A notification before the statement date, at your reminder time.';
+
+  @override
+  String get statementReminderDays => 'Days before';
+
+  @override
+  String reminderStatementClosing(
+    int days,
+    String card,
+    String date,
+    String next,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other:
+          'Your $card statement closes in $days days, on $date. Installments after that go on the $next statement.',
+      one:
+          'Your $card statement closes in 1 day, on $date. Installments after that go on the $next statement.',
+    );
+    return '$_temp0';
+  }
 }

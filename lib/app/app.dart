@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../core/reminders/reminder_models.dart' show cardIdOfPayload;
 import '../core/routing/router.dart';
 import '../core/routing/routes.dart';
 import '../core/theme/kalan_theme.dart';
@@ -40,7 +41,10 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     ref.read(proControllerProvider);
     // App start: schedule from the stored data right away.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(reminderSyncProvider).request();
+      if (!mounted) return;
+      ref.read(reminderSyncProvider).request();
+      // Launched by tapping a statement closing reminder: over home.
+      _openCard(ref.read(launchPayloadProvider));
     });
   }
 
@@ -71,9 +75,9 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     unawaited(ref.read(proControllerProvider.notifier).recheck());
   }
 
-  /// A tapped reminder opens the home screen. A button, should the
-  /// platform deliver one here, runs the same handler as in the
-  /// background.
+  /// A tapped reminder opens the home screen; a statement closing
+  /// reminder opens its card's statements. A button, should the platform
+  /// deliver one here, runs the same handler as in the background.
   void _onTap(NotificationResponse response) {
     if (ReminderActionIds.parse(response.actionId) != null) {
       unawaited(
@@ -82,7 +86,22 @@ class _KalanAppState extends ConsumerState<KalanApp> {
       );
       return;
     }
+    if (_openCard(response.payload)) return;
     ref.read(routerProvider).go(Routes.home);
+  }
+
+  /// A statement closing reminder's [payload]: its card's statements
+  /// (16) open over the current screen, so back returns there; not a
+  /// second time when they are already on top (a second tap).
+  bool _openCard(String? payload) {
+    final card = cardIdOfPayload(payload);
+    if (card == null) return false;
+    final router = ref.read(routerProvider);
+    final route = Routes.cardStatements(card);
+    if (router.state.uri.toString() != route) {
+      unawaited(router.push(route));
+    }
+    return true;
   }
 
   @override

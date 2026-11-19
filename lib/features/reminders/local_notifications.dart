@@ -233,6 +233,14 @@ class LocalNotificationsGateway implements NotificationGateway {
     payload: r.data?.encode() ?? r.payload,
   );
 
+  /// The payload of the notification whose tap launched the app; null
+  /// when the app was opened another way.
+  Future<String?> launchPayload() async {
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    if (details == null || !details.didNotificationLaunchApp) return null;
+    return details.notificationResponse?.payload;
+  }
+
   @override
   Future<void> replaceAll(List<PlannedReminder> reminders) async {
     await _updateCategories(reminders);

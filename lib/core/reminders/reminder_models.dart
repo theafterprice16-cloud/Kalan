@@ -4,6 +4,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../date/local_date.dart';
 import '../engine/payment_method.dart';
+import '../engine/schedule.dart' show CardTerms;
 
 export '../engine/payment_method.dart' show PaymentMethod;
 
@@ -267,6 +268,60 @@ abstract interface class ReminderTexts {
   /// Text of the payday summary. Without [showAmounts] only the number of
   /// payments.
   ReminderText payday(PaydaySummary summary, {required bool showAmounts});
+
+  /// Text of a statement closing reminder: [card]'s statement is cut in
+  /// [days] days, on [date]; what comes after goes on the [next]
+  /// statement. Information only: no amount, no limit, no button.
+  String statementClosing({
+    required String card,
+    required int days,
+    required LocalDate date,
+    required LocalDate next,
+  });
+}
+
+/// "How many days before" choices of the statement closing reminder.
+const statementLeadDayChoices = [1, 2];
+
+/// The statement closing reminder's initial "days before".
+const initialStatementLeadDays = 2;
+
+/// How many coming statements of a card get a closing reminder (a year);
+/// the 60 limit keeps only the soonest that fit anyway.
+const statementClosingHorizon = 12;
+
+/// A card whose statement closing reminder is on ("Hesap kesim
+/// hatırlatması"), as the planner sees it.
+class StatementCard {
+  const StatementCard({
+    required this.id,
+    required this.name,
+    required this.terms,
+    this.leadDays = initialStatementLeadDays,
+  });
+
+  /// The card's source id: the notification opens its statements.
+  final int id;
+  final String name;
+
+  /// The card's days; its statement dates come from the engine
+  /// ([CardTerms.statementFor], [CardTerms.statementInMonth]).
+  final CardTerms terms;
+
+  /// 1 or 2 ([statementLeadDayChoices]); anything else counts as 2.
+  final int leadDays;
+}
+
+/// What a tapped statement closing reminder opens: card [cardId]'s
+/// statements.
+String cardStatementPayload(int cardId) => 'card:$cardId';
+
+/// The card a [cardStatementPayload] points at; null for anything else
+/// (payment reminders, the payday summary, a damaged payload).
+int? cardIdOfPayload(String? payload) {
+  if (payload == null || !payload.startsWith('card:')) return null;
+  final id = int.tryParse(payload.substring(5));
+  return id == null || id < 0 ? null : id;
 }
 
 /// The payment method a notification's text speaks for: the one every
@@ -412,6 +467,7 @@ class PlannedReminder {
     this.buttons = const [],
     this.data,
     this.isPaydaySummary = false,
+    this.isStatementClosing = false,
   });
 
   /// Stable per fire day and kind, so rescheduling replaces a reminder
@@ -447,6 +503,11 @@ class PlannedReminder {
   /// with payment reminders.
   final bool isPaydaySummary;
 
+  /// A statement closing reminder ([statementClosingReminders]): no
+  /// payments, no buttons, its own id; [payload] opens the card's
+  /// statements. Never merged with any other reminder.
+  final bool isStatementClosing;
+
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
 
   /// "Ahead" and "on day" at the reminder time: fire day × 2 + kind,
@@ -478,6 +539,15 @@ class PlannedReminder {
   static int idForPayday(LocalDate date) => paydayIdBase + date.epochDay;
 
   static const paydayIdBase = 3 << 28;
+
+  /// A statement closing reminder: 2^28 + card × 1024 + fire day mod
+  /// 1024, below repeat ids (2^29 + ...). Unique per card and fire day
+  /// within 1024 days (statements are scheduled a year ahead at most) and
+  /// for the first 2^18 cards.
+  static int idForStatementClosing(int cardId, LocalDate fireDate) =>
+      statementIdBase + (cardId % (1 << 18)) * 1024 + fireDate.epochDay % 1024;
+
+  static const statementIdBase = 1 << 28;
 }
 
 /// What a notification's buttons act on, carried in its payload: the

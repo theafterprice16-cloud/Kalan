@@ -1830,5 +1830,42 @@
   "cardStatementNotComing": "This statement is not among your card's coming statements.",
   "@cardStatementNotComing": {
     "description": "Statement detail opened for a statement that is no longer one of the six coming ones (or a removed card). Calm, factual. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan. (Card statement term: use the market's banking word, e.g. pt-BR fatura, es-419 Mexico estado de cuenta.)"
+  },
+  "statementReminderToggle": "Statement closing reminder",
+  "@statementReminderToggle": {
+    "description": "Card settings switch: a notification some days before the card's statement date (hesap kesim). Off by default. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan (e.g. pt-BR fatura / fechamento, es-419 Mexico fecha de corte). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)"
+  },
+  "statementReminderToggleHint": "A notification before the statement date, at your reminder time.",
+  "@statementReminderToggleHint": {
+    "description": "Under the statement closing reminder switch, muted. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan (e.g. pt-BR fatura / fechamento, es-419 Mexico fecha de corte). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)"
+  },
+  "statementReminderDays": "Days before",
+  "@statementReminderDays": {
+    "description": "Card settings: label above the 1 / 2 days choice of the statement closing reminder (the choices reuse reminderLeadDaysValue). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)"
+  },
+  "reminderStatementClosing": "{days, plural, =1{Your {card} statement closes in 1 day, on {date}. Installments after that go on the {next} statement.} other{Your {card} statement closes in {days} days, on {date}. Installments after that go on the {next} statement.}}",
+  "@reminderStatementClosing": {
+    "description": "Statement closing reminder notification. No amount, no button; a tap opens the card's statements. 'After that' means purchases after the statement date. Kart ekstresi terimi; pazarın bankacılık karşılığını kullan (e.g. pt-BR fatura / fechamento, es-419 Mexico fecha de corte). Yalnızca bilgi; alışverişe teşvik etme, aciliyet ifadesi kullanma. (Information only: do not encourage spending, no urgency.)",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "description": "Days until the statement date (1 or 2)"
+      },
+      "card": {
+        "type": "String",
+        "example": "Maximum",
+        "description": "Card name as the user typed it"
+      },
+      "date": {
+        "type": "String",
+        "example": "November 14",
+        "description": "Statement date, day and month (intl MMMMd)"
+      },
+      "next": {
+        "type": "String",
+        "example": "December 14",
+        "description": "Next statement's date, day and month (intl MMMMd)"
+      }
+    }
   }
 }

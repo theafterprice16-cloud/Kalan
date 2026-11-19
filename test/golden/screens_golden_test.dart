@@ -388,6 +388,30 @@ void main() {
           await tester.tap(find.byKey(const ValueKey('card-statement-1-0')));
           await shoot(tester, '60-card-statement-$lang-$theme');
         });
+
+        // Statement closing reminder (17): the card's settings, the switch
+        // off (the default) and on with 1 / 2 days.
+        Future<void> openCardSettings(WidgetTester tester) async {
+          await openSources(tester);
+          await tester.tap(find.text('Ada Kart'));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('card settings, reminder off, $lang', (tester) async {
+          await openCardSettings(tester);
+          await shoot(tester, '61-card-settings-reminder-off-$lang-$theme');
+        });
+
+        testWidgets('card settings, reminder on, $lang', (tester) async {
+          await openCardSettings(tester);
+          await tester.tap(find.byKey(const ValueKey('statement-reminder')));
+          await tester.pumpAndSettle();
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('statement-reminder-days')),
+          );
+          await shoot(tester, '62-card-settings-reminder-on-$lang-$theme');
+        });
       }
 
       testWidgets('add plan', (tester) async {

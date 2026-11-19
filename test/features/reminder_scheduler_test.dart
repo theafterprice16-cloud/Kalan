@@ -212,6 +212,96 @@ void main() {
     });
   });
 
+  group('statement closing reminder', () {
+    Future<int> card({bool on = true, int days = 2}) =>
+        SourceRepository(db, PlanRepository(db)).create(
+          name: 'Bonus',
+          kind: SourceKind.card,
+          statementDay: 25,
+          dueDay: 5,
+          statementReminderEnabled: on,
+          statementReminderDays: days,
+        );
+
+    String ids(List<PlannedReminder> list) =>
+        [for (final r in list) '${r.id} ${r.fireAt} ${r.body}'].join('\n');
+
+    test('switch off (the default): the list is exactly as before', () async {
+      final scheduler = schedulerFor(db, gateway);
+      final before = ids(await scheduler.buildAll());
+      await card(on: false);
+      await scheduler.rescheduleAll();
+      expect(ids(gateway.all), before);
+      expect(gateway.statements, isEmpty);
+    });
+
+    test('switch on: 2 days before the statement, at 09:00', () async {
+      final id = await card();
+      await schedulerFor(db, gateway).rescheduleAll();
+      final first = gateway.statements.first;
+      expect(first.fireAt.toUtc(), DateTime.utc(2026, 11, 23, 6)); // TRT
+      expect(
+        first.body,
+        'Bonus kartının hesabı 2 gün sonra, 25 Kasım tarihinde kesiliyor. '
+        'Bu tarihten sonraki taksitler 25 Aralık ekstresine girer.',
+      );
+      expect(first.payload, cardStatementPayload(id));
+      expect(first.buttons, isEmpty);
+      // The payment reminders do not change.
+      expect(gateway.pending, hasLength(7));
+      expect(gateway.all.length, 7 + 1 + statementClosingHorizon);
+    });
+
+    test('1 day before', () async {
+      await card(days: 1);
+      await schedulerFor(db, gateway).rescheduleAll();
+      expect(gateway.statements.first.fireDate, LocalDate(2026, 11, 24));
+      expect(gateway.statements.first.body, contains('1 gün sonra'));
+    });
+
+    test('a card without its days set gets none', () async {
+      final id = await card();
+      final row = await (db.select(
+        db.sources,
+      )..where((s) => s.id.equals(id))).getSingle();
+      await db
+          .update(db.sources)
+          .replace(row.copyWith(dueDay: const Value(null)));
+      await schedulerFor(db, gateway).rescheduleAll();
+      expect(gateway.statements, isEmpty);
+    });
+
+    test('saving a card without its days turns the switch off', () async {
+      final repo = SourceRepository(db, PlanRepository(db));
+      final id = await card();
+      final row = (await repo.byId(id))!;
+      await repo.update(row.copyWith(dueDay: const Value(null)));
+      expect((await repo.byId(id))!.statementReminderEnabled, isFalse);
+      final none = await repo.create(
+        name: 'Yarım',
+        kind: SourceKind.card,
+        statementDay: 14,
+        statementReminderEnabled: true,
+      );
+      expect((await repo.byId(none))!.statementReminderEnabled, isFalse);
+    });
+
+    test('60 payment reminders: no statement reminder', () async {
+      await card();
+      for (var i = 0; i < 30; i++) {
+        await seedPayIn4(
+          db,
+          first: LocalDate(2026, 11, 21).addDays(i * 3),
+          source: 'P$i',
+        );
+      }
+      await schedulerFor(db, gateway).rescheduleAll();
+      expect(gateway.pending, hasLength(60));
+      expect(gateway.statements, isEmpty);
+      expect(gateway.all, hasLength(60));
+    });
+  });
+
   test('payments paid before Kalan are never reminded', () async {
     // Dates in the future on purpose: even then nothing is scheduled.
     final source = await SourceRepository(
