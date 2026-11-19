@@ -1,13 +1,14 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kalan/core/date/local_date.dart';
+import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
 import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/features/home/home_view.dart';
 import 'package:kalan/features/plans/add_plan_screen.dart' show SourceNameField;
 import 'package:kalan/features/sources/charge_forecast_view.dart';
@@ -319,5 +320,70 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Maaşkart'), findsOneWidget);
     expect(find.text('Maaşım'), findsNothing);
+  });
+
+  testWidgets('open and closed are heard by screen readers', (tester) async {
+    final handle = tester.ensureSemantics();
+    await open(tester);
+    for (final key in [
+      'charge-details-${ids.maas}',
+      'charge-next-period-${ids.maas}',
+    ]) {
+      final f = find.byKey(ValueKey(key));
+      await tester.ensureVisible(f);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSemantics(f),
+        matchesSemantics(
+          isButton: true,
+          hasExpandedState: true,
+          isExpanded: false,
+          hasTapAction: true,
+          isFocusable: true,
+          hasFocusAction: true,
+          label: key.startsWith('charge-details')
+              ? 'Sıradaki çekim: 18 Kas · ${tl(240000)}\n'
+                    '14 Ara tarihine kadar · ${tl(390000)}\nAyrıntı'
+              : 'Sonraki dönem\n15 Ara – 14 Oca',
+        ),
+      );
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSemantics(f),
+        containsSemantics(isExpanded: true, hasExpandedState: true),
+      );
+    }
+    handle.dispose();
+  });
+
+  testWidgets('no source at all: the card shows, without the note', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      today: chargeToday,
+      seed: (db) async {
+        await seedSettings(db);
+        await PlanRepository(db).saveDraft(
+          PlanCalculator.payLater(
+            purchaseDate: chargeToday,
+            rule: const PayLaterRule.days(14),
+            totalMinor: 30000,
+          ),
+          sourceId: null,
+          origin: PlanOrigin.template,
+          title: 'Ayakkabı',
+          paymentMethod: PaymentMethod.automatic,
+        );
+      },
+      overrides: [initialRouteProvider.overrideWithValue(Routes.sources)],
+    );
+    expect(find.byKey(const ValueKey('charge-unassigned')), findsOneWidget);
+    expect(find.text('Sıradaki: 29 Kas · ${tl(30000)}'), findsOneWidget);
+    expect(
+      find.text('Çekildiği yeri planın ayrıntısından seçebilirsin.'),
+      findsNothing,
+    );
   });
 }

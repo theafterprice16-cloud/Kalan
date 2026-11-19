@@ -184,43 +184,45 @@ class _Toggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Semantics(
-      button: true,
-      expanded: expanded,
-      child: InkWell(
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: kMinInteractiveDimension,
-          ),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              KalanSpace.md,
-              KalanSpace.xs,
-              KalanSpace.xs,
-              KalanSpace.xs,
+    return MergeSemantics(
+      child: Semantics(
+        button: true,
+        expanded: expanded,
+        child: InkWell(
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: kMinInteractiveDimension,
             ),
-            child: Row(
-              children: [
-                Expanded(child: child),
-                if (trailingLabel != null) ...[
-                  const SizedBox(width: KalanSpace.xs),
-                  Text(
-                    trailingLabel!,
-                    style: Theme.of(context).textTheme.labelLarge
-                        ?.copyWith(color: colors.textMuted),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                KalanSpace.md,
+                KalanSpace.xs,
+                KalanSpace.xs,
+                KalanSpace.xs,
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: child),
+                  if (trailingLabel != null) ...[
+                    const SizedBox(width: KalanSpace.xs),
+                    Text(
+                      trailingLabel!,
+                      style: Theme.of(context).textTheme.labelLarge
+                          ?.copyWith(color: colors.textMuted),
+                    ),
+                  ],
+                  ExcludeSemantics(
+                    child: AnimatedRotation(
+                      turns: expanded ? 0.5 : 0,
+                      duration: MediaQuery.disableAnimationsOf(context)
+                          ? Duration.zero
+                          : const Duration(milliseconds: 200),
+                      child: Icon(Icons.expand_more, color: colors.textMuted),
+                    ),
                   ),
                 ],
-                ExcludeSemantics(
-                  child: AnimatedRotation(
-                    turns: expanded ? 0.5 : 0,
-                    duration: MediaQuery.disableAnimationsOf(context)
-                        ? Duration.zero
-                        : const Duration(milliseconds: 200),
-                    child: Icon(Icons.expand_more, color: colors.textMuted),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -228,6 +230,11 @@ class _Toggle extends StatelessWidget {
     );
   }
 }
+
+/// Tick and clock size on a day row, and the square they sit in: the
+/// height of the row's first line, so the icon is centred on it.
+const double _rowIconSize = 18;
+const double _rowIconSlot = 24;
 
 /// One day: "By 25 Nov · ₺3.900" (running total) with the names below; a
 /// paid day muted with a tick; today's row with a clock when it holds a
@@ -249,15 +256,15 @@ class _ChargeRowTile extends ConsumerWidget {
     final Widget icon;
     if (row.isPaid) {
       icon = ExcludeSemantics(
-        child: Icon(Icons.check, size: 18, color: colors.text),
+        child: Icon(Icons.check, size: _rowIconSize, color: colors.text),
       );
     } else if (row.includesPastDue) {
       icon = Semantics(
         label: l10n.chargePastDue,
-        child: Icon(Icons.schedule, size: 18, color: colors.text),
+        child: Icon(Icons.schedule, size: _rowIconSize, color: colors.text),
       );
     } else {
-      icon = const SizedBox(width: 18);
+      icon = const SizedBox.shrink();
     }
     return MergeSemantics(
       child: Padding(
@@ -270,9 +277,10 @@ class _ChargeRowTile extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: SizedBox(width: 18, child: icon),
+            // The icon sits on the first line's centre.
+            SizedBox.square(
+              dimension: _rowIconSlot,
+              child: Center(child: icon),
             ),
             const SizedBox(width: KalanSpace.xs),
             Expanded(
@@ -313,9 +321,17 @@ class _ChargeRowTile extends ConsumerWidget {
 /// the end, one row per plan with its next payment; a row opens the plan,
 /// where the source can be chosen.
 class UnassignedChargesCard extends ConsumerWidget {
-  const UnassignedChargesCard({required this.items, super.key});
+  const UnassignedChargesCard({
+    required this.items,
+    required this.canChoose,
+    super.key,
+  });
 
   final List<ChargeItem> items;
+
+  /// Whether any source exists: the plan details offer a choice only then,
+  /// so the note pointing there is shown only then.
+  final bool canChoose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -396,20 +412,23 @@ class UnassignedChargesCard extends ConsumerWidget {
                 ),
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              KalanSpace.md,
-              KalanSpace.xxs,
-              KalanSpace.md,
-              KalanSpace.md,
-            ),
-            child: Text(
-              l10n.chargeUnassignedNote,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.textMuted,
+          if (!canChoose)
+            const SizedBox(height: KalanSpace.xs)
+          else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KalanSpace.md,
+                KalanSpace.xxs,
+                KalanSpace.md,
+                KalanSpace.md,
+              ),
+              child: Text(
+                l10n.chargeUnassignedNote,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.textMuted,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

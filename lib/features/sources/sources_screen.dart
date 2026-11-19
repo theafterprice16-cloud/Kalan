@@ -60,7 +60,10 @@ class _SourcesScreenState extends ConsumerState<SourcesScreen> {
         ref.watch(chargeForecastProvider)?.forecast.unassigned ?? const [];
     final unassignedCard = unassigned.isEmpty
         ? null
-        : UnassignedChargesCard(items: unassigned);
+        : UnassignedChargesCard(
+            items: unassigned,
+            canChoose: sources?.isNotEmpty ?? false,
+          );
     return Scaffold(
       appBar: AppBar(title: Text(l10n.sourcesTitle)),
       floatingActionButton: FloatingActionButton.extended(

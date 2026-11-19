@@ -192,4 +192,22 @@ void main() {
       isNull,
     );
   });
+
+  test('a payment with reminders off is not in the sentence total', () {
+    // The same account, the same day, but its plan's reminders are off:
+    // the notification speaks only for the payments it holds.
+    final r = plan([
+      ...example,
+      ReminderPayment(
+        name: 'Laptop taksiti',
+        date: d(11, 14),
+        amountMinor: 150000,
+        method: auto,
+        account: maas,
+        ref: const PlanPaymentRef(9),
+        choice: ReminderChoice.disabled,
+      ),
+    ]);
+    expect(aheadOf(r).body, endsWith('Maaş hesabı: ₺2.400 bulunsun.'));
+  });
 }
