@@ -28,6 +28,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../helpers/app_harness.dart';
 import '../helpers/calendar_seed.dart';
+import '../helpers/charge_seed.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
 import '../helpers/statement_seed.dart';
@@ -411,6 +412,60 @@ void main() {
             find.byKey(const ValueKey('statement-reminder-days')),
           );
           await shoot(tester, '62-card-settings-reminder-on-$lang-$theme');
+        });
+      }
+
+      // Keep in account (18): a card with another plan taken from it, an
+      // empty bank account, the salary account opened with its next
+      // period, and automatic payments without a source.
+      for (final (lang, locale, plans, sources) in [
+        ('tr', const Locale('tr', 'TR'), 'Planlar', 'Kaynaklar ve kartlar'),
+        ('en', const Locale('en', 'US'), 'Plans', 'Sources and cards'),
+      ]) {
+        late ChargeSeed ids;
+        Future<void> openCharges(WidgetTester tester) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: (db) async => ids = await seedCharges(db),
+            today: chargeToday,
+          );
+          await openTab(tester, plans);
+          await tester.tap(find.byTooltip(sources));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('charges, $lang', (tester) async {
+          await openCharges(tester);
+          await shoot(tester, '63-charges-$lang-$theme');
+        });
+
+        testWidgets('charges opened, $lang', (tester) async {
+          await openCharges(tester);
+          for (final key in [
+            'charge-details-${ids.maas}',
+            'charge-next-period-${ids.maas}',
+          ]) {
+            final f = find.byKey(ValueKey(key));
+            await tester.ensureVisible(f);
+            await tester.pumpAndSettle();
+            await tester.tap(f);
+            await tester.pumpAndSettle();
+          }
+          await tester.ensureVisible(
+            find.byKey(ValueKey('charge-section-${ids.maas}')),
+          );
+          await tester.pumpAndSettle();
+          await shoot(tester, '64-charges-opened-$lang-$theme');
+        });
+
+        testWidgets('charges without a source, $lang', (tester) async {
+          await openCharges(tester);
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('charge-unassigned')),
+          );
+          await shoot(tester, '65-charges-unassigned-$lang-$theme');
         });
       }
 

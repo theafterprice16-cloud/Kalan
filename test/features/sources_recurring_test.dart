@@ -37,6 +37,37 @@ void main() {
     expect(card.shiftDueToBusinessDay, isTrue);
   });
 
+  testWidgets('define a bank account (18): no days, its own empty line', (
+    tester,
+  ) async {
+    final db = await pumpApp(tester, seed: seedSettings);
+    await openTab(tester, 'Planlar');
+    await tester.tap(find.byTooltip('Kaynaklar ve kartlar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kaynak ekle'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('source-name')),
+      'Maaş hesabı',
+    );
+    await tester.tap(find.text('Banka hesabı'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('statement-day')), findsNothing);
+    await scrollTo(tester, find.byKey(const ValueKey('save-source')));
+    await tester.tap(find.byKey(const ValueKey('save-source')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Banka hesabı'), findsOneWidget);
+    expect(find.text('Hesapta bulunsun'), findsOneWidget);
+    expect(
+      find.text('Bu dönem bu kaynaktan çıkacak otomatik ödeme yok.'),
+      findsOneWidget,
+    );
+    final account = await db.select(db.sources).getSingle();
+    expect(account.kind, SourceKind.account);
+    expect(account.statementDay, isNull);
+  });
+
   testWidgets('a source with plans cannot be deleted', (tester) async {
     await pumpApp(
       tester,
