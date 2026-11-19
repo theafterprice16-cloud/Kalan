@@ -155,6 +155,13 @@ class PlanRepository {
       ..where(_db.plans.status.equalsValue(PlanStatus.closed).not()),
   );
 
+  /// An update of [planId]'s own row that never touches a closed plan.
+  UpdateStatement<$PlansTable, PlanRow> _unclosedPlan(int planId) =>
+      _db.update(_db.plans)..where(
+        (p) =>
+            p.id.equals(planId) & p.status.equalsValue(PlanStatus.closed).not(),
+      );
+
   Future<PlanRow> _plan(int planId) =>
       (_db.select(_db.plans)..where((p) => p.id.equals(planId))).getSingle();
 
@@ -305,7 +312,7 @@ class PlanRepository {
     int planId, {
     required bool enabled,
     int? leadDays,
-  }) => (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+  }) => _unclosedPlan(planId).write(
     PlansCompanion(
       remindersEnabled: Value(enabled),
       reminderLeadDays: Value(leadDays),
@@ -363,7 +370,7 @@ class PlanRepository {
     int planId,
     PaymentMethod? method, {
     int? chargeSourceId,
-  }) => (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+  }) => _unclosedPlan(planId).write(
     PlansCompanion(
       paymentMethod: Value(method),
       chargeSourceId: Value(
@@ -374,9 +381,7 @@ class PlanRepository {
 
   /// The plan's repeat reminders; null follows the global setting.
   Future<void> setRepeatMode(int planId, ReminderRepeat? mode) =>
-      (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
-        PlansCompanion(repeatMode: Value(mode)),
-      );
+      _unclosedPlan(planId).write(PlansCompanion(repeatMode: Value(mode)));
 
   /// "This plan is already underway", changed later. The first [count]
   /// payments of the plan's leading run (payments not marked paid in Kalan)
@@ -393,6 +398,7 @@ class PlanRepository {
     UnderwayPattern? pattern,
     DateTime? now,
   }) => _db.transaction(() async {
+    await _requireNotClosed(planId);
     final rows =
         await (_db.select(_db.payments)
               ..where((p) => p.planId.equals(planId))
@@ -437,6 +443,7 @@ class PlanRepository {
     required int count,
     UnderwayPattern? pattern,
   }) => _db.transaction(() async {
+    await _requireNotClosed(planId);
     final rows =
         await (_db.select(_db.payments)
               ..where((p) => p.planId.equals(planId))
@@ -639,7 +646,10 @@ class PlanRepository {
         await (_db.select(_db.plans)..where(
               (p) =>
                   p.sourceId.equals(sourceId) &
-                  p.kind.equalsValue(PlanKind.card),
+                  p.kind.equalsValue(PlanKind.card) &
+                  // A closed plan never changes (19); one on hold can be
+                  // reopened, so its dates follow the card.
+                  p.status.equalsValue(PlanStatus.closed).not(),
             ))
             .get();
     for (final plan in plans) {

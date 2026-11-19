@@ -280,7 +280,9 @@ class PlanDetailScreen extends ConsumerWidget {
                 },
               ),
             ),
-          SectionTitle(l10n.planPaymentsTitle),
+          if (plan.paidBefore.isNotEmpty ||
+              plan.listedPayments.any((p) => !plan.isClosed || p.isPaid))
+            SectionTitle(l10n.planPaymentsTitle),
           // Paid before Kalan: one line, no dates, nothing to open.
           if (plan.paidBefore.isNotEmpty)
             Padding(
@@ -379,7 +381,9 @@ class _PaymentRow extends ConsumerWidget {
     final today = ref.watch(todayProvider);
     // On hold (19): never past due, shown muted with the pause icon.
     final held = plan.isOnHold && !payment.isPaid;
-    final readOnly = plan.isClosed;
+    // A closed plan is read-only; a held payment is marked after "Reopen",
+    // where a passed date asks when it was paid, as everywhere else.
+    final readOnly = plan.isClosed || held;
     final pastDue =
         !held &&
         isPastDue(dueDate: payment.date, isPaid: payment.isPaid, today: today);
@@ -445,7 +449,8 @@ class _PaymentRow extends ConsumerWidget {
               color: payment.isPaid || held ? colors.textMuted : null,
             ),
             if (readOnly)
-              const SizedBox(width: KalanSpace.md)
+              // The button's place, so amounts and rows line up.
+              const SizedBox.square(dimension: kMinInteractiveDimension)
             else
               IconButton(
                 tooltip: payment.isPaid ? l10n.markAsUnpaid : l10n.markAsPaid,

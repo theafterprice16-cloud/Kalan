@@ -333,7 +333,8 @@ class PayLaterSummary extends StatelessWidget {
       children: [
         PayLaterDueLine(
           due: plan.allPayments.first.date,
-          showDaysLeft: plan.isOpen,
+          // On hold (19): never "x days ago" or "x days left".
+          showDaysLeft: plan.isOpen && !plan.isOnHold,
         ),
         if (rule != null)
           Text(

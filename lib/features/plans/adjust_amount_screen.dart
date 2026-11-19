@@ -28,6 +28,10 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
   final _total = TextEditingController();
   bool _saving = false;
 
+  /// Refused on save although the preview allowed it (the plan changed
+  /// meanwhile): said under the field until the total is typed again.
+  AdjustRejection? _refused;
+
   @override
   void dispose() {
     _total.dispose();
@@ -40,12 +44,22 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
     final tabs = ref.read(tabMessengersProvider);
     final router = GoRouter.of(context);
     setState(() => _saving = true);
-    final rejected = await ref
-        .read(planRepositoryProvider)
-        .adjustTotal(plan.plan.id, newTotal);
+    AdjustRejection? rejected;
+    try {
+      rejected = await ref
+          .read(planRepositoryProvider)
+          .adjustTotal(plan.plan.id, newTotal);
+    } on StateError {
+      // Closed meanwhile: nothing to adjust any more.
+      if (mounted) setState(() => _saving = false);
+      return;
+    }
     if (!mounted) return;
     if (rejected != null) {
-      setState(() => _saving = false);
+      setState(() {
+        _saving = false;
+        _refused = rejected;
+      });
       return;
     }
     KalanHaptics.success();
@@ -63,9 +77,13 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
-    await ref
-        .read(planRepositoryProvider)
-        .close(plan.plan.id, reason: reason, today: ref.read(todayProvider));
+    try {
+      await ref
+          .read(planRepositoryProvider)
+          .close(plan.plan.id, reason: reason, today: ref.read(todayProvider));
+    } on StateError {
+      // Already closed elsewhere.
+    }
     router.popWithMessage(
       SnackBar(content: Text(l10n.planClosedDone)),
       fallback: messenger,
@@ -98,7 +116,7 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
     final typed = text.isEmpty ? null : ref.parseMoney(context, text);
     final result = typed == null ? null : adjustPlanTotal(states, typed);
     final applied = result is AdjustApplied ? result.payments : null;
-    final rejection = result is AdjustRejected ? result.reason : null;
+    final rejection = result is AdjustRejected ? result.reason : _refused;
     final message = switch (rejection) {
       AdjustRejection.belowPaid => l10n.adjustBelowPaid(
         ref.money(context, paid),
@@ -156,7 +174,7 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
                     ? null
                     : TextStyle(color: colors.text),
               ),
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) => setState(() => _refused = null),
             ),
             if (rejection == AdjustRejection.nothingLeft) ...[
               const SizedBox(height: KalanSpace.xs),

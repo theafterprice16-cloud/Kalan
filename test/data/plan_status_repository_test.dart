@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/models.dart';
 import 'package:kalan/data/period_totals.dart';
@@ -14,6 +15,7 @@ import 'package:kalan/features/periods/coming_periods.dart';
 import 'package:kalan/features/sources/charge_forecast_view.dart';
 
 import '../core/date/local_date_test.dart' show d;
+import '../helpers/app_harness.dart' show seedCard;
 
 class _Free implements Entitlement {
   @override
@@ -234,6 +236,53 @@ void main() {
         throwsStateError,
       );
     });
+  });
+
+  test('a closed plan keeps its settings and card dates; a held one '
+      'follows the card', () async {
+    final card = await seedCard(db);
+    const oldTerms = CardTerms(statementDay: 25, dueDay: 5);
+    Future<int> cardPlan() => plans.saveDraft(
+      PlanCalculator.card(
+        purchaseDate: d('2026-11-10'),
+        totalMinor: 60000,
+        count: 3,
+        terms: oldTerms,
+      ),
+      sourceId: card,
+      origin: PlanOrigin.template,
+    );
+    final closed = await cardPlan();
+    final held = await cardPlan();
+    await plans.close(
+      closed,
+      reason: CloseReason.refund,
+      today: d('2026-11-20'),
+    );
+    await plans.hold(held, today: d('2026-11-20'));
+    List<int> days(PlanWithPayments p) => [
+      for (final x in p.allPayments) x.dueDay,
+    ];
+    final closedBefore = days(await load(closed));
+    final heldBefore = days(await load(held));
+
+    await plans.recomputeCardPlans(
+      sourceId: card,
+      oldTerms: oldTerms,
+      newTerms: const CardTerms(statementDay: 10, dueDay: 20),
+    );
+    expect(days(await load(closed)), closedBefore);
+    expect(days(await load(held)), isNot(heldBefore));
+
+    await plans.setReminderChoice(closed, enabled: false);
+    await plans.setRepeatMode(closed, ReminderRepeat.daily);
+    await plans.setPaymentMethod(closed, PaymentMethod.manual);
+    final row = (await load(closed)).plan;
+    expect(row.remindersEnabled, isTrue);
+    expect(row.repeatMode, isNull);
+    expect(row.paymentMethod, isNull);
+    await expectLater(plans.setPaidBefore(closed, count: 1), throwsStateError);
+    await expectLater(plans.resize(closed, count: 2), throwsStateError);
   });
 
   group('Example 3: adjust amount (300 EUR, 4 x 75, first paid)', () {

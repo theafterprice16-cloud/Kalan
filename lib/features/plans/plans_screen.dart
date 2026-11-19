@@ -128,7 +128,8 @@ class _PlanList extends ConsumerWidget {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ),
-                            if (p.status == PlanStatus.open &&
+                            if (p.isOpen &&
+                                !p.isOnHold &&
                                 planRepeats(p.plan, global)) ...[
                               const SizedBox(width: KalanSpace.xxs),
                               const RepeatIcon(),

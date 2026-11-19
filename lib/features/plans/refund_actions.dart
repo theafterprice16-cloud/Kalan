@@ -41,14 +41,31 @@ Future<void> runRefundChoice(
   PlanWithPayments plan,
   RefundChoice choice,
 ) async {
-  final l10n = context.l10n;
   final messenger = ScaffoldMessenger.of(context);
-  final repo = ref.read(planRepositoryProvider);
   final today = ref.read(todayProvider);
   final id = plan.plan.id;
   void done(String message) => messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(message)));
+  // A second tap, or a screen not yet showing a change made elsewhere:
+  // the plan is already where the tap would take it, so nothing happens.
+  try {
+    await _run(context, ref, choice, id, today, done);
+  } on StateError {
+    return;
+  }
+}
+
+Future<void> _run(
+  BuildContext context,
+  WidgetRef ref,
+  RefundChoice choice,
+  int id,
+  LocalDate today,
+  void Function(String) done,
+) async {
+  final l10n = context.l10n;
+  final repo = ref.read(planRepositoryProvider);
   switch (choice) {
     case RefundChoice.hold:
       await repo.hold(id, today: today);

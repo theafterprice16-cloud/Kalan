@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
+import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
+import 'package:kalan/features/reminders/repeat_mode_ui.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -334,6 +336,68 @@ void main() {
     await openMont(tester);
     expect(find.text('6 gün önce'), findsNothing);
     expect(find.textContaining(RegExp(r'^\d+ gün önce$')), findsNothing);
+  });
+
+  testWidgets('a held payment cannot be marked; it is marked after '
+      '"Reopen"', (tester) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        final id = await seedMont(db);
+        await PlanRepository(db).hold(id, today: testToday);
+      },
+    );
+    await openMont(tester);
+    // Only the paid payment has its button.
+    expect(find.byTooltip('Ödendi olarak işaretle'), findsNothing);
+    expect(find.byTooltip('Ödenmedi olarak işaretle'), findsOneWidget);
+  });
+
+  testWidgets('"Pay later" on hold: no days left or ago', (tester) async {
+    await pumpApp(
+      tester,
+      today: LocalDate(2026, 12, 30),
+      seed: (db) async {
+        await seedSettings(db, currency: 'EUR');
+        final repo = PlanRepository(db);
+        final id = await repo.saveDraft(
+          PlanCalculator.payLater(
+            purchaseDate: LocalDate(2026, 11, 20),
+            rule: const PayLaterRule.days(30),
+            totalMinor: 24000,
+          ),
+          sourceId: null,
+          origin: PlanOrigin.template,
+          title: 'Mont',
+        );
+        await repo.hold(id, today: LocalDate(2026, 11, 21));
+      },
+    );
+    await openMont(tester);
+    expect(find.byKey(const ValueKey('pay-later-summary')), findsOneWidget);
+    expect(find.textContaining(RegExp(r'gün (önce|kaldı)$')), findsNothing);
+    expect(find.text('Beklemede'), findsWidgets);
+  });
+
+  testWidgets('a finished plan in the archive has no repeat icon', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, currency: 'EUR');
+        final id = await seedPayIn4(db, title: 'Mont');
+        await PlanRepository(db).setRepeatMode(id, ReminderRepeat.daily);
+        for (final p in await db.select(db.payments).get()) {
+          await PlanRepository(db).setPaid(p.id, paid: true);
+        }
+      },
+    );
+    await openTab(tester, 'Planlar');
+    await tester.tap(find.text('Biten'));
+    await tester.pumpAndSettle();
+    expect(find.text('Mont'), findsOneWidget);
+    expect(find.byType(RepeatIcon), findsNothing);
   });
 
   testWidgets('twice the text size: nothing overflows', (tester) async {
