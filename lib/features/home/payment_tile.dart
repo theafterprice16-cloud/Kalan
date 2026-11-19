@@ -16,6 +16,9 @@ import 'past_due.dart';
 class PaymentTile extends ConsumerWidget {
   const PaymentTile({required this.entry, super.key});
 
+  /// The most of the row's width the amount takes.
+  static const double _maxAmountShare = 0.4;
+
   final HomeEntry entry;
 
   Future<void> _toggle(BuildContext context, WidgetRef ref) async {
@@ -86,9 +89,12 @@ class PaymentTile extends ConsumerWidget {
           children: [
             Icon(Icons.circle, size: 10, color: colors.text),
             const SizedBox(width: KalanSpace.xxs),
-            Text(
-              days == 0 ? l10n.dueToday : l10n.dueTomorrow,
-              style: theme.textTheme.bodyMedium,
+            // Flexible: at large text sizes the note wraps, never overflows.
+            Flexible(
+              child: Text(
+                days == 0 ? l10n.dueToday : l10n.dueTomorrow,
+                style: theme.textTheme.bodyMedium,
+              ),
             ),
           ],
         ),
@@ -118,34 +124,47 @@ class PaymentTile extends ConsumerWidget {
                   KalanSpace.xs,
                   KalanSpace.xs,
                 ),
-                child: Row(
-                  children: [
-                    LetterBadge(entry.label(l10n)),
-                    const SizedBox(width: KalanSpace.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            entry.label(l10n),
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: KalanSpace.xxs),
-                          Wrap(
-                            spacing: KalanSpace.sm,
-                            runSpacing: KalanSpace.xxs,
-                            children: details,
-                          ),
-                        ],
+                child: LayoutBuilder(
+                  builder: (context, constraints) => Row(
+                    children: [
+                      LetterBadge(entry.label(l10n)),
+                      const SizedBox(width: KalanSpace.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.label(l10n),
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: KalanSpace.xxs),
+                            Wrap(
+                              spacing: KalanSpace.sm,
+                              runSpacing: KalanSpace.xxs,
+                              children: details,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: KalanSpace.xs),
-                    AmountText(
-                      amount,
-                      size: AmountSize.small,
-                      color: entry.isPaid ? colors.textMuted : null,
-                    ),
-                  ],
+                      const SizedBox(width: KalanSpace.xs),
+                      // At large text sizes a long amount shrinks to fit
+                      // instead of pushing the row past the screen.
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: constraints.maxWidth * _maxAmountShare,
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: AmountText(
+                            amount,
+                            size: AmountSize.small,
+                            color: entry.isPaid ? colors.textMuted : null,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

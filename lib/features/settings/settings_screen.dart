@@ -24,6 +24,26 @@ import '../onboarding/pay_form.dart';
 import '../pro/pro_screen.dart';
 import '../reminders/reminders_section.dart';
 
+/// Opens the net income dialog and saves the answer: the same dialog as
+/// the income row in Settings (also used by the coming pay periods).
+Future<void> editNetIncome(BuildContext context, WidgetRef ref) async {
+  final l10n = context.l10n;
+  final result = await showKalanDialog<Choice<int?>>(
+    context: context,
+    builder: (_) => _AmountDialog(
+      title: l10n.settingsNetIncome,
+      help: l10n.netIncomeHelp,
+      initialMinor: ref.read(settingsProvider).value?.netIncomeMinor,
+      currency: ref.read(currencyProvider),
+    ),
+  );
+  if (result != null) {
+    await ref
+        .read(settingsRepositoryProvider)
+        .update(AppSettingsCompanion(netIncomeMinor: Value(result.value)));
+  }
+}
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -164,14 +184,7 @@ class SettingsScreen extends ConsumerWidget {
           ListTile(
             title: Text(l10n.settingsNetIncome),
             subtitle: Text(amountOrNot(s.netIncomeMinor), style: secondary),
-            onTap: () => _editAmount(
-              context,
-              ref,
-              title: l10n.settingsNetIncome,
-              help: l10n.netIncomeHelp,
-              current: s.netIncomeMinor,
-              toChanges: (v) => AppSettingsCompanion(netIncomeMinor: Value(v)),
-            ),
+            onTap: () => editNetIncome(context, ref),
           ),
           ListTile(
             title: Text(l10n.settingsTight),

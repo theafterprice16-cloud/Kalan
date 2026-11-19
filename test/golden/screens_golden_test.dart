@@ -65,7 +65,7 @@ Future<void> loadFonts() async {
 }
 
 /// A plan with a past unpaid payment (overdue), a card plan, rent.
-Future<void> seedRich(AppDatabase db, {required int incomeMinor}) async {
+Future<void> seedRich(AppDatabase db, {required int? incomeMinor}) async {
   await seedSettings(db, incomeMinor: incomeMinor, thresholdMinor: 500000);
   await seedPayIn4(db, totalMinor: 240000, title: 'Kulaklık');
   await seedPayIn4(
@@ -180,7 +180,7 @@ void main() {
 
     Future<void> start(
       WidgetTester tester, {
-      int income = 4500000,
+      int? income = 4500000,
       bool onboarded = true,
       List<Override> extra = const [],
       String? route,
@@ -231,6 +231,33 @@ void main() {
       testWidgets('home, left negative', (tester) async {
         await start(tester, income: 1500000);
         await shoot(tester, '03-home-negative-$theme');
+      });
+
+      // Coming pay periods (12): the home strip and its screen, with
+      // income, without it and with short periods.
+      testWidgets('home, no income', (tester) async {
+        await start(tester, income: null);
+        await shoot(tester, '51-home-no-income-$theme');
+      });
+
+      for (final (name, income) in [
+        ('positive', 4500000),
+        ('negative', 1900000),
+        ('no-income', null),
+      ]) {
+        testWidgets('coming periods, $name', (tester) async {
+          await start(tester, income: income);
+          await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
+          await shoot(tester, '52-coming-periods-$name-$theme');
+        });
+      }
+
+      testWidgets('coming periods, next period selected, en', (tester) async {
+        await start(tester, locale: const Locale('en', 'US'));
+        await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('coming-period-1')));
+        await shoot(tester, '53-coming-periods-next-en-$theme');
       });
 
       testWidgets('add plan', (tester) async {

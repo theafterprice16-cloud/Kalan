@@ -1633,4 +1633,70 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get limitSheetNotNow => 'Şimdi değil';
+
+  @override
+  String get comingPeriodsTitle => 'İleriki dönemler';
+
+  @override
+  String comingPeriodsSummary(int count, String total, String left) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bu dönem $count ödeme. Toplam $total. Kalan $left.',
+      one: 'Bu dönem 1 ödeme. Toplam $total. Kalan $left.',
+      zero: 'Bu dönem ödeme yok. Kalan $left.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String comingPeriodsSummaryNoLeft(int count, String total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bu dönem $count ödeme. Toplam $total.',
+      one: 'Bu dönem 1 ödeme. Toplam $total.',
+      zero: 'Bu dönem ödeme yok.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String comingPeriodsShort(String amount) {
+    return '$amount eksik';
+  }
+
+  @override
+  String get comingPeriodsIncomeInvite =>
+      'Gelirini girersen her dönemde ne kaldığını da görürsün.';
+
+  @override
+  String comingPeriodsEmpty(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Önümüzdeki $count dönemde ödeme yok.',
+      one: 'Önümüzdeki dönemde ödeme yok.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String comingPeriodsBarLabel(String range, String spokenFor, String left) {
+    return '$range: söz verilmiş $spokenFor, kalan $left.';
+  }
+
+  @override
+  String comingPeriodsBarLabelNoIncome(String range, String spokenFor) {
+    return '$range: söz verilmiş $spokenFor.';
+  }
+
+  @override
+  String comingPeriodsBarLabelShort(
+    String range,
+    String spokenFor,
+    String amount,
+  ) {
+    return '$range: söz verilmiş $spokenFor, $amount eksik.';
+  }
 }

@@ -7,6 +7,7 @@ import '../../core/design/widgets.dart';
 import '../../core/engine/period_summary.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
+import '../periods/coming_periods_strip.dart';
 import 'home_view.dart';
 import 'past_due.dart';
 import 'payment_tile.dart';
@@ -42,6 +43,7 @@ class HomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(bottom: KalanSpace.fabClearance),
         children: [
           _Header(view: view),
+          const ComingPeriodsStrip(),
           PastDueSection(view: view),
           if (view.entries.isNotEmpty) ...[
             SectionTitle(l10n.homePaymentsTitle),

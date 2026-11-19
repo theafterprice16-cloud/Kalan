@@ -1484,5 +1484,100 @@
     }
   },
   "limitSheetSeePro": "See Pro",
-  "limitSheetNotNow": "Not now"
+  "limitSheetNotNow": "Not now",
+  "comingPeriodsTitle": "Coming pay periods",
+  "@comingPeriodsTitle": {
+    "description": "Title of the chart of the next 6 pay periods (home strip and its screen)."
+  },
+  "comingPeriodsSummary": "{count, plural, =0{No payments this period. {left} left.} =1{1 payment this period. {total} in total. {left} left.} other{{count} payments this period. {total} in total. {left} left.}}",
+  "@comingPeriodsSummary": {
+    "description": "Summary of the selected pay period when income is set and nothing is short. total: spoken for; left: income minus spoken for.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "comingPeriodsSummaryNoLeft": "{count, plural, =0{No payments this period.} =1{1 payment this period. {total} in total.} other{{count} payments this period. {total} in total.}}",
+  "@comingPeriodsSummaryNoLeft": {
+    "description": "Summary of the selected pay period without the left amount (no income set, or the period is short).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "comingPeriodsShort": "{amount} short",
+  "@comingPeriodsShort": {
+    "description": "Under a bar and in the summary when spoken for exceeds income. amount is negative and carries its minus sign, e.g. -1,200.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "comingPeriodsIncomeInvite": "Add your income to see what's left in each period.",
+  "@comingPeriodsIncomeInvite": {
+    "description": "Link shown when no income is set; opens the income field."
+  },
+  "comingPeriodsEmpty": "{count, plural, =1{No payments in the next pay period.} other{No payments in the next {count} pay periods.}}",
+  "@comingPeriodsEmpty": {
+    "description": "Shown instead of the chart when no period has a payment.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "comingPeriodsBarLabel": "{range}: {spokenFor} spoken for, {left} left.",
+  "@comingPeriodsBarLabel": {
+    "description": "Screen reader text of one bar. range: e.g. December 15 – January 14.",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "spokenFor": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "comingPeriodsBarLabelNoIncome": "{range}: {spokenFor} spoken for.",
+  "@comingPeriodsBarLabelNoIncome": {
+    "description": "Screen reader text of one bar when no income is set.",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "spokenFor": {
+        "type": "String"
+      }
+    }
+  },
+  "comingPeriodsBarLabelShort": "{range}: {spokenFor} spoken for, {amount} short.",
+  "@comingPeriodsBarLabelShort": {
+    "description": "Screen reader text of one bar when spoken for exceeds income. amount is negative with its minus sign.",
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "spokenFor": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }
