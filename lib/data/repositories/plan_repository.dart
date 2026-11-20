@@ -315,6 +315,75 @@ class PlanRepository {
     return null;
   });
 
+  /// Stores [amountMinor] and [note] as [paymentId]'s extra fee (21),
+  /// replacing the one it has: one fee per payment. Re-checks the rule
+  /// ([extraFeeRejection]) in one transaction; returns the reason when
+  /// nothing is stored. The payment's amount, date and paid state never
+  /// change; reminders follow from the payments stream (`ReminderSync`).
+  Future<ExtraFeeRejection?> setExtraFee(
+    int paymentId, {
+    required int amountMinor,
+    String? note,
+  }) => _db.transaction(() async {
+    final found = await _paymentWithPlan(paymentId);
+    if (found == null) return ExtraFeeRejection.notFound;
+    final (payment, plan) = found;
+    final rejection = extraFeeRejection(
+      status: plan.status,
+      isPaid: payment.isPaid,
+      paidBeforeKalan: payment.paidBeforeKalan,
+      amountMinor: amountMinor,
+      note: note,
+    );
+    if (rejection != null) return rejection;
+    await (_db.update(
+      _db.payments,
+    )..where((p) => p.id.equals(paymentId))).write(
+      PaymentsCompanion(
+        extraFeeMinor: Value(amountMinor),
+        extraFeeNote: Value(normalizeExtraFeeNote(note)),
+      ),
+    );
+    return null;
+  });
+
+  /// Removes [paymentId]'s extra fee (21) and returns it, so "Undo" can
+  /// store it again with [setExtraFee]. Null when there was none or the
+  /// payment cannot change ([canHaveExtraFee]: a closed plan keeps its
+  /// fees).
+  Future<({int amountMinor, String? note})?> removeExtraFee(int paymentId) =>
+      _db.transaction(() async {
+        final found = await _paymentWithPlan(paymentId);
+        if (found == null) return null;
+        final (payment, plan) = found;
+        final fee = payment.extraFeeMinor;
+        if (fee == null ||
+            !canHaveExtraFee(
+              status: plan.status,
+              isPaid: payment.isPaid,
+              paidBeforeKalan: payment.paidBeforeKalan,
+            )) {
+          return null;
+        }
+        await (_db.update(
+          _db.payments,
+        )..where((p) => p.id.equals(paymentId))).write(
+          const PaymentsCompanion(
+            extraFeeMinor: Value(null),
+            extraFeeNote: Value(null),
+          ),
+        );
+        return (amountMinor: fee, note: payment.extraFeeNote);
+      });
+
+  Future<(PaymentRow, PlanRow)?> _paymentWithPlan(int paymentId) async {
+    final payment = await (_db.select(
+      _db.payments,
+    )..where((p) => p.id.equals(paymentId))).getSingleOrNull();
+    if (payment == null) return null;
+    return (payment, await _plan(payment.planId));
+  }
+
   /// Changes one payment; returns the reason when the edit is not allowed.
   Future<EditRejection?> editPayment({
     required int planId,

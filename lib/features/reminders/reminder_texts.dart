@@ -47,7 +47,7 @@ class L10nReminderTexts implements ReminderTexts {
   }) {
     final count = payments.length;
     final name = payments.first.name;
-    final total = _money(payments.fold(0, (sum, p) => sum + p.amountMinor));
+    final total = _money(payments.fold(0, (sum, p) => sum + p.dueMinor));
     final date = _date(dueDates.first);
     final due = dueDates.first;
     var body = switch ((kind, dueDates.length > 1, showAmounts)) {

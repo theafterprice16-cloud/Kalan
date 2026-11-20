@@ -52,7 +52,9 @@ DatedAmount _counting(PaymentRow pay, LocalDate today, {LocalDate? dueDate}) =>
             : LocalDate.fromEpochDay(pay.paidOnDay!),
         today: today,
       ),
-      pay.amountMinor,
+      // Its amount plus its extra fee (21): the one place a fee joins a
+      // period total.
+      pay.spokenForMinor,
     );
 
 /// "Change date" (20): the periods whose totals change when [plan]'s
