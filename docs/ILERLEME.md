@@ -41,13 +41,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 19. İade, iptal ve itiraz (19 Kasım 2026): plan ayrıntısının üst çubuğunda "İade ya da iptal" → alt sayfa: Beklet (beklemedeki planda Yeniden aç), Tutarı düzelt, Kapat; beklemedeki taksitler hiçbir hesapta, gecikenlerde, ileriki dönemlerde, takvimde, ekstrede ve bildirimde yok, ödenmişler yerinde; "Beklemede" soluk renk ve duraklat ikonuyla (plan, taksitler, liste); 30. günden itibaren "Hâlâ iadeyi mi bekliyorsun?"; yeniden açınca bekleme sırasında tarihi geçenler sayılır; Tutarı düzelt önizlemeli, artan son taksite; Kapat'ta neden (İade/İptal), arşivde "Kapatıldı · İade", kapatılan plan salt okunur; beklemedeki plan 4 plan sınırına sayılır, kapatılan sayılmaz; şema v14
 
+- 20. Taksit erteleme (20 Kasım 2026): plan ayrıntısında açık planın ödenmemiş taksitine dokununca alt sayfa: "Tarihi değiştir" ve eski "Ödemeyi düzelt"; tarih seçici (en erken bugün, sınır yok) → "Tarihi değiştir" ekranı: şu anki ve yeni tarih, "Sonraki taksitleri de kaydır" (kapalı), "Dönemlere etkisi" (yalnızca toplamı değişen dönemler, mürekkep renginde işaret ve okla "Kalan +$60", gelir yoksa "Söz verilmiş"; değişmiyorsa "Dönem değişmiyor; kalan aynı kalıyor."; en çok 6 + "ve N dönem daha"; sonraki taksiti geçince "Bu tarih bir sonraki taksitten sonra.") → Kaydet (tek işlem); notta "Ertelendi / Öne alındı · ilk tarih …"; plan listesi tarihe göre, numaralar korunur; kart taksitlerinde, beklemedeki ve kapatılmış planda, ödenmiş taksitte yok; "Sonra öde" dahil; bildirimler yeni tarihe kurulur, eski erteleme ("Akşam/Yarın hatırlat") taşınan ödemeyi eski günde hatırlatmaz; şema v15
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 20. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 21. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 
