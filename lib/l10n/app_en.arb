@@ -189,7 +189,7 @@
   "editPaymentTitle": "Edit payment",
   "editPaymentHelp": "The difference is spread over later payments. The plan total stays the same.",
   "editRejectedPaid": "A paid payment can't be edited. Mark it as not paid first.",
-  "editRejectedNoAbsorbers": "There's no later payment to take the difference. You can still change the date.",
+  "editRejectedNoAbsorbers": "There's no later payment to take the difference, so this amount can't change on its own.",
   "editRejectedAbsorber": "This change would bring a later payment to zero. Try a smaller change.",
   "editedTag": "Edited",
   "paymentUpdated": "Payment updated.",
@@ -2240,9 +2240,9 @@
   "@changeDateActionHint": {
     "description": "Explanation under 'Change date' in the installment sheet. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
   },
-  "editPaymentActionHint": "Fix the amount or date. The difference is spread over later payments.",
+  "editPaymentActionHint": "Fix the amount. The difference is spread over later payments.",
   "@editPaymentActionHint": {
-    "description": "Explanation under 'Edit payment' in the installment sheet (the existing amount and date edit). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+    "description": "Explanation under 'Edit payment' in the installment sheet: changes the amount only (dates change with 'Change date'). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
   },
   "changeDateCurrent": "Current date: {date}",
   "@changeDateCurrent": {

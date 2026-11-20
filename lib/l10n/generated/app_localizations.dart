@@ -581,7 +581,7 @@ abstract class AppLocalizations {
   /// No description provided for @editRejectedNoAbsorbers.
   ///
   /// In en, this message translates to:
-  /// **'There\'s no later payment to take the difference. You can still change the date.'**
+  /// **'There\'s no later payment to take the difference, so this amount can\'t change on its own.'**
   String get editRejectedNoAbsorbers;
 
   /// No description provided for @editRejectedAbsorber.
@@ -2858,10 +2858,10 @@ abstract class AppLocalizations {
   /// **'Record the new date your provider gave you.'**
   String get changeDateActionHint;
 
-  /// Explanation under 'Edit payment' in the installment sheet (the existing amount and date edit). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  /// Explanation under 'Edit payment' in the installment sheet: changes the amount only (dates change with 'Change date'). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
   ///
   /// In en, this message translates to:
-  /// **'Fix the amount or date. The difference is spread over later payments.'**
+  /// **'Fix the amount. The difference is spread over later payments.'**
   String get editPaymentActionHint;
 
   /// 'Change date' screen: the installment's date before the change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)

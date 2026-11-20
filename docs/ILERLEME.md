@@ -43,6 +43,8 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 20. Taksit erteleme (20 Kasım 2026): plan ayrıntısında açık planın ödenmemiş taksitine dokununca alt sayfa: "Tarihi değiştir" ve eski "Ödemeyi düzelt"; tarih seçici (en erken bugün, sınır yok) → "Tarihi değiştir" ekranı: şu anki ve yeni tarih, "Sonraki taksitleri de kaydır" (kapalı), "Dönemlere etkisi" (yalnızca toplamı değişen dönemler, mürekkep renginde işaret ve okla "Kalan +$60", gelir yoksa "Söz verilmiş"; değişmiyorsa "Dönem değişmiyor; kalan aynı kalıyor."; en çok 6 + "ve N dönem daha"; sonraki taksiti geçince "Bu tarih bir sonraki taksitten sonra.") → Kaydet (tek işlem); notta "Ertelendi / Öne alındı · ilk tarih …"; plan listesi tarihe göre, numaralar korunur; kart taksitlerinde, beklemedeki ve kapatılmış planda, ödenmiş taksitte yok; "Sonra öde" dahil; bildirimler yeni tarihe kurulur, eski erteleme ("Akşam/Yarın hatırlat") taşınan ödemeyi eski günde hatırlatmaz; şema v15
 
+- 20 ardından (20 Kasım 2026): tek tarih yolu; "Ödemeyi düzelt" yalnızca tutarı değiştirir, tarih her zaman "Tarihi değiştir"den (ürün sahibi kararı)
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)

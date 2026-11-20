@@ -24,7 +24,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('payment-edit')));
     await tester.pumpAndSettle();
     expect(find.text('Ödemeyi düzelt'), findsOneWidget);
-    expect(find.text('Ödeme tarihi'), findsOneWidget);
+    // The amount only; dates change with "Change date" (20).
+    expect(find.text('Ödeme tarihi'), findsNothing);
     await tester.enterText(find.byKey(const ValueKey('edit-amount')), '160');
     await tester.tap(find.text('Kaydet'));
     await tester.pumpAndSettle();
@@ -60,7 +61,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.text(
-        'Farkı alacak sonraki ödeme yok. Yalnızca tarihi değiştirebilirsin.',
+        'Farkı alacak sonraki ödeme yok. Bu taksitin tutarı tek başına '
+        'değiştirilemez.',
       ),
       findsOneWidget,
     );
