@@ -36,7 +36,8 @@ List<ChargeItem> chargeItemsOf(Iterable<PlanWithPayments> plans) => [
         sourceId: p.chargeSourceId,
         method: p.plan.paymentMethod,
         dueDate: pay.date,
-        amountMinor: pay.amountMinor,
+        // What is taken: the amount plus its extra fee (21).
+        amountMinor: pay.spokenForMinor,
         isPaid: pay.isPaid,
         paidOn: pay.paidOnDay == null
             ? null

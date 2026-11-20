@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../date/local_date.dart';
+import '../engine/extra_fee.dart';
 import '../engine/payment_method.dart';
 import '../engine/schedule.dart' show CardTerms;
 
@@ -97,11 +98,24 @@ class ReminderPayment {
     this.repeat,
     this.method,
     this.account,
+    this.extraFeeMinor,
   });
 
   final String name;
   final LocalDate date;
+
+  /// The payment's own amount, its extra fee left out.
   final int amountMinor;
+
+  /// The payment's extra fee (21), typed by the user; null when none.
+  final int? extraFeeMinor;
+
+  /// What the reminder says is due: the amount plus the extra fee (21).
+  /// The one rule for every reminder total; without a fee, exactly the
+  /// amount, as before.
+  int get dueMinor =>
+      spokenForAmount(amountMinor: amountMinor, extraFeeMinor: extraFeeMinor);
+
   final bool isPaid;
   final ReminderChoice choice;
 
@@ -555,7 +569,8 @@ class PlannedReminder {
   /// statements. Never merged with any other reminder.
   final bool isStatementClosing;
 
-  int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
+  /// What the reminder's payments come to, extra fees included (21).
+  int get totalMinor => payments.fold(0, (sum, p) => sum + p.dueMinor);
 
   /// "Ahead" and "on day" at the reminder time: fire day × 2 + kind,
   /// unchanged since the first reminders.

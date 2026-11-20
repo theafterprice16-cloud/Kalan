@@ -224,6 +224,7 @@ class ReminderScheduler {
             name: planNameIn(l10n, p),
             date: LocalDate.fromEpochDay(pay.dueDay),
             amountMinor: pay.amountMinor,
+            extraFeeMinor: pay.extraFeeMinor,
             isPaid: pay.paidAt != null,
             choice: reminderChoiceOf(
               enabled: p.plan.remindersEnabled,

@@ -22,6 +22,9 @@ class HomeEntry {
     this.recurringId,
     this.isPayLater = false,
     this.paymentMethod,
+    this.extraFeeMinor,
+    this.extraFeeNote,
+    this.canHaveExtraFee = false,
   });
 
   /// Null for an untitled "Pay later" plan: see [label].
@@ -43,6 +46,16 @@ class HomeEntry {
   /// The plan's payment method; null when not set (and for recurring
   /// payments): no icon then.
   final PaymentMethod? paymentMethod;
+
+  /// The payment's extra fee (21), shown as a note next to [amountMinor],
+  /// which stays the payment's own amount. Null when none (and for
+  /// recurring payments).
+  final int? extraFeeMinor;
+  final String? extraFeeNote;
+
+  /// Whether the payment can take, change or lose an extra fee
+  /// ([canHaveExtraFee] in the engine, the one rule).
+  final bool canHaveExtraFee;
 
   bool get isRecurring => recurringId != null;
 
@@ -89,6 +102,13 @@ HomeEntry planEntryOf(PlanWithPayments p, PaymentRow pay) => HomeEntry(
   installmentCount: p.plan.installmentCount,
   isPayLater: p.isPayLater,
   paymentMethod: p.plan.paymentMethod,
+  extraFeeMinor: pay.extraFeeMinor,
+  extraFeeNote: pay.extraFeeNote,
+  canHaveExtraFee: canHaveExtraFee(
+    status: p.status,
+    isPaid: pay.isPaid,
+    paidBeforeKalan: pay.paidBeforeKalan,
+  ),
 );
 
 /// Home order: by date, then name.

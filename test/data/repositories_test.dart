@@ -265,6 +265,28 @@ void main() {
       expect((await repo.get())!.currencyCode, 'EUR');
     });
 
+    test('an extra fee (21) moves with its payment, never below 1', () async {
+      await seed();
+      final rows = (await plans.watchAll().first).single.payments;
+      await plans.setExtraFee(rows[0].id, amountMinor: 5000);
+      await plans.setExtraFee(rows[1].id, amountMinor: 40);
+      final repo = SettingsRepository(db);
+      await repo.changeCurrency(
+        from: Currency.fromCode('TRY'),
+        to: Currency.fromCode('JPY'),
+      );
+      Future<List<int?>> stored() async => [
+        for (final p in (await plans.watchAll().first).single.payments)
+          p.extraFeeMinor,
+      ];
+      expect(await stored(), [50, 1, null, null]);
+      await repo.changeCurrency(
+        from: Currency.fromCode('JPY'),
+        to: Currency.fromCode('KWD'),
+      );
+      expect(await stored(), [50000, 1000, null, null]);
+    });
+
     test('same decimals only change the label', () async {
       await seed();
       await SettingsRepository(db).changeCurrency(

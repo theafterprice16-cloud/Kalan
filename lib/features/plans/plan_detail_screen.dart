@@ -21,6 +21,7 @@ import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
 import '../reminders/repeat_mode_ui.dart';
 import 'change_date_screen.dart';
+import 'extra_fee_sheet.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
 import 'plan_labels.dart';
@@ -228,6 +229,16 @@ class PlanDetailScreen extends ConsumerWidget {
                           ),
                       ],
                     ),
+                    // Fees on this plan's payments (21): beside its total,
+                    // never in it.
+                    if (plan.extraFeesMinor > 0) ...[
+                      const SizedBox(height: KalanSpace.xxs),
+                      ExtraFeeText(
+                        line: l10n.extraFeesTotal,
+                        amount: ref.money(context, plan.extraFeesMinor),
+                        key: const ValueKey('extra-fees-total'),
+                      ),
+                    ],
                     if (plan.isPayLater) ...[
                       const SizedBox(height: KalanSpace.xs),
                       PayLaterSummary(plan: plan),
@@ -391,17 +402,28 @@ class _PaymentRow extends ConsumerWidget {
     Future<void> edit() async => plan.isPayLater
         ? context.push(Routes.planEdit(plan.plan.id))
         : _edit(context, ref);
-    // "Change date" (20): unpaid payments of open plans, not card ones.
-    final canMove = canChangeDate(
-      status: plan.status,
-      kind: plan.plan.kind,
-      isPaid: payment.isPaid,
+    // "Change date" (20), the edit and the extra fee (21): one sheet.
+    final choices = paymentChoicesFor(plan, payment);
+    final fee = payment.extraFeeMinor;
+    Future<void> openFee() => openExtraFee(
+      context,
+      ref,
+      paymentId: payment.id,
+      planName: context.planName(plan),
+      paymentLabel: paymentLabelOf(
+        context,
+        seq: payment.seq,
+        installmentCount: plan.plan.installmentCount,
+        isPayLater: plan.isPayLater,
+        date: payment.date,
+      ),
+      feeMinor: fee,
+      note: payment.extraFeeNote,
     );
     return InkWell(
-      onTap: readOnly
+      onTap: choices.isEmpty
           ? null
-          : canMove
-          ? () async {
+          : () async {
               final choice = await openPaymentActions(
                 context,
                 ref,
@@ -411,8 +433,7 @@ class _PaymentRow extends ConsumerWidget {
               if (choice == PaymentChoice.edit && context.mounted) {
                 await edit();
               }
-            }
-          : edit,
+            },
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(
           KalanSpace.md,
@@ -460,6 +481,35 @@ class _PaymentRow extends ConsumerWidget {
                     ],
                   ),
                   MoveNoteText(payment: payment),
+                  // The fee and its note under the payment (21); the
+                  // amount on the right stays the installment's own.
+                  if (fee != null) ...[
+                    ExtraFeeText(
+                      line: l10n.extraFeeLine,
+                      amount: ref.money(context, fee),
+                      key: ValueKey('fee-line-${payment.id}'),
+                    ),
+                    if (payment.extraFeeNote case final note?)
+                      Text(
+                        note,
+                        key: ValueKey('fee-note-${payment.id}'),
+                        style: secondary,
+                      ),
+                  ] else if (pastDue &&
+                      choices.contains(PaymentChoice.extraFee))
+                    // Past due: "Add extra fee" stands out (decision 3).
+                    TextButton(
+                      key: ValueKey('fee-add-${payment.id}'),
+                      // Ink, not accent: accent is only for "left". No
+                      // side padding: its text lines up with the date.
+                      style: TextButton.styleFrom(
+                        foregroundColor: colors.text,
+                        padding: EdgeInsets.zero,
+                        alignment: AlignmentDirectional.centerStart,
+                      ),
+                      onPressed: openFee,
+                      child: Text(l10n.extraFeeAdd),
+                    ),
                 ],
               ),
             ),
@@ -579,6 +629,42 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
           },
         ),
       ],
+    );
+  }
+}
+
+/// "Extra fee: {amount}": the label in textMuted, the amount in text (21).
+/// [line] is the whole sentence from the ARB file; only its amount is
+/// set apart, so word order stays the translation's.
+class ExtraFeeText extends StatelessWidget {
+  const ExtraFeeText({required this.line, required this.amount, super.key});
+
+  final String Function(String amount) line;
+  final String amount;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final style = Theme.of(context).textTheme.bodyMedium;
+    final text = line(amount);
+    final at = text.indexOf(amount);
+    final muted = style?.copyWith(color: colors.textMuted);
+    if (at < 0) return Text(text, style: muted);
+    return Text.rich(
+      TextSpan(
+        style: muted,
+        children: [
+          TextSpan(text: text.substring(0, at)),
+          TextSpan(
+            text: amount,
+            style: TextStyle(
+              color: colors.text,
+              fontFeatures: AmountText.tabular,
+            ),
+          ),
+          TextSpan(text: text.substring(at + amount.length)),
+        ],
+      ),
     );
   }
 }

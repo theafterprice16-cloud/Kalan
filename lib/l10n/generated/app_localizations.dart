@@ -2995,6 +2995,95 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This payment\'s date can\'t be changed here any more.'**
   String get changeDateNotAvailable;
+
+  /// Action on a payment: record a one-off fee the provider added. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Add extra fee'**
+  String get extraFeeAdd;
+
+  /// Action on a payment that already has an extra fee: change or delete it. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Edit extra fee'**
+  String get extraFeeEdit;
+
+  /// Hint under 'Add extra fee' in the payment's action sheet. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Record a fee your provider added.'**
+  String get extraFeeAddHint;
+
+  /// Under a payment in the plan details: the fee recorded on it. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fee: {amount}'**
+  String extraFeeLine(String amount);
+
+  /// Plan summary line: all extra fees recorded on this plan's payments. Not a yearly total or a statistic. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fees: {amount}'**
+  String extraFeesTotal(String amount);
+
+  /// Small note under a payment row: the fee recorded on top of the payment's own amount. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'+ {amount} extra fee'**
+  String extraFeeRowNote(String amount);
+
+  /// Title of the sheet where the fee is entered. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fee'**
+  String get extraFeeSheetTitle;
+
+  /// Short explanation in the extra fee sheet. Calm; Kalan only keeps the user's record. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan doesn\'t calculate fees. Enter the amount from your provider; it counts in the same period as the payment.'**
+  String get extraFeeSheetHint;
+
+  /// Label of the optional short note field in the extra fee sheet. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get extraFeeNoteLabel;
+
+  /// Short message after saving an extra fee. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fee saved.'**
+  String get extraFeeSaved;
+
+  /// Short message after deleting an extra fee, shown with 'Undo'. Calm, not a warning. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fee removed.'**
+  String get extraFeeRemoved;
+
+  /// When the payment's plan was closed or put on hold meanwhile. Calm, no error tone. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'An extra fee can\'t be added to this payment.'**
+  String get extraFeeNotAllowed;
+
+  /// Under the note field when it is too long. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'{max, plural, =1{The note can be up to 1 character.} other{The note can be up to {max} characters.}}'**
+  String extraFeeNoteTooLong(int max);
+
+  /// Screen reader label of a past-due row with an extra fee. Calm: a fact, not a warning. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{{plan}, {amount}, plus {fee} extra fee, due 1 day ago} other{{plan}, {amount}, plus {fee} extra fee, due {days} days ago}}'**
+  String pastDueRowFeeSemantics(
+    String plan,
+    String amount,
+    String fee,
+    int days,
+  );
 }
 
 class _AppLocalizationsDelegate

@@ -2232,4 +2232,85 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get changeDateNotAvailable =>
       'This payment\'s date can\'t be changed here any more.';
+
+  @override
+  String get extraFeeAdd => 'Add extra fee';
+
+  @override
+  String get extraFeeEdit => 'Edit extra fee';
+
+  @override
+  String get extraFeeAddHint => 'Record a fee your provider added.';
+
+  @override
+  String extraFeeLine(String amount) {
+    return 'Extra fee: $amount';
+  }
+
+  @override
+  String extraFeesTotal(String amount) {
+    return 'Extra fees: $amount';
+  }
+
+  @override
+  String extraFeeRowNote(String amount) {
+    return '+ $amount extra fee';
+  }
+
+  @override
+  String get extraFeeSheetTitle => 'Extra fee';
+
+  @override
+  String get extraFeeSheetHint =>
+      'Kalan doesn\'t calculate fees. Enter the amount from your provider; it counts in the same period as the payment.';
+
+  @override
+  String get extraFeeNoteLabel => 'Note (optional)';
+
+  @override
+  String get extraFeeSaved => 'Extra fee saved.';
+
+  @override
+  String get extraFeeRemoved => 'Extra fee removed.';
+
+  @override
+  String get extraFeeNotAllowed =>
+      'An extra fee can\'t be added to this payment.';
+
+  @override
+  String extraFeeNoteTooLong(int max) {
+    final intl.NumberFormat maxNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String maxString = maxNumberFormat.format(max);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: 'The note can be up to $maxString characters.',
+      one: 'The note can be up to 1 character.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pastDueRowFeeSemantics(
+    String plan,
+    String amount,
+    String fee,
+    int days,
+  ) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$plan, $amount, plus $fee extra fee, due $daysString days ago',
+      one: '$plan, $amount, plus $fee extra fee, due 1 day ago',
+    );
+    return '$_temp0';
+  }
 }

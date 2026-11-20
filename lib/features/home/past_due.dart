@@ -10,6 +10,7 @@ import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../plans/extra_fee_sheet.dart';
 import 'home_view.dart';
 
 /// Rows shown before "Show all".
@@ -251,13 +252,22 @@ class PastDueRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final amount = ref.money(context, entry.amountMinor);
     final days = daysPastDue(dueDate: entry.date, today: today);
-    return Row(
-      key: ValueKey('past-due-${entry.paymentId}'),
+    final fee = entry.extraFeeMinor == null
+        ? null
+        : ref.money(context, entry.extraFeeMinor!);
+    final row = Row(
       children: [
         Expanded(
           child: Semantics(
             button: true,
-            label: l10n.pastDueRowSemantics(entry.label(l10n), amount, days),
+            label: fee == null
+                ? l10n.pastDueRowSemantics(entry.label(l10n), amount, days)
+                : l10n.pastDueRowFeeSemantics(
+                    entry.label(l10n),
+                    amount,
+                    fee,
+                    days,
+                  ),
             // The tap is read out with the label (the InkWell's own is
             // excluded), so screen readers can open the plan too.
             onTap: () => context.push(Routes.plan(entry.planId!)),
@@ -267,11 +277,12 @@ class PastDueRow extends ConsumerWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 56),
                 child: Padding(
+                  // No bottom padding: "Add extra fee" follows (21).
                   padding: const EdgeInsetsDirectional.fromSTEB(
                     KalanSpace.md,
                     KalanSpace.xs,
                     KalanSpace.xs,
-                    KalanSpace.xs,
+                    0,
                   ),
                   child: Row(
                     children: [
@@ -289,6 +300,18 @@ class PastDueRow extends ConsumerWidget {
                             ),
                             const SizedBox(height: KalanSpace.xxs),
                             DaysAgoNote(days: days),
+                            // The amount stays the payment's own; the
+                            // fee is a note under it (21).
+                            if (fee != null)
+                              Text(
+                                l10n.extraFeeRowNote(fee),
+                                key: ValueKey(
+                                  'past-due-fee-${entry.paymentId}',
+                                ),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: context.colors.textMuted,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -314,6 +337,43 @@ class PastDueRow extends ConsumerWidget {
             child: Text(l10n.pastDueMarkPaid),
           ),
         ),
+      ],
+    );
+    return Column(
+      key: ValueKey('past-due-${entry.paymentId}'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        row,
+        // "Add extra fee" in ink (21), under the name: outside the row's
+        // own label so screen readers reach it too.
+        if (entry.canHaveExtraFee)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(
+              start: KalanSpace.md + LetterBadge.defaultSize,
+              bottom: KalanSpace.xxs,
+            ),
+            child: TextButton(
+              key: ValueKey('past-due-fee-action-${entry.paymentId}'),
+              // Ink, not accent: accent is only for "left" (21).
+              style: TextButton.styleFrom(foregroundColor: context.colors.text),
+              onPressed: () => openExtraFee(
+                context,
+                ref,
+                paymentId: entry.paymentId!,
+                planName: entry.label(l10n),
+                paymentLabel: paymentLabelOf(
+                  context,
+                  seq: entry.seq!,
+                  installmentCount: entry.installmentCount!,
+                  isPayLater: entry.isPayLater,
+                  date: entry.date,
+                ),
+                feeMinor: entry.extraFeeMinor,
+                note: entry.extraFeeNote,
+              ),
+              child: Text(fee == null ? l10n.extraFeeAdd : l10n.extraFeeEdit),
+            ),
+          ),
       ],
     );
   }

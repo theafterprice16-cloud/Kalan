@@ -298,7 +298,11 @@ void main() {
       );
       await openTom(tester);
       await tapPayment(tester, '20 Kas 2026');
-      expect(find.byKey(const ValueKey('payment-sheet')), findsNothing);
+      // Only the extra fee (21) is offered for a paid payment.
+      expect(find.byKey(const ValueKey('payment-sheet')), findsOneWidget);
+      expect(find.byKey(const ValueKey('payment-changeDate')), findsNothing);
+      expect(find.byKey(const ValueKey('payment-edit')), findsNothing);
+      expect(find.byKey(const ValueKey('payment-extraFee')), findsOneWidget);
     });
 
     testWidgets('a plan on hold or closed', (tester) async {
@@ -338,7 +342,11 @@ void main() {
       await openTom(tester);
       await tester.tap(find.textContaining('2026').at(1));
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('payment-sheet')), findsNothing);
+      // No "Change date"; the edit as before, beside the extra fee (21).
+      expect(find.byKey(const ValueKey('payment-changeDate')), findsNothing);
+      expect(find.byKey(const ValueKey('payment-extraFee')), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('payment-edit')));
+      await tester.pumpAndSettle();
       expect(find.text('Ödemeyi düzelt'), findsOneWidget);
     });
   });

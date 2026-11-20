@@ -45,13 +45,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 20 ardından (20 Kasım 2026): tek tarih yolu; "Ödemeyi düzelt" yalnızca tutarı değiştirir, tarih her zaman "Tarihi değiştir"den (ürün sahibi kararı)
 
+- 21. Ek ücret kaydı (20 Kasım 2026): her ödemede tek ek ücret (tutar + isteğe bağlı en çok 80 karakter not), elle girilir, hiç hesaplanmaz; ana ekrandaki geciken satırda mürekkep renginde "Ek ücret ekle" (varsa "Ek ücreti düzelt") ve tutarın yanında "+ €6 ek ücret" notu; plan ayrıntısında geciken satırda düğme, diğer ödemelerde dokununca açılan işlem listesinde (ödenmiş ödemeler ve kart taksitleri de artık bu listeyi açar); ödemenin altında "Ek ücret: €6" ve not, plan kartında "Ek ücretler: €6"; ücret ödemenin sayıldığı dönemin söz verilmiş tutarına, kalana, ileriki dönemlere, maaş günü özetine, hazır tutulacak tutara (18) ve ödenmemiş ödemenin hatırlatma tutarına girer; plan toplamı, taksit tutarı, kart ekstresi (16), yoğun hafta (14) ve takvim gün toplamı (13) değişmez; silmede onay yok, "Geri al" var; "zaten sürüyor" taksitleri, kapatılmış planlar ve beklemedeki ödenmemiş taksitler ücret alamaz; sabit ödemelere yok; şema v16
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 21. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 22. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 

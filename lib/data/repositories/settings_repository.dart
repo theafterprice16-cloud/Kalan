@@ -44,8 +44,8 @@ class SettingsRepository {
 
   /// Switches the currency label. No conversion: shown amounts stay the
   /// same. When minor digits differ, every stored amount moves to the new
-  /// base in one transaction, rounding half up; payments and recurring
-  /// amounts never drop below one minor unit.
+  /// base in one transaction, rounding half up; payments, their extra
+  /// fees and recurring amounts never drop below one minor unit.
   Future<void> changeCurrency({
     required Currency from,
     required Currency to,
@@ -62,7 +62,13 @@ class SettingsRepository {
 
       for (final p in await _db.select(_db.payments).get()) {
         await (_db.update(_db.payments)..where((x) => x.id.equals(p.id))).write(
-          PaymentsCompanion(amountMinor: Value(scale(p.amountMinor, min: 1))),
+          PaymentsCompanion(
+            amountMinor: Value(scale(p.amountMinor, min: 1)),
+            // An extra fee (21) moves with its payment; never below 1.
+            extraFeeMinor: Value(
+              p.extraFeeMinor == null ? null : scale(p.extraFeeMinor!, min: 1),
+            ),
+          ),
         );
       }
       for (final r in await _db.select(_db.recurringPayments).get()) {

@@ -15,11 +15,17 @@ extension SourceRowX on SourceRow {
 }
 
 /// Payments from the start of a plan that are not marked paid in Kalan:
-/// the ones "already underway" may cover.
+/// the ones "already underway" may cover. A payment with an extra fee
+/// (21) is a record made in Kalan too: it is never covered, so its fee is
+/// never hidden in "paid before Kalan".
 int leadingRunOf(List<PaymentRow> payments) {
   var run = 0;
   for (final p in payments) {
-    if (p.isPaid && !p.paidBeforeKalan) break;
+    if (p.paidBeforeKalan) {
+      run++;
+      continue;
+    }
+    if (p.isPaid || p.extraFeeMinor != null) break;
     run++;
   }
   return run;
@@ -35,6 +41,13 @@ int maxPaidBeforeOf(List<PaymentRow> payments) {
 extension PaymentRowX on PaymentRow {
   LocalDate get date => LocalDate.fromEpochDay(dueDay);
   bool get isPaid => paidAt != null;
+
+  /// What this payment adds to "spoken for": its amount plus its extra
+  /// fee (21, [spokenForAmount]). Period totals, reminders and the amount
+  /// to keep in an account (18) use it; the plan's total, the payment's
+  /// own amount and card statements (16) use [PaymentRow.amountMinor].
+  int get spokenForMinor =>
+      spokenForAmount(amountMinor: amountMinor, extraFeeMinor: extraFeeMinor);
 
   /// The date before "Change date" first moved it (20); null otherwise.
   LocalDate? get originalDate =>
@@ -181,6 +194,12 @@ class PlanWithPayments {
 
   /// What was paid, paid before Kalan included.
   int get paidMinor => totalMinor - remainingMinor;
+
+  /// The extra fees (21) of the payments that count ([payments]): what
+  /// the plan adds to period totals beyond its installments. Never part
+  /// of [totalMinor].
+  int get extraFeesMinor =>
+      payments.fold(0, (sum, p) => sum + (p.extraFeeMinor ?? 0));
 
   /// Paid before Kalan plus paid in Kalan.
   int get paidCount =>

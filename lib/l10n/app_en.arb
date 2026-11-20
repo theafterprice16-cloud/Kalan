@@ -2415,5 +2415,111 @@
   "changeDateNotAvailable": "This payment's date can't be changed here any more.",
   "@changeDateNotAvailable": {
     "description": "'Change date' screen when the payment was paid, or its plan put on hold or closed, after the screen opened. Calm, no error tone. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "extraFeeAdd": "Add extra fee",
+  "@extraFeeAdd": {
+    "description": "Action on a payment: record a one-off fee the provider added. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeEdit": "Edit extra fee",
+  "@extraFeeEdit": {
+    "description": "Action on a payment that already has an extra fee: change or delete it. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeAddHint": "Record a fee your provider added.",
+  "@extraFeeAddHint": {
+    "description": "Hint under 'Add extra fee' in the payment's action sheet. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeLine": "Extra fee: {amount}",
+  "@extraFeeLine": {
+    "description": "Under a payment in the plan details: the fee recorded on it. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "6,00 €",
+        "description": "Formatted amount"
+      }
+    }
+  },
+  "extraFeesTotal": "Extra fees: {amount}",
+  "@extraFeesTotal": {
+    "description": "Plan summary line: all extra fees recorded on this plan's payments. Not a yearly total or a statistic. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "6,00 €",
+        "description": "Formatted amount"
+      }
+    }
+  },
+  "extraFeeRowNote": "+ {amount} extra fee",
+  "@extraFeeRowNote": {
+    "description": "Small note under a payment row: the fee recorded on top of the payment's own amount. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "6,00 €",
+        "description": "Formatted amount"
+      }
+    }
+  },
+  "extraFeeSheetTitle": "Extra fee",
+  "@extraFeeSheetTitle": {
+    "description": "Title of the sheet where the fee is entered. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeSheetHint": "Kalan doesn't calculate fees. Enter the amount from your provider; it counts in the same period as the payment.",
+  "@extraFeeSheetHint": {
+    "description": "Short explanation in the extra fee sheet. Calm; Kalan only keeps the user's record. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeNoteLabel": "Note (optional)",
+  "@extraFeeNoteLabel": {
+    "description": "Label of the optional short note field in the extra fee sheet. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeSaved": "Extra fee saved.",
+  "@extraFeeSaved": {
+    "description": "Short message after saving an extra fee. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeRemoved": "Extra fee removed.",
+  "@extraFeeRemoved": {
+    "description": "Short message after deleting an extra fee, shown with 'Undo'. Calm, not a warning. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeNotAllowed": "An extra fee can't be added to this payment.",
+  "@extraFeeNotAllowed": {
+    "description": "When the payment's plan was closed or put on hold meanwhile. Calm, no error tone. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)"
+  },
+  "extraFeeNoteTooLong": "{max, plural, =1{The note can be up to 1 character.} other{The note can be up to {max} characters.}}",
+  "@extraFeeNoteTooLong": {
+    "description": "Under the note field when it is too long. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)",
+    "placeholders": {
+      "max": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Longest note"
+      }
+    }
+  },
+  "pastDueRowFeeSemantics": "{days, plural, =1{{plan}, {amount}, plus {fee} extra fee, due 1 day ago} other{{plan}, {amount}, plus {fee} extra fee, due {days} days ago}}",
+  "@pastDueRowFeeSemantics": {
+    "description": "Screen reader label of a past-due row with an extra fee. Calm: a fact, not a warning. Nötr bir kayıt etiketi. 'Ceza' ya da suçlayıcı bir kelime kullanma; ücreti gecikmeye bağlayan bir ifade de kullanma. (A neutral record label. Never 'penalty' or a blaming word; never tie the fee to being late.)",
+    "placeholders": {
+      "plan": {
+        "type": "String",
+        "example": "Klarna",
+        "description": "Plan name"
+      },
+      "amount": {
+        "type": "String",
+        "example": "60,00 €",
+        "description": "The payment's own amount"
+      },
+      "fee": {
+        "type": "String",
+        "example": "6,00 €",
+        "description": "The extra fee"
+      },
+      "days": {
+        "type": "int",
+        "format": "decimalPattern",
+        "description": "Days since the due date"
+      }
+    }
   }
 }
