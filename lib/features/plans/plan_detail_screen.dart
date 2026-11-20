@@ -6,7 +6,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
-import '../../core/design/form_fields.dart';
 import '../../core/design/haptics.dart';
 import '../../core/design/kalan_dialog.dart';
 import '../../core/design/widgets.dart';
@@ -517,12 +516,10 @@ class _EditPaymentDialog extends StatefulWidget {
 class _EditPaymentDialogState extends State<_EditPaymentDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _amount;
-  late LocalDate _date;
 
   @override
   void initState() {
     super.initState();
-    _date = widget.payment.date;
     _amount = TextEditingController();
   }
 
@@ -552,13 +549,8 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DateField(
-                label: l10n.fieldPaymentDate,
-                value: _date,
-                format: context.longDate,
-                onChanged: (d) => setState(() => _date = d),
-              ),
-              const SizedBox(height: KalanSpace.md),
+              // The amount only: a date changes with "Change date" (20),
+              // which previews the periods and keeps the original date.
               AmountField(
                 fieldKey: const ValueKey('edit-amount'),
                 controller: _amount,
@@ -581,7 +573,7 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
           onPressed: () {
             if (!_formKey.currentState!.validate()) return;
             Navigator.pop(context, (
-              _date,
+              widget.payment.date,
               widget.ref.parseMoney(context, _amount.text)!,
             ));
           },

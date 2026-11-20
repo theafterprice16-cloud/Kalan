@@ -296,7 +296,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get editRejectedNoAbsorbers =>
-      'Farkı alacak sonraki ödeme yok. Yalnızca tarihi değiştirebilirsin.';
+      'Farkı alacak sonraki ödeme yok. Bu taksitin tutarı tek başına değiştirilemez.';
 
   @override
   String get editRejectedAbsorber =>
@@ -2139,7 +2139,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get editPaymentActionHint =>
-      'Tutarı ya da tarihi düzelt. Fark sonraki ödemelere dağıtılır.';
+      'Tutarı düzelt. Fark sonraki ödemelere dağıtılır.';
 
   @override
   String changeDateCurrent(String date) {

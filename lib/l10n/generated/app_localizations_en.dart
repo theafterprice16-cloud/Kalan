@@ -300,7 +300,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editRejectedNoAbsorbers =>
-      'There\'s no later payment to take the difference. You can still change the date.';
+      'There\'s no later payment to take the difference, so this amount can\'t change on its own.';
 
   @override
   String get editRejectedAbsorber =>
@@ -2131,7 +2131,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editPaymentActionHint =>
-      'Fix the amount or date. The difference is spread over later payments.';
+      'Fix the amount. The difference is spread over later payments.';
 
   @override
   String changeDateCurrent(String date) {
