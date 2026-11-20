@@ -256,6 +256,45 @@ void main() {
     });
   });
 
+  group('"Remind tomorrow" on a repeat, then the date changes (20)', () {
+    // Past due on 18 Nov, "Remind tomorrow" pressed on 20 Nov (repeats
+    // every day): the skip is for the rest of the 20th, back on the 21st.
+    final skip = ReminderSnooze(
+      id: 4,
+      kind: ReminderKind.overdue,
+      fireDate: d(11, 21),
+      minuteOfDay: 540,
+      refs: const [PlanPaymentRef(1)],
+      skipsDay: true,
+    );
+
+    test('unchanged: the skip still holds', () {
+      final list = plan(
+        [pay(1, d(11, 18))],
+        settings: settings(),
+        now: at(d(11, 20), 8),
+        snoozes: [skip],
+      );
+      expect(list.any((r) => r.fireDate == d(11, 20)), isFalse);
+      expect(list.first.fireDate, d(11, 21));
+    });
+
+    test('moved to 22 Nov: its own reminders on the 20th stay', () {
+      final list = plan(
+        [pay(1, d(11, 22))],
+        settings: settings(),
+        now: at(d(11, 20), 8),
+        snoozes: [skip],
+      );
+      // Without the rule the skip would wipe the 20th and the list would
+      // start at 21 Nov 09:00.
+      expect(slots(list).take(2), [
+        (d(11, 20), 9, 0, ahead),
+        (d(11, 20), 20, 0, ahead),
+      ]);
+    });
+  });
+
   group('Example 4: "Remind tomorrow" on a repeat', () {
     final due = d(11, 27);
     final s = settings(leadDays: 3);

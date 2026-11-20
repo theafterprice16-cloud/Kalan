@@ -1,4 +1,5 @@
 import '../date/local_date.dart';
+import 'pay_later.dart';
 import 'pay_period.dart';
 import 'period_summary.dart';
 import 'plan_draft.dart';
@@ -135,8 +136,9 @@ MoveNote? moveNoteOf({required LocalDate date, LocalDate? originalDate}) {
   return date > originalDate ? MoveNote.later : MoveNote.earlier;
 }
 
-/// Payment [seq] moved alone to [newDate] lands after the next payment
-/// (by number): the numbers stay, the plan lists payments by date.
+/// Payment [seq] moved alone to [newDate] lands after the next unpaid
+/// payment (by number): the numbers stay, the plan lists payments by
+/// date. A paid payment is settled, so it is never "the next payment".
 bool passesNextPayment(
   List<MovablePayment> payments, {
   required int seq,
@@ -144,7 +146,9 @@ bool passesNextPayment(
 }) {
   MovablePayment? next;
   for (final p in payments) {
-    if (p.seq > seq && (next == null || p.seq < next.seq)) next = p;
+    if (p.seq > seq && !p.isPaid && (next == null || p.seq < next.seq)) {
+      next = p;
+    }
   }
   return next != null && newDate > next.date;
 }
@@ -199,3 +203,19 @@ List<PeriodChange> periodChanges({
       if (delta != 0) PeriodChange(period, delta),
   ]..sort((a, b) => a.period.start.compareTo(b.period.start));
 }
+
+/// A "Pay later" plan edited after "Change date" (20): the recorded
+/// [movedDate] stays while the purchase date, the rule and a picked date
+/// are as stored; otherwise the rule decides the date again (and the note
+/// goes). The one check for the edit screen and the save.
+bool keepsMovedPayLaterDate({
+  required LocalDate movedDate,
+  required LocalDate? storedPurchase,
+  required PayLaterRule? storedRule,
+  required LocalDate purchase,
+  required PayLaterRule rule,
+  LocalDate? chosen,
+}) =>
+    storedPurchase == purchase &&
+    storedRule == rule &&
+    (chosen == null || chosen == movedDate);

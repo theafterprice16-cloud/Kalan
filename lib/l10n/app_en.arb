@@ -2411,5 +2411,9 @@
         "description": "Original date, day and month"
       }
     }
+  },
+  "changeDateNotAvailable": "This payment's date can't be changed here any more.",
+  "@changeDateNotAvailable": {
+    "description": "'Change date' screen when the payment was paid, or its plan put on hold or closed, after the screen opened. Calm, no error tone. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
   }
 }

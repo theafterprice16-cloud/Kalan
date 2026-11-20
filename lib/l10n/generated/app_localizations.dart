@@ -2989,6 +2989,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Moved earlier · originally {date}'**
   String moveNoteEarlier(String date);
+
+  /// 'Change date' screen when the payment was paid, or its plan put on hold or closed, after the screen opened. Calm, no error tone. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'This payment\'s date can\'t be changed here any more.'**
+  String get changeDateNotAvailable;
 }
 
 class _AppLocalizationsDelegate

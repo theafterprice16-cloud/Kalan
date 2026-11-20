@@ -477,5 +477,6 @@
   "changeDateLaterBeforeToday": "Sonraki bir taksit bugünden önceye düşüyor. Anahtarı kapatabilir ya da başka bir tarih seçebilirsin.",
   "changeDateDone": "Tarih kaydedildi.",
   "moveNoteLater": "Ertelendi · ilk tarih {date}",
-  "moveNoteEarlier": "Öne alındı · ilk tarih {date}"
+  "moveNoteEarlier": "Öne alındı · ilk tarih {date}",
+  "changeDateNotAvailable": "Bu taksitin tarihi artık buradan değiştirilemiyor."
 }

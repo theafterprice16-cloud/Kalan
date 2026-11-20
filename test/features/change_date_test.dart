@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
+import 'package:kalan/core/routing/router.dart';
+import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:material_ui/material_ui.dart';
@@ -207,6 +209,80 @@ void main() {
     );
     expect(LocalDate.fromDateTime(picker.firstDate), today);
     expect(LocalDate.fromDateTime(picker.initialDate!), today);
+  });
+
+  testWidgets('"Pay later": the edit screen shows the moved date, as the '
+      'save keeps it', (tester) async {
+    await pumpApp(
+      tester,
+      today: today,
+      seed: (db) async {
+        await seedSettings(db, currency: 'USD', payDay: 25);
+        final plans = PlanRepository(db);
+        final id = await plans.saveDraft(
+          PlanCalculator.payLater(
+            purchaseDate: LocalDate(2026, 11, 10),
+            rule: const PayLaterRule.days(14),
+            totalMinor: 9000,
+          ),
+          sourceId: null,
+          origin: PlanOrigin.template,
+          title: 'Tom',
+        );
+        await plans.movePayment(
+          planId: id,
+          seq: 1,
+          newDate: LocalDate(2026, 12, 1),
+          shiftLater: false,
+          today: today,
+        );
+      },
+    );
+    await openTom(tester);
+    expect(find.text('Ertelendi · ilk tarih 24 Kasım'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('plan-edit')));
+    await tester.pumpAndSettle();
+    final due = find.byKey(const ValueKey('pay-later-due'));
+    expect(
+      find.descendant(of: due, matching: find.textContaining('1 Ara 2026')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a picked day that has passed: a calm note, no save', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      today: today,
+      seed: seedTom,
+      overrides: [
+        initialRouteProvider.overrideWithValue(
+          Routes.paymentDate(1, 2, LocalDate(2026, 11, 14)),
+        ),
+      ],
+    );
+    expect(find.text('Yeni bir tarih seç.'), findsOneWidget);
+    final save = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('change-date-save')),
+    );
+    expect(save.onPressed, isNull);
+  });
+
+  testWidgets('put on hold while the screen is open: nothing to change', (
+    tester,
+  ) async {
+    final db = await pumpApp(tester, today: today, seed: seedTom);
+    await openTom(tester);
+    await tapPayment(tester, '4 Ara 2026');
+    await changeTo(tester, 10);
+    await tester.runAsync(() => PlanRepository(db).hold(1, today: today));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Bu taksitin tarihi artık buradan değiştirilemiyor.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('change-date-save')), findsNothing);
   });
 
   group('no "Change date"', () {

@@ -35,6 +35,11 @@ class PayLaterInput {
   /// The picked due date ("Pick a date").
   LocalDate? chosenDate;
 
+  /// Editing a plan whose date was changed with "Change date" (20): that
+  /// date and the purchase date and rule stored with it. The due line
+  /// shows the moved date while they are unchanged, as the save keeps it.
+  ({LocalDate date, LocalDate? purchase, PayLaterRule? rule})? moved;
+
   /// Shows [rule] as the selected chip (and its number).
   void setRule(PayLaterRule rule) {
     switch (rule.kind) {
@@ -80,6 +85,17 @@ class PayLaterInput {
     if (rule == null) return null;
     if (rule.kind == PayLaterRuleKind.chosenDate && chosenDate == null) {
       return null;
+    }
+    if (moved case final m?
+        when keepsMovedPayLaterDate(
+          movedDate: m.date,
+          storedPurchase: m.purchase,
+          storedRule: m.rule,
+          purchase: purchaseDate,
+          rule: rule,
+          chosen: chosenDate,
+        )) {
+      return m.date;
     }
     return payLaterDueDate(
       purchase: purchaseDate,

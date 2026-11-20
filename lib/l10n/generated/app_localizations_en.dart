@@ -2228,4 +2228,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String moveNoteEarlier(String date) {
     return 'Moved earlier · originally $date';
   }
+
+  @override
+  String get changeDateNotAvailable =>
+      'This payment\'s date can\'t be changed here any more.';
 }

@@ -2235,4 +2235,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String moveNoteEarlier(String date) {
     return 'Öne alındı · ilk tarih $date';
   }
+
+  @override
+  String get changeDateNotAvailable =>
+      'Bu taksitin tarihi artık buradan değiştirilemiyor.';
 }

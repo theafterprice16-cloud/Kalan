@@ -401,10 +401,16 @@ class PlanRepository {
     // again and the note goes.
     final keepsMove =
         payment.originalDay != null &&
-        plan.purchaseDay == purchaseDate.epochDay &&
-        plan.payLaterRule == rule.kind &&
-        plan.payLaterValue == rule.value &&
-        (chosenDate == null || chosenDate == payment.date);
+        keepsMovedPayLaterDate(
+          movedDate: payment.date,
+          storedPurchase: plan.purchaseDay == null
+              ? null
+              : LocalDate.fromEpochDay(plan.purchaseDay!),
+          storedRule: PayLaterRule.from(plan.payLaterRule, plan.payLaterValue),
+          purchase: purchaseDate,
+          rule: rule,
+          chosen: chosenDate,
+        );
     await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
       PlansCompanion(
         title: Value((trimmed?.isEmpty ?? true) ? null : trimmed),

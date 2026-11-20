@@ -264,6 +264,22 @@ void main() {
       expect(passesNextPayment(tom, seq: 2, newDate: d(2026, 12, 18)), isFalse);
       expect(passesNextPayment(tom, seq: 2, newDate: d(2026, 12, 6)), isFalse);
     });
+    test('a paid next payment is skipped', () {
+      final payments = [
+        tom[0],
+        tom[1],
+        MovablePayment(seq: 3, date: d(2026, 12, 18), isPaid: true),
+        tom[3],
+      ];
+      expect(
+        passesNextPayment(payments, seq: 2, newDate: d(2026, 12, 20)),
+        isFalse,
+      );
+      expect(
+        passesNextPayment(payments, seq: 2, newDate: d(2027, 1, 2)),
+        isTrue,
+      );
+    });
     test('the last payment has no next', () {
       expect(passesNextPayment(tom, seq: 4, newDate: d(2027, 6, 1)), isFalse);
     });
@@ -353,5 +369,25 @@ void main() {
       );
       expect(check(payments, 2, d(2026, 11, 30)), isNull);
     });
+  });
+
+  test('keepsMovedPayLaterDate: only while nothing it follows changes', () {
+    final moved = d(2026, 12, 1);
+    final purchase = d(2026, 11, 10);
+    const rule = PayLaterRule.days(14);
+    bool keeps({LocalDate? p, PayLaterRule r = rule, LocalDate? chosen}) =>
+        keepsMovedPayLaterDate(
+          movedDate: moved,
+          storedPurchase: purchase,
+          storedRule: rule,
+          purchase: p ?? purchase,
+          rule: r,
+          chosen: chosen,
+        );
+    expect(keeps(), isTrue);
+    expect(keeps(chosen: moved), isTrue);
+    expect(keeps(p: d(2026, 11, 11)), isFalse);
+    expect(keeps(r: const PayLaterRule.days(30)), isFalse);
+    expect(keeps(chosen: d(2026, 12, 2)), isFalse);
   });
 }

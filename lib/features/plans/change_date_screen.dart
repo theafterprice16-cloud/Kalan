@@ -171,12 +171,19 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
   bool _shiftLater = false;
   bool _saving = false;
 
+  /// The plan as it was when "Save" was tapped: shown while the screen
+  /// closes, so the saved date does not flash in as "Current date".
+  PlanWithPayments? _frozen;
+
   Future<void> _save(PlanWithPayments plan, LocalDate date) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
     final router = GoRouter.of(context);
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _frozen = plan;
+    });
     final rejected = await ref
         .read(planRepositoryProvider)
         .movePayment(
@@ -190,7 +197,10 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
     if (rejected != null) {
       // The plan changed meanwhile: the screen shows why from the same
       // check once it rebuilds.
-      setState(() => _saving = false);
+      setState(() {
+        _saving = false;
+        _frozen = null;
+      });
       return;
     }
     KalanHaptics.success();
@@ -205,9 +215,9 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final plans = ref.watch(plansProvider);
-    final plan = plans.value
-        ?.where((p) => p.plan.id == widget.planId)
-        .firstOrNull;
+    final plan =
+        _frozen ??
+        plans.value?.where((p) => p.plan.id == widget.planId).firstOrNull;
     final payment = plan?.allPayments
         .where((p) => p.seq == widget.seq)
         .firstOrNull;
@@ -256,6 +266,19 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
         !shift &&
         passesNextPayment(payments, seq: widget.seq, newDate: date);
     const gap = SizedBox(height: KalanSpace.md);
+    // Paid, put on hold or closed since the sheet opened (another screen,
+    // a notification): nothing to change here any more.
+    if (rejection == MoveRejection.notAllowed ||
+        rejection == MoveRejection.notFound) {
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.changeDateAction)),
+        body: EmptyState(
+          rejection == MoveRejection.notFound
+              ? l10n.planNotFound
+              : l10n.changeDateNotAvailable,
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.changeDateAction)),
@@ -295,7 +318,11 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
               value: date,
               format: context.longDate,
               firstDate: today,
-              helperText: rejection == MoveRejection.unchanged
+              // The same date, or a day that passed meanwhile (a date kept
+              // from the day before): a calm note, never an error.
+              helperText:
+                  rejection == MoveRejection.unchanged ||
+                      rejection == MoveRejection.beforeToday
                   ? l10n.changeDatePickNew
                   : null,
               onChanged: (d) => setState(() => _date = d),

@@ -52,7 +52,16 @@ List<PlannedReminder> planReminders({
       settings,
       skips: [
         for (final s in skips)
-          if (p.ref != null && s.refs.contains(p.ref)) s,
+          if (p.ref != null &&
+              s.refs.contains(p.ref) &&
+              // Pressed the day before it fires; a payment moved away
+              // since (20) is reminded on its new date only.
+              snoozeStillFits(
+                s.kind,
+                fireDate: s.fireDate.addDays(-1),
+                due: p.date,
+              ))
+            s,
       ],
     )) {
       groups.putIfAbsent(m, () => []).add(p);
