@@ -108,11 +108,21 @@ Future<void> openExtraFee(
             persist: false,
             action: SnackBarAction(
               label: l10n.actionUndo,
-              onPressed: () => repo.setExtraFee(
-                paymentId,
-                amountMinor: removed.amountMinor,
-                note: removed.note,
-              ),
+              onPressed: () async {
+                final rejection = await repo.setExtraFee(
+                  paymentId,
+                  amountMinor: removed.amountMinor,
+                  note: removed.note,
+                );
+                // The plan was closed or put on hold meanwhile.
+                if (rejection != null) {
+                  messenger
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      SnackBar(content: Text(l10n.extraFeeNotAllowed)),
+                    );
+                }
+              },
             ),
           ),
         );
