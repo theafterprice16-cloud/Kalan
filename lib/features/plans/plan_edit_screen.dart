@@ -599,7 +599,11 @@ class _FeeSection extends ConsumerWidget {
       title: Text(l10n.moreOptions),
       initiallyExpanded: plan.installmentFee != null,
       tilePadding: EdgeInsets.zero,
-      childrenPadding: const EdgeInsets.only(bottom: KalanSpace.xs),
+      // Room above the field, so its floating label is never cut off.
+      childrenPadding: const EdgeInsets.only(
+        top: KalanSpace.xs,
+        bottom: KalanSpace.xs,
+      ),
       children: [
         InstallmentFeeFields(
           controller: controller,

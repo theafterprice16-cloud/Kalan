@@ -1460,6 +1460,166 @@ void main() {
         });
       }
 
+      // Fee per payment (22): Kenji, JPY 10.000 in 4 monthly from 10 Nov,
+      // 390 ¥ on every payment (example 1); Sofia's EUR 120,00 in 3 with
+      // 2,50 € on the first only (example 2); today 15 Nov.
+      for (final (lang, locale, addPlan, monthly, plansTab) in [
+        (
+          'tr',
+          const Locale('tr', 'TR'),
+          'Plan ekle',
+          'Aylık taksit',
+          'Planlar',
+        ),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Add plan',
+          'Monthly installments',
+          'Plans',
+        ),
+      ]) {
+        Future<void> fillAdd(
+          WidgetTester tester, {
+          required String total,
+          required String count,
+          required String fee,
+          bool firstOnly = false,
+        }) async {
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, monthly));
+          await tester.pumpAndSettle();
+          await tester.enterText(find.byKey(const ValueKey('source')), 'Paidy');
+          await tester.enterText(find.byKey(const ValueKey('total')), total);
+          await tester.enterText(find.byKey(const ValueKey('count')), count);
+          final details = find.byKey(const ValueKey('more-details'));
+          await scrollTo(tester, details);
+          await tester.tap(details);
+          await tester.pumpAndSettle();
+          final feeField = find.byKey(const ValueKey('installment-fee'));
+          await scrollTo(tester, feeField);
+          await tester.enterText(feeField, fee);
+          await tester.pumpAndSettle();
+          if (firstOnly) {
+            final choice = find.descendant(
+              of: find.byKey(const ValueKey('installment-fee-scope')),
+              matching: find.byType(ChoiceChip),
+            );
+            await tester.tap(choice.last);
+            await tester.pumpAndSettle();
+          }
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+        }
+
+        Future<int> seedKenji(
+          AppDatabase db, {
+          InstallmentFeeScope scope = InstallmentFeeScope.everyPayment,
+        }) async {
+          await seedSettings(db, currency: 'JPY', payDay: 25);
+          final plans = PlanRepository(db);
+          final id = await plans.saveDraft(
+            PlanCalculator.monthly(
+              firstDate: LocalDate(2026, 11, 10),
+              totalMinor: 10000,
+              count: 4,
+            ),
+            sourceId: await SourceRepository(
+              db,
+              plans,
+            ).findOrCreateProvider('Paidy'),
+            origin: PlanOrigin.template,
+            title: 'Kenji',
+          );
+          final first = await (db.select(
+            db.payments,
+          )..where((p) => p.seq.equals(1))).getSingle();
+          await plans.setPaid(first.id, paid: true);
+          await plans.editPlan(
+            id,
+            count: 4,
+            paidBefore: 0,
+            installmentFee: (feeMinor: 390, scope: scope),
+          );
+          return id;
+        }
+
+        testWidgets('add plan, fee open, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedSettings(db, currency: 'JPY', payDay: 25),
+          );
+          await fillAdd(tester, total: '10000', count: '4', fee: '390');
+          await shoot(tester, '84-add-plan-fee-open-$lang-$theme');
+        });
+
+        testWidgets('add plan, fee preview, example 1, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedSettings(db, currency: 'JPY', payDay: 25),
+          );
+          await fillAdd(tester, total: '10000', count: '4', fee: '390');
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('preview-fee-summary')),
+          );
+          await shoot(tester, '85-add-plan-fee-preview-$lang-$theme');
+        });
+
+        testWidgets('add plan, first only, example 2, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedSettings(db, currency: 'EUR', payDay: 25),
+          );
+          await fillAdd(
+            tester,
+            total: lang == 'tr' ? '120,00' : '120.00',
+            count: '3',
+            fee: lang == 'tr' ? '2,50' : '2.50',
+            firstOnly: true,
+          );
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('preview-fee-summary')),
+          );
+          await shoot(tester, '86-add-plan-fee-first-$lang-$theme');
+        });
+
+        testWidgets('plan detail with fees, example 3, $lang', (tester) async {
+          await start(tester, locale: locale, today: feeToday, seed: seedKenji);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Kenji'));
+          await shoot(tester, '87-plan-detail-fee-$lang-$theme');
+        });
+
+        testWidgets('plan edit, first paid, example 4, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) =>
+                seedKenji(db, scope: InstallmentFeeScope.firstPaymentOnly),
+          );
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Kenji'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('plan-edit')));
+          await tester.pumpAndSettle();
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('installment-fee-first-paid')),
+          );
+          await shoot(tester, '88-plan-edit-fee-first-paid-$lang-$theme');
+        });
+      }
+
       testWidgets('ios, change date', variant: ios, (tester) async {
         await start(
           tester,
