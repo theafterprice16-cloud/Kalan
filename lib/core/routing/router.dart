@@ -9,6 +9,7 @@ import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/periods/coming_periods_screen.dart';
 import '../../features/plans/add_plan_screen.dart';
 import '../../features/plans/adjust_amount_screen.dart';
+import '../../features/plans/change_date_screen.dart';
 import '../../features/plans/plan_detail_screen.dart';
 import '../../features/plans/plan_edit_screen.dart';
 import '../../features/plans/plans_screen.dart';
@@ -21,6 +22,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/sources/card_statement_screen.dart';
 import '../../features/sources/source_edit_screen.dart';
 import '../../features/sources/sources_screen.dart';
+import '../date/local_date.dart';
 import 'routes.dart';
 import 'tab_messengers.dart';
 
@@ -93,6 +95,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/plan/:id/adjust',
         builder: (_, state) =>
             AdjustAmountScreen(planId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/plan/:id/payment/:seq/date',
+        builder: (_, state) => ChangeDateScreen(
+          planId: int.parse(state.pathParameters['id']!),
+          seq: int.parse(state.pathParameters['seq']!),
+          initialDate: switch (int.tryParse(
+            state.uri.queryParameters['to'] ?? '',
+          )) {
+            final day? => LocalDate.fromEpochDay(day),
+            null => null,
+          },
+        ),
       ),
       GoRoute(
         path: Routes.sources,

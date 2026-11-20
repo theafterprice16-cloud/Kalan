@@ -2116,4 +2116,116 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get adjustNothingLeft =>
       'No payments would be left. Do you want to close the plan?';
+
+  @override
+  String paymentActionsTitle(String position, String date) {
+    return '$position · $date';
+  }
+
+  @override
+  String get changeDateAction => 'Change date';
+
+  @override
+  String get changeDateActionHint =>
+      'Record the new date your provider gave you.';
+
+  @override
+  String get editPaymentActionHint =>
+      'Fix the amount or date. The difference is spread over later payments.';
+
+  @override
+  String changeDateCurrent(String date) {
+    return 'Current date: $date';
+  }
+
+  @override
+  String get changeDateNewDate => 'New date';
+
+  @override
+  String get changeDatePickNew => 'Pick a new date.';
+
+  @override
+  String get changeDateShiftLater => 'Move later payments too';
+
+  @override
+  String get changeDatePreviewTitle => 'Effect on your pay periods';
+
+  @override
+  String changeDateLeftUp(String amount) {
+    return 'Left +$amount ↑';
+  }
+
+  @override
+  String changeDateLeftDown(String amount) {
+    return 'Left −$amount ↓';
+  }
+
+  @override
+  String changeDateCommittedUp(String amount) {
+    return 'Committed +$amount ↑';
+  }
+
+  @override
+  String changeDateCommittedDown(String amount) {
+    return 'Committed −$amount ↓';
+  }
+
+  @override
+  String changeDateLeftUpSemantics(String amount) {
+    return 'Left goes up by $amount';
+  }
+
+  @override
+  String changeDateLeftDownSemantics(String amount) {
+    return 'Left goes down by $amount';
+  }
+
+  @override
+  String changeDateCommittedUpSemantics(String amount) {
+    return 'Committed goes up by $amount';
+  }
+
+  @override
+  String changeDateCommittedDownSemantics(String amount) {
+    return 'Committed goes down by $amount';
+  }
+
+  @override
+  String get changeDateSamePeriod =>
+      'Same period; what\'s left stays the same.';
+
+  @override
+  String get changeDateSamePeriodCommitted =>
+      'Same period; what\'s committed stays the same.';
+
+  @override
+  String changeDateMorePeriods(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'and $count more periods',
+      one: 'and 1 more period',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get changeDatePassesNext => 'This date is after the next payment.';
+
+  @override
+  String get changeDateLaterBeforeToday =>
+      'A later payment would fall before today. You can turn the switch off or pick another date.';
+
+  @override
+  String get changeDateDone => 'Date saved.';
+
+  @override
+  String moveNoteLater(String date) {
+    return 'Moved later · originally $date';
+  }
+
+  @override
+  String moveNoteEarlier(String date) {
+    return 'Moved earlier · originally $date';
+  }
 }

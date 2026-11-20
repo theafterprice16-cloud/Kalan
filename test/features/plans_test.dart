@@ -20,6 +20,9 @@ void main() {
 
     await tester.tap(find.text('20 Kas 2026'));
     await tester.pumpAndSettle();
+    // The payment sheet (20): the edit is its second option.
+    await tester.tap(find.byKey(const ValueKey('payment-edit')));
+    await tester.pumpAndSettle();
     expect(find.text('Ödemeyi düzelt'), findsOneWidget);
     expect(find.text('Ödeme tarihi'), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('edit-amount')), '160');
@@ -49,6 +52,8 @@ void main() {
     await tester.tap(find.text('Klarna'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('1 Oca 2027'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('payment-edit')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('edit-amount')), '50');
     await tester.tap(find.text('Kaydet'));

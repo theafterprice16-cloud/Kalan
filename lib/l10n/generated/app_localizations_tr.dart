@@ -2125,4 +2125,114 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get adjustNothingLeft =>
       'Kalan taksit kalmıyor. Planı kapatmak ister misin?';
+
+  @override
+  String paymentActionsTitle(String position, String date) {
+    return '$position · $date';
+  }
+
+  @override
+  String get changeDateAction => 'Tarihi değiştir';
+
+  @override
+  String get changeDateActionHint => 'Sağlayıcının verdiği yeni tarihi kaydet.';
+
+  @override
+  String get editPaymentActionHint =>
+      'Tutarı ya da tarihi düzelt. Fark sonraki ödemelere dağıtılır.';
+
+  @override
+  String changeDateCurrent(String date) {
+    return 'Şu anki tarih: $date';
+  }
+
+  @override
+  String get changeDateNewDate => 'Yeni tarih';
+
+  @override
+  String get changeDatePickNew => 'Yeni bir tarih seç.';
+
+  @override
+  String get changeDateShiftLater => 'Sonraki taksitleri de kaydır';
+
+  @override
+  String get changeDatePreviewTitle => 'Dönemlere etkisi';
+
+  @override
+  String changeDateLeftUp(String amount) {
+    return 'Kalan +$amount ↑';
+  }
+
+  @override
+  String changeDateLeftDown(String amount) {
+    return 'Kalan −$amount ↓';
+  }
+
+  @override
+  String changeDateCommittedUp(String amount) {
+    return 'Söz verilmiş +$amount ↑';
+  }
+
+  @override
+  String changeDateCommittedDown(String amount) {
+    return 'Söz verilmiş −$amount ↓';
+  }
+
+  @override
+  String changeDateLeftUpSemantics(String amount) {
+    return 'Kalan $amount artıyor';
+  }
+
+  @override
+  String changeDateLeftDownSemantics(String amount) {
+    return 'Kalan $amount azalıyor';
+  }
+
+  @override
+  String changeDateCommittedUpSemantics(String amount) {
+    return 'Söz verilmiş $amount artıyor';
+  }
+
+  @override
+  String changeDateCommittedDownSemantics(String amount) {
+    return 'Söz verilmiş $amount azalıyor';
+  }
+
+  @override
+  String get changeDateSamePeriod => 'Dönem değişmiyor; kalan aynı kalıyor.';
+
+  @override
+  String get changeDateSamePeriodCommitted =>
+      'Dönem değişmiyor; söz verilmiş tutar aynı kalıyor.';
+
+  @override
+  String changeDateMorePeriods(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 've $count dönem daha',
+      one: 've 1 dönem daha',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get changeDatePassesNext => 'Bu tarih bir sonraki taksitten sonra.';
+
+  @override
+  String get changeDateLaterBeforeToday =>
+      'Sonraki bir taksit bugünden önceye düşüyor. Anahtarı kapatabilir ya da başka bir tarih seçebilirsin.';
+
+  @override
+  String get changeDateDone => 'Tarih kaydedildi.';
+
+  @override
+  String moveNoteLater(String date) {
+    return 'Ertelendi · ilk tarih $date';
+  }
+
+  @override
+  String moveNoteEarlier(String date) {
+    return 'Öne alındı · ilk tarih $date';
+  }
 }

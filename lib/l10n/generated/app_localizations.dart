@@ -2839,6 +2839,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No payments would be left. Do you want to close the plan?'**
   String get adjustNothingLeft;
+
+  /// Title of the sheet that opens when an installment is tapped in plan details: its number and its date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'{position} · {date}'**
+  String paymentActionsTitle(String position, String date);
+
+  /// Option in the installment sheet and title of its screen: records a new date the provider set for this one installment. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Change date'**
+  String get changeDateAction;
+
+  /// Explanation under 'Change date' in the installment sheet. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Record the new date your provider gave you.'**
+  String get changeDateActionHint;
+
+  /// Explanation under 'Edit payment' in the installment sheet (the existing amount and date edit). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Fix the amount or date. The difference is spread over later payments.'**
+  String get editPaymentActionHint;
+
+  /// 'Change date' screen: the installment's date before the change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Current date: {date}'**
+  String changeDateCurrent(String date);
+
+  /// 'Change date' screen: label of the date field. Earliest date is today. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'New date'**
+  String get changeDateNewDate;
+
+  /// 'Change date' screen: under the date field while it still shows the current date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a new date.'**
+  String get changeDatePickNew;
+
+  /// 'Change date' screen: switch, off by default. On: every later unpaid installment moves by the same number of days. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Move later payments too'**
+  String get changeDateShiftLater;
+
+  /// 'Change date' screen: heading of the preview of which pay periods change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Effect on your pay periods'**
+  String get changeDatePreviewTitle;
+
+  /// Preview row: what is left in this pay period goes up by the amount. Sign and arrow carry the meaning, not color. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Left +{amount} ↑'**
+  String changeDateLeftUp(String amount);
+
+  /// Preview row: what is left in this pay period goes down by the amount. Sign and arrow carry the meaning, not color. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Left −{amount} ↓'**
+  String changeDateLeftDown(String amount);
+
+  /// Preview row when no income is entered: the amount committed in this pay period goes up. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Committed +{amount} ↑'**
+  String changeDateCommittedUp(String amount);
+
+  /// Preview row when no income is entered: the amount committed in this pay period goes down. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Committed −{amount} ↓'**
+  String changeDateCommittedDown(String amount);
+
+  /// Screen reader text for 'Left +{amount} ↑'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Left goes up by {amount}'**
+  String changeDateLeftUpSemantics(String amount);
+
+  /// Screen reader text for 'Left −{amount} ↓'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Left goes down by {amount}'**
+  String changeDateLeftDownSemantics(String amount);
+
+  /// Screen reader text for 'Committed +{amount} ↑'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Committed goes up by {amount}'**
+  String changeDateCommittedUpSemantics(String amount);
+
+  /// Screen reader text for 'Committed −{amount} ↓'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Committed goes down by {amount}'**
+  String changeDateCommittedDownSemantics(String amount);
+
+  /// Preview when no pay period total changes (income entered). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Same period; what\'s left stays the same.'**
+  String get changeDateSamePeriod;
+
+  /// Preview when no pay period total changes (no income entered). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Same period; what\'s committed stays the same.'**
+  String get changeDateSamePeriodCommitted;
+
+  /// Last preview line when more than 6 pay periods change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{and 1 more period} other{and {count} more periods}}'**
+  String changeDateMorePeriods(int count);
+
+  /// Calm info line on the 'Change date' screen when the new date is after the next installment (allowed; numbers stay). Not a warning. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'This date is after the next payment.'**
+  String get changeDatePassesNext;
+
+  /// Calm note when moving later payments too would put one before today; saving is not possible then. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'A later payment would fall before today. You can turn the switch off or pick another date.'**
+  String get changeDateLaterBeforeToday;
+
+  /// Snackbar after saving a changed installment date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Date saved.'**
+  String get changeDateDone;
+
+  /// Muted note under an installment whose date was changed to a later day, with its original date. A record, not a judgment. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Moved later · originally {date}'**
+  String moveNoteLater(String date);
+
+  /// Muted note under an installment whose date was changed to an earlier day, with its original date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  ///
+  /// In en, this message translates to:
+  /// **'Moved earlier · originally {date}'**
+  String moveNoteEarlier(String date);
 }
 
 class _AppLocalizationsDelegate

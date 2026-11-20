@@ -21,6 +21,7 @@ import '../onboarding/pay_form.dart';
 import '../reminders/reminder_choice_tile.dart';
 import '../reminders/reminder_settings_store.dart';
 import '../reminders/repeat_mode_ui.dart';
+import 'change_date_screen.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
 import 'plan_labels.dart';
@@ -387,13 +388,32 @@ class _PaymentRow extends ConsumerWidget {
     final pastDue =
         !held &&
         isPastDue(dueDate: payment.date, isPaid: payment.isPaid, today: today);
+    // "Pay later": amount and dates change together, on the edit screen.
+    Future<void> edit() async => plan.isPayLater
+        ? context.push(Routes.planEdit(plan.plan.id))
+        : _edit(context, ref);
+    // "Change date" (20): unpaid payments of open plans, not card ones.
+    final canMove = canChangeDate(
+      status: plan.status,
+      kind: plan.plan.kind,
+      isPaid: payment.isPaid,
+    );
     return InkWell(
-      // "Pay later": amount and dates change together, on the edit screen.
       onTap: readOnly
           ? null
-          : plan.isPayLater
-          ? () => context.push(Routes.planEdit(plan.plan.id))
-          : () => _edit(context, ref),
+          : canMove
+          ? () async {
+              final choice = await openPaymentActions(
+                context,
+                ref,
+                plan,
+                payment,
+              );
+              if (choice == PaymentChoice.edit && context.mounted) {
+                await edit();
+              }
+            }
+          : edit,
       child: Padding(
         padding: const EdgeInsetsDirectional.fromSTEB(
           KalanSpace.md,
@@ -440,6 +460,7 @@ class _PaymentRow extends ConsumerWidget {
                         Text(l10n.editedTag, style: secondary),
                     ],
                   ),
+                  MoveNoteText(payment: payment),
                 ],
               ),
             ),
