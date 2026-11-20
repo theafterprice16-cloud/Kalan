@@ -99,22 +99,29 @@ class ReminderPayment {
     this.method,
     this.account,
     this.extraFeeMinor,
+    this.installmentFeeMinor,
   });
 
   final String name;
   final LocalDate date;
 
-  /// The payment's own amount, its extra fee left out.
+  /// The payment's own amount, its fees left out.
   final int amountMinor;
+
+  /// The fee per payment (22) this payment took; null when none.
+  final int? installmentFeeMinor;
 
   /// The payment's extra fee (21), typed by the user; null when none.
   final int? extraFeeMinor;
 
-  /// What the reminder says is due: the amount plus the extra fee (21).
-  /// The one rule for every reminder total; without a fee, exactly the
-  /// amount, as before.
-  int get dueMinor =>
-      spokenForAmount(amountMinor: amountMinor, extraFeeMinor: extraFeeMinor);
+  /// What the reminder says is due: the amount plus the fee per payment
+  /// (22) plus the extra fee (21). The one rule for every reminder total;
+  /// without fees, exactly the amount, as before.
+  int get dueMinor => spokenForAmount(
+    amountMinor: amountMinor,
+    installmentFeeMinor: installmentFeeMinor,
+    extraFeeMinor: extraFeeMinor,
+  );
 
   final bool isPaid;
   final ReminderChoice choice;

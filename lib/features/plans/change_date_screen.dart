@@ -370,7 +370,7 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
               [
                 if (!plan.isPayLater)
                   l10n.progressLabel(payment.seq, plan.plan.installmentCount),
-                ref.money(context, payment.amountMinor),
+                ref.money(context, payment.installmentMinor),
               ].join(' · '),
               style: muted,
             ),

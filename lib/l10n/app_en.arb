@@ -2521,5 +2521,88 @@
         "description": "Days since the due date"
       }
     }
+  },
+  "installmentFeeLabel": "Fee per payment",
+  "@installmentFeeLabel": {
+    "description": "Optional amount field under 'More details' on the add and edit plan screens: a fixed fee the plan charges with its payments. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeeHelper": "A fixed fee your provider charges with payments. Leave empty for none.",
+  "@installmentFeeHelper": {
+    "description": "Helper text under the fee per payment field. Kalan never calculates or suggests it. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeeScopeLabel": "Charged on",
+  "@installmentFeeScopeLabel": {
+    "description": "Heading of the choice of which payments take the fee per payment. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeeScopeEvery": "On every payment",
+  "@installmentFeeScopeEvery": {
+    "description": "Choice: the fee per payment is added to every payment (default). Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeeScopeFirst": "First payment only",
+  "@installmentFeeScopeFirst": {
+    "description": "Choice: the fee per payment is added to payment number 1 only. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeeIncluded": "Includes {fee} payment fee",
+  "@installmentFeeIncluded": {
+    "description": "Muted note under an installment amount that includes the plan's fee per payment. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)",
+    "placeholders": {
+      "fee": {
+        "type": "String",
+        "example": "390 ¥",
+        "description": "Formatted amount"
+      }
+    }
+  },
+  "planAmountLabel": "Plan amount",
+  "@planAmountLabel": {
+    "description": "Plan summary row label: the plan's amount without fees per payment. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeesLabel": "Payment fees",
+  "@installmentFeesLabel": {
+    "description": "Plan summary row label: the fees per payment of all the plan's payments. Not a statistic or a warning. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "planTotalLabel": "Total",
+  "@planTotalLabel": {
+    "description": "Plan summary row label: plan amount plus payment fees. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "installmentFeeAffects": "{count, plural, =1{This changes 1 unpaid payment.} other{This changes {count} unpaid payments.}}",
+  "@installmentFeeAffects": {
+    "description": "Calm line on the edit plan screen when the fee per payment change touches unpaid payments; paid payments never change. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "installmentFeeFirstPaid": "The first payment is already paid, so no fee is added.",
+  "@installmentFeeFirstPaid": {
+    "description": "Calm line on the edit plan screen: 'First payment only' is chosen but the first payment is already paid, so no payment takes the fee. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)"
+  },
+  "moreOptions": "More options",
+  "@moreOptions": {
+    "description": "Collapsed section on the edit plan screen holding the fee per payment (22). Closed by default; open when the plan has a fee. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)"
+  },
+  "installmentFeeOnTop": "The {fee} payment fee is added on top.",
+  "@installmentFeeOnTop": {
+    "description": "Muted line in the 'Edit payment' dialog: the amount typed is the installment without the plan's fee per payment, which is added on top. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)",
+    "placeholders": {
+      "fee": {
+        "type": "String",
+        "example": "390 ¥",
+        "description": "Formatted amount"
+      }
+    }
+  },
+  "adjustFeesStay": "Payment fees ({fees}) stay the same.",
+  "@adjustFeesStay": {
+    "description": "Muted line on the 'Adjust amount' screen (19) of a plan with fees per payment (22): the new total changes installment amounts only; the fees stay. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)",
+    "placeholders": {
+      "fees": {
+        "type": "String",
+        "example": "1.170 ¥",
+        "description": "Formatted amount"
+      }
+    }
   }
 }

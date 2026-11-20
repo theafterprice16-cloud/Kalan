@@ -157,6 +157,15 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
               style: muted,
             ),
             Text(l10n.adjustPaidSoFar(ref.money(context, paid)), style: muted),
+            // The new total is the plan amount; fees per payment (22) stay.
+            if (plan.installmentFeesMinor > 0)
+              Text(
+                l10n.adjustFeesStay(
+                  ref.money(context, plan.installmentFeesMinor),
+                ),
+                key: const ValueKey('adjust-fees-stay'),
+                style: muted,
+              ),
             gap,
             TextField(
               key: const ValueKey('adjust-total'),
@@ -220,6 +229,10 @@ class _Preview extends ConsumerWidget {
     final l10n = context.l10n;
     final muted = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: context.colors.textMuted);
+    int? feeOf(int seq) => plan.allPayments
+        .where((p) => p.seq == seq)
+        .firstOrNull
+        ?.installmentFeeMinor;
     return Card(
       key: const ValueKey('adjust-preview'),
       child: Padding(
@@ -253,8 +266,15 @@ class _Preview extends ConsumerWidget {
                           ),
                         ),
                       Expanded(child: Text(context.longDate(p.date))),
+                      // As on the plan: the installment with its fee (22).
                       AmountText(
-                        ref.money(context, p.amountMinor),
+                        ref.money(
+                          context,
+                          installmentAmount(
+                            amountMinor: p.amountMinor,
+                            installmentFeeMinor: feeOf(p.seq),
+                          ),
+                        ),
                         size: AmountSize.small,
                       ),
                     ],

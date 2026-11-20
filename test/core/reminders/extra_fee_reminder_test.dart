@@ -20,6 +20,7 @@ late tz.Location istanbul;
 ReminderPayment pay(
   int amount, {
   int? fee,
+  int? planFee,
   String name = 'Klarna',
   PaymentMethod? method,
   ChargeAccount? account,
@@ -29,6 +30,7 @@ ReminderPayment pay(
   date: d(11, 14),
   amountMinor: amount,
   extraFeeMinor: fee,
+  installmentFeeMinor: planFee,
   method: method,
   account: account,
   ref: PlanPaymentRef(ref),
@@ -125,5 +127,20 @@ void main() {
       [for (final r in withField) (r.id, r.fireAt, r.title, r.body)],
       [for (final r in before) (r.id, r.fireAt, r.title, r.body)],
     );
+  });
+
+  // Fee per payment (22, decision 10).
+  test('example 1: 2.500 ¥ with a 390 ¥ fee per payment says 2.890 ¥', () {
+    final r = plan([pay(2500, planFee: 390)], currency: 'JPY');
+    final ahead = kindOf(r, ReminderKind.ahead);
+    expect(ahead.totalMinor, 2890);
+    expect(ahead.body, contains('2.890'));
+    expect(kindOf(r, ReminderKind.onDay).body, contains('2.890'));
+  });
+
+  test('a fee per payment and an extra fee together', () {
+    final r = plan([pay(4000, planFee: 250, fee: 600)]);
+    expect(kindOf(r, ReminderKind.ahead).totalMinor, 4850);
+    expect(kindOf(r, ReminderKind.ahead).body, contains('48,50'));
   });
 }

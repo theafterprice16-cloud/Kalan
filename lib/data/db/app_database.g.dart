@@ -888,6 +888,32 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _installmentFeeMinorMeta =
+      const VerificationMeta('installmentFeeMinor');
+  @override
+  late final GeneratedColumn<int> installmentFeeMinor = GeneratedColumn<int>(
+    'installment_fee_minor',
+    aliasedName,
+    true,
+    check: () =>
+        installmentFeeMinor.isNull() |
+        ComparableExpr(installmentFeeMinor).isBiggerOrEqualValue(1),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<InstallmentFeeScope, String>
+  installmentFeeScope =
+      GeneratedColumn<String>(
+        'installment_fee_scope',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('everyPayment'),
+      ).withConverter<InstallmentFeeScope>(
+        $PlansTable.$converterinstallmentFeeScope,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -914,6 +940,8 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     holdCheckDay,
     reopenedDay,
     closedDay,
+    installmentFeeMinor,
+    installmentFeeScope,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1064,6 +1092,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         closedDay.isAcceptableOrUnknown(data['closed_day']!, _closedDayMeta),
       );
     }
+    if (data.containsKey('installment_fee_minor')) {
+      context.handle(
+        _installmentFeeMinorMeta,
+        installmentFeeMinor.isAcceptableOrUnknown(
+          data['installment_fee_minor']!,
+          _installmentFeeMinorMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1183,6 +1220,16 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         DriftSqlType.int,
         data['${effectivePrefix}closed_day'],
       ),
+      installmentFeeMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}installment_fee_minor'],
+      ),
+      installmentFeeScope: $PlansTable.$converterinstallmentFeeScope.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}installment_fee_scope'],
+        )!,
+      ),
     );
   }
 
@@ -1221,6 +1268,10 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
       const EnumNameConverter<CloseReason>(CloseReason.values);
   static JsonTypeConverter2<CloseReason?, String?, String?>
   $convertercloseReasonn = JsonTypeConverter2.asNullable($convertercloseReason);
+  static JsonTypeConverter2<InstallmentFeeScope, String, String>
+  $converterinstallmentFeeScope = const EnumNameConverter<InstallmentFeeScope>(
+    InstallmentFeeScope.values,
+  );
 }
 
 class PlanRow extends DataClass implements Insertable<PlanRow> {
@@ -1285,6 +1336,15 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   /// The day a plan was closed; null for every other plan. Closing cannot
   /// be undone.
   final int? closedDay;
+
+  /// The plan's fee per payment as typed (schema v17, 22): never computed.
+  /// Empty for no fee; never on card installments. Each payment keeps the
+  /// fee it took in [Payments.installmentFeeMinor], so a paid one keeps its own.
+  final int? installmentFeeMinor;
+
+  /// Which payments take the fee: every payment unless "first payment
+  /// only" is chosen. Always every payment for "Pay later".
+  final InstallmentFeeScope installmentFeeScope;
   const PlanRow({
     required this.id,
     this.sourceId,
@@ -1310,6 +1370,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     this.holdCheckDay,
     this.reopenedDay,
     this.closedDay,
+    this.installmentFeeMinor,
+    required this.installmentFeeScope,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1386,6 +1448,14 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     if (!nullToAbsent || closedDay != null) {
       map['closed_day'] = Variable<int>(closedDay);
     }
+    if (!nullToAbsent || installmentFeeMinor != null) {
+      map['installment_fee_minor'] = Variable<int>(installmentFeeMinor);
+    }
+    {
+      map['installment_fee_scope'] = Variable<String>(
+        $PlansTable.$converterinstallmentFeeScope.toSql(installmentFeeScope),
+      );
+    }
     return map;
   }
 
@@ -1445,6 +1515,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       closedDay: closedDay == null && nullToAbsent
           ? const Value.absent()
           : Value(closedDay),
+      installmentFeeMinor: installmentFeeMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(installmentFeeMinor),
+      installmentFeeScope: Value(installmentFeeScope),
     );
   }
 
@@ -1492,6 +1566,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       holdCheckDay: serializer.fromJson<int?>(json['holdCheckDay']),
       reopenedDay: serializer.fromJson<int?>(json['reopenedDay']),
       closedDay: serializer.fromJson<int?>(json['closedDay']),
+      installmentFeeMinor: serializer.fromJson<int?>(
+        json['installmentFeeMinor'],
+      ),
+      installmentFeeScope: $PlansTable.$converterinstallmentFeeScope.fromJson(
+        serializer.fromJson<String>(json['installmentFeeScope']),
+      ),
     );
   }
   @override
@@ -1536,6 +1616,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       'holdCheckDay': serializer.toJson<int?>(holdCheckDay),
       'reopenedDay': serializer.toJson<int?>(reopenedDay),
       'closedDay': serializer.toJson<int?>(closedDay),
+      'installmentFeeMinor': serializer.toJson<int?>(installmentFeeMinor),
+      'installmentFeeScope': serializer.toJson<String>(
+        $PlansTable.$converterinstallmentFeeScope.toJson(installmentFeeScope),
+      ),
     };
   }
 
@@ -1564,6 +1648,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     Value<int?> holdCheckDay = const Value.absent(),
     Value<int?> reopenedDay = const Value.absent(),
     Value<int?> closedDay = const Value.absent(),
+    Value<int?> installmentFeeMinor = const Value.absent(),
+    InstallmentFeeScope? installmentFeeScope,
   }) => PlanRow(
     id: id ?? this.id,
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
@@ -1597,6 +1683,10 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     holdCheckDay: holdCheckDay.present ? holdCheckDay.value : this.holdCheckDay,
     reopenedDay: reopenedDay.present ? reopenedDay.value : this.reopenedDay,
     closedDay: closedDay.present ? closedDay.value : this.closedDay,
+    installmentFeeMinor: installmentFeeMinor.present
+        ? installmentFeeMinor.value
+        : this.installmentFeeMinor,
+    installmentFeeScope: installmentFeeScope ?? this.installmentFeeScope,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -1656,6 +1746,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ? data.reopenedDay.value
           : this.reopenedDay,
       closedDay: data.closedDay.present ? data.closedDay.value : this.closedDay,
+      installmentFeeMinor: data.installmentFeeMinor.present
+          ? data.installmentFeeMinor.value
+          : this.installmentFeeMinor,
+      installmentFeeScope: data.installmentFeeScope.present
+          ? data.installmentFeeScope.value
+          : this.installmentFeeScope,
     );
   }
 
@@ -1685,7 +1781,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('heldSinceDay: $heldSinceDay, ')
           ..write('holdCheckDay: $holdCheckDay, ')
           ..write('reopenedDay: $reopenedDay, ')
-          ..write('closedDay: $closedDay')
+          ..write('closedDay: $closedDay, ')
+          ..write('installmentFeeMinor: $installmentFeeMinor, ')
+          ..write('installmentFeeScope: $installmentFeeScope')
           ..write(')'))
         .toString();
   }
@@ -1716,6 +1814,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     holdCheckDay,
     reopenedDay,
     closedDay,
+    installmentFeeMinor,
+    installmentFeeScope,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1744,7 +1844,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.heldSinceDay == this.heldSinceDay &&
           other.holdCheckDay == this.holdCheckDay &&
           other.reopenedDay == this.reopenedDay &&
-          other.closedDay == this.closedDay);
+          other.closedDay == this.closedDay &&
+          other.installmentFeeMinor == this.installmentFeeMinor &&
+          other.installmentFeeScope == this.installmentFeeScope);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
@@ -1772,6 +1874,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<int?> holdCheckDay;
   final Value<int?> reopenedDay;
   final Value<int?> closedDay;
+  final Value<int?> installmentFeeMinor;
+  final Value<InstallmentFeeScope> installmentFeeScope;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1797,6 +1901,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.holdCheckDay = const Value.absent(),
     this.reopenedDay = const Value.absent(),
     this.closedDay = const Value.absent(),
+    this.installmentFeeMinor = const Value.absent(),
+    this.installmentFeeScope = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
@@ -1823,6 +1929,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.holdCheckDay = const Value.absent(),
     this.reopenedDay = const Value.absent(),
     this.closedDay = const Value.absent(),
+    this.installmentFeeMinor = const Value.absent(),
+    this.installmentFeeScope = const Value.absent(),
   }) : kind = Value(kind),
        installmentCount = Value(installmentCount),
        origin = Value(origin);
@@ -1851,6 +1959,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<int>? holdCheckDay,
     Expression<int>? reopenedDay,
     Expression<int>? closedDay,
+    Expression<int>? installmentFeeMinor,
+    Expression<String>? installmentFeeScope,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1877,6 +1987,10 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       if (holdCheckDay != null) 'hold_check_day': holdCheckDay,
       if (reopenedDay != null) 'reopened_day': reopenedDay,
       if (closedDay != null) 'closed_day': closedDay,
+      if (installmentFeeMinor != null)
+        'installment_fee_minor': installmentFeeMinor,
+      if (installmentFeeScope != null)
+        'installment_fee_scope': installmentFeeScope,
     });
   }
 
@@ -1905,6 +2019,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<int?>? holdCheckDay,
     Value<int?>? reopenedDay,
     Value<int?>? closedDay,
+    Value<int?>? installmentFeeMinor,
+    Value<InstallmentFeeScope>? installmentFeeScope,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -1931,6 +2047,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       holdCheckDay: holdCheckDay ?? this.holdCheckDay,
       reopenedDay: reopenedDay ?? this.reopenedDay,
       closedDay: closedDay ?? this.closedDay,
+      installmentFeeMinor: installmentFeeMinor ?? this.installmentFeeMinor,
+      installmentFeeScope: installmentFeeScope ?? this.installmentFeeScope,
     );
   }
 
@@ -2023,6 +2141,16 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     if (closedDay.present) {
       map['closed_day'] = Variable<int>(closedDay.value);
     }
+    if (installmentFeeMinor.present) {
+      map['installment_fee_minor'] = Variable<int>(installmentFeeMinor.value);
+    }
+    if (installmentFeeScope.present) {
+      map['installment_fee_scope'] = Variable<String>(
+        $PlansTable.$converterinstallmentFeeScope.toSql(
+          installmentFeeScope.value,
+        ),
+      );
+    }
     return map;
   }
 
@@ -2052,7 +2180,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('heldSinceDay: $heldSinceDay, ')
           ..write('holdCheckDay: $holdCheckDay, ')
           ..write('reopenedDay: $reopenedDay, ')
-          ..write('closedDay: $closedDay')
+          ..write('closedDay: $closedDay, ')
+          ..write('installmentFeeMinor: $installmentFeeMinor, ')
+          ..write('installmentFeeScope: $installmentFeeScope')
           ..write(')'))
         .toString();
   }
@@ -2206,6 +2336,19 @@ class $PaymentsTable extends Payments
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _installmentFeeMinorMeta =
+      const VerificationMeta('installmentFeeMinor');
+  @override
+  late final GeneratedColumn<int> installmentFeeMinor = GeneratedColumn<int>(
+    'installment_fee_minor',
+    aliasedName,
+    true,
+    check: () =>
+        installmentFeeMinor.isNull() |
+        ComparableExpr(installmentFeeMinor).isBiggerOrEqualValue(1),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2220,6 +2363,7 @@ class $PaymentsTable extends Payments
     originalDay,
     extraFeeMinor,
     extraFeeNote,
+    installmentFeeMinor,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2325,6 +2469,15 @@ class $PaymentsTable extends Payments
         ),
       );
     }
+    if (data.containsKey('installment_fee_minor')) {
+      context.handle(
+        _installmentFeeMinorMeta,
+        installmentFeeMinor.isAcceptableOrUnknown(
+          data['installment_fee_minor']!,
+          _installmentFeeMinorMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2386,6 +2539,10 @@ class $PaymentsTable extends Payments
         DriftSqlType.string,
         data['${effectivePrefix}extra_fee_note'],
       ),
+      installmentFeeMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}installment_fee_minor'],
+      ),
     );
   }
 
@@ -2427,6 +2584,13 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
 
   /// The extra fee's optional short note (21).
   final String? extraFeeNote;
+
+  /// The plan's fee per payment this payment took (schema v17, 22),
+  /// written when the plan's fee is set: unpaid payments follow the plan,
+  /// paid ones keep theirs. Part of the installment shown and of "spoken
+  /// for" ([spokenForAmount]); never part of [amountMinor] or the plan's
+  /// total. Empty for every payment without one.
+  final int? installmentFeeMinor;
   const PaymentRow({
     required this.id,
     required this.planId,
@@ -2440,6 +2604,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     this.originalDay,
     this.extraFeeMinor,
     this.extraFeeNote,
+    this.installmentFeeMinor,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2465,6 +2630,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     }
     if (!nullToAbsent || extraFeeNote != null) {
       map['extra_fee_note'] = Variable<String>(extraFeeNote);
+    }
+    if (!nullToAbsent || installmentFeeMinor != null) {
+      map['installment_fee_minor'] = Variable<int>(installmentFeeMinor);
     }
     return map;
   }
@@ -2493,6 +2661,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       extraFeeNote: extraFeeNote == null && nullToAbsent
           ? const Value.absent()
           : Value(extraFeeNote),
+      installmentFeeMinor: installmentFeeMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(installmentFeeMinor),
     );
   }
 
@@ -2514,6 +2685,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       originalDay: serializer.fromJson<int?>(json['originalDay']),
       extraFeeMinor: serializer.fromJson<int?>(json['extraFeeMinor']),
       extraFeeNote: serializer.fromJson<String?>(json['extraFeeNote']),
+      installmentFeeMinor: serializer.fromJson<int?>(
+        json['installmentFeeMinor'],
+      ),
     );
   }
   @override
@@ -2532,6 +2706,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       'originalDay': serializer.toJson<int?>(originalDay),
       'extraFeeMinor': serializer.toJson<int?>(extraFeeMinor),
       'extraFeeNote': serializer.toJson<String?>(extraFeeNote),
+      'installmentFeeMinor': serializer.toJson<int?>(installmentFeeMinor),
     };
   }
 
@@ -2548,6 +2723,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     Value<int?> originalDay = const Value.absent(),
     Value<int?> extraFeeMinor = const Value.absent(),
     Value<String?> extraFeeNote = const Value.absent(),
+    Value<int?> installmentFeeMinor = const Value.absent(),
   }) => PaymentRow(
     id: id ?? this.id,
     planId: planId ?? this.planId,
@@ -2563,6 +2739,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
         ? extraFeeMinor.value
         : this.extraFeeMinor,
     extraFeeNote: extraFeeNote.present ? extraFeeNote.value : this.extraFeeNote,
+    installmentFeeMinor: installmentFeeMinor.present
+        ? installmentFeeMinor.value
+        : this.installmentFeeMinor,
   );
   PaymentRow copyWithCompanion(PaymentsCompanion data) {
     return PaymentRow(
@@ -2588,6 +2767,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       extraFeeNote: data.extraFeeNote.present
           ? data.extraFeeNote.value
           : this.extraFeeNote,
+      installmentFeeMinor: data.installmentFeeMinor.present
+          ? data.installmentFeeMinor.value
+          : this.installmentFeeMinor,
     );
   }
 
@@ -2605,7 +2787,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           ..write('paidOnDay: $paidOnDay, ')
           ..write('originalDay: $originalDay, ')
           ..write('extraFeeMinor: $extraFeeMinor, ')
-          ..write('extraFeeNote: $extraFeeNote')
+          ..write('extraFeeNote: $extraFeeNote, ')
+          ..write('installmentFeeMinor: $installmentFeeMinor')
           ..write(')'))
         .toString();
   }
@@ -2624,6 +2807,7 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     originalDay,
     extraFeeMinor,
     extraFeeNote,
+    installmentFeeMinor,
   );
   @override
   bool operator ==(Object other) =>
@@ -2640,7 +2824,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           other.paidOnDay == this.paidOnDay &&
           other.originalDay == this.originalDay &&
           other.extraFeeMinor == this.extraFeeMinor &&
-          other.extraFeeNote == this.extraFeeNote);
+          other.extraFeeNote == this.extraFeeNote &&
+          other.installmentFeeMinor == this.installmentFeeMinor);
 }
 
 class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
@@ -2656,6 +2841,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
   final Value<int?> originalDay;
   final Value<int?> extraFeeMinor;
   final Value<String?> extraFeeNote;
+  final Value<int?> installmentFeeMinor;
   const PaymentsCompanion({
     this.id = const Value.absent(),
     this.planId = const Value.absent(),
@@ -2669,6 +2855,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     this.originalDay = const Value.absent(),
     this.extraFeeMinor = const Value.absent(),
     this.extraFeeNote = const Value.absent(),
+    this.installmentFeeMinor = const Value.absent(),
   });
   PaymentsCompanion.insert({
     this.id = const Value.absent(),
@@ -2683,6 +2870,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     this.originalDay = const Value.absent(),
     this.extraFeeMinor = const Value.absent(),
     this.extraFeeNote = const Value.absent(),
+    this.installmentFeeMinor = const Value.absent(),
   }) : planId = Value(planId),
        seq = Value(seq),
        dueDay = Value(dueDay),
@@ -2700,6 +2888,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     Expression<int>? originalDay,
     Expression<int>? extraFeeMinor,
     Expression<String>? extraFeeNote,
+    Expression<int>? installmentFeeMinor,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2714,6 +2903,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
       if (originalDay != null) 'original_day': originalDay,
       if (extraFeeMinor != null) 'extra_fee_minor': extraFeeMinor,
       if (extraFeeNote != null) 'extra_fee_note': extraFeeNote,
+      if (installmentFeeMinor != null)
+        'installment_fee_minor': installmentFeeMinor,
     });
   }
 
@@ -2730,6 +2921,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     Value<int?>? originalDay,
     Value<int?>? extraFeeMinor,
     Value<String?>? extraFeeNote,
+    Value<int?>? installmentFeeMinor,
   }) {
     return PaymentsCompanion(
       id: id ?? this.id,
@@ -2744,6 +2936,7 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
       originalDay: originalDay ?? this.originalDay,
       extraFeeMinor: extraFeeMinor ?? this.extraFeeMinor,
       extraFeeNote: extraFeeNote ?? this.extraFeeNote,
+      installmentFeeMinor: installmentFeeMinor ?? this.installmentFeeMinor,
     );
   }
 
@@ -2786,6 +2979,9 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     if (extraFeeNote.present) {
       map['extra_fee_note'] = Variable<String>(extraFeeNote.value);
     }
+    if (installmentFeeMinor.present) {
+      map['installment_fee_minor'] = Variable<int>(installmentFeeMinor.value);
+    }
     return map;
   }
 
@@ -2803,7 +2999,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
           ..write('paidOnDay: $paidOnDay, ')
           ..write('originalDay: $originalDay, ')
           ..write('extraFeeMinor: $extraFeeMinor, ')
-          ..write('extraFeeNote: $extraFeeNote')
+          ..write('extraFeeNote: $extraFeeNote, ')
+          ..write('installmentFeeMinor: $installmentFeeMinor')
           ..write(')'))
         .toString();
   }
@@ -5714,6 +5911,8 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<int?> holdCheckDay,
   Value<int?> reopenedDay,
   Value<int?> closedDay,
+  Value<int?> installmentFeeMinor,
+  Value<InstallmentFeeScope> installmentFeeScope,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -5740,6 +5939,8 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int?> holdCheckDay,
   Value<int?> reopenedDay,
   Value<int?> closedDay,
+  Value<int?> installmentFeeMinor,
+  Value<InstallmentFeeScope> installmentFeeScope,
 });
 
 final class $$PlansTableReferences
@@ -5922,6 +6123,21 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
   ColumnFilters<int> get closedDay => $composableBuilder(
     column: $table.closedDay,
     builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get installmentFeeMinor => $composableBuilder(
+    column: $table.installmentFeeMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    InstallmentFeeScope,
+    InstallmentFeeScope,
+    String
+  >
+  get installmentFeeScope => $composableBuilder(
+    column: $table.installmentFeeScope,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   $$SourcesTableFilterComposer get sourceId {
@@ -6115,6 +6331,16 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get installmentFeeMinor => $composableBuilder(
+    column: $table.installmentFeeMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get installmentFeeScope => $composableBuilder(
+    column: $table.installmentFeeScope,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6271,6 +6497,17 @@ class $$PlansTableAnnotationComposer
   GeneratedColumn<int> get closedDay =>
       $composableBuilder(column: $table.closedDay, builder: (column) => column);
 
+  GeneratedColumn<int> get installmentFeeMinor => $composableBuilder(
+    column: $table.installmentFeeMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<InstallmentFeeScope, String>
+  get installmentFeeScope => $composableBuilder(
+    column: $table.installmentFeeScope,
+    builder: (column) => column,
+  );
+
   $$SourcesTableAnnotationComposer get sourceId {
     final $$SourcesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6399,6 +6636,9 @@ class $$PlansTableTableManager
                 Value<int?> holdCheckDay = const Value.absent(),
                 Value<int?> reopenedDay = const Value.absent(),
                 Value<int?> closedDay = const Value.absent(),
+                Value<int?> installmentFeeMinor = const Value.absent(),
+                Value<InstallmentFeeScope> installmentFeeScope =
+                    const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -6424,6 +6664,8 @@ class $$PlansTableTableManager
                 holdCheckDay: holdCheckDay,
                 reopenedDay: reopenedDay,
                 closedDay: closedDay,
+                installmentFeeMinor: installmentFeeMinor,
+                installmentFeeScope: installmentFeeScope,
               ),
           createCompanionCallback:
               ({
@@ -6451,6 +6693,9 @@ class $$PlansTableTableManager
                 Value<int?> holdCheckDay = const Value.absent(),
                 Value<int?> reopenedDay = const Value.absent(),
                 Value<int?> closedDay = const Value.absent(),
+                Value<int?> installmentFeeMinor = const Value.absent(),
+                Value<InstallmentFeeScope> installmentFeeScope =
+                    const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -6476,6 +6721,8 @@ class $$PlansTableTableManager
                 holdCheckDay: holdCheckDay,
                 reopenedDay: reopenedDay,
                 closedDay: closedDay,
+                installmentFeeMinor: installmentFeeMinor,
+                installmentFeeScope: installmentFeeScope,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -6596,6 +6843,7 @@ typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
   Value<int?> originalDay,
   Value<int?> extraFeeMinor,
   Value<String?> extraFeeNote,
+  Value<int?> installmentFeeMinor,
 });
 typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<int> id,
@@ -6610,6 +6858,7 @@ typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<int?> originalDay,
   Value<int?> extraFeeMinor,
   Value<String?> extraFeeNote,
+  Value<int?> installmentFeeMinor,
 });
 
 final class $$PaymentsTableReferences
@@ -6695,6 +6944,11 @@ class $$PaymentsTableFilterComposer
 
   ColumnFilters<String> get extraFeeNote => $composableBuilder(
     column: $table.extraFeeNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get installmentFeeMinor => $composableBuilder(
+    column: $table.installmentFeeMinor,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6786,6 +7040,11 @@ class $$PaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get installmentFeeMinor => $composableBuilder(
+    column: $table.installmentFeeMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PlansTableOrderingComposer get planId {
     final $$PlansTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6862,6 +7121,11 @@ class $$PaymentsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get installmentFeeMinor => $composableBuilder(
+    column: $table.installmentFeeMinor,
+    builder: (column) => column,
+  );
+
   $$PlansTableAnnotationComposer get planId {
     final $$PlansTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6926,6 +7190,7 @@ class $$PaymentsTableTableManager
                 Value<int?> originalDay = const Value.absent(),
                 Value<int?> extraFeeMinor = const Value.absent(),
                 Value<String?> extraFeeNote = const Value.absent(),
+                Value<int?> installmentFeeMinor = const Value.absent(),
               }) => PaymentsCompanion(
                 id: id,
                 planId: planId,
@@ -6939,6 +7204,7 @@ class $$PaymentsTableTableManager
                 originalDay: originalDay,
                 extraFeeMinor: extraFeeMinor,
                 extraFeeNote: extraFeeNote,
+                installmentFeeMinor: installmentFeeMinor,
               ),
           createCompanionCallback:
               ({
@@ -6954,6 +7220,7 @@ class $$PaymentsTableTableManager
                 Value<int?> originalDay = const Value.absent(),
                 Value<int?> extraFeeMinor = const Value.absent(),
                 Value<String?> extraFeeNote = const Value.absent(),
+                Value<int?> installmentFeeMinor = const Value.absent(),
               }) => PaymentsCompanion.insert(
                 id: id,
                 planId: planId,
@@ -6967,6 +7234,7 @@ class $$PaymentsTableTableManager
                 originalDay: originalDay,
                 extraFeeMinor: extraFeeMinor,
                 extraFeeNote: extraFeeNote,
+                installmentFeeMinor: installmentFeeMinor,
               ),
           withReferenceMapper: (p0) => p0
               .map(

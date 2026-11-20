@@ -106,6 +106,8 @@ class PlanRepository {
             chargeSourceId: Value(
               paymentMethod == PaymentMethod.automatic ? chargeSourceId : null,
             ),
+            installmentFeeMinor: Value(draft.installmentFeeMinor),
+            installmentFeeScope: Value(draft.installmentFeeScope),
           ),
         );
     await _db.batch((b) {
@@ -118,6 +120,7 @@ class PlanRepository {
             amountMinor: p.amountMinor,
             paidAt: Value(i < draft.paidBeforeCount ? paidAt : null),
             paidBeforeKalan: Value(i < draft.paidBeforeCount),
+            installmentFeeMinor: Value(draft.feeAt(i)),
           ),
       ]);
     });
@@ -125,17 +128,25 @@ class PlanRepository {
   });
 
   /// Nothing is marked or unmarked on a closed plan: its history stays as
-  /// it was when it was closed (19).
+  /// it was when it was closed (19). An unmarked payment is unpaid again
+  /// and takes the plan's fee per payment as it is now (22).
   Future<void> setPaid(int paymentId, {required bool paid, DateTime? now}) =>
-      (_db.update(
-        _db.payments,
-      )..where((p) => p.id.equals(paymentId) & _onUnclosedPlan(p))).write(
-        PaymentsCompanion(
-          paidAt: Value(paid ? (now ?? DateTime.now()) : null),
-          // Unmarking forgets the past-due choice too.
-          paidOnDay: paid ? const Value.absent() : const Value(null),
-        ),
-      );
+      _db.transaction(() async {
+        await (_db.update(
+          _db.payments,
+        )..where((p) => p.id.equals(paymentId) & _onUnclosedPlan(p))).write(
+          PaymentsCompanion(
+            paidAt: Value(paid ? (now ?? DateTime.now()) : null),
+            // Unmarking forgets the past-due choice too.
+            paidOnDay: paid ? const Value.absent() : const Value(null),
+          ),
+        );
+        if (paid) return;
+        final row = await (_db.select(
+          _db.payments,
+        )..where((p) => p.id.equals(paymentId))).getSingleOrNull();
+        if (row != null) await _applyInstallmentFee(row.planId);
+      });
 
   /// "Paid" from the past-due list: [paidOn] is today (counts in this
   /// period) or the due date (counts in its own period).
@@ -177,6 +188,57 @@ class PlanRepository {
             ..where((p) => p.planId.equals(planId))
             ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
           .get();
+
+  /// Keeps every payment of [planId] on the plan's fee per payment (22,
+  /// [appliedInstallmentFees]): unpaid payments follow the plan's fee and
+  /// scope, paid ones keep their own, ones paid before Kalan have none.
+  /// Called at the end of every change that adds payments or changes
+  /// which are paid, so the rule always holds. A closed plan is never
+  /// touched.
+  Future<void> _applyInstallmentFee(int planId) async {
+    final plan = await _plan(planId);
+    if (plan.status == PlanStatus.closed) return;
+    final rows = await _rows(planId);
+    final fees = appliedInstallmentFees(
+      payments: [for (final r in rows) r.toFeePayment()],
+      feeMinor: canHaveInstallmentFee(plan.kind)
+          ? plan.installmentFeeMinor
+          : null,
+      scope: plan.installmentFeeScope,
+    );
+    for (final (i, r) in rows.indexed) {
+      if (r.installmentFeeMinor == fees[i]) continue;
+      await (_db.update(_db.payments)..where((p) => p.id.equals(r.id))).write(
+        PaymentsCompanion(installmentFeeMinor: Value(fees[i])),
+      );
+    }
+  }
+
+  /// Stores the plan's fee per payment and scope (22) and applies them to
+  /// its unpaid payments; paid payments keep their own fee. Empty or zero
+  /// is no fee. Never on a closed plan or card installments.
+  Future<void> _setInstallmentFee(
+    int planId,
+    int? feeMinor,
+    InstallmentFeeScope scope,
+  ) async {
+    final plan = await _plan(planId);
+    if (plan.status == PlanStatus.closed) {
+      throw StateError('plan $planId is closed');
+    }
+    if (!canHaveInstallmentFee(plan.kind)) return;
+    await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+      PlansCompanion(
+        installmentFeeMinor: Value(normalizeInstallmentFee(feeMinor)),
+        installmentFeeScope: Value(
+          plan.kind == PlanKind.payLater
+              ? InstallmentFeeScope.everyPayment
+              : scope,
+        ),
+      ),
+    );
+    await _applyInstallmentFee(planId);
+  }
 
   /// "Put on hold" (19): the unpaid payments leave every total, period,
   /// past-due list and reminder until the plan is reopened or closed.
@@ -455,6 +517,7 @@ class PlanRepository {
     required LocalDate purchaseDate,
     required PayLaterRule rule,
     LocalDate? chosenDate,
+    InstallmentFeeInput? installmentFee,
   }) => _db.transaction(() async {
     final plan = await _plan(planId);
     if (plan.status == PlanStatus.closed) {
@@ -489,6 +552,13 @@ class PlanRepository {
         payLaterValue: paid ? const Value.absent() : Value(rule.value),
       ),
     );
+    if (installmentFee != null) {
+      await _setInstallmentFee(
+        planId,
+        installmentFee.feeMinor,
+        installmentFee.scope,
+      );
+    }
     if (paid) return;
     final due = keepsMove
         ? payment.date
@@ -579,6 +649,7 @@ class PlanRepository {
         _db.payments,
       )..where((p) => p.id.equals(r.id))).write(change);
     }
+    await _applyInstallmentFee(planId);
   });
 
   /// Changes the plan's installment count, keeping its total ([resizePlan]):
@@ -650,6 +721,7 @@ class PlanRepository {
         await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
           PlansCompanion(installmentCount: Value(count)),
         );
+        await _applyInstallmentFee(planId);
         return null;
     }
   });
@@ -673,6 +745,7 @@ class PlanRepository {
     LocalDate? nextDate,
     UnderwayPattern? pattern,
     PaymentInterval? interval,
+    InstallmentFeeInput? installmentFee,
   }) => _db
       .transaction<ResizeRejection?>(() async {
         if (paidBefore < 0 || paidBefore >= count) {
@@ -724,6 +797,13 @@ class PlanRepository {
         if (newInterval) {
           await (_db.update(_db.plans)..where((p) => p.id.equals(planId)))
               .write(PlansCompanion(intervalDays: Value(chosen.days)));
+        }
+        if (installmentFee != null) {
+          await _setInstallmentFee(
+            planId,
+            installmentFee.feeMinor,
+            installmentFee.scope,
+          );
         }
         return null;
       })
@@ -831,6 +911,10 @@ class PlanRepository {
     }
   });
 }
+
+/// A plan's fee per payment (22) as chosen on the edit screen: the fee
+/// (null or zero: none) and which payments take it.
+typedef InstallmentFeeInput = ({int? feeMinor, InstallmentFeeScope scope});
 
 /// Undoes an [PlanRepository.editPlan] whose second step was refused.
 class _Rollback implements Exception {

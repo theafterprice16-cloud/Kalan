@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../core/engine/amount_entry.dart';
+import '../../core/engine/installment_fee.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/payment_method.dart';
@@ -53,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -219,6 +220,14 @@ class AppDatabase extends _$AppDatabase {
       from15To16: (m, schema) async {
         await m.addColumn(schema.payments, schema.payments.extraFeeMinor);
         await m.addColumn(schema.payments, schema.payments.extraFeeNote);
+      },
+      // v17: a plan's fee per payment and which payments take it, and the
+      // fee each payment took (22). Empty for every existing plan and
+      // payment; no date or amount changes.
+      from16To17: (m, schema) async {
+        await m.addColumn(schema.plans, schema.plans.installmentFeeMinor);
+        await m.addColumn(schema.plans, schema.plans.installmentFeeScope);
+        await m.addColumn(schema.payments, schema.payments.installmentFeeMinor);
       },
     ),
     beforeOpen: (details) async {

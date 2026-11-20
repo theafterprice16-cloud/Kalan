@@ -1,4 +1,5 @@
 import '../date/local_date.dart';
+import 'installment_fee.dart';
 import 'pay_later.dart';
 import 'schedule.dart';
 
@@ -54,6 +55,8 @@ class PlanDraft {
     this.paidBeforeCount = 0,
     this.payLaterRule,
     this.interval,
+    this.installmentFeeMinor,
+    this.installmentFeeScope = InstallmentFeeScope.everyPayment,
   });
 
   final PlanKind kind;
@@ -82,20 +85,86 @@ class PlanDraft {
   /// payments repeat. Null for other kinds.
   final PaymentInterval? interval;
 
+  /// The fee per payment as typed (22); null for none. Never on card
+  /// installments ([canHaveInstallmentFee]).
+  final int? installmentFeeMinor;
+
+  /// Which payments take [installmentFeeMinor].
+  final InstallmentFeeScope installmentFeeScope;
+
   /// The same draft with its first [count] payments paid before Kalan.
-  PlanDraft withPaidBefore(int count) => PlanDraft(
+  PlanDraft withPaidBefore(int count) => _copy(paidBeforeCount: count);
+
+  /// The same draft with a fee per payment (22): ignored on card
+  /// installments; empty or zero is no fee. "Pay later" is always "every
+  /// payment" (one payment).
+  PlanDraft withInstallmentFee(int? feeMinor, InstallmentFeeScope scope) =>
+      _copy(
+        feeMinor: canHaveInstallmentFee(kind)
+            ? normalizeInstallmentFee(feeMinor)
+            : null,
+        scope: kind == PlanKind.payLater
+            ? InstallmentFeeScope.everyPayment
+            : scope,
+      );
+
+  PlanDraft _copy({
+    int? paidBeforeCount,
+    int? feeMinor,
+    InstallmentFeeScope? scope,
+  }) => PlanDraft(
     kind: kind,
     installmentCount: installmentCount,
     payments: payments,
     purchaseDate: purchaseDate,
     deferMonths: deferMonths,
     isCashAdvance: isCashAdvance,
-    paidBeforeCount: count,
+    paidBeforeCount: paidBeforeCount ?? this.paidBeforeCount,
     payLaterRule: payLaterRule,
     interval: interval,
+    installmentFeeMinor: scope == null ? installmentFeeMinor : feeMinor,
+    installmentFeeScope: scope ?? installmentFeeScope,
+  );
+
+  /// The fee the payment at [index] of [payments] takes: none for one
+  /// paid before Kalan ("already underway", 22 decision 8).
+  int? feeAt(int index) => index < paidBeforeCount
+      ? null
+      : installmentFeeFor(
+          feeMinor: installmentFeeMinor,
+          scope: installmentFeeScope,
+          seq: payments[index].seq,
+        );
+
+  /// The installment at [index] as shown: its amount plus its fee.
+  int installmentAt(int index) =>
+      payments[index].amountMinor + (feeAt(index) ?? 0);
+
+  /// "Payment fees": the fees all payments take.
+  int get installmentFeesMinor =>
+      [for (var i = 0; i < payments.length; i++) feeAt(i) ?? 0]
+          .fold(0, (a, b) => a + b);
+
+  /// "First payment only" while payment number 1 is paid before Kalan or
+  /// not kept: the fee goes on no payment.
+  bool get feeAddsNothing => firstPaymentFeeAddsNothing(
+    payments: [
+      for (final (i, p) in payments.indexed)
+        (
+          seq: p.seq,
+          isPaid: i < paidBeforeCount,
+          paidBeforeKalan: i < paidBeforeCount,
+          feeMinor: null,
+        ),
+    ],
+    feeMinor: installmentFeeMinor,
+    scope: installmentFeeScope,
   );
 
   int get totalMinor => payments.fold(0, (sum, p) => sum + p.amountMinor);
+
+  /// "Total": the plan amount and its fees per payment (22).
+  int get totalWithFeesMinor => totalMinor + installmentFeesMinor;
 
   int get firstTrackedSeq => payments.first.seq;
 

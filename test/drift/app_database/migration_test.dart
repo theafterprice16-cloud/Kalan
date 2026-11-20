@@ -11,6 +11,7 @@ import 'package:drift/native.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/amount_entry.dart';
+import 'package:kalan/core/engine/installment_fee.dart';
 import 'package:kalan/core/engine/pay_later.dart';
 import 'package:kalan/core/engine/pay_period.dart';
 import 'package:kalan/core/engine/payment_method.dart';
@@ -674,6 +675,100 @@ void main() {
       await db.close();
     },
   );
+
+  test(
+    'v16 -> current: dates, amounts and periods unchanged, no fee per payment',
+    () async {
+      final schema = await verifier.schemaAt(16);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at, '
+        'is_edited, paid_on_day, original_day, extra_fee_minor, '
+        'extra_fee_note) '
+        "VALUES (1, 3, 20400, 6000, 1700000000, 1, 20403, 20390, 600, 'x')",
+      );
+      const columns =
+          'plan_id, seq, due_day, amount_minor, paid_at, is_edited, '
+          'paid_before_kalan, paid_on_day, original_day, extra_fee_minor, '
+          'extra_fee_note';
+      final before = schema.rawDatabase.select(
+        'SELECT $columns FROM payments ORDER BY plan_id, seq',
+      );
+      final plansBefore = schema.rawDatabase.select(
+        'SELECT id, kind, installment_count, status FROM plans ORDER BY id',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final after = await db
+          .customSelect('SELECT $columns FROM payments ORDER BY plan_id, seq')
+          .get();
+      expect(
+        [for (final r in after) r.data],
+        [for (final r in before) Map<String, Object?>.of(r)],
+      );
+      final plansAfter = await db
+          .customSelect(
+            'SELECT id, kind, installment_count, status FROM plans ORDER BY id',
+          )
+          .get();
+      expect(
+        [for (final r in plansAfter) r.data],
+        [for (final r in plansBefore) Map<String, Object?>.of(r)],
+      );
+      final payments = await db.select(db.payments).get();
+      expect(payments, isNotEmpty);
+      expect(
+        payments.map((p) => p.installmentFeeMinor),
+        everyElement(equals(null)),
+      );
+      final plans = await db.select(db.plans).get();
+      expect(
+        plans.map((p) => p.installmentFeeMinor),
+        everyElement(equals(null)),
+      );
+      expect(
+        plans.map((p) => p.installmentFeeScope),
+        everyElement(InstallmentFeeScope.everyPayment),
+      );
+      await db.close();
+    },
+  );
+
+  test('a fee per payment below 1 is refused', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final planId = await db
+        .into(db.plans)
+        .insert(
+          PlansCompanion.insert(
+            kind: PlanKind.monthly,
+            installmentCount: 1,
+            origin: PlanOrigin.template,
+          ),
+        );
+    final id = await db
+        .into(db.payments)
+        .insert(
+          PaymentsCompanion.insert(
+            planId: planId,
+            seq: 1,
+            dueDay: 20400,
+            amountMinor: 6000,
+          ),
+        );
+    await expectLater(
+      (db.update(db.plans)..where((p) => p.id.equals(planId))).write(
+        const PlansCompanion(installmentFeeMinor: Value(0)),
+      ),
+      throwsA(anything),
+    );
+    await expectLater(
+      (db.update(db.payments)..where((p) => p.id.equals(id))).write(
+        const PaymentsCompanion(installmentFeeMinor: Value(0)),
+      ),
+      throwsA(anything),
+    );
+    await db.close();
+  });
 
   test('an extra fee below 1 and a note over 80 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());

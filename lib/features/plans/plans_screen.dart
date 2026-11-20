@@ -186,10 +186,10 @@ class _PlanList extends ConsumerWidget {
                     size: AmountSize.small,
                     color: p.isOnHold ? context.colors.textMuted : null,
                     semanticsLabel: p.isOpen
-                        ? l10n.planToPay(ref.money(context, p.remainingMinor))
+                        ? l10n.planToPay(ref.money(context, _amountOf(p)))
                         : p.isClosed
-                        ? l10n.planPaidAmount(ref.money(context, p.paidMinor))
-                        : l10n.planTotal(ref.money(context, p.totalMinor)),
+                        ? l10n.planPaidAmount(ref.money(context, _amountOf(p)))
+                        : l10n.planTotal(ref.money(context, _amountOf(p))),
                   ),
                 ],
               ),
@@ -201,12 +201,13 @@ class _PlanList extends ConsumerWidget {
 }
 
 /// Open (and on hold): what is left to pay. Finished: the total. Closed
-/// (19): what was paid, since the rest is no longer owed.
+/// (19): what was paid, since the rest is no longer owed. Fees per
+/// payment (22) included, as on the plan.
 int _amountOf(PlanWithPayments p) => p.isOpen
-    ? p.remainingMinor
+    ? p.remainingWithFeesMinor
     : p.isClosed
-    ? p.paidMinor
-    : p.totalMinor;
+    ? p.paidWithFeesMinor
+    : p.totalWithFeesMinor;
 
 class _RecurringList extends ConsumerWidget {
   const _RecurringList({required this.items});

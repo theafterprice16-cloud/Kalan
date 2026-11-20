@@ -2313,4 +2313,62 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get installmentFeeLabel => 'Fee per payment';
+
+  @override
+  String get installmentFeeHelper =>
+      'A fixed fee your provider charges with payments. Leave empty for none.';
+
+  @override
+  String get installmentFeeScopeLabel => 'Charged on';
+
+  @override
+  String get installmentFeeScopeEvery => 'On every payment';
+
+  @override
+  String get installmentFeeScopeFirst => 'First payment only';
+
+  @override
+  String installmentFeeIncluded(String fee) {
+    return 'Includes $fee payment fee';
+  }
+
+  @override
+  String get planAmountLabel => 'Plan amount';
+
+  @override
+  String get installmentFeesLabel => 'Payment fees';
+
+  @override
+  String get planTotalLabel => 'Total';
+
+  @override
+  String installmentFeeAffects(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'This changes $count unpaid payments.',
+      one: 'This changes 1 unpaid payment.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installmentFeeFirstPaid =>
+      'The first payment is already paid, so no fee is added.';
+
+  @override
+  String get moreOptions => 'More options';
+
+  @override
+  String installmentFeeOnTop(String fee) {
+    return 'The $fee payment fee is added on top.';
+  }
+
+  @override
+  String adjustFeesStay(String fees) {
+    return 'Payment fees ($fees) stay the same.';
+  }
 }

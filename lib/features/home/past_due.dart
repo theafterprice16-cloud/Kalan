@@ -300,8 +300,20 @@ class PastDueRow extends ConsumerWidget {
                             ),
                             const SizedBox(height: KalanSpace.xxs),
                             DaysAgoNote(days: days),
-                            // The amount stays the payment's own; the
-                            // fee is a note under it (21).
+                            // The fee per payment is inside the amount
+                            // (22); the extra fee is a note under it (21).
+                            if (entry.installmentFeeMinor case final f?)
+                              Text(
+                                l10n.installmentFeeIncluded(
+                                  ref.money(context, f),
+                                ),
+                                key: ValueKey(
+                                  'past-due-installment-fee-${entry.paymentId}',
+                                ),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: context.colors.textMuted,
+                                ),
+                              ),
                             if (fee != null)
                               Text(
                                 l10n.extraFeeRowNote(fee),
