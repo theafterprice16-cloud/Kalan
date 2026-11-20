@@ -158,6 +158,22 @@ void main() {
     expect((await rows(db)).first.extraFeeNote, 'x' * 80);
   });
 
+  testWidgets('emoji count as stored: never split, counter agrees', (
+    tester,
+  ) async {
+    final db = await pumpSofia(tester);
+    final first = (await rows(db)).first;
+    await tapKey(tester, 'past-due-fee-action-${first.id}');
+    await tester.enterText(
+      find.byKey(const ValueKey('extra-fee-note')),
+      '😀' * 45,
+    );
+    await tester.pump();
+    expect(find.text('80/80'), findsOneWidget);
+    await fillAndSave(tester, '6');
+    expect((await rows(db)).first.extraFeeNote, '😀' * 40);
+  });
+
   testWidgets('example 3: correct the fee and add a note', (tester) async {
     final db = await pumpSofia(
       tester,

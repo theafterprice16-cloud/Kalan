@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -234,7 +235,23 @@ class _ExtraFeeSheetState extends ConsumerState<ExtraFeeSheet> {
                 TextFormField(
                   key: const ValueKey('extra-fee-note'),
                   controller: _note,
+                  // Limited and counted as stored (UTF-16), so the
+                  // counter never says 45/80 while the note is too long:
+                  // an emoji counts twice, as in the database.
+                  inputFormatters: const [ExtraFeeNoteFormatter()],
+                  buildCounter:
+                      (
+                        context, {
+                        required currentLength,
+                        required isFocused,
+                        required maxLength,
+                      }) => Text(
+                        '${_note.text.length}/$extraFeeNoteMaxLength',
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: context.colors.textMuted),
+                      ),
                   maxLength: extraFeeNoteMaxLength,
+                  maxLengthEnforcement: MaxLengthEnforcement.none,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration(
                     labelText: l10n.extraFeeNoteLabel,
@@ -268,6 +285,31 @@ class _ExtraFeeSheetState extends ConsumerState<ExtraFeeSheet> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Keeps the note within [extraFeeNoteMaxLength] UTF-16 code units, the
+/// way it is stored: a longer paste is cut at the last whole character
+/// (an emoji is never split) that fits.
+class ExtraFeeNoteFormatter extends TextInputFormatter {
+  const ExtraFeeNoteFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.length <= extraFeeNoteMaxLength) return newValue;
+    final kept = StringBuffer();
+    for (final c in newValue.text.characters) {
+      if (kept.length + c.length > extraFeeNoteMaxLength) break;
+      kept.write(c);
+    }
+    final text = kept.toString();
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     );
   }
 }

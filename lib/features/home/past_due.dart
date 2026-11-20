@@ -346,33 +346,34 @@ class PastDueRow extends ConsumerWidget {
         row,
         // "Add extra fee" in ink (21), under the name: outside the row's
         // own label so screen readers reach it too.
-        Padding(
-          padding: const EdgeInsetsDirectional.only(
-            start: KalanSpace.md + LetterBadge.defaultSize,
-            bottom: KalanSpace.xxs,
-          ),
-          child: TextButton(
-            key: ValueKey('past-due-fee-action-${entry.paymentId}'),
-            // Ink, not accent: accent is only for "left" (21).
-            style: TextButton.styleFrom(foregroundColor: context.colors.text),
-            onPressed: () => openExtraFee(
-              context,
-              ref,
-              paymentId: entry.paymentId!,
-              planName: entry.label(l10n),
-              paymentLabel: paymentLabelOf(
-                context,
-                seq: entry.seq!,
-                installmentCount: entry.installmentCount!,
-                isPayLater: entry.isPayLater,
-                date: entry.date,
-              ),
-              feeMinor: entry.extraFeeMinor,
-              note: entry.extraFeeNote,
+        if (entry.canHaveExtraFee)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(
+              start: KalanSpace.md + LetterBadge.defaultSize,
+              bottom: KalanSpace.xxs,
             ),
-            child: Text(fee == null ? l10n.extraFeeAdd : l10n.extraFeeEdit),
+            child: TextButton(
+              key: ValueKey('past-due-fee-action-${entry.paymentId}'),
+              // Ink, not accent: accent is only for "left" (21).
+              style: TextButton.styleFrom(foregroundColor: context.colors.text),
+              onPressed: () => openExtraFee(
+                context,
+                ref,
+                paymentId: entry.paymentId!,
+                planName: entry.label(l10n),
+                paymentLabel: paymentLabelOf(
+                  context,
+                  seq: entry.seq!,
+                  installmentCount: entry.installmentCount!,
+                  isPayLater: entry.isPayLater,
+                  date: entry.date,
+                ),
+                feeMinor: entry.extraFeeMinor,
+                note: entry.extraFeeNote,
+              ),
+              child: Text(fee == null ? l10n.extraFeeAdd : l10n.extraFeeEdit),
+            ),
           ),
-        ),
       ],
     );
   }
