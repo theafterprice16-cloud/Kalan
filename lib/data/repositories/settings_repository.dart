@@ -68,6 +68,22 @@ class SettingsRepository {
             extraFeeMinor: Value(
               p.extraFeeMinor == null ? null : scale(p.extraFeeMinor!, min: 1),
             ),
+            // So does a fee per payment (22).
+            installmentFeeMinor: Value(
+              p.installmentFeeMinor == null
+                  ? null
+                  : scale(p.installmentFeeMinor!, min: 1),
+            ),
+          ),
+        );
+      }
+      // The plan's fee per payment scales the same way, so its unpaid
+      // payments still match it (22).
+      for (final p in await _db.select(_db.plans).get()) {
+        if (p.installmentFeeMinor == null) continue;
+        await (_db.update(_db.plans)..where((x) => x.id.equals(p.id))).write(
+          PlansCompanion(
+            installmentFeeMinor: Value(scale(p.installmentFeeMinor!, min: 1)),
           ),
         );
       }
