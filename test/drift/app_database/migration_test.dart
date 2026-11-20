@@ -642,6 +642,81 @@ void main() {
     },
   );
 
+  test(
+    'v15 -> current: dates, amounts and periods unchanged, no extra fee',
+    () async {
+      final schema = await verifier.schemaAt(15);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at, '
+        'is_edited, paid_on_day, original_day) '
+        'VALUES (1, 3, 20400, 6000, 1700000000, 1, 20403, 20390)',
+      );
+      const columns =
+          'plan_id, seq, due_day, amount_minor, paid_at, is_edited, '
+          'paid_before_kalan, paid_on_day, original_day';
+      final before = schema.rawDatabase.select(
+        'SELECT $columns FROM payments ORDER BY plan_id, seq',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final after = await db
+          .customSelect('SELECT $columns FROM payments ORDER BY plan_id, seq')
+          .get();
+      expect(
+        [for (final r in after) r.data],
+        [for (final r in before) Map<String, Object?>.of(r)],
+      );
+      final payments = await db.select(db.payments).get();
+      expect(payments, isNotEmpty);
+      expect(payments.map((p) => p.extraFeeMinor), everyElement(equals(null)));
+      expect(payments.map((p) => p.extraFeeNote), everyElement(equals(null)));
+      await db.close();
+    },
+  );
+
+  test('an extra fee below 1 and a note over 80 are refused', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final planId = await db
+        .into(db.plans)
+        .insert(
+          PlansCompanion.insert(
+            kind: PlanKind.monthly,
+            installmentCount: 1,
+            origin: PlanOrigin.template,
+          ),
+        );
+    final id = await db
+        .into(db.payments)
+        .insert(
+          PaymentsCompanion.insert(
+            planId: planId,
+            seq: 1,
+            dueDay: 20400,
+            amountMinor: 6000,
+          ),
+        );
+    Future<void> write(PaymentsCompanion c) =>
+        (db.update(db.payments)..where((p) => p.id.equals(id))).write(c);
+    await expectLater(
+      write(const PaymentsCompanion(extraFeeMinor: Value(0))),
+      throwsA(anything),
+    );
+    await expectLater(
+      write(PaymentsCompanion(extraFeeNote: Value('x' * 81))),
+      throwsA(anything),
+    );
+    await write(
+      PaymentsCompanion(
+        extraFeeMinor: const Value(600),
+        extraFeeNote: Value('x' * 80),
+      ),
+    );
+    final row = await db.select(db.payments).getSingle();
+    expect(row.extraFeeMinor, 600);
+    await db.close();
+  });
+
   test('statement reminder days outside 1 and 2 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     Future<int> insert(int days) => db

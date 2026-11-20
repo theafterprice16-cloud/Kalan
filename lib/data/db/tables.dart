@@ -156,6 +156,17 @@ class Payments extends Table {
   /// payment.
   IntColumn get originalDay => integer().nullable()();
 
+  /// A one-off extra fee the provider added, as typed by the user (schema
+  /// v16, 21): never computed. Follows the payment's paid state and counts
+  /// with it ([spokenForAmount]); never part of the plan's total. Empty
+  /// for every payment without one.
+  IntColumn get extraFeeMinor => integer().nullable().check(
+    extraFeeMinor.isNull() | extraFeeMinor.isBiggerOrEqualValue(1),
+  )();
+
+  /// The extra fee's optional short note (21).
+  TextColumn get extraFeeNote => text().nullable().withLength(max: 80)();
+
   @override
   List<Set<Column>> get uniqueKeys => [
     {planId, seq},

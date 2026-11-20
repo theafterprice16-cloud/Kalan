@@ -2180,6 +2180,32 @@ class $PaymentsTable extends Payments
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _extraFeeMinorMeta = const VerificationMeta(
+    'extraFeeMinor',
+  );
+  @override
+  late final GeneratedColumn<int> extraFeeMinor = GeneratedColumn<int>(
+    'extra_fee_minor',
+    aliasedName,
+    true,
+    check: () =>
+        extraFeeMinor.isNull() |
+        ComparableExpr(extraFeeMinor).isBiggerOrEqualValue(1),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _extraFeeNoteMeta = const VerificationMeta(
+    'extraFeeNote',
+  );
+  @override
+  late final GeneratedColumn<String> extraFeeNote = GeneratedColumn<String>(
+    'extra_fee_note',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 80),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2192,6 +2218,8 @@ class $PaymentsTable extends Payments
     paidBeforeKalan,
     paidOnDay,
     originalDay,
+    extraFeeMinor,
+    extraFeeNote,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2279,6 +2307,24 @@ class $PaymentsTable extends Payments
         ),
       );
     }
+    if (data.containsKey('extra_fee_minor')) {
+      context.handle(
+        _extraFeeMinorMeta,
+        extraFeeMinor.isAcceptableOrUnknown(
+          data['extra_fee_minor']!,
+          _extraFeeMinorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('extra_fee_note')) {
+      context.handle(
+        _extraFeeNoteMeta,
+        extraFeeNote.isAcceptableOrUnknown(
+          data['extra_fee_note']!,
+          _extraFeeNoteMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2332,6 +2378,14 @@ class $PaymentsTable extends Payments
         DriftSqlType.int,
         data['${effectivePrefix}original_day'],
       ),
+      extraFeeMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}extra_fee_minor'],
+      ),
+      extraFeeNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}extra_fee_note'],
+      ),
     );
   }
 
@@ -2364,6 +2418,15 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
   /// cleared when the payment goes back to it. Empty for every other
   /// payment.
   final int? originalDay;
+
+  /// A one-off extra fee the provider added, as typed by the user (schema
+  /// v16, 21): never computed. Follows the payment's paid state and counts
+  /// with it ([spokenForAmount]); never part of the plan's total. Empty
+  /// for every payment without one.
+  final int? extraFeeMinor;
+
+  /// The extra fee's optional short note (21).
+  final String? extraFeeNote;
   const PaymentRow({
     required this.id,
     required this.planId,
@@ -2375,6 +2438,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     required this.paidBeforeKalan,
     this.paidOnDay,
     this.originalDay,
+    this.extraFeeMinor,
+    this.extraFeeNote,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2394,6 +2459,12 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     }
     if (!nullToAbsent || originalDay != null) {
       map['original_day'] = Variable<int>(originalDay);
+    }
+    if (!nullToAbsent || extraFeeMinor != null) {
+      map['extra_fee_minor'] = Variable<int>(extraFeeMinor);
+    }
+    if (!nullToAbsent || extraFeeNote != null) {
+      map['extra_fee_note'] = Variable<String>(extraFeeNote);
     }
     return map;
   }
@@ -2416,6 +2487,12 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       originalDay: originalDay == null && nullToAbsent
           ? const Value.absent()
           : Value(originalDay),
+      extraFeeMinor: extraFeeMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraFeeMinor),
+      extraFeeNote: extraFeeNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraFeeNote),
     );
   }
 
@@ -2435,6 +2512,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       paidBeforeKalan: serializer.fromJson<bool>(json['paidBeforeKalan']),
       paidOnDay: serializer.fromJson<int?>(json['paidOnDay']),
       originalDay: serializer.fromJson<int?>(json['originalDay']),
+      extraFeeMinor: serializer.fromJson<int?>(json['extraFeeMinor']),
+      extraFeeNote: serializer.fromJson<String?>(json['extraFeeNote']),
     );
   }
   @override
@@ -2451,6 +2530,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       'paidBeforeKalan': serializer.toJson<bool>(paidBeforeKalan),
       'paidOnDay': serializer.toJson<int?>(paidOnDay),
       'originalDay': serializer.toJson<int?>(originalDay),
+      'extraFeeMinor': serializer.toJson<int?>(extraFeeMinor),
+      'extraFeeNote': serializer.toJson<String?>(extraFeeNote),
     };
   }
 
@@ -2465,6 +2546,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     bool? paidBeforeKalan,
     Value<int?> paidOnDay = const Value.absent(),
     Value<int?> originalDay = const Value.absent(),
+    Value<int?> extraFeeMinor = const Value.absent(),
+    Value<String?> extraFeeNote = const Value.absent(),
   }) => PaymentRow(
     id: id ?? this.id,
     planId: planId ?? this.planId,
@@ -2476,6 +2559,10 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     paidBeforeKalan: paidBeforeKalan ?? this.paidBeforeKalan,
     paidOnDay: paidOnDay.present ? paidOnDay.value : this.paidOnDay,
     originalDay: originalDay.present ? originalDay.value : this.originalDay,
+    extraFeeMinor: extraFeeMinor.present
+        ? extraFeeMinor.value
+        : this.extraFeeMinor,
+    extraFeeNote: extraFeeNote.present ? extraFeeNote.value : this.extraFeeNote,
   );
   PaymentRow copyWithCompanion(PaymentsCompanion data) {
     return PaymentRow(
@@ -2495,6 +2582,12 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
       originalDay: data.originalDay.present
           ? data.originalDay.value
           : this.originalDay,
+      extraFeeMinor: data.extraFeeMinor.present
+          ? data.extraFeeMinor.value
+          : this.extraFeeMinor,
+      extraFeeNote: data.extraFeeNote.present
+          ? data.extraFeeNote.value
+          : this.extraFeeNote,
     );
   }
 
@@ -2510,7 +2603,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           ..write('isEdited: $isEdited, ')
           ..write('paidBeforeKalan: $paidBeforeKalan, ')
           ..write('paidOnDay: $paidOnDay, ')
-          ..write('originalDay: $originalDay')
+          ..write('originalDay: $originalDay, ')
+          ..write('extraFeeMinor: $extraFeeMinor, ')
+          ..write('extraFeeNote: $extraFeeNote')
           ..write(')'))
         .toString();
   }
@@ -2527,6 +2622,8 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
     paidBeforeKalan,
     paidOnDay,
     originalDay,
+    extraFeeMinor,
+    extraFeeNote,
   );
   @override
   bool operator ==(Object other) =>
@@ -2541,7 +2638,9 @@ class PaymentRow extends DataClass implements Insertable<PaymentRow> {
           other.isEdited == this.isEdited &&
           other.paidBeforeKalan == this.paidBeforeKalan &&
           other.paidOnDay == this.paidOnDay &&
-          other.originalDay == this.originalDay);
+          other.originalDay == this.originalDay &&
+          other.extraFeeMinor == this.extraFeeMinor &&
+          other.extraFeeNote == this.extraFeeNote);
 }
 
 class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
@@ -2555,6 +2654,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
   final Value<bool> paidBeforeKalan;
   final Value<int?> paidOnDay;
   final Value<int?> originalDay;
+  final Value<int?> extraFeeMinor;
+  final Value<String?> extraFeeNote;
   const PaymentsCompanion({
     this.id = const Value.absent(),
     this.planId = const Value.absent(),
@@ -2566,6 +2667,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     this.paidBeforeKalan = const Value.absent(),
     this.paidOnDay = const Value.absent(),
     this.originalDay = const Value.absent(),
+    this.extraFeeMinor = const Value.absent(),
+    this.extraFeeNote = const Value.absent(),
   });
   PaymentsCompanion.insert({
     this.id = const Value.absent(),
@@ -2578,6 +2681,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     this.paidBeforeKalan = const Value.absent(),
     this.paidOnDay = const Value.absent(),
     this.originalDay = const Value.absent(),
+    this.extraFeeMinor = const Value.absent(),
+    this.extraFeeNote = const Value.absent(),
   }) : planId = Value(planId),
        seq = Value(seq),
        dueDay = Value(dueDay),
@@ -2593,6 +2698,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     Expression<bool>? paidBeforeKalan,
     Expression<int>? paidOnDay,
     Expression<int>? originalDay,
+    Expression<int>? extraFeeMinor,
+    Expression<String>? extraFeeNote,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2605,6 +2712,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
       if (paidBeforeKalan != null) 'paid_before_kalan': paidBeforeKalan,
       if (paidOnDay != null) 'paid_on_day': paidOnDay,
       if (originalDay != null) 'original_day': originalDay,
+      if (extraFeeMinor != null) 'extra_fee_minor': extraFeeMinor,
+      if (extraFeeNote != null) 'extra_fee_note': extraFeeNote,
     });
   }
 
@@ -2619,6 +2728,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     Value<bool>? paidBeforeKalan,
     Value<int?>? paidOnDay,
     Value<int?>? originalDay,
+    Value<int?>? extraFeeMinor,
+    Value<String?>? extraFeeNote,
   }) {
     return PaymentsCompanion(
       id: id ?? this.id,
@@ -2631,6 +2742,8 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
       paidBeforeKalan: paidBeforeKalan ?? this.paidBeforeKalan,
       paidOnDay: paidOnDay ?? this.paidOnDay,
       originalDay: originalDay ?? this.originalDay,
+      extraFeeMinor: extraFeeMinor ?? this.extraFeeMinor,
+      extraFeeNote: extraFeeNote ?? this.extraFeeNote,
     );
   }
 
@@ -2667,6 +2780,12 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
     if (originalDay.present) {
       map['original_day'] = Variable<int>(originalDay.value);
     }
+    if (extraFeeMinor.present) {
+      map['extra_fee_minor'] = Variable<int>(extraFeeMinor.value);
+    }
+    if (extraFeeNote.present) {
+      map['extra_fee_note'] = Variable<String>(extraFeeNote.value);
+    }
     return map;
   }
 
@@ -2682,7 +2801,9 @@ class PaymentsCompanion extends UpdateCompanion<PaymentRow> {
           ..write('isEdited: $isEdited, ')
           ..write('paidBeforeKalan: $paidBeforeKalan, ')
           ..write('paidOnDay: $paidOnDay, ')
-          ..write('originalDay: $originalDay')
+          ..write('originalDay: $originalDay, ')
+          ..write('extraFeeMinor: $extraFeeMinor, ')
+          ..write('extraFeeNote: $extraFeeNote')
           ..write(')'))
         .toString();
   }
@@ -6473,6 +6594,8 @@ typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
   Value<bool> paidBeforeKalan,
   Value<int?> paidOnDay,
   Value<int?> originalDay,
+  Value<int?> extraFeeMinor,
+  Value<String?> extraFeeNote,
 });
 typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<int> id,
@@ -6485,6 +6608,8 @@ typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<bool> paidBeforeKalan,
   Value<int?> paidOnDay,
   Value<int?> originalDay,
+  Value<int?> extraFeeMinor,
+  Value<String?> extraFeeNote,
 });
 
 final class $$PaymentsTableReferences
@@ -6560,6 +6685,16 @@ class $$PaymentsTableFilterComposer
 
   ColumnFilters<int> get originalDay => $composableBuilder(
     column: $table.originalDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get extraFeeMinor => $composableBuilder(
+    column: $table.extraFeeMinor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get extraFeeNote => $composableBuilder(
+    column: $table.extraFeeNote,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6641,6 +6776,16 @@ class $$PaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get extraFeeMinor => $composableBuilder(
+    column: $table.extraFeeMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get extraFeeNote => $composableBuilder(
+    column: $table.extraFeeNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PlansTableOrderingComposer get planId {
     final $$PlansTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6707,6 +6852,16 @@ class $$PaymentsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get extraFeeMinor => $composableBuilder(
+    column: $table.extraFeeMinor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get extraFeeNote => $composableBuilder(
+    column: $table.extraFeeNote,
+    builder: (column) => column,
+  );
+
   $$PlansTableAnnotationComposer get planId {
     final $$PlansTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6769,6 +6924,8 @@ class $$PaymentsTableTableManager
                 Value<bool> paidBeforeKalan = const Value.absent(),
                 Value<int?> paidOnDay = const Value.absent(),
                 Value<int?> originalDay = const Value.absent(),
+                Value<int?> extraFeeMinor = const Value.absent(),
+                Value<String?> extraFeeNote = const Value.absent(),
               }) => PaymentsCompanion(
                 id: id,
                 planId: planId,
@@ -6780,6 +6937,8 @@ class $$PaymentsTableTableManager
                 paidBeforeKalan: paidBeforeKalan,
                 paidOnDay: paidOnDay,
                 originalDay: originalDay,
+                extraFeeMinor: extraFeeMinor,
+                extraFeeNote: extraFeeNote,
               ),
           createCompanionCallback:
               ({
@@ -6793,6 +6952,8 @@ class $$PaymentsTableTableManager
                 Value<bool> paidBeforeKalan = const Value.absent(),
                 Value<int?> paidOnDay = const Value.absent(),
                 Value<int?> originalDay = const Value.absent(),
+                Value<int?> extraFeeMinor = const Value.absent(),
+                Value<String?> extraFeeNote = const Value.absent(),
               }) => PaymentsCompanion.insert(
                 id: id,
                 planId: planId,
@@ -6804,6 +6965,8 @@ class $$PaymentsTableTableManager
                 paidBeforeKalan: paidBeforeKalan,
                 paidOnDay: paidOnDay,
                 originalDay: originalDay,
+                extraFeeMinor: extraFeeMinor,
+                extraFeeNote: extraFeeNote,
               ),
           withReferenceMapper: (p0) => p0
               .map(
