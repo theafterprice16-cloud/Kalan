@@ -2894,28 +2894,28 @@ abstract class AppLocalizations {
   /// **'Effect on your pay periods'**
   String get changeDatePreviewTitle;
 
-  /// Preview row: what is left in this pay period goes up by the amount. Sign and arrow carry the meaning, not color. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  /// Preview row: what is left in this pay period goes up by the amount. The sign and an arrow icon next to it carry the meaning, not color. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
   ///
   /// In en, this message translates to:
-  /// **'Left +{amount} ↑'**
+  /// **'Left +{amount}'**
   String changeDateLeftUp(String amount);
 
-  /// Preview row: what is left in this pay period goes down by the amount. Sign and arrow carry the meaning, not color. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  /// Preview row: what is left in this pay period goes down by the amount. The sign and an arrow icon next to it carry the meaning, not color. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
   ///
   /// In en, this message translates to:
-  /// **'Left −{amount} ↓'**
+  /// **'Left −{amount}'**
   String changeDateLeftDown(String amount);
 
   /// Preview row when no income is entered: the amount committed in this pay period goes up. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
   ///
   /// In en, this message translates to:
-  /// **'Committed +{amount} ↑'**
+  /// **'Committed +{amount}'**
   String changeDateCommittedUp(String amount);
 
-  /// Preview row when no income is entered: the amount committed in this pay period goes down. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
+  /// Preview row when no income is entered: the amount committed in this pay period goes down. Use a real minus sign. An arrow icon follows. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)
   ///
   /// In en, this message translates to:
-  /// **'Committed −{amount} ↓'**
+  /// **'Committed −{amount}'**
   String changeDateCommittedDown(String amount);
 
   /// Screen reader text for 'Left +{amount} ↑'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)

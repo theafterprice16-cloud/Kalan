@@ -370,46 +370,43 @@ class DateChangePreview extends ConsumerWidget {
       child: Text(text, key: key, style: body),
     );
 
-    return Container(
+    return Card(
       key: const ValueKey('change-date-preview'),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: KalanSpace.md,
-        vertical: KalanSpace.xs,
-      ),
-      decoration: BoxDecoration(
-        color: colors.surfaceRaised,
-        border: Border.all(color: colors.border, width: 0.5),
-        borderRadius: BorderRadius.circular(KalanRadius.card),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (laterBeforeToday)
-            line(
-              l10n.changeDateLaterBeforeToday,
-              key: const ValueKey('change-date-later-before-today'),
-            )
-          else if (changes.isEmpty)
-            line(
-              hasIncome
-                  ? l10n.changeDateSamePeriod
-                  : l10n.changeDateSamePeriodCommitted,
-              key: const ValueKey('change-date-same-period'),
-            ),
-          for (final c in shown)
-            _PeriodRow(change: c, hasIncome: hasIncome, style: body),
-          if (more > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: KalanSpace.xxs),
-              child: Text(l10n.changeDateMorePeriods(more), style: muted),
-            ),
-          if (passesNext)
-            line(
-              l10n.changeDatePassesNext,
-              key: const ValueKey('change-date-passes-next'),
-            ),
-        ],
+      color: colors.surfaceRaised,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: KalanSpace.md,
+          vertical: KalanSpace.xs,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (laterBeforeToday)
+              line(
+                l10n.changeDateLaterBeforeToday,
+                key: const ValueKey('change-date-later-before-today'),
+              )
+            else if (changes.isEmpty)
+              line(
+                hasIncome
+                    ? l10n.changeDateSamePeriod
+                    : l10n.changeDateSamePeriodCommitted,
+                key: const ValueKey('change-date-same-period'),
+              ),
+            for (final c in shown)
+              _PeriodRow(change: c, hasIncome: hasIncome, style: body),
+            if (more > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: KalanSpace.xxs),
+                child: Text(l10n.changeDateMorePeriods(more), style: muted),
+              ),
+            if (passesNext)
+              line(
+                l10n.changeDatePassesNext,
+                key: const ValueKey('change-date-passes-next'),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -462,15 +459,37 @@ class _PeriodRow extends ConsumerWidget {
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: KalanSpace.xxs),
-        child: Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          spacing: KalanSpace.sm,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(range, style: style),
-            Text(
-              text,
-              key: ValueKey('change-date-row-${change.period.start.epochDay}'),
-              style: style?.copyWith(fontFeatures: AmountText.tabular),
+            Flexible(child: Text(range, style: style)),
+            const SizedBox(width: KalanSpace.sm),
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      text,
+                      key: ValueKey(
+                        'change-date-row-${change.period.start.epochDay}',
+                      ),
+                      textAlign: TextAlign.end,
+                      style: style?.copyWith(
+                        fontFeatures: AmountText.tabular,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: KalanSpace.xxs),
+                  // The arrow with the sign: never color alone.
+                  Icon(
+                    up ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 16,
+                    color: context.colors.text,
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -2152,22 +2152,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String changeDateLeftUp(String amount) {
-    return 'Left +$amount ↑';
+    return 'Left +$amount';
   }
 
   @override
   String changeDateLeftDown(String amount) {
-    return 'Left −$amount ↓';
+    return 'Left −$amount';
   }
 
   @override
   String changeDateCommittedUp(String amount) {
-    return 'Committed +$amount ↑';
+    return 'Committed +$amount';
   }
 
   @override
   String changeDateCommittedDown(String amount) {
-    return 'Committed −$amount ↓';
+    return 'Committed −$amount';
   }
 
   @override

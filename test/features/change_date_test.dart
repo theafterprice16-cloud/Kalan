@@ -77,9 +77,9 @@ void main() {
     expect(find.text('27 Kas 2026'), findsOneWidget);
     // Example 1.
     expect(find.text('25 Eki – 24 Kas'), findsOneWidget);
-    expect(find.text('Kalan +${tr(6000)} ↑'), findsOneWidget);
+    expect(find.text('Kalan +${tr(6000)}'), findsOneWidget);
     expect(find.text('25 Kas – 24 Ara'), findsOneWidget);
-    expect(find.text('Kalan −${tr(6000)} ↓'), findsOneWidget);
+    expect(find.text('Kalan −${tr(6000)}'), findsOneWidget);
 
     // The switch starts off; on, it is example 2.
     final shift = find.byKey(const ValueKey('change-date-shift'));
@@ -115,8 +115,8 @@ void main() {
     await openTom(tester);
     await tapPayment(tester, '20 Kas 2026');
     await changeTo(tester, 27);
-    expect(find.text('Söz verilmiş −${tr(6000)} ↓'), findsOneWidget);
-    expect(find.text('Söz verilmiş +${tr(6000)} ↑'), findsOneWidget);
+    expect(find.text('Söz verilmiş −${tr(6000)}'), findsOneWidget);
+    expect(find.text('Söz verilmiş +${tr(6000)}'), findsOneWidget);
   });
 
   testWidgets('example 4: same period; back again removes the note', (

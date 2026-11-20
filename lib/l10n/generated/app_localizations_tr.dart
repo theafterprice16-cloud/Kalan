@@ -2160,22 +2160,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String changeDateLeftUp(String amount) {
-    return 'Kalan +$amount ↑';
+    return 'Kalan +$amount';
   }
 
   @override
   String changeDateLeftDown(String amount) {
-    return 'Kalan −$amount ↓';
+    return 'Kalan −$amount';
   }
 
   @override
   String changeDateCommittedUp(String amount) {
-    return 'Söz verilmiş +$amount ↑';
+    return 'Söz verilmiş +$amount';
   }
 
   @override
   String changeDateCommittedDown(String amount) {
-    return 'Söz verilmiş −$amount ↓';
+    return 'Söz verilmiş −$amount';
   }
 
   @override

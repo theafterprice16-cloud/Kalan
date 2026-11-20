@@ -2271,9 +2271,9 @@
   "@changeDatePreviewTitle": {
     "description": "'Change date' screen: heading of the preview of which pay periods change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
   },
-  "changeDateLeftUp": "Left +{amount} ↑",
+  "changeDateLeftUp": "Left +{amount}",
   "@changeDateLeftUp": {
-    "description": "Preview row: what is left in this pay period goes up by the amount. Sign and arrow carry the meaning, not color. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "description": "Preview row: what is left in this pay period goes up by the amount. The sign and an arrow icon next to it carry the meaning, not color. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
     "placeholders": {
       "amount": {
         "type": "String",
@@ -2282,9 +2282,9 @@
       }
     }
   },
-  "changeDateLeftDown": "Left −{amount} ↓",
+  "changeDateLeftDown": "Left −{amount}",
   "@changeDateLeftDown": {
-    "description": "Preview row: what is left in this pay period goes down by the amount. Sign and arrow carry the meaning, not color. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "description": "Preview row: what is left in this pay period goes down by the amount. The sign and an arrow icon next to it carry the meaning, not color. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
     "placeholders": {
       "amount": {
         "type": "String",
@@ -2293,7 +2293,7 @@
       }
     }
   },
-  "changeDateCommittedUp": "Committed +{amount} ↑",
+  "changeDateCommittedUp": "Committed +{amount}",
   "@changeDateCommittedUp": {
     "description": "Preview row when no income is entered: the amount committed in this pay period goes up. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
     "placeholders": {
@@ -2304,9 +2304,9 @@
       }
     }
   },
-  "changeDateCommittedDown": "Committed −{amount} ↓",
+  "changeDateCommittedDown": "Committed −{amount}",
   "@changeDateCommittedDown": {
-    "description": "Preview row when no income is entered: the amount committed in this pay period goes down. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "description": "Preview row when no income is entered: the amount committed in this pay period goes down. Use a real minus sign. An arrow icon follows. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
     "placeholders": {
       "amount": {
         "type": "String",
