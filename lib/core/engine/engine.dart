@@ -8,6 +8,7 @@ export 'busy_week.dart';
 export 'card_statement.dart';
 export 'charge_forecast.dart';
 export 'extra_fee.dart';
+export 'installment_fee.dart';
 export 'past_due.dart';
 export 'pay_later.dart';
 export 'pay_period.dart';

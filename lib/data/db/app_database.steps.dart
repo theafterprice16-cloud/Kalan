@@ -3843,6 +3843,296 @@ i1.GeneratedColumn<String> _column_75(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'NULL',
     );
+
+final class Schema17 extends i0.VersionedSchema {
+  Schema17({required super.database}) : super(version: 17);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    sources,
+    plans,
+    payments,
+    recurringPayments,
+    recurringMarks,
+    appSettings,
+    reminderSnoozes,
+    paymentsDueDay,
+  ];
+  late final Shape22 sources = Shape22(
+    source: i0.VersionedTable(
+      entityName: 'sources',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_65,
+        _column_66,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape26 plans = Shape26(
+    source: i0.VersionedTable(
+      entityName: 'plans',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_55,
+        _column_8,
+        _column_2,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_6,
+        _column_14,
+        _column_43,
+        _column_51,
+        _column_56,
+        _column_57,
+        _column_60,
+        _column_62,
+        _column_63,
+        _column_67,
+        _column_68,
+        _column_69,
+        _column_70,
+        _column_71,
+        _column_72,
+        _column_76,
+        _column_77,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape27 payments = Shape27(
+    source: i0.VersionedTable(
+      entityName: 'payments',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(plan_id, seq)'],
+      columns: [
+        _column_0,
+        _column_15,
+        _column_16,
+        _column_17,
+        _column_18,
+        _column_19,
+        _column_20,
+        _column_45,
+        _column_46,
+        _column_73,
+        _column_74,
+        _column_75,
+        _column_76,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape13 recurringPayments = Shape13(
+    source: i0.VersionedTable(
+      entityName: 'recurring_payments',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_18,
+        _column_21,
+        _column_22,
+        _column_23,
+        _column_6,
+        _column_14,
+        _column_43,
+        _column_51,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 recurringMarks = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'recurring_marks',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(recurring_id, occurrence_day)'],
+      columns: [_column_24, _column_25, _column_26],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape21 appSettings = Shape21(
+    source: i0.VersionedTable(
+      entityName: 'app_settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_27,
+        _column_28,
+        _column_29,
+        _column_30,
+        _column_31,
+        _column_32,
+        _column_33,
+        _column_34,
+        _column_35,
+        _column_14,
+        _column_44,
+        _column_40,
+        _column_41,
+        _column_42,
+        _column_52,
+        _column_58,
+        _column_59,
+        _column_61,
+        _column_64,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape15 reminderSnoozes = Shape15(
+    source: i0.VersionedTable(
+      entityName: 'reminder_snoozes',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['UNIQUE(kind, fire_day, minute_of_day, refs)'],
+      columns: [
+        _column_0,
+        _column_53,
+        _column_48,
+        _column_49,
+        _column_50,
+        _column_54,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index paymentsDueDay = i1.Index(
+    'payments_due_day',
+    'CREATE INDEX payments_due_day ON payments (due_day)',
+  );
+}
+
+class Shape26 extends i0.VersionedTable {
+  Shape26({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get sourceId =>
+      columnsByName['source_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get title =>
+      columnsByName['title']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get kind =>
+      columnsByName['kind']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get installmentCount =>
+      columnsByName['installment_count']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get purchaseDay =>
+      columnsByName['purchase_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get deferMonths =>
+      columnsByName['defer_months']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get isCashAdvance =>
+      columnsByName['is_cash_advance']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get origin =>
+      columnsByName['origin']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get remindersEnabled =>
+      columnsByName['reminders_enabled']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get reminderLeadDays =>
+      columnsByName['reminder_lead_days']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get repeatMode =>
+      columnsByName['repeat_mode']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get payLaterRule =>
+      columnsByName['pay_later_rule']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get payLaterValue =>
+      columnsByName['pay_later_value']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get intervalDays =>
+      columnsByName['interval_days']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get paymentMethod =>
+      columnsByName['payment_method']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get chargeSourceId =>
+      columnsByName['charge_source_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get status =>
+      columnsByName['status']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get closeReason =>
+      columnsByName['close_reason']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get heldSinceDay =>
+      columnsByName['held_since_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get holdCheckDay =>
+      columnsByName['hold_check_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get reopenedDay =>
+      columnsByName['reopened_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get closedDay =>
+      columnsByName['closed_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get installmentFeeMinor =>
+      columnsByName['installment_fee_minor']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get installmentFeeScope =>
+      columnsByName['installment_fee_scope']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<int> _column_76(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'installment_fee_minor',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL CHECK (installment_fee_minor IS NULL OR installment_fee_minor >= 1)',
+    );
+i1.GeneratedColumn<String> _column_77(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'installment_fee_scope',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL DEFAULT \'everyPayment\'',
+      defaultValue: const i1.CustomExpression('\'everyPayment\''),
+    );
+
+class Shape27 extends i0.VersionedTable {
+  Shape27({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get planId =>
+      columnsByName['plan_id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get seq =>
+      columnsByName['seq']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get dueDay =>
+      columnsByName['due_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get amountMinor =>
+      columnsByName['amount_minor']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get paidAt =>
+      columnsByName['paid_at']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get isEdited =>
+      columnsByName['is_edited']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get paidBeforeKalan =>
+      columnsByName['paid_before_kalan']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get paidOnDay =>
+      columnsByName['paid_on_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get originalDay =>
+      columnsByName['original_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get extraFeeMinor =>
+      columnsByName['extra_fee_minor']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get extraFeeNote =>
+      columnsByName['extra_fee_note']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get installmentFeeMinor =>
+      columnsByName['installment_fee_minor']! as i1.GeneratedColumn<int>;
+}
+
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
@@ -3859,6 +4149,7 @@ i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
   required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
   required Future<void> Function(i1.Migrator m, Schema16 schema) from15To16,
+  required Future<void> Function(i1.Migrator m, Schema17 schema) from16To17,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -3937,6 +4228,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from15To16(migrator, schema);
         return 16;
+      case 16:
+        final schema = Schema17(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from16To17(migrator, schema);
+        return 17;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -3959,6 +4255,7 @@ i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema14 schema) from13To14,
   required Future<void> Function(i1.Migrator m, Schema15 schema) from14To15,
   required Future<void> Function(i1.Migrator m, Schema16 schema) from15To16,
+  required Future<void> Function(i1.Migrator m, Schema17 schema) from16To17,
 }) => i0.VersionedSchema.stepByStepHelper(
   step: migrationSteps(
     from1To2: from1To2,
@@ -3976,5 +4273,6 @@ i1.OnUpgrade stepByStep({
     from13To14: from13To14,
     from14To15: from14To15,
     from15To16: from15To16,
+    from16To17: from16To17,
   ),
 );

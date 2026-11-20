@@ -8,14 +8,30 @@ import 'plan_status.dart';
 /// The longest note an extra fee takes.
 const extraFeeNoteMaxLength = 80;
 
-/// What a payment adds to "spoken for": its amount plus its extra fee.
-/// The fee follows the payment: unpaid, it is still to pay with it; paid,
-/// it was paid with it. Applied once, where period totals are made
+/// What a payment adds to "spoken for": its amount plus its fee per
+/// payment (22) plus its extra fee (21). The one place both fees are
+/// added. The fees follow the payment: unpaid, they are still to pay with
+/// it; paid, they were paid with it. Applied where period totals are made
 /// (`spokenForItems`), and in reminders (`ReminderPayment.dueMinor`). A
-/// plan's total and its installment amounts never include it, and neither
-/// does a card statement (16).
-int spokenForAmount({required int amountMinor, int? extraFeeMinor}) =>
-    amountMinor + (extraFeeMinor ?? 0);
+/// plan's total never includes either fee, and neither does a card
+/// statement (16; card plans have no fee per payment). The installment
+/// shown includes the fee per payment ([installmentAmount]).
+int spokenForAmount({
+  required int amountMinor,
+  int? installmentFeeMinor,
+  int? extraFeeMinor,
+}) =>
+    installmentAmount(
+      amountMinor: amountMinor,
+      installmentFeeMinor: installmentFeeMinor,
+    ) +
+    (extraFeeMinor ?? 0);
+
+/// The installment as shown on a payment row and in a reminder line: its
+/// amount plus its fee per payment (22), without the extra fee (21),
+/// which has its own note.
+int installmentAmount({required int amountMinor, int? installmentFeeMinor}) =>
+    amountMinor + (installmentFeeMinor ?? 0);
 
 /// Whether a payment can take, change or lose an extra fee:
 ///

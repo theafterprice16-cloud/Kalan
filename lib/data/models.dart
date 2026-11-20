@@ -42,12 +42,30 @@ extension PaymentRowX on PaymentRow {
   LocalDate get date => LocalDate.fromEpochDay(dueDay);
   bool get isPaid => paidAt != null;
 
-  /// What this payment adds to "spoken for": its amount plus its extra
-  /// fee (21, [spokenForAmount]). Period totals, reminders and the amount
-  /// to keep in an account (18) use it; the plan's total, the payment's
-  /// own amount and card statements (16) use [PaymentRow.amountMinor].
-  int get spokenForMinor =>
-      spokenForAmount(amountMinor: amountMinor, extraFeeMinor: extraFeeMinor);
+  /// What this payment adds to "spoken for": its amount, its fee per
+  /// payment (22) and its extra fee (21) ([spokenForAmount]). Period
+  /// totals, reminders and the amount to keep in an account (18) use it;
+  /// the plan's total and card statements (16) use
+  /// [PaymentRow.amountMinor].
+  int get spokenForMinor => spokenForAmount(
+    amountMinor: amountMinor,
+    installmentFeeMinor: installmentFeeMinor,
+    extraFeeMinor: extraFeeMinor,
+  );
+
+  /// The installment shown on rows: its amount plus its fee per payment
+  /// (22), without the extra fee (21) ([installmentAmount]).
+  int get installmentMinor => installmentAmount(
+    amountMinor: amountMinor,
+    installmentFeeMinor: installmentFeeMinor,
+  );
+
+  FeePayment toFeePayment() => (
+    seq: seq,
+    isPaid: isPaid,
+    paidBeforeKalan: paidBeforeKalan,
+    feeMinor: installmentFeeMinor,
+  );
 
   /// The date before "Change date" first moved it (20); null otherwise.
   LocalDate? get originalDate =>
@@ -200,6 +218,25 @@ class PlanWithPayments {
   /// of [totalMinor].
   int get extraFeesMinor =>
       payments.fold(0, (sum, p) => sum + (p.extraFeeMinor ?? 0));
+
+  /// The fees per payment (22) of every stored payment: "Payment fees" in
+  /// the plan summary, beside [totalMinor] ("Plan amount"), never in it.
+  int get installmentFeesMinor =>
+      allPayments.fold(0, (sum, p) => sum + (p.installmentFeeMinor ?? 0));
+
+  /// "Total" in the plan summary: the plan amount and its fees per payment.
+  int get totalWithFeesMinor => totalMinor + installmentFeesMinor;
+
+  /// What is left to pay on the plan, fees per payment included (22).
+  int get remainingWithFeesMinor => allPayments
+      .where((p) => !p.isPaid)
+      .fold(0, (sum, p) => sum + p.installmentMinor);
+
+  /// What was paid, fees per payment included (22).
+  int get paidWithFeesMinor => totalWithFeesMinor - remainingWithFeesMinor;
+
+  /// The plan's fee per payment as typed (22); null for none.
+  int? get installmentFee => plan.installmentFeeMinor;
 
   /// Paid before Kalan plus paid in Kalan.
   int get paidCount =>

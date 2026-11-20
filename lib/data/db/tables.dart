@@ -4,6 +4,7 @@
 import 'package:drift/drift.dart';
 
 import '../../core/engine/amount_entry.dart';
+import '../../core/engine/installment_fee.dart';
 import '../../core/engine/pay_later.dart';
 import '../../core/engine/pay_period.dart';
 import '../../core/engine/payment_method.dart';
@@ -125,6 +126,18 @@ class Plans extends Table {
   /// The day a plan was closed; null for every other plan. Closing cannot
   /// be undone.
   IntColumn get closedDay => integer().nullable()();
+
+  /// The plan's fee per payment as typed (schema v17, 22): never computed.
+  /// Empty for no fee; never on card installments. Each payment keeps the
+  /// fee it took in [Payments.installmentFeeMinor], so a paid one keeps its own.
+  IntColumn get installmentFeeMinor => integer().nullable().check(
+    installmentFeeMinor.isNull() | installmentFeeMinor.isBiggerOrEqualValue(1),
+  )();
+
+  /// Which payments take the fee: every payment unless "first payment
+  /// only" is chosen. Always every payment for "Pay later".
+  TextColumn get installmentFeeScope => textEnum<InstallmentFeeScope>()
+      .withDefault(const Constant('everyPayment'))();
 }
 
 @DataClassName('PaymentRow')
@@ -166,6 +179,15 @@ class Payments extends Table {
 
   /// The extra fee's optional short note (21).
   TextColumn get extraFeeNote => text().nullable().withLength(max: 80)();
+
+  /// The plan's fee per payment this payment took (schema v17, 22),
+  /// written when the plan's fee is set: unpaid payments follow the plan,
+  /// paid ones keep theirs. Part of the installment shown and of "spoken
+  /// for" ([spokenForAmount]); never part of [amountMinor] or the plan's
+  /// total. Empty for every payment without one.
+  IntColumn get installmentFeeMinor => integer().nullable().check(
+    installmentFeeMinor.isNull() | installmentFeeMinor.isBiggerOrEqualValue(1),
+  )();
 
   @override
   List<Set<Column>> get uniqueKeys => [
