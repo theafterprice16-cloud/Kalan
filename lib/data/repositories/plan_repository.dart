@@ -265,6 +265,56 @@ class PlanRepository {
         }
       });
 
+  /// "Change date" (20): payment [seq] moves to [newDate]; with
+  /// [shiftLater], every later unpaid payment moves by the same number of
+  /// days ([movedDates]). Each moved payment keeps its first original date
+  /// ([originalDateAfterMove]). One transaction; nothing else changes
+  /// (amounts, numbers, "edited"). Returns the reason when nothing is
+  /// stored ([moveRejection], the screen's own check).
+  Future<MoveRejection?> movePayment({
+    required int planId,
+    required int seq,
+    required LocalDate newDate,
+    required bool shiftLater,
+    required LocalDate today,
+  }) => _db.transaction(() async {
+    final plan = await _plan(planId);
+    final rows = await _rows(planId);
+    final payments = [for (final r in rows) r.toMovable()];
+    final rejection = moveRejection(
+      payments,
+      seq: seq,
+      newDate: newDate,
+      shiftLater: shiftLater,
+      today: today,
+      status: plan.status,
+      kind: plan.kind,
+    );
+    if (rejection != null) return rejection;
+    final moved = movedDates(
+      payments,
+      seq: seq,
+      newDate: newDate,
+      shiftLater: shiftLater,
+    );
+    for (final r in rows) {
+      final date = moved[r.seq];
+      if (date == null) continue;
+      final original = originalDateAfterMove(
+        current: r.date,
+        stored: r.originalDate,
+        newDate: date,
+      );
+      await (_db.update(_db.payments)..where((p) => p.id.equals(r.id))).write(
+        PaymentsCompanion(
+          dueDay: Value(date.epochDay),
+          originalDay: Value(original?.epochDay),
+        ),
+      );
+    }
+    return null;
+  });
+
   /// Changes one payment; returns the reason when the edit is not allowed.
   Future<EditRejection?> editPayment({
     required int planId,
@@ -299,6 +349,11 @@ class PlanRepository {
               dueDay: Value(after.date.epochDay),
               amountMinor: Value(after.amountMinor),
               isEdited: Value(after.isEdited),
+              // Back on the date it had before "Change date" (20): the
+              // note goes. Otherwise the original date stays as it is.
+              originalDay: before.originalDay == after.date.epochDay
+                  ? const Value(null)
+                  : const Value.absent(),
             ),
           );
         }
@@ -332,12 +387,24 @@ class PlanRepository {
     required PayLaterRule rule,
     LocalDate? chosenDate,
   }) => _db.transaction(() async {
-    await _requireNotClosed(planId);
+    final plan = await _plan(planId);
+    if (plan.status == PlanStatus.closed) {
+      throw StateError('plan $planId is closed');
+    }
     final payment = await (_db.select(
       _db.payments,
     )..where((p) => p.planId.equals(planId))).getSingle();
     final trimmed = title?.trim();
     final paid = payment.isPaid;
+    // A date recorded with "Change date" (20) stays until the purchase
+    // date, the rule or a picked date changes; then the rule decides
+    // again and the note goes.
+    final keepsMove =
+        payment.originalDay != null &&
+        plan.purchaseDay == purchaseDate.epochDay &&
+        plan.payLaterRule == rule.kind &&
+        plan.payLaterValue == rule.value &&
+        (chosenDate == null || chosenDate == payment.date);
     await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
       PlansCompanion(
         title: Value((trimmed?.isEmpty ?? true) ? null : trimmed),
@@ -348,17 +415,20 @@ class PlanRepository {
       ),
     );
     if (paid) return;
-    final due = payLaterDueDate(
-      purchase: purchaseDate,
-      rule: rule,
-      chosen: chosenDate ?? LocalDate.fromEpochDay(payment.dueDay),
-    );
+    final due = keepsMove
+        ? payment.date
+        : payLaterDueDate(
+            purchase: purchaseDate,
+            rule: rule,
+            chosen: chosenDate ?? LocalDate.fromEpochDay(payment.dueDay),
+          );
     await (_db.update(
       _db.payments,
     )..where((p) => p.id.equals(payment.id))).write(
       PaymentsCompanion(
         amountMinor: Value(amountMinor),
         dueDay: Value(due.epochDay),
+        originalDay: keepsMove ? const Value.absent() : const Value(null),
       ),
     );
   });
@@ -421,7 +491,9 @@ class PlanRepository {
       final markedInKalan = r.isPaid && !r.paidBeforeKalan;
       if (markedInKalan) continue;
       final before = i < run && i < count;
-      final date = dates != null && !r.isEdited ? dates[i] : r.date;
+      // Edited by hand or moved with "Change date" (20): the date stays.
+      final pinned = r.isEdited || r.originalDay != null;
+      final date = dates != null && !pinned ? dates[i] : r.date;
       final change = PaymentsCompanion(
         paidAt: Value(before ? (r.paidBeforeKalan ? r.paidAt : paidAt) : null),
         paidBeforeKalan: Value(before),
@@ -607,7 +679,9 @@ class PlanRepository {
               ..where((p) => p.planId.equals(planId))
               ..orderBy([(p) => OrderingTerm.asc(p.seq)]))
             .get();
-    bool free(PaymentRow r) => !r.isPaid && !r.isEdited;
+    // Moved with "Change date" (20): kept like a date edited by hand.
+    bool free(PaymentRow r) =>
+        !r.isPaid && !r.isEdited && r.originalDay == null;
     var anchor = paidBefore;
     while (anchor < rows.length && !free(rows[anchor])) {
       anchor++;
