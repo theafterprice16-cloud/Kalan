@@ -91,7 +91,7 @@ void main() {
   testWidgets('the add form looks the same until "More details" opens', (
     tester,
   ) async {
-    await pumpTall(tester, today: today, seed: (db) => seedKenji(db));
+    await pumpTall(tester, today: today, seed: seedKenji);
     await openAdd(tester, 'Aylık taksit');
     expect(find.byKey(const ValueKey('installment-fee')), findsNothing);
     await tapKey(tester, 'more-details');
@@ -101,14 +101,14 @@ void main() {
   });
 
   testWidgets('card installments have no fee field', (tester) async {
-    await pumpTall(tester, today: today, seed: (db) => seedKenji(db));
+    await pumpTall(tester, today: today, seed: seedKenji);
     await openAdd(tester, 'Kredi kartı taksidi');
     await tapKey(tester, 'more-details');
     expect(find.byKey(const ValueKey('installment-fee')), findsNothing);
   });
 
   testWidgets('pay later: the fee without a scope choice', (tester) async {
-    await pumpTall(tester, today: today, seed: (db) => seedKenji(db));
+    await pumpTall(tester, today: today, seed: seedKenji);
     await openAdd(tester, 'Sonra öde');
     await tapKey(tester, 'more-details');
     final field = find.byKey(const ValueKey('installment-fee'));
