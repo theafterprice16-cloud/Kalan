@@ -2320,4 +2320,56 @@ class AppLocalizationsTr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get installmentFeeLabel => 'Taksit başı ücret';
+
+  @override
+  String get installmentFeeHelper =>
+      'Sağlayıcının ödemelerde aldığı sabit ücret. Ücret yoksa boş bırak.';
+
+  @override
+  String get installmentFeeScopeLabel => 'Ücretin alındığı taksit';
+
+  @override
+  String get installmentFeeScopeEvery => 'Her taksitte';
+
+  @override
+  String get installmentFeeScopeFirst => 'Yalnızca ilk taksitte';
+
+  @override
+  String installmentFeeIncluded(String fee) {
+    return '$fee taksit ücreti dahil';
+  }
+
+  @override
+  String get planAmountLabel => 'Plan tutarı';
+
+  @override
+  String get installmentFeesLabel => 'Taksit ücretleri';
+
+  @override
+  String get planTotalLabel => 'Toplam';
+
+  @override
+  String installmentFeeAffects(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bu değişiklik ödenmemiş $count taksiti etkiler.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get installmentFeeFirstPaid =>
+      'İlk taksit ödendiği için ücret hiçbir taksite eklenmez.';
+
+  @override
+  String get moreOptions => 'Daha fazla seçenek';
+
+  @override
+  String installmentFeeOnTop(String fee) {
+    return '$fee taksit ücreti bu tutara ayrıca eklenir.';
+  }
 }

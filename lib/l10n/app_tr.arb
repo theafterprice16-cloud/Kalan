@@ -492,5 +492,18 @@
   "extraFeeRemoved": "Ek ücret silindi.",
   "extraFeeNotAllowed": "Bu ödemeye ek ücret eklenemiyor.",
   "extraFeeNoteTooLong": "{max, plural, other{Not en çok {max} karakter olabilir.}}",
-  "pastDueRowFeeSemantics": "{days, plural, =1{{plan}, {amount}, artı {fee} ek ücret, son ödeme günü 1 gün önce geçti} other{{plan}, {amount}, artı {fee} ek ücret, son ödeme günü {days} gün önce geçti}}"
+  "pastDueRowFeeSemantics": "{days, plural, =1{{plan}, {amount}, artı {fee} ek ücret, son ödeme günü 1 gün önce geçti} other{{plan}, {amount}, artı {fee} ek ücret, son ödeme günü {days} gün önce geçti}}",
+  "installmentFeeLabel": "Taksit başı ücret",
+  "installmentFeeHelper": "Sağlayıcının ödemelerde aldığı sabit ücret. Ücret yoksa boş bırak.",
+  "installmentFeeScopeLabel": "Ücretin alındığı taksit",
+  "installmentFeeScopeEvery": "Her taksitte",
+  "installmentFeeScopeFirst": "Yalnızca ilk taksitte",
+  "installmentFeeIncluded": "{fee} taksit ücreti dahil",
+  "planAmountLabel": "Plan tutarı",
+  "installmentFeesLabel": "Taksit ücretleri",
+  "planTotalLabel": "Toplam",
+  "installmentFeeAffects": "{count, plural, other{Bu değişiklik ödenmemiş {count} taksiti etkiler.}}",
+  "installmentFeeFirstPaid": "İlk taksit ödendiği için ücret hiçbir taksite eklenmez.",
+  "moreOptions": "Daha fazla seçenek",
+  "installmentFeeOnTop": "{fee} taksit ücreti bu tutara ayrıca eklenir."
 }

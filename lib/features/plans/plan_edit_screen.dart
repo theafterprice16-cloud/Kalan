@@ -14,6 +14,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import 'add_plan_screen.dart' show findSourceByName;
+import 'installment_fee_fields.dart';
 import 'interval_field.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
@@ -49,8 +50,13 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   PaymentMethod? _method;
   int? _chargeSourceId;
 
+  /// Fee per payment (22); empty is no fee.
+  final _fee = TextEditingController();
+  InstallmentFeeScope _feeScope = InstallmentFeeScope.everyPayment;
+
   @override
   void dispose() {
+    _fee.dispose();
     _paid.dispose();
     _count.dispose();
     _interval?.dispose();
@@ -69,6 +75,10 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     if (plan.interval case final interval?) _interval = IntervalInput(interval);
     _method = plan.plan.paymentMethod;
     _chargeSourceId = plan.chargeSourceId;
+    _feeScope = plan.plan.installmentFeeScope;
+    if (plan.installmentFee case final fee?) {
+      _fee.text = ref.moneyInput(context, fee);
+    }
   }
 
   bool _isPayIn4(PlanWithPayments plan) => plan.plan.kind == PlanKind.payIn4;
@@ -144,6 +154,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
+    final fee = typedInstallmentFee(context, ref, _fee.text);
     final count = _underway ? _paidCount(plan) ?? 0 : 0;
     final back = plan.paidBefore.length - count;
     if (back > 0) {
@@ -181,6 +192,9 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
           nextDate: moveDates ? _nextDate : null,
           pattern: pattern,
           interval: _interval?.interval,
+          installmentFee: canHaveInstallmentFee(plan.plan.kind)
+              ? (feeMinor: fee, scope: _feeScope)
+              : null,
         );
     if (rejected != null) {
       // What is left cannot be split that finely; say so under the field.
@@ -347,6 +361,17 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                 onChargeSourceChanged: (id) =>
                     setState(() => _chargeSourceId = id),
               ),
+              // Fee per payment (22): never for card installments.
+              if (canHaveInstallmentFee(plan.plan.kind)) ...[
+                const SizedBox(height: KalanSpace.xs),
+                _FeeSection(
+                  plan: plan,
+                  controller: _fee,
+                  scope: _feeScope,
+                  onScopeChanged: (v) => setState(() => _feeScope = v),
+                  onChanged: () => setState(() {}),
+                ),
+              ],
               gap,
               FilledButton(
                 key: const ValueKey('save-plan-edit'),
@@ -380,6 +405,9 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
   PaymentMethod? _method;
   int? _chargeSourceId;
 
+  /// Fee per payment (22); empty is no fee.
+  final _fee = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -407,6 +435,9 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _input.amount.text = ref.moneyInput(context, payment.amountMinor);
+      if (plan.installmentFee case final fee?) {
+        _fee.text = ref.moneyInput(context, fee);
+      }
     });
   }
 
@@ -415,6 +446,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
   @override
   void dispose() {
     _input.dispose();
+    _fee.dispose();
     super.dispose();
   }
 
@@ -427,6 +459,7 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
         : ref.parseMoney(context, _input.amount.text);
     final rule = _input.rule;
     if (amount == null || rule == null) return;
+    final fee = typedInstallmentFee(context, ref, _fee.text);
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
@@ -450,6 +483,10 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
           purchaseDate: _input.purchaseDate,
           rule: rule,
           chosenDate: _input.chosenDate,
+          installmentFee: (
+            feeMinor: fee,
+            scope: InstallmentFeeScope.everyPayment,
+          ),
         );
     await ref
         .read(planRepositoryProvider)
@@ -500,6 +537,14 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
                 onChargeSourceChanged: (id) =>
                     setState(() => _chargeSourceId = id),
               ),
+              const SizedBox(height: KalanSpace.xs),
+              _FeeSection(
+                plan: widget.plan,
+                controller: _fee,
+                scope: InstallmentFeeScope.everyPayment,
+                onScopeChanged: (_) {},
+                onChanged: _refresh,
+              ),
               const SizedBox(height: KalanSpace.md),
               FilledButton(
                 key: const ValueKey('save-plan-edit'),
@@ -510,6 +555,66 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "More options" on the edit screens (22): the fee per payment, closed
+/// unless the plan has one. Says calmly how many unpaid payments the
+/// change touches, or that "first payment only" adds nothing because the
+/// first payment is paid. Paid payments never change.
+class _FeeSection extends ConsumerWidget {
+  const _FeeSection({
+    required this.plan,
+    required this.controller,
+    required this.scope,
+    required this.onScopeChanged,
+    required this.onChanged,
+  });
+
+  final PlanWithPayments plan;
+  final TextEditingController controller;
+  final InstallmentFeeScope scope;
+  final ValueChanged<InstallmentFeeScope> onScopeChanged;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final fee = typedInstallmentFee(context, ref, controller.text);
+    final payments = [for (final p in plan.allPayments) p.toFeePayment()];
+    final scopeNow = plan.isPayLater ? InstallmentFeeScope.everyPayment : scope;
+    final changes = unpaidFeeChanges(
+      payments: payments,
+      feeMinor: fee,
+      scope: scopeNow,
+    );
+    final addsNothing = firstPaymentFeeAddsNothing(
+      payments: payments,
+      feeMinor: fee,
+      scope: scopeNow,
+    );
+    return ExpansionTile(
+      key: const ValueKey('more-options'),
+      title: Text(l10n.moreOptions),
+      initiallyExpanded: plan.installmentFee != null,
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsets.only(bottom: KalanSpace.xs),
+      children: [
+        InstallmentFeeFields(
+          controller: controller,
+          scope: scope,
+          showScope: !plan.isPayLater,
+          onScopeChanged: onScopeChanged,
+          onChanged: onChanged,
+          notes: [
+            if (addsNothing)
+              ('installment-fee-first-paid', l10n.installmentFeeFirstPaid)
+            else if (changes > 0)
+              ('installment-fee-affects', l10n.installmentFeeAffects(changes)),
+          ],
+        ),
+      ],
     );
   }
 }

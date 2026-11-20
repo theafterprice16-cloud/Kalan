@@ -102,7 +102,7 @@ BusyWeek? busyWeekIn({
     for (final p in plans)
       for (final pay in p.payments)
         if (!pay.paidBeforeKalan)
-          DatedAmount(LocalDate.fromEpochDay(pay.dueDay), pay.amountMinor),
+          DatedAmount(LocalDate.fromEpochDay(pay.dueDay), pay.installmentMinor),
   ],
 );
 

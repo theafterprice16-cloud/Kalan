@@ -25,12 +25,19 @@ class HomeEntry {
     this.extraFeeMinor,
     this.extraFeeNote,
     this.canHaveExtraFee = false,
+    this.installmentFeeMinor,
   });
 
   /// Null for an untitled "Pay later" plan: see [label].
   final String? name;
   final LocalDate date;
+
+  /// The installment as shown: its amount plus its fee per payment (22),
+  /// never the extra fee (21).
   final int amountMinor;
+
+  /// The fee per payment (22) included in [amountMinor]; null when none.
+  final int? installmentFeeMinor;
   final bool isPaid;
 
   final int? paymentId;
@@ -48,7 +55,7 @@ class HomeEntry {
   final PaymentMethod? paymentMethod;
 
   /// The payment's extra fee (21), shown as a note next to [amountMinor],
-  /// which stays the payment's own amount. Null when none (and for
+  /// which never includes it. Null when none (and for
   /// recurring payments).
   final int? extraFeeMinor;
   final String? extraFeeNote;
@@ -94,7 +101,8 @@ class HomeView {
 HomeEntry planEntryOf(PlanWithPayments p, PaymentRow pay) => HomeEntry(
   name: p.ownName,
   date: LocalDate.fromEpochDay(pay.dueDay),
-  amountMinor: pay.amountMinor,
+  amountMinor: pay.installmentMinor,
+  installmentFeeMinor: pay.installmentFeeMinor,
   isPaid: pay.paidAt != null,
   paymentId: pay.id,
   planId: p.plan.id,

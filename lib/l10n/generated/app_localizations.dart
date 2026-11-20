@@ -3084,6 +3084,84 @@ abstract class AppLocalizations {
     String fee,
     int days,
   );
+
+  /// Optional amount field under 'More details' on the add and edit plan screens: a fixed fee the plan charges with its payments. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'Fee per payment'**
+  String get installmentFeeLabel;
+
+  /// Helper text under the fee per payment field. Kalan never calculates or suggests it. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'A fixed fee your provider charges with payments. Leave empty for none.'**
+  String get installmentFeeHelper;
+
+  /// Heading of the choice of which payments take the fee per payment. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'Charged on'**
+  String get installmentFeeScopeLabel;
+
+  /// Choice: the fee per payment is added to every payment (default). Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'On every payment'**
+  String get installmentFeeScopeEvery;
+
+  /// Choice: the fee per payment is added to payment number 1 only. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'First payment only'**
+  String get installmentFeeScopeFirst;
+
+  /// Muted note under an installment amount that includes the plan's fee per payment. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'Includes {fee} payment fee'**
+  String installmentFeeIncluded(String fee);
+
+  /// Plan summary row label: the plan's amount without fees per payment. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'Plan amount'**
+  String get planAmountLabel;
+
+  /// Plan summary row label: the fees per payment of all the plan's payments. Not a statistic or a warning. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'Payment fees'**
+  String get installmentFeesLabel;
+
+  /// Plan summary row label: plan amount plus payment fees. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get planTotalLabel;
+
+  /// Calm line on the edit plan screen when the fee per payment change touches unpaid payments; paid payments never change. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This changes 1 unpaid payment.} other{This changes {count} unpaid payments.}}'**
+  String installmentFeeAffects(int count);
+
+  /// Calm line on the edit plan screen: 'First payment only' is chosen but the first payment is already paid, so no payment takes the fee. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  ///
+  /// In en, this message translates to:
+  /// **'The first payment is already paid, so no fee is added.'**
+  String get installmentFeeFirstPaid;
+
+  /// Collapsed section on the edit plan screen holding the fee per payment (22). Closed by default; open when the plan has a fee. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get moreOptions;
+
+  /// Muted line in the 'Edit payment' dialog: the amount typed is the installment without the plan's fee per payment, which is added on top. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.
+  ///
+  /// In en, this message translates to:
+  /// **'The {fee} payment fee is added on top.'**
+  String installmentFeeOnTop(String fee);
 }
 
 class _AppLocalizationsDelegate

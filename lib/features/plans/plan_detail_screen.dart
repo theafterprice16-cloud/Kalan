@@ -22,6 +22,7 @@ import '../reminders/reminder_settings_store.dart';
 import '../reminders/repeat_mode_ui.dart';
 import 'change_date_screen.dart';
 import 'extra_fee_sheet.dart';
+import 'installment_fee_fields.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
 import 'plan_labels.dart';
@@ -83,7 +84,11 @@ class PlanDetailScreen extends ConsumerWidget {
     final today = ref.watch(todayProvider);
     final passedWhileHeld = plan.passedWhileHeld;
     // A closed plan shows what was paid; its other payments are out.
-    final heroMinor = plan.isClosed ? plan.paidMinor : plan.remainingMinor;
+    // Fees per payment (22) are part of what is paid and to pay.
+    final heroMinor = plan.isClosed
+        ? plan.paidWithFeesMinor
+        : plan.remainingWithFeesMinor;
+    final fees = plan.installmentFeesMinor;
 
     return Scaffold(
       appBar: AppBar(
@@ -216,9 +221,11 @@ class PlanDetailScreen extends ConsumerWidget {
                             paid: plan.paidCount,
                             total: plan.plan.installmentCount,
                           ),
-                        Text(
-                          l10n.planTotal(ref.money(context, plan.totalMinor)),
-                        ),
+                        // With fees per payment (22): the three rows below.
+                        if (fees == 0)
+                          Text(
+                            l10n.planTotal(ref.money(context, plan.totalMinor)),
+                          ),
                         if (plan.plan.purchaseDay != null)
                           Text(
                             l10n.planPurchaseDate(
@@ -229,6 +236,15 @@ class PlanDetailScreen extends ConsumerWidget {
                           ),
                       ],
                     ),
+                    // "Plan amount / Payment fees / Total" (22).
+                    if (fees > 0) ...[
+                      const SizedBox(height: KalanSpace.xs),
+                      InstallmentFeeSummary(
+                        key: const ValueKey('plan-fee-summary'),
+                        planMinor: plan.totalMinor,
+                        feesMinor: fees,
+                      ),
+                    ],
                     // Fees on this plan's payments (21): beside its total,
                     // never in it.
                     if (plan.extraFeesMinor > 0) ...[
@@ -481,8 +497,16 @@ class _PaymentRow extends ConsumerWidget {
                     ],
                   ),
                   MoveNoteText(payment: payment),
-                  // The fee and its note under the payment (21); the
-                  // amount on the right stays the installment's own.
+                  // The amount on the right includes the fee per payment
+                  // (22); this says which part it is.
+                  if (payment.installmentFeeMinor case final planFee?)
+                    Text(
+                      l10n.installmentFeeIncluded(ref.money(context, planFee)),
+                      key: ValueKey('installment-fee-${payment.id}'),
+                      style: secondary,
+                    ),
+                  // The extra fee and its note under the payment (21); the
+                  // amount on the right is the installment, without it.
                   if (fee != null) ...[
                     ExtraFeeText(
                       line: l10n.extraFeeLine,
@@ -514,7 +538,7 @@ class _PaymentRow extends ConsumerWidget {
               ),
             ),
             AmountText(
-              ref.money(context, payment.amountMinor),
+              ref.money(context, payment.installmentMinor),
               size: AmountSize.small,
               color: payment.isPaid || held ? colors.textMuted : null,
             ),
@@ -606,6 +630,16 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
                 controller: _amount,
                 label: l10n.fieldAmount,
               ),
+              // The amount typed leaves out the fee per payment (22).
+              if (widget.payment.installmentFeeMinor case final fee?) ...[
+                const SizedBox(height: KalanSpace.xs),
+                Text(
+                  l10n.installmentFeeOnTop(widget.ref.money(context, fee)),
+                  key: const ValueKey('edit-amount-fee'),
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: context.colors.textMuted),
+                ),
+              ],
               const SizedBox(height: KalanSpace.sm),
               Text(l10n.editPaymentHelp),
             ],

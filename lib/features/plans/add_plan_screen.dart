@@ -16,6 +16,7 @@ import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
 import '../pro/pro_limit_sheet.dart';
 import '../reminders/reminder_prompt.dart';
+import 'installment_fee_fields.dart';
 import 'interval_field.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
@@ -71,6 +72,10 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   final _step = TextEditingController(text: '1');
   final _defer = TextEditingController(text: '0');
   final _title = TextEditingController();
+
+  /// Fee per payment (22), under "More details"; empty is no fee.
+  final _fee = TextEditingController();
+  InstallmentFeeScope _feeScope = InstallmentFeeScope.everyPayment;
 
   AddMode _mode = AddMode.payIn4;
 
@@ -167,6 +172,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       _step,
       _defer,
       _title,
+      _fee,
     ]) {
       c.dispose();
     }
@@ -288,8 +294,14 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   bool get _nextDateSuggested =>
       _mode == AddMode.card && _cardTerms != null && !_nextDateTouched;
 
-  /// The draft for the current inputs, or null while incomplete.
-  PlanDraft? _buildDraft() {
+  /// The draft for the current inputs with the fee per payment (22), or
+  /// null while incomplete.
+  PlanDraft? _buildDraft() => _baseDraft()?.withInstallmentFee(
+    typedInstallmentFee(context, ref, _fee.text),
+    _feeScope,
+  );
+
+  PlanDraft? _baseDraft() {
     try {
       if (_mode == AddMode.payLater) return _payLaterDraft();
       final total = _totalValue;
@@ -569,6 +581,17 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               PayLaterFields(input: _payLater, onChanged: _refresh),
               const SizedBox(height: KalanSpace.xs),
               _details(context),
+              // A fee per payment (22): the payment with its fee, in the
+              // same rows as the plan summary.
+              if (_buildDraft() case final d?
+                  when d.installmentFeesMinor > 0) ...[
+                const SizedBox(height: KalanSpace.xs),
+                InstallmentFeeSummary(
+                  key: const ValueKey('pay-later-fee-summary'),
+                  planMinor: d.totalMinor,
+                  feesMinor: d.installmentFeesMinor,
+                ),
+              ],
             ] else ...[
               ..._fields(context),
               const SizedBox(height: KalanSpace.xs),
@@ -948,6 +971,17 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             onChanged: (v) => setState(() => _cashAdvance = v),
           ),
         ],
+        // Fee per payment (22): never for card installments.
+        if (_mode != AddMode.card) ...[
+          const SizedBox(height: KalanSpace.xs),
+          InstallmentFeeFields(
+            controller: _fee,
+            scope: _feeScope,
+            showScope: _mode != AddMode.payLater,
+            onScopeChanged: (v) => setState(() => _feeScope = v),
+            onChanged: _refresh,
+          ),
+        ],
         const SizedBox(height: KalanSpace.xs),
         PaymentMethodFields(
           method: _paymentMethod,
@@ -1059,6 +1093,9 @@ class _Preview extends ConsumerWidget {
     final d = draft;
     // Payments paid before Kalan are summed up, never listed with dates.
     final listed = d?.payments.skip(d.paidBeforeCount).toList() ?? const [];
+    // The installment as shown includes its fee per payment (22).
+    int shown(int i) => d!.installmentAt(d.paidBeforeCount + i);
+    int? feeOf(int i) => d!.feeAt(d.paidBeforeCount + i);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(KalanSpace.md),
@@ -1086,7 +1123,8 @@ class _Preview extends ConsumerWidget {
                   listed.length,
                   ref.money(
                     context,
-                    listed.fold(0, (sum, p) => sum + p.amountMinor),
+                    [for (var i = 0; i < listed.length; i++) shown(i)]
+                        .fold(0, (sum, v) => sum + v),
                   ),
                 ),
                 key: const ValueKey('preview-summary'),
@@ -1132,8 +1170,16 @@ class _Preview extends ConsumerWidget {
                     ),
                   ),
                 ),
+              if (d.installmentFeesMinor > 0) ...[
+                const SizedBox(height: KalanSpace.xs),
+                InstallmentFeeSummary(
+                  key: const ValueKey('preview-fee-summary'),
+                  planMinor: d.totalMinor,
+                  feesMinor: d.installmentFeesMinor,
+                ),
+              ],
               const SizedBox(height: KalanSpace.xs),
-              for (final p in listed)
+              for (final (i, p) in listed.indexed)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: KalanSpace.xxs),
                   child: Row(
@@ -1149,9 +1195,24 @@ class _Preview extends ConsumerWidget {
                         ),
                       ),
                       Expanded(child: Text(context.longDate(p.date))),
-                      AmountText(
-                        ref.money(context, p.amountMinor),
-                        size: AmountSize.small,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          AmountText(
+                            ref.money(context, shown(i)),
+                            size: AmountSize.small,
+                          ),
+                          if (feeOf(i) case final fee?)
+                            Text(
+                              l10n.installmentFeeIncluded(
+                                ref.money(context, fee),
+                              ),
+                              key: ValueKey('preview-fee-${p.seq}'),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: context.colors.textMuted,
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
