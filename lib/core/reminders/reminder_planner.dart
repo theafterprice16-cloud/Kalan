@@ -52,7 +52,16 @@ List<PlannedReminder> planReminders({
       settings,
       skips: [
         for (final s in skips)
-          if (p.ref != null && s.refs.contains(p.ref)) s,
+          if (p.ref != null &&
+              s.refs.contains(p.ref) &&
+              // Pressed the day before it fires; a payment moved away
+              // since (20) is reminded on its new date only.
+              snoozeStillFits(
+                s.kind,
+                fireDate: s.fireDate.addDays(-1),
+                due: p.date,
+              ))
+            s,
       ],
     )) {
       groups.putIfAbsent(m, () => []).add(p);
@@ -93,7 +102,10 @@ List<PlannedReminder> planReminders({
     };
     final group = [
       for (final ref in s.refs)
-        if (byRef[ref] case final p? when !p.choice.off && !already.contains(p))
+        if (byRef[ref] case final p?
+            when !p.choice.off &&
+                !already.contains(p) &&
+                snoozeStillFits(s.kind, fireDate: s.fireDate, due: p.date))
           p,
     ];
     if (group.isEmpty) continue;
@@ -121,6 +133,19 @@ List<PlannedReminder> planReminders({
   });
   return planned.length > limit ? planned.sublist(0, limit) : planned;
 }
+
+/// A snoozed reminder still speaks of a payment due on [due]: an "ahead"
+/// one only before the due date, an "on the day" or overdue one only on
+/// or after it. A payment whose date changed since (20, "Change date")
+/// is reminded on its new date instead of with the old text.
+bool snoozeStillFits(
+  ReminderKind kind, {
+  required LocalDate fireDate,
+  required LocalDate due,
+}) => switch (kind) {
+  ReminderKind.ahead => due > fireDate,
+  ReminderKind.onDay || ReminderKind.overdue => due <= fireDate,
+};
 
 /// The payment reminders [planned] ([planReminders]) with the payday
 /// summary for [payday] added in time order: its own notification, never

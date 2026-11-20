@@ -390,6 +390,13 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
       rule: plan.payLaterRule ?? const PayLaterRule.chosenDate(),
       chosenDate: payment.date,
     );
+    if (payment.originalDay != null && !payment.isPaid) {
+      _input.moved = (
+        date: payment.date,
+        purchase: plan.purchaseDate,
+        rule: plan.payLaterRule,
+      );
+    }
     _input.store.text = plan.plan.title ?? '';
     _input.source.text = plan.source?.name ?? '';
     _method = plan.plan.paymentMethod;

@@ -1,3 +1,5 @@
+import '../date/local_date.dart';
+
 /// Route paths. Top-level routes open above the tab shell.
 abstract final class Routes {
   static const onboarding = '/onboarding';
@@ -8,6 +10,11 @@ abstract final class Routes {
   static String plan(int id) => '/plan/$id';
   static String planEdit(int id) => '/plan/$id/edit';
   static String planAdjust(int id) => '/plan/$id/adjust';
+
+  /// "Change date" (20) for payment [seq] of plan [id], with the date
+  /// picked in the payment sheet.
+  static String paymentDate(int id, int seq, LocalDate to) =>
+      '/plan/$id/payment/$seq/date?to=${to.epochDay}';
   static const sources = '/sources';
 
   /// The sources screen scrolled to card [cardId]'s statements (16; a

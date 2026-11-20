@@ -611,6 +611,37 @@ void main() {
     },
   );
 
+  test(
+    'v14 -> current: dates and amounts unchanged, no original date',
+    () async {
+      final schema = await verifier.schemaAt(14);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at, '
+        'is_edited) VALUES (1, 3, 20400, 6000, 1700000000, 1)',
+      );
+      const columns =
+          'plan_id, seq, due_day, amount_minor, paid_at, is_edited, '
+          'paid_before_kalan, paid_on_day';
+      final before = schema.rawDatabase.select(
+        'SELECT $columns FROM payments ORDER BY plan_id, seq',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final after = await db
+          .customSelect('SELECT $columns FROM payments ORDER BY plan_id, seq')
+          .get();
+      expect(
+        [for (final r in after) r.data],
+        [for (final r in before) Map<String, Object?>.of(r)],
+      );
+      final payments = await db.select(db.payments).get();
+      expect(payments, isNotEmpty);
+      expect(payments.map((p) => p.originalDay), everyElement(equals(null)));
+      await db.close();
+    },
+  );
+
   test('statement reminder days outside 1 and 2 are refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     Future<int> insert(int days) => db

@@ -972,6 +972,9 @@ void main() {
         await tester.tap(find.text('Kulaklık'));
         await tester.pumpAndSettle();
         await tester.tap(find.text('4 Ara 2026'));
+        await tester.pumpAndSettle();
+        // The payment sheet (20): the edit is its second option.
+        await tester.tap(find.byKey(const ValueKey('payment-edit')));
         await shoot(tester, '42-ios-edit-payment-$theme');
       });
 
@@ -1257,6 +1260,159 @@ void main() {
           await shoot(tester, '72-archive-closed-$lang-$theme');
         });
       }
+
+      // Change date (20): Tom's 240 $ in 4 × 60 $ (20 Nov, 4 Dec, 18 Dec,
+      // 1 Jan), USD, payday 25, today 15 Nov.
+      final moveToday = LocalDate(2026, 11, 15);
+      for (final (lang, locale, plansTab, okLabel, first, second) in [
+        (
+          'tr',
+          const Locale('tr', 'TR'),
+          'Planlar',
+          'Tamam',
+          '20 Kas 2026',
+          '4 Ara 2026',
+        ),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Plans',
+          'OK',
+          'Nov 20, 2026',
+          'Dec 4, 2026',
+        ),
+      ]) {
+        Future<int> seedTom(AppDatabase db, {int? income = 250000}) async {
+          await seedSettings(
+            db,
+            currency: 'USD',
+            payDay: 25,
+            incomeMinor: income,
+          );
+          return seedPayIn4(
+            db,
+            first: LocalDate(2026, 11, 20),
+            totalMinor: 24000,
+            source: 'Afterpay',
+            title: 'Tom',
+          );
+        }
+
+        Future<void> openTom(WidgetTester tester) async {
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Tom'));
+          await tester.pumpAndSettle();
+        }
+
+        Future<void> changeTo(WidgetTester tester, String row, int day) async {
+          await openTom(tester);
+          await tester.tap(find.text(row));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('payment-changeDate')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('$day'));
+          await tester.tap(find.text(okLabel));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('payment sheet, $lang', (tester) async {
+          await start(tester, locale: locale, today: moveToday, seed: seedTom);
+          await openTom(tester);
+          await tester.tap(find.text(first));
+          await shoot(tester, '73-payment-sheet-$lang-$theme');
+        });
+
+        testWidgets('change date, example 1, $lang', (tester) async {
+          await start(tester, locale: locale, today: moveToday, seed: seedTom);
+          await changeTo(tester, first, 27);
+          await shoot(tester, '74-change-date-later-$lang-$theme');
+        });
+
+        testWidgets('change date, example 2, $lang', (tester) async {
+          await start(tester, locale: locale, today: moveToday, seed: seedTom);
+          await changeTo(tester, first, 27);
+          await tester.tap(find.byKey(const ValueKey('change-date-shift')));
+          await shoot(tester, '75-change-date-shift-$lang-$theme');
+        });
+
+        testWidgets('change date, example 3, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: moveToday,
+            seed: (db) => seedTom(db, income: null),
+          );
+          await changeTo(tester, first, 27);
+          await shoot(tester, '76-change-date-no-income-$lang-$theme');
+        });
+
+        testWidgets('change date, example 4, $lang', (tester) async {
+          await start(tester, locale: locale, today: moveToday, seed: seedTom);
+          await changeTo(tester, second, 6);
+          await shoot(tester, '77-change-date-same-period-$lang-$theme');
+        });
+
+        testWidgets('plan detail, moved payments, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: moveToday,
+            seed: (db) async {
+              final id = await seedTom(db);
+              final repo = PlanRepository(db);
+              // Example 1, then example 5: 4 Dec past 18 Dec.
+              for (final (seq, date) in [
+                (1, LocalDate(2026, 11, 27)),
+                (2, LocalDate(2026, 12, 20)),
+              ]) {
+                await repo.movePayment(
+                  planId: id,
+                  seq: seq,
+                  newDate: date,
+                  shiftLater: false,
+                  today: moveToday,
+                );
+              }
+            },
+          );
+          await openTom(tester);
+          await shoot(tester, '78-plan-detail-moved-$lang-$theme');
+        });
+      }
+
+      testWidgets('ios, change date', variant: ios, (tester) async {
+        await start(
+          tester,
+          today: moveToday,
+          seed: (db) async {
+            await seedSettings(
+              db,
+              currency: 'USD',
+              payDay: 25,
+              incomeMinor: 250000,
+            );
+            await seedPayIn4(
+              db,
+              first: LocalDate(2026, 11, 20),
+              totalMinor: 24000,
+              source: 'Afterpay',
+              title: 'Tom',
+            );
+          },
+        );
+        await openTab(tester, 'Planlar');
+        await tester.tap(find.text('Tom'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('20 Kas 2026'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('payment-changeDate')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('27'));
+        await tester.tap(find.text('Tamam'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('change-date-shift')));
+        await shoot(tester, '79-ios-change-date-$theme');
+      });
     });
   }
 }

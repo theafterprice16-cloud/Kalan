@@ -36,6 +36,17 @@ extension PaymentRowX on PaymentRow {
   LocalDate get date => LocalDate.fromEpochDay(dueDay);
   bool get isPaid => paidAt != null;
 
+  /// The date before "Change date" first moved it (20); null otherwise.
+  LocalDate? get originalDate =>
+      originalDay == null ? null : LocalDate.fromEpochDay(originalDay!);
+
+  MovablePayment toMovable() => MovablePayment(
+    seq: seq,
+    date: date,
+    isPaid: isPaid,
+    originalDate: originalDate,
+  );
+
   PaymentState toState() => PaymentState(
     seq: seq,
     date: date,
@@ -186,22 +197,35 @@ class PlanWithPayments {
   int get paidBeforeMinor =>
       paidBefore.fold(0, (sum, p) => sum + p.amountMinor);
 
-  /// The payments to list: everything except those paid before Kalan.
-  List<PaymentRow> get listedPayments => [
-    for (final p in allPayments)
-      if (!p.paidBeforeKalan) p,
-  ];
+  /// The payments to list: everything except those paid before Kalan, by
+  /// date. A payment moved past the next one keeps its number (20).
+  List<PaymentRow> get listedPayments =>
+      [
+        for (final p in allPayments)
+          if (!p.paidBeforeKalan) p,
+      ]..sort((a, b) {
+        final byDate = a.dueDay.compareTo(b.dueDay);
+        return byDate != 0 ? byDate : a.seq.compareTo(b.seq);
+      });
 
   /// Plans added with only their remaining payments (before schema v4) do
   /// not have the earlier ones; they cannot be edited as "underway".
   bool get startsAtFirstPayment =>
       allPayments.isEmpty || allPayments.first.seq == 1;
 
+  /// The earliest unpaid payment by date (a moved payment can pass the
+  /// next one, 20).
   PaymentRow? get nextUnpaid {
+    PaymentRow? next;
     for (final p in allPayments) {
-      if (!p.isPaid) return p;
+      if (p.isPaid) continue;
+      if (next == null ||
+          p.dueDay < next.dueDay ||
+          p.dueDay == next.dueDay && p.seq < next.seq) {
+        next = p;
+      }
     }
-    return null;
+    return next;
   }
 }
 

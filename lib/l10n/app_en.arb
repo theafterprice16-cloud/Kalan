@@ -2215,5 +2215,205 @@
   "adjustNothingLeft": "No payments would be left. Do you want to close the plan?",
   "@adjustNothingLeft": {
     "description": "'Adjust amount' screen when the new total equals what is paid. Offers 'Close plan'. Sakin ve yargısız ton. İade bir hata değil; hukuki ya da gergin kelime kullanma. (Calm, non-judgmental tone. A return is not a mistake; use no legal or tense words.)"
+  },
+  "paymentActionsTitle": "{position} · {date}",
+  "@paymentActionsTitle": {
+    "description": "Title of the sheet that opens when an installment is tapped in plan details: its number and its date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "position": {
+        "type": "String",
+        "example": "2/4",
+        "description": "Installment number, e.g. 2/4"
+      },
+      "date": {
+        "type": "String",
+        "example": "Dec 4, 2026",
+        "description": "The installment's date"
+      }
+    }
+  },
+  "changeDateAction": "Change date",
+  "@changeDateAction": {
+    "description": "Option in the installment sheet and title of its screen: records a new date the provider set for this one installment. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateActionHint": "Record the new date your provider gave you.",
+  "@changeDateActionHint": {
+    "description": "Explanation under 'Change date' in the installment sheet. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "editPaymentActionHint": "Fix the amount or date. The difference is spread over later payments.",
+  "@editPaymentActionHint": {
+    "description": "Explanation under 'Edit payment' in the installment sheet (the existing amount and date edit). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateCurrent": "Current date: {date}",
+  "@changeDateCurrent": {
+    "description": "'Change date' screen: the installment's date before the change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 20",
+        "description": "The current date, long format"
+      }
+    }
+  },
+  "changeDateNewDate": "New date",
+  "@changeDateNewDate": {
+    "description": "'Change date' screen: label of the date field. Earliest date is today. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDatePickNew": "Pick a new date.",
+  "@changeDatePickNew": {
+    "description": "'Change date' screen: under the date field while it still shows the current date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateShiftLater": "Move later payments too",
+  "@changeDateShiftLater": {
+    "description": "'Change date' screen: switch, off by default. On: every later unpaid installment moves by the same number of days. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDatePreviewTitle": "Effect on your pay periods",
+  "@changeDatePreviewTitle": {
+    "description": "'Change date' screen: heading of the preview of which pay periods change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateLeftUp": "Left +{amount}",
+  "@changeDateLeftUp": {
+    "description": "Preview row: what is left in this pay period goes up by the amount. The sign and an arrow icon next to it carry the meaning, not color. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateLeftDown": "Left −{amount}",
+  "@changeDateLeftDown": {
+    "description": "Preview row: what is left in this pay period goes down by the amount. The sign and an arrow icon next to it carry the meaning, not color. Use a real minus sign. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateCommittedUp": "Committed +{amount}",
+  "@changeDateCommittedUp": {
+    "description": "Preview row when no income is entered: the amount committed in this pay period goes up. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateCommittedDown": "Committed −{amount}",
+  "@changeDateCommittedDown": {
+    "description": "Preview row when no income is entered: the amount committed in this pay period goes down. Use a real minus sign. An arrow icon follows. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateLeftUpSemantics": "Left goes up by {amount}",
+  "@changeDateLeftUpSemantics": {
+    "description": "Screen reader text for 'Left +{amount} ↑'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateLeftDownSemantics": "Left goes down by {amount}",
+  "@changeDateLeftDownSemantics": {
+    "description": "Screen reader text for 'Left −{amount} ↓'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateCommittedUpSemantics": "Committed goes up by {amount}",
+  "@changeDateCommittedUpSemantics": {
+    "description": "Screen reader text for 'Committed +{amount} ↑'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateCommittedDownSemantics": "Committed goes down by {amount}",
+  "@changeDateCommittedDownSemantics": {
+    "description": "Screen reader text for 'Committed −{amount} ↓'. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "$60",
+        "description": "Money amount, already formatted"
+      }
+    }
+  },
+  "changeDateSamePeriod": "Same period; what's left stays the same.",
+  "@changeDateSamePeriod": {
+    "description": "Preview when no pay period total changes (income entered). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateSamePeriodCommitted": "Same period; what's committed stays the same.",
+  "@changeDateSamePeriodCommitted": {
+    "description": "Preview when no pay period total changes (no income entered). Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateMorePeriods": "{count, plural, =1{and 1 more period} other{and {count} more periods}}",
+  "@changeDateMorePeriods": {
+    "description": "Last preview line when more than 6 pay periods change. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2",
+        "description": "Pay periods not listed"
+      }
+    }
+  },
+  "changeDatePassesNext": "This date is after the next payment.",
+  "@changeDatePassesNext": {
+    "description": "Calm info line on the 'Change date' screen when the new date is after the next installment (allowed; numbers stay). Not a warning. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateLaterBeforeToday": "A later payment would fall before today. You can turn the switch off or pick another date.",
+  "@changeDateLaterBeforeToday": {
+    "description": "Calm note when moving later payments too would put one before today; saving is not possible then. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "changeDateDone": "Date saved.",
+  "@changeDateDone": {
+    "description": "Snackbar after saving a changed installment date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
+  },
+  "moveNoteLater": "Moved later · originally {date}",
+  "@moveNoteLater": {
+    "description": "Muted note under an installment whose date was changed to a later day, with its original date. A record, not a judgment. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 20",
+        "description": "Original date, day and month"
+      }
+    }
+  },
+  "moveNoteEarlier": "Moved earlier · originally {date}",
+  "@moveNoteEarlier": {
+    "description": "Muted note under an installment whose date was changed to an earlier day, with its original date. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Nov 20",
+        "description": "Original date, day and month"
+      }
+    }
+  },
+  "changeDateNotAvailable": "This payment's date can't be changed here any more.",
+  "@changeDateNotAvailable": {
+    "description": "'Change date' screen when the payment was paid, or its plan put on hold or closed, after the screen opened. Calm, no error tone. Kalan yalnızca kayıt tutar; sağlayıcıda değişiklik yapmaz. Erteleme önerir gibi yazma. (Kalan only keeps a record; it changes nothing at the provider. Never word it as a suggestion to postpone.)"
   }
 }

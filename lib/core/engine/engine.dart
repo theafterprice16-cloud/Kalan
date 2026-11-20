@@ -12,6 +12,7 @@ export 'pay_later.dart';
 export 'pay_period.dart';
 export 'payment_edit.dart';
 export 'payment_method.dart';
+export 'payment_move.dart';
 export 'period_summary.dart';
 export 'plan_calculator.dart';
 export 'plan_draft.dart';

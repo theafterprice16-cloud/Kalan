@@ -2,6 +2,27 @@ import 'package:material_ui/material_ui.dart';
 
 import '../date/local_date.dart';
 
+/// The platform date picker, as [DateField] opens it. [initial] outside
+/// [firstDate]..[lastDate] (a past-due date with today as the first day)
+/// opens on the nearest allowed day. Null when dismissed.
+Future<LocalDate?> pickDate(
+  BuildContext context, {
+  required LocalDate initial,
+  LocalDate? firstDate,
+  LocalDate? lastDate,
+}) async {
+  final first = firstDate ?? LocalDate(2000, 1, 1);
+  final last = lastDate ?? LocalDate(2100, 12, 31);
+  final start = initial < first ? first : (initial > last ? last : initial);
+  final picked = await showDatePicker(
+    context: context,
+    initialDate: start.toDateTime(),
+    firstDate: first.toDateTime(),
+    lastDate: last.toDateTime(),
+  );
+  return picked == null ? null : LocalDate.fromDateTime(picked);
+}
+
 /// Read-only field that opens the platform date picker.
 class DateField extends StatelessWidget {
   const DateField({
@@ -26,14 +47,13 @@ class DateField extends StatelessWidget {
   final String? helperText;
 
   Future<void> _pick(BuildContext context) async {
-    final initial = (value ?? LocalDate.today()).toDateTime();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: (firstDate ?? LocalDate(2000, 1, 1)).toDateTime(),
-      lastDate: (lastDate ?? LocalDate(2100, 12, 31)).toDateTime(),
+    final picked = await pickDate(
+      context,
+      initial: value ?? LocalDate.today(),
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
-    if (picked != null) onChanged(LocalDate.fromDateTime(picked));
+    if (picked != null) onChanged(picked);
   }
 
   @override

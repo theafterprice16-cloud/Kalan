@@ -150,6 +150,12 @@ class Payments extends Table {
   /// keeps counting on its due date ([countingDate]).
   IntColumn get paidOnDay => integer().nullable()();
 
+  /// The date the payment had before its date was first changed with
+  /// "Change date" (schema v15, 20). Written once, never overwritten;
+  /// cleared when the payment goes back to it. Empty for every other
+  /// payment.
+  IntColumn get originalDay => integer().nullable()();
+
   @override
   List<Set<Column>> get uniqueKeys => [
     {planId, seq},
