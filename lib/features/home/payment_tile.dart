@@ -101,6 +101,13 @@ class PaymentTile extends ConsumerWidget {
           ),
         ),
       if (showDaysAgo && !entry.isPaid && days < 0) DaysAgoNote(days: -days),
+      // The fee on top of the amount on the right (21), never in it.
+      if (entry.extraFeeMinor case final fee?)
+        Text(
+          l10n.extraFeeRowNote(ref.money(context, fee)),
+          key: ValueKey('fee-note-${entry.paymentId}'),
+          style: secondary,
+        ),
       if (soon)
         Row(
           mainAxisSize: MainAxisSize.min,

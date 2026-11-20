@@ -2239,4 +2239,85 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get changeDateNotAvailable =>
       'Bu taksitin tarihi artık buradan değiştirilemiyor.';
+
+  @override
+  String get extraFeeAdd => 'Ek ücret ekle';
+
+  @override
+  String get extraFeeEdit => 'Ek ücreti düzelt';
+
+  @override
+  String get extraFeeAddHint => 'Sağlayıcının eklediği bir ücreti kaydet.';
+
+  @override
+  String extraFeeLine(String amount) {
+    return 'Ek ücret: $amount';
+  }
+
+  @override
+  String extraFeesTotal(String amount) {
+    return 'Ek ücretler: $amount';
+  }
+
+  @override
+  String extraFeeRowNote(String amount) {
+    return '+ $amount ek ücret';
+  }
+
+  @override
+  String get extraFeeSheetTitle => 'Ek ücret';
+
+  @override
+  String get extraFeeSheetHint =>
+      'Kalan ücret hesaplamaz. Sağlayıcının bildirdiği tutarı yaz; ödemeyle aynı dönemde sayılır.';
+
+  @override
+  String get extraFeeNoteLabel => 'Not (isteğe bağlı)';
+
+  @override
+  String get extraFeeSaved => 'Ek ücret kaydedildi.';
+
+  @override
+  String get extraFeeRemoved => 'Ek ücret silindi.';
+
+  @override
+  String get extraFeeNotAllowed => 'Bu ödemeye ek ücret eklenemiyor.';
+
+  @override
+  String extraFeeNoteTooLong(int max) {
+    final intl.NumberFormat maxNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String maxString = maxNumberFormat.format(max);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      max,
+      locale: localeName,
+      other: 'Not en çok $maxString karakter olabilir.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pastDueRowFeeSemantics(
+    String plan,
+    String amount,
+    String fee,
+    int days,
+  ) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other:
+          '$plan, $amount, artı $fee ek ücret, son ödeme günü $daysString gün önce geçti',
+      one:
+          '$plan, $amount, artı $fee ek ücret, son ödeme günü 1 gün önce geçti',
+    );
+    return '$_temp0';
+  }
 }

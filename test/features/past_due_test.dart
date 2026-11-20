@@ -173,6 +173,13 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('paid-when-cancel')));
     await tester.pumpAndSettle();
     expect(find.text('Günü geçen 1 ödeme'), findsOneWidget);
+    // The row has "Add extra fee" under it (21): the big number is
+    // scrolled out by opening the sheet; scroll back to it.
+    await tester.scrollUntilVisible(
+      find.text('₺17.150'),
+      -100,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('₺17.150'), findsOneWidget);
   });
 

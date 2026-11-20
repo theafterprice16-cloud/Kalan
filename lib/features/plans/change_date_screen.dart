@@ -14,17 +14,42 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../data/period_totals.dart';
+import 'extra_fee_sheet.dart';
 
-/// What the installment sheet offers (20).
-enum PaymentChoice { changeDate, edit }
+/// What the installment sheet offers (20, 21).
+enum PaymentChoice { changeDate, edit, extraFee }
+
+/// What [payment]'s sheet offers, in order; empty when nothing can change
+/// (a closed plan, a held unpaid payment). "Change date" for unpaid
+/// payments of open plans, not card ones (20); the edit for every unpaid
+/// payment of an open plan; the extra fee wherever [canHaveExtraFee]
+/// allows (21), paid payments and card installments included.
+List<PaymentChoice> paymentChoicesFor(
+  PlanWithPayments plan,
+  PaymentRow payment,
+) => [
+  if (canChangeDate(
+    status: plan.status,
+    kind: plan.plan.kind,
+    isPaid: payment.isPaid,
+  ))
+    PaymentChoice.changeDate,
+  if (plan.status == PlanStatus.open && !payment.isPaid) PaymentChoice.edit,
+  if (canHaveExtraFee(
+    status: plan.status,
+    isPaid: payment.isPaid,
+    paidBeforeKalan: payment.paidBeforeKalan,
+  ))
+    PaymentChoice.extraFee,
+];
 
 /// The note's small calendar icon, in textMuted with the note.
 const moveNoteIcon = Icons.event_outlined;
 
-/// The installment sheet: "Change date" and the existing edit. Carries
-/// out "Change date" (date picker, then the preview screen) and returns
-/// [PaymentChoice.edit] for the caller's own edit; null when dismissed or
-/// done.
+/// The installment sheet: [paymentChoicesFor]. Carries out "Change date"
+/// (date picker, then the preview screen) and the extra fee (its sheet),
+/// and returns [PaymentChoice.edit] for the caller's own edit; null when
+/// dismissed or done.
 Future<PaymentChoice?> openPaymentActions(
   BuildContext context,
   WidgetRef ref,
@@ -35,8 +60,30 @@ Future<PaymentChoice?> openPaymentActions(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (_) => PaymentActionsSheet(plan: plan, payment: payment),
+    builder: (_) => PaymentActionsSheet(
+      plan: plan,
+      payment: payment,
+      choices: paymentChoicesFor(plan, payment),
+    ),
   );
+  if (choice == PaymentChoice.extraFee && context.mounted) {
+    await openExtraFee(
+      context,
+      ref,
+      paymentId: payment.id,
+      planName: context.planName(plan),
+      paymentLabel: paymentLabelOf(
+        context,
+        seq: payment.seq,
+        installmentCount: plan.plan.installmentCount,
+        isPayLater: plan.isPayLater,
+        date: payment.date,
+      ),
+      feeMinor: payment.extraFeeMinor,
+      note: payment.extraFeeNote,
+    );
+    return null;
+  }
   if (choice != PaymentChoice.changeDate || !context.mounted) return choice;
   final today = ref.read(todayProvider);
   final picked = await pickDate(
@@ -49,18 +96,22 @@ Future<PaymentChoice?> openPaymentActions(
   return null;
 }
 
-class PaymentActionsSheet extends StatelessWidget {
+class PaymentActionsSheet extends ConsumerWidget {
   const PaymentActionsSheet({
     required this.plan,
     required this.payment,
+    required this.choices,
     super.key,
   });
 
   final PlanWithPayments plan;
   final PaymentRow payment;
 
+  /// The options shown, in order ([paymentChoicesFor]).
+  final List<PaymentChoice> choices;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final date = context.longDate(payment.date);
     return SafeArea(
@@ -91,18 +142,35 @@ class PaymentActionsSheet extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            _Option(
-              choice: PaymentChoice.changeDate,
-              icon: Icons.event_outlined,
-              title: l10n.changeDateAction,
-              hint: l10n.changeDateActionHint,
-            ),
-            _Option(
-              choice: PaymentChoice.edit,
-              icon: Icons.edit_outlined,
-              title: plan.isPayLater ? l10n.planEdit : l10n.editPaymentTitle,
-              hint: plan.isPayLater ? null : l10n.editPaymentActionHint,
-            ),
+            for (final choice in choices)
+              switch (choice) {
+                PaymentChoice.changeDate => _Option(
+                  choice: PaymentChoice.changeDate,
+                  icon: Icons.event_outlined,
+                  title: l10n.changeDateAction,
+                  hint: l10n.changeDateActionHint,
+                ),
+                PaymentChoice.edit => _Option(
+                  choice: PaymentChoice.edit,
+                  icon: Icons.edit_outlined,
+                  title: plan.isPayLater
+                      ? l10n.planEdit
+                      : l10n.editPaymentTitle,
+                  hint: plan.isPayLater ? null : l10n.editPaymentActionHint,
+                ),
+                PaymentChoice.extraFee => _Option(
+                  choice: PaymentChoice.extraFee,
+                  icon: Icons.add_card_outlined,
+                  title: payment.extraFeeMinor == null
+                      ? l10n.extraFeeAdd
+                      : l10n.extraFeeEdit,
+                  hint: payment.extraFeeMinor == null
+                      ? l10n.extraFeeAddHint
+                      : l10n.extraFeeLine(
+                          ref.money(context, payment.extraFeeMinor!),
+                        ),
+                ),
+              },
           ],
         ),
       ),

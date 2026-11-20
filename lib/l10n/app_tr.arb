@@ -478,5 +478,19 @@
   "changeDateDone": "Tarih kaydedildi.",
   "moveNoteLater": "Ertelendi · ilk tarih {date}",
   "moveNoteEarlier": "Öne alındı · ilk tarih {date}",
-  "changeDateNotAvailable": "Bu taksitin tarihi artık buradan değiştirilemiyor."
+  "changeDateNotAvailable": "Bu taksitin tarihi artık buradan değiştirilemiyor.",
+  "extraFeeAdd": "Ek ücret ekle",
+  "extraFeeEdit": "Ek ücreti düzelt",
+  "extraFeeAddHint": "Sağlayıcının eklediği bir ücreti kaydet.",
+  "extraFeeLine": "Ek ücret: {amount}",
+  "extraFeesTotal": "Ek ücretler: {amount}",
+  "extraFeeRowNote": "+ {amount} ek ücret",
+  "extraFeeSheetTitle": "Ek ücret",
+  "extraFeeSheetHint": "Kalan ücret hesaplamaz. Sağlayıcının bildirdiği tutarı yaz; ödemeyle aynı dönemde sayılır.",
+  "extraFeeNoteLabel": "Not (isteğe bağlı)",
+  "extraFeeSaved": "Ek ücret kaydedildi.",
+  "extraFeeRemoved": "Ek ücret silindi.",
+  "extraFeeNotAllowed": "Bu ödemeye ek ücret eklenemiyor.",
+  "extraFeeNoteTooLong": "{max, plural, other{Not en çok {max} karakter olabilir.}}",
+  "pastDueRowFeeSemantics": "{days, plural, =1{{plan}, {amount}, artı {fee} ek ücret, son ödeme günü 1 gün önce geçti} other{{plan}, {amount}, artı {fee} ek ücret, son ödeme günü {days} gün önce geçti}}"
 }
