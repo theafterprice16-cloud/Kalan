@@ -1380,6 +1380,86 @@ void main() {
         });
       }
 
+      // Extra fee (21): EUR, payday 25, today 15 Nov; Sofia's 4 × 60 €
+      // from 10 Nov, the first one past due.
+      final feeToday = LocalDate(2026, 11, 15);
+      for (final (lang, locale, plansTab, note) in [
+        ('tr', const Locale('tr', 'TR'), 'Planlar', 'İkinci ücret'),
+        ('en', const Locale('en', 'US'), 'Plans', 'Second fee'),
+      ]) {
+        Future<void> seedSofia(AppDatabase db, {bool fee = true}) async {
+          await seedSettings(
+            db,
+            currency: 'EUR',
+            payDay: 25,
+            incomeMinor: 100000,
+          );
+          final plans = PlanRepository(db);
+          await plans.saveDraft(
+            PlanCalculator.monthly(
+              firstDate: LocalDate(2026, 11, 10),
+              totalMinor: 24000,
+              count: 4,
+            ),
+            sourceId: await SourceRepository(
+              db,
+              plans,
+            ).findOrCreateProvider('Klarna'),
+            origin: PlanOrigin.template,
+            title: 'Sofia',
+          );
+          if (!fee) return;
+          final first = await (db.select(
+            db.payments,
+          )..where((p) => p.seq.equals(1))).getSingle();
+          await plans.setExtraFee(first.id, amountMinor: 1200, note: note);
+        }
+
+        Future<void> openFeeSheet(WidgetTester tester) async {
+          final action = find.byWidgetPredicate(
+            (w) =>
+                w.key is ValueKey<String> &&
+                (w.key! as ValueKey<String>).value.startsWith(
+                  'past-due-fee-action-',
+                ),
+          );
+          await tester.ensureVisible(action);
+          await tester.pumpAndSettle();
+          await tester.tap(action);
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('home, past due with an extra fee, $lang', (tester) async {
+          await start(tester, locale: locale, today: feeToday, seed: seedSofia);
+          await shoot(tester, '80-home-extra-fee-$lang-$theme');
+        });
+
+        testWidgets('extra fee sheet, empty, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedSofia(db, fee: false),
+          );
+          await openFeeSheet(tester);
+          await shoot(tester, '81-extra-fee-sheet-empty-$lang-$theme');
+        });
+
+        testWidgets('extra fee sheet, filled, $lang', (tester) async {
+          await start(tester, locale: locale, today: feeToday, seed: seedSofia);
+          await openFeeSheet(tester);
+          FocusManager.instance.primaryFocus?.unfocus();
+          await shoot(tester, '82-extra-fee-sheet-filled-$lang-$theme');
+        });
+
+        testWidgets('plan detail with an extra fee, $lang', (tester) async {
+          await start(tester, locale: locale, today: feeToday, seed: seedSofia);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Sofia'));
+          await shoot(tester, '83-plan-detail-extra-fee-$lang-$theme');
+        });
+      }
+
       testWidgets('ios, change date', variant: ios, (tester) async {
         await start(
           tester,

@@ -277,11 +277,12 @@ class PastDueRow extends ConsumerWidget {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 56),
                 child: Padding(
+                  // No bottom padding: "Add extra fee" follows (21).
                   padding: const EdgeInsetsDirectional.fromSTEB(
                     KalanSpace.md,
                     KalanSpace.xs,
                     KalanSpace.xs,
-                    KalanSpace.xs,
+                    0,
                   ),
                   child: Row(
                     children: [
@@ -352,6 +353,8 @@ class PastDueRow extends ConsumerWidget {
           ),
           child: TextButton(
             key: ValueKey('past-due-fee-action-${entry.paymentId}'),
+            // Ink, not accent: accent is only for "left" (21).
+            style: TextButton.styleFrom(foregroundColor: context.colors.text),
             onPressed: () => openExtraFee(
               context,
               ref,

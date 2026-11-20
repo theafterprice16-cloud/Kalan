@@ -498,19 +498,17 @@ class _PaymentRow extends ConsumerWidget {
                   ] else if (pastDue &&
                       choices.contains(PaymentChoice.extraFee))
                     // Past due: "Add extra fee" stands out (decision 3).
-                    Padding(
-                      padding: const EdgeInsets.only(top: KalanSpace.xxs),
-                      child: TextButton(
-                        key: ValueKey('fee-add-${payment.id}'),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: KalanSpace.xs,
-                          ),
-                          alignment: AlignmentDirectional.centerStart,
-                        ),
-                        onPressed: openFee,
-                        child: Text(l10n.extraFeeAdd),
+                    TextButton(
+                      key: ValueKey('fee-add-${payment.id}'),
+                      // Ink, not accent: accent is only for "left". No
+                      // side padding: its text lines up with the date.
+                      style: TextButton.styleFrom(
+                        foregroundColor: colors.text,
+                        padding: EdgeInsets.zero,
+                        alignment: AlignmentDirectional.centerStart,
                       ),
+                      onPressed: openFee,
+                      child: Text(l10n.extraFeeAdd),
                     ),
                 ],
               ),
