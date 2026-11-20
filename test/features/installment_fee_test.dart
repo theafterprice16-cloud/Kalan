@@ -297,4 +297,72 @@ void main() {
     expect(find.text(tr(2890)), findsWidgets);
     expect(find.text('${tr(390)} taksit ücreti dahil'), findsWidgets);
   });
+
+  testWidgets('add screen: first only on a plan underway, said calmly', (
+    tester,
+  ) async {
+    await pumpTall(
+      tester,
+      today: today,
+      seed: (db) => seedSettings(db, currency: 'JPY', payDay: 25),
+    );
+    await openAdd(tester, 'Aylık taksit');
+    await tester.enterText(find.byKey(const ValueKey('source')), 'Paidy');
+    await tester.enterText(find.byKey(const ValueKey('total')), '10000');
+    await tester.enterText(find.byKey(const ValueKey('count')), '4');
+    await tapKey(tester, 'underway');
+    final paid = find.byKey(const ValueKey('paid-count'));
+    await scrollTo(tester, paid);
+    await tester.enterText(paid, '1');
+    await tapKey(tester, 'more-details');
+    final field = find.byKey(const ValueKey('installment-fee'));
+    await scrollTo(tester, field);
+    await tester.enterText(field, '390');
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('installment-fee-first-paid')),
+      findsNothing,
+    );
+    await tester.tap(find.text('Yalnızca ilk taksitte'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('İlk taksit ödendiği için ücret hiçbir taksite eklenmez.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('"Adjust amount" (19): fees stay, rows include them', (
+    tester,
+  ) async {
+    await pumpTall(tester, today: today, seed: (db) => seedKenji(db, fee: 390));
+    await openKenji(tester);
+    await tapKey(tester, 'refund-action');
+    await tapKey(tester, 'refund-adjust');
+    expect(
+      find.text('Taksit ücretleri (${tr(1560)}) aynı kalır.'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byKey(const ValueKey('adjust-total')), '8000');
+    await tester.pumpAndSettle();
+    // 2.000 ¥ each, plus the 390 ¥ fee.
+    expect(find.text(tr(2390)), findsNWidgets(4));
+  });
+
+  testWidgets('the past-due row says the fee is included', (tester) async {
+    await pumpTall(
+      tester,
+      today: LocalDate(2026, 12, 12),
+      seed: (db) => seedKenji(db, fee: 390),
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith(
+              'past-due-installment-fee-',
+            ),
+      ),
+      findsOneWidget,
+    );
+  });
 }

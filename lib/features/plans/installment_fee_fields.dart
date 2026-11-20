@@ -27,6 +27,7 @@ class InstallmentFeeFields extends ConsumerWidget {
     required this.onScopeChanged,
     required this.onChanged,
     this.showScope = true,
+    this.enabled = true,
     this.notes = const [],
     super.key,
   });
@@ -38,6 +39,10 @@ class InstallmentFeeFields extends ConsumerWidget {
 
   /// False for "Pay later": one payment, no choice.
   final bool showScope;
+
+  /// False when nothing could change: a paid "Pay later" plan, whose one
+  /// payment keeps its own fee.
+  final bool enabled;
 
   /// (key, text) of each calm line.
   final List<(String, String)> notes;
@@ -54,6 +59,7 @@ class InstallmentFeeFields extends ConsumerWidget {
         TextFormField(
           key: const ValueKey('installment-fee'),
           controller: controller,
+          enabled: enabled,
           keyboardType: ref.amountKeyboard,
           inputFormatters: ref.amountFormatters(context),
           decoration: InputDecoration(

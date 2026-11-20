@@ -2581,15 +2581,26 @@
   },
   "moreOptions": "More options",
   "@moreOptions": {
-    "description": "Collapsed section on the edit plan screen holding the fee per payment (22). Closed by default; open when the plan has a fee. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma."
+    "description": "Collapsed section on the edit plan screen holding the fee per payment (22). Closed by default; open when the plan has a fee. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)"
   },
   "installmentFeeOnTop": "The {fee} payment fee is added on top.",
   "@installmentFeeOnTop": {
-    "description": "Muted line in the 'Edit payment' dialog: the amount typed is the installment without the plan's fee per payment, which is added on top. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.",
+    "description": "Muted line in the 'Edit payment' dialog: the amount typed is the installment without the plan's fee per payment, which is added on top. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)",
     "placeholders": {
       "fee": {
         "type": "String",
         "example": "390 ¥",
+        "description": "Formatted amount"
+      }
+    }
+  },
+  "adjustFeesStay": "Payment fees ({fees}) stay the same.",
+  "@adjustFeesStay": {
+    "description": "Muted line on the 'Adjust amount' screen (19) of a plan with fees per payment (22): the new total changes installment amounts only; the fees stay. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)",
+    "placeholders": {
+      "fees": {
+        "type": "String",
+        "example": "1.170 ¥",
         "description": "Formatted amount"
       }
     }

@@ -2366,4 +2366,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String installmentFeeOnTop(String fee) {
     return 'The $fee payment fee is added on top.';
   }
+
+  @override
+  String adjustFeesStay(String fees) {
+    return 'Payment fees ($fees) stay the same.';
+  }
 }

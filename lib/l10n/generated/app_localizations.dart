@@ -3151,17 +3151,23 @@ abstract class AppLocalizations {
   /// **'The first payment is already paid, so no fee is added.'**
   String get installmentFeeFirstPaid;
 
-  /// Collapsed section on the edit plan screen holding the fee per payment (22). Closed by default; open when the plan has a fee. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.
+  /// Collapsed section on the edit plan screen holding the fee per payment (22). Closed by default; open when the plan has a fee. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)
   ///
   /// In en, this message translates to:
   /// **'More options'**
   String get moreOptions;
 
-  /// Muted line in the 'Edit payment' dialog: the amount typed is the installment without the plan's fee per payment, which is added on top. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.
+  /// Muted line in the 'Edit payment' dialog: the amount typed is the installment without the plan's fee per payment, which is added on top. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)
   ///
   /// In en, this message translates to:
   /// **'The {fee} payment fee is added on top.'**
   String installmentFeeOnTop(String fee);
+
+  /// Muted line on the 'Adjust amount' screen (19) of a plan with fees per payment (22): the new total changes installment amounts only; the fees stay. A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word. (Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma.)
+  ///
+  /// In en, this message translates to:
+  /// **'Payment fees ({fees}) stay the same.'**
+  String adjustFeesStay(String fees);
 }
 
 class _AppLocalizationsDelegate

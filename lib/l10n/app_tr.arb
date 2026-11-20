@@ -505,5 +505,6 @@
   "installmentFeeAffects": "{count, plural, other{Bu değişiklik ödenmemiş {count} taksiti etkiler.}}",
   "installmentFeeFirstPaid": "İlk taksit ödendiği için ücret hiçbir taksite eklenmez.",
   "moreOptions": "Daha fazla seçenek",
-  "installmentFeeOnTop": "{fee} taksit ücreti bu tutara ayrıca eklenir."
+  "installmentFeeOnTop": "{fee} taksit ücreti bu tutara ayrıca eklenir.",
+  "adjustFeesStay": "Taksit ücretleri ({fees}) aynı kalır."
 }

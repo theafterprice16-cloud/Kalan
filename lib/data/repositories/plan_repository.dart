@@ -912,11 +912,11 @@ class PlanRepository {
   });
 }
 
-/// Undoes an [PlanRepository.editPlan] whose second step was refused.
 /// A plan's fee per payment (22) as chosen on the edit screen: the fee
 /// (null or zero: none) and which payments take it.
 typedef InstallmentFeeInput = ({int? feeMinor, InstallmentFeeScope scope});
 
+/// Undoes an [PlanRepository.editPlan] whose second step was refused.
 class _Rollback implements Exception {
   const _Rollback(this.reason);
   final ResizeRejection reason;

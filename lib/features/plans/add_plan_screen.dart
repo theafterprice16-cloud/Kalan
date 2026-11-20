@@ -980,6 +980,15 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             showScope: _mode != AddMode.payLater,
             onScopeChanged: (v) => setState(() => _feeScope = v),
             onChanged: _refresh,
+            // "First payment only" on a plan already underway: the first
+            // payment is paid, so no payment takes the fee (22).
+            notes: [
+              if (_buildDraft()?.feeAddsNothing ?? false)
+                (
+                  'installment-fee-first-paid',
+                  context.l10n.installmentFeeFirstPaid,
+                ),
+            ],
           ),
         ],
         const SizedBox(height: KalanSpace.xs),

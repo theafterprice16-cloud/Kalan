@@ -609,6 +609,8 @@ class _FeeSection extends ConsumerWidget {
           controller: controller,
           scope: scope,
           showScope: !plan.isPayLater,
+          // A paid "Pay later" keeps its fee, like its amount and date.
+          enabled: !(plan.isPayLater && plan.allPayments.first.isPaid),
           onScopeChanged: onScopeChanged,
           onChanged: onChanged,
           notes: [

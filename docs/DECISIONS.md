@@ -695,3 +695,29 @@ Yol Haritası 21. Açık soruları ürün sahibi iş tanımında cevapladı (Kar
 | Taksit sayısı azalınca (inceleme bulgusu) | Sondan silinen ödenmemiş taksitlerin ücreti taksitle birlikte silinir (taksit artık yok). Bilerek böyle; ayrı uyarı yok. |
 | Para birimi değişince (inceleme bulgusu) | Ondalık sayısı farklı bir birime geçilince ek ücret de ödeme tutarı gibi yeni ölçeğe taşınır, en az 1 küçük birim (testli). "Geri al" sırasında plan kapatılmış ya da bekletilmişse ücret geri gelmez ve "Bu ödemeye ek ücret eklenemiyor." görünür. |
 | Not sınırı ve sayaç (inceleme bulgusu) | Not alanı, veritabanının saydığı gibi UTF-16 ile sınırlanır ve sayaç da aynı sayıyı gösterir; uzun yapıştırma son sığan tam karakterde kesilir (emoji bölünmez). Böylece sayaç "45/80" derken "çok uzun" hatası çıkmaz. Ana ekrandaki düğme de uygunluğu aynı tek kuraldan (`canHaveExtraFee`) alır. |
+
+## Taksit başı ücret (22) (20 Kasım 2026)
+
+Yol Haritası 22. Açık sorular (alanın yeri, "yalnızca ilk taksit") ürün sahibi iş tanımında cevapladı (Karar 1-4); 5-13 iş tanımındaki kararlar; en alttakiler uygulama sırasında verilen kararlar.
+
+| Konu | Karar |
+|---|---|
+| Görünürlük (ürün sahibi, Karar 1) | Plan ekleme ekranında repodaki kapalı "Ayrıntı ekle" / "More details" bölümünün içinde (ayrı bölüm açılmadı; varsayılan görünüm aynı, golden 04 değişmedi). Düzenleme ekranlarında böyle bir bölüm yoktu: kapalı "Daha fazla seçenek" / "More options" bölümü eklendi, ücretli planda açık gelir. Alan boş gelir. |
+| Kapsam (ürün sahibi, Karar 2) | "Her taksitte" (varsayılan) / "Yalnızca ilk taksitte"; seçim yalnızca bir ücret yazılınca görünür. "Sonra öde"de seçim yok ve kapsam her zaman "her taksitte" saklanır. |
+| Türler (ürün sahibi, Karar 3) | Kart taksidi dışında her tür (`canHaveInstallmentFee`). Kartta alan yok, depo da yazmaz; ekstre tahmini (16) değişmedi. |
+| Sonradan değişiklik (ürün sahibi, Karar 4) | Yalnızca ödenmemiş taksitler değişir; ödenmiş taksit kendi ücretini korur. "Yalnızca ilk taksitte" ve 1. taksit ödenmiş (ya da "zaten sürüyor") ise ücret hiçbir taksite eklenmez; düzenleme ve ekleme ekranında "İlk taksit ödendiği için ücret hiçbir taksite eklenmez." |
+| Veri (Karar 5) | Şema v17: `plans.installment_fee_minor` (boş olabilir, 1 ve üstü), `plans.installment_fee_scope` (everyPayment/firstPaymentOnly, varsayılan everyPayment; adlar kalıcı), `payments.installment_fee_minor` (boş olabilir, 1 ve üstü). Göçte hepsi boş ya da varsayılan; tutar, tarih ve dönem değişmez (göç testi). Repoda dışa aktarma ya da yedek yok; 29-30. maddeler bu alanları eklemeli. |
+| Kural (Karar 4, 7, 8) | Saf Dart `appliedInstallmentFees` (`lib/core/engine/installment_fee.dart`, tablo testli): Kalan'dan önce ödenmiş → ücret yok; Kalan'da ödenmiş → kendi ücreti; ödenmemiş → planın ücreti ve kapsamı ("ilk" = sıra numarası 1). Depoda tek uygulama noktası `_applyInstallmentFee`: kayıt, düzenleme, taksit sayısı, "zaten sürüyor", "Sonra öde" düzenlemesi ve "ödendi" işaretinin kaldırılmasından sonra aynı işlem içinde çalışır. |
+| Hesap (Karar 6) | Söz verilmiş = tutar + taksit başı ücret + ek ücret (21): tek nokta `spokenForAmount`. Dönem toplamları, kalan, ileriki dönemler (12), dönem açığı (15), maaş günü özeti ve hazır tutulacak tutar (18) ücreti kendiliğinden görür. Plan toplamı (`totalMinor`) ve taksit tutarı (`amountMinor`) ücretsizdir. |
+| Gösterim (Karar 9) | Taksit satırında (plan ayrıntısı, ana ekran, gecikenler, takvim, ileriki dönemlerin listesi, önizleme, "Tarihi değiştir") tutar ücret dahil (`installmentMinor`), altında textMuted "{fee} taksit ücreti dahil". Önizlemede ve plan kartında, ücret varsa "Plan tutarı / Taksit ücretleri / Toplam" (etiket textMuted, tutar text); yoksa eskisi gibi "Toplam". Ek ücret (21) satırları ve "Ek ücretler" ayrı kalır. |
+| Bildirim (Karar 10) | `ReminderPayment.dueMinor` taksit başı ücreti de içerir (önce planlayıcıda testle). Ücret yokken bildirimler birebir aynı. Yeni kod yok: `ReminderSync` ödeme akışından yeniden kurar. |
+| Uyum (Karar 11) | "Tutarı düzelt" (19) yalnızca taksit tutarlarını değiştirir, ücret aynı kalır; ekranda "Taksit ücretleri (…) aynı kalır." ve önizleme satırları ücret dahil. Beklet/Kapat ücretleri de toplamlardan çıkarır. "Tarihi değiştir" (20) ücreti satırla taşır. |
+| Giriş (Karar 12) | Uygulamanın para giriş yolu (`ref.amountKeyboard`, `amountFormatters`, `parseMoney`); boş ve sıfır "ücret yok". |
+| Etki satırı (Karar 13) | "Bu değişiklik ödenmemiş {count} taksiti etkiler." (ICU çoğul): ücreti değişecek ödenmemiş taksit sayısı (`unpaidFeeChanges`). Aynı kayıtta taksit sayısı ya da "zaten sürüyor" da değişiyorsa sayı şimdiki taksitlere göredir (bilinen küçük fark). |
+| "Ödendi" işareti kaldırılınca (uygulama kararı) | Taksit yeniden ödenmemiş olur ve planın şimdiki ücretini alır (Karar 4'teki "ödenmemişler plana uyar" kuralı). Kapatılmış planda işaret değişmez. |
+| Ödenecek tutar (uygulama kararı) | Plan ayrıntısındaki büyük sayı ve plan listesindeki tutar taksit başı ücret dahil (satırlar ve "Toplam" ile tutarlı). Ek ücret (21) yine dahil değil. |
+| Takvim ve yoğun hafta (uygulama kararı) | Takvim gün toplamı (13) ve yoğun hafta (14) taksit başı ücreti içerir (satırdaki tutarla aynı); 21'deki karar yalnızca ek ücret için, o hâlâ dahil değil. |
+| Ödemeyi düzelt penceresi (inceleme bulgusu) | Pencere ücretsiz taksit tutarını sorar; ücretli taksitte altında "{fee} taksit ücreti bu tutara ayrıca eklenir." (ücretin iki kez sayılmaması için). |
+| Ödenmiş "Sonra öde" (inceleme bulgusu) | Tutar ve tarih gibi ücret alanı da kilitli; ödenmiş ödeme kendi ücretini korur. |
+| Para birimi değişince | Planın ücreti ve her ödemenin ücreti ödeme tutarı gibi yeni ölçeğe taşınır, en az 1 küçük birim (testli). |
+| Metinler | Bütün yeni anahtarların çevirmen açıklamasında "Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma." notu. "This changes {count} unpaid payments." EN'de =1 dalıyla. |

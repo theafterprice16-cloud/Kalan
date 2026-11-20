@@ -37,6 +37,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 - ~~**Taksit erteleme**~~ Tamamlandı (20 Kasım 2026, yol haritası 20): plan ayrıntısında taksite dokununca "Tarihi değiştir" → tarih seçici → dönemlere etkisi önizlemesi → Kaydet; "Sonraki taksitleri de kaydır" (kapalı gelir); "Ertelendi · ilk tarih …" / "Öne alındı · ilk tarih …" notu; yalnızca özgün tarih saklanır; kart taksitlerinde yok. Ücretsiz. Kapsam dışı: sağlayıcıda erteleme, erteleme ücreti (21), toplu erteleme.
 
 - ~~**Ek ücret kaydı**~~ Tamamlandı (20 Kasım 2026, yol haritası 21): bir ödemeye sağlayıcının eklediği tek seferlik ücreti elle kaydetme (tutar ve isteğe bağlı kısa not); geciken satırda "Ek ücret ekle", diğer ödemelerde işlem listesinde; ücret ödemenin sayıldığı dönemin söz verilmiş tutarına ve hatırlatma tutarına girer; plan toplamına ve kart ekstresine girmez; silmede "Geri al". Ücretsiz. Kapsam dışı: ücret hesaplama ya da önerme, gecikme faizi, yıllık toplam, sabit ödemelere ücret.
+- ~~**Taksit başı ücret**~~ Tamamlandı (20 Kasım 2026, yol haritası 22): planın her taksitte (ya da yalnızca ilk taksitte) aldığı sabit ücret; plan ekleme ve düzenlemede kapalı bölümde, varsayılan boş; kart taksitlerinde yok; ücret yalnızca ödenmemiş taksitlere yazılır, ödenmişler kendi ücretini korur; taksit satırında ücret dahil tutar ve "taksit ücreti dahil" notu; plan özetinde "Plan tutarı / Taksit ücretleri / Toplam"; ücret dönem toplamına, kalana ve hatırlatma tutarına girer. Ücretsiz. Kapsam dışı: yüzdeli ücret ve faiz (23).
 
 ## Notlar
 

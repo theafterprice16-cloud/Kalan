@@ -2372,4 +2372,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String installmentFeeOnTop(String fee) {
     return '$fee taksit ücreti bu tutara ayrıca eklenir.';
   }
+
+  @override
+  String adjustFeesStay(String fees) {
+    return 'Taksit ücretleri ($fees) aynı kalır.';
+  }
 }

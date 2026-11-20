@@ -285,4 +285,50 @@ void main() {
     expect(plan.plan.installmentFeeMinor, 39000);
     expect(await feesOf(id), List.filled(4, 39000));
   });
+
+  test('a smaller count keeps the fee on what remains', () async {
+    final id = await save(kenji(fee: 390));
+    expect(
+      await plans.editPlan(
+        id,
+        count: 2,
+        paidBefore: 0,
+        interval: PaymentInterval.sameDay,
+      ),
+      isNull,
+    );
+    expect(await feesOf(id), [390, 390]);
+  });
+
+  test('unmarking on a closed plan changes nothing', () async {
+    final id = await save(kenji(fee: 390));
+    final p1 = (await load(id)).allPayments.first;
+    await plans.setPaid(p1.id, paid: true);
+    await plans.close(id, reason: CloseReason.cancel, today: today);
+    await plans.setPaid(p1.id, paid: false);
+    final row = (await load(id)).allPayments.first;
+    expect(row.isPaid, isTrue);
+    expect(row.installmentFeeMinor, 390);
+  });
+
+  test('a paid "Pay later" keeps its own fee', () async {
+    final id = await save(
+      PlanCalculator.payLater(
+        purchaseDate: d('2026-11-10'),
+        rule: const PayLaterRule.days(30),
+        totalMinor: 5000,
+      ).withInstallmentFee(150, every),
+    );
+    await plans.setPaid((await load(id)).allPayments.first.id, paid: true);
+    await plans.editPayLater(
+      id,
+      title: null,
+      sourceId: null,
+      amountMinor: 5000,
+      purchaseDate: d('2026-11-10'),
+      rule: const PayLaterRule.days(30),
+      installmentFee: (feeMinor: 300, scope: every),
+    );
+    expect(await feesOf(id), [150]);
+  });
 }
