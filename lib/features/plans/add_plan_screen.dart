@@ -931,6 +931,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   Widget _details(BuildContext context) {
     final l10n = context.l10n;
+    final draft = _buildDraft();
     return ExpansionTile(
       key: const ValueKey('more-details'),
       title: Text(l10n.actionMoreDetails),
@@ -983,7 +984,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             // "First payment only" on a plan already underway: the first
             // payment is paid, so no payment takes the fee (22).
             notes: [
-              if (_buildDraft()?.feeAddsNothing ?? false)
+              if (draft?.feeAddsNothing ?? false)
                 (
                   'installment-fee-first-paid',
                   context.l10n.installmentFeeFirstPaid,

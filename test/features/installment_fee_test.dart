@@ -365,4 +365,36 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('a paid "Pay later" shows its fee locked', (tester) async {
+    await pumpTall(
+      tester,
+      today: today,
+      seed: (db) async {
+        await seedSettings(db, currency: 'JPY', payDay: 25);
+        final plans = PlanRepository(db);
+        await plans.saveDraft(
+          PlanCalculator.payLater(
+            purchaseDate: LocalDate(2026, 11, 10),
+            rule: const PayLaterRule.days(30),
+            totalMinor: 5000,
+          ).withInstallmentFee(150, InstallmentFeeScope.everyPayment),
+          sourceId: null,
+          origin: PlanOrigin.template,
+          title: 'Kenji',
+        );
+        final p = await db.select(db.payments).getSingle();
+        await plans.setPaid(p.id, paid: true);
+      },
+    );
+    await openTab(tester, 'Planlar');
+    await tester.tap(find.text('Biten'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kenji'));
+    await tester.pumpAndSettle();
+    await tapKey(tester, 'plan-edit');
+    final field = find.byKey(const ValueKey('installment-fee'));
+    await scrollTo(tester, field);
+    expect(tester.widget<TextFormField>(field).enabled, isFalse);
+  });
 }
