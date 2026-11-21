@@ -131,6 +131,9 @@ void main() {
     expect(covers({'=0', 'other'}, 'zero', 'ar'), isTrue);
     expect(covers({'=2', 'other'}, 'two', 'ar'), isTrue);
     expect(covers({'other'}, 'few', 'pl'), isFalse);
+    // Portuguese of Portugal: "one" is 1 alone; of Brazil: 0 and 1.
+    expect(covers({'=1', 'other'}, 'one', 'pt_PT'), isTrue);
+    expect(covers({'=1', 'other'}, 'one', 'pt'), isFalse);
   });
 
   test('a message that counts something is a plural', () {
@@ -170,14 +173,16 @@ void main() {
   for (final locale in openLocales()) {
     test('${locale.code}: every plural has every category', () {
       final arb = loadArb(locale.code);
-      final language = locale.languageCode;
-      final required = categoriesOf(language)
-          .difference(optionalCategories[language] ?? const {});
+      // The locale's own rules (pt_PT differs from pt); optional
+      // categories go by language.
+      final rules = locale.intlLocale;
+      final required = categoriesOf(rules)
+          .difference(optionalCategories[locale.languageCode] ?? const {});
       for (final k in messages) {
         for (final (name, selectors) in pluralsIn(arb[k] as String)) {
           for (final category in required) {
             expect(
-              covers(selectors, category, language),
+              covers(selectors, category, rules),
               isTrue,
               reason: '${locale.code}.$k ($name): $category',
             );

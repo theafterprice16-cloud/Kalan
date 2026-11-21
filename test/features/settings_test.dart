@@ -108,20 +108,52 @@ void main() {
   ) async {
     final db = await pumpApp(
       tester,
-      seed: (db) => seedSettings(db, localeCode: 'en'),
+      locale: const Locale('en', 'US'),
+      seed: (db) => seedSettings(db, localeCode: 'tr'),
     );
-    expect(find.text('Settings'), findsWidgets);
-    // The phone's language changes while English is picked.
-    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
-    tester.platformDispatcher.localesTestValue = const [Locale('tr', 'TR')];
+    expect(find.text('Ayarlar'), findsWidgets);
+    // The phone moves to German while Turkish is picked.
+    tester.platformDispatcher.localeTestValue = const Locale('de', 'DE');
+    tester.platformDispatcher.localesTestValue = const [Locale('de', 'DE')];
     await tester.pumpAndSettle();
-    expect(find.text('Settings'), findsWidgets);
+    expect(find.text('Ayarlar'), findsWidgets);
     await db
         .update(db.appSettings)
         .write(const AppSettingsCompanion(localeCode: Value(null)));
     await tester.pumpAndSettle();
-    expect(find.text('Ayarlar'), findsWidgets);
-    expect(find.text('Settings'), findsNothing);
+    // German is not open: English.
+    expect(find.text('Settings'), findsWidgets);
+    expect(find.text('Ayarlar'), findsNothing);
+  });
+
+  testWidgets('a draft picked by hand is not kept as the phone\'s match', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      // Exactly the picked locale (no region), the case that was kept.
+      locale: const Locale('de'),
+      seed: (db) => seedSettings(db, localeCode: 'de'),
+      overrides: [
+        appLocalesProvider.overrideWithValue([
+          for (final l in appLocales)
+            l.code == 'de' ? l.withStatus(LocaleStatus.draft) : l,
+        ]),
+      ],
+    );
+    Locale shown() =>
+        Localizations.localeOf(tester.element(find.byType(Scaffold).first));
+    expect(shown(), const Locale('de'));
+    tester.platformDispatcher.localeTestValue = const Locale('de');
+    tester.platformDispatcher.localesTestValue = const [Locale('de')];
+    await tester.pumpAndSettle();
+    expect(shown(), const Locale('de'));
+    await db
+        .update(db.appSettings)
+        .write(const AppSettingsCompanion(localeCode: Value(null)));
+    await tester.pumpAndSettle();
+    // The phone is German, but a draft is never matched to the phone.
+    expect(shown(), const Locale('en'));
   });
 
   testWidgets('income and threshold drive the home screen', (tester) async {

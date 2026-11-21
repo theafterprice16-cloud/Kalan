@@ -17,9 +17,8 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: Untranslated list is committed
-        # flutter pub get ran gen-l10n, which rewrites the messages still
-        # waiting for the bulk translation (Roadmap 24): commit that file
-        # with every ARB change.
+        # gen-l10n rewrites the messages still waiting for the bulk
+        # translation (Roadmap 24): commit that file with every ARB change.
         run: |
           flutter gen-l10n
           git diff -- docs/ceviriler/cevrilecekler.json
