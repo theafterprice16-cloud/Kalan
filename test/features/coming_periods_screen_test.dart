@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/providers.dart';
@@ -328,7 +329,10 @@ void main() {
     expect(find.textContaining('B eksik'), findsNothing);
   });
 
-  testWidgets('large text on a small phone: every amount short, none cut', (
+  // Roadmap 24: a column is never narrower than its short amount, so no
+  // amount is cut inside (it used to break "1,2 B" apart at large text);
+  // the row scrolls sideways.
+  testWidgets('large text on a small phone: amounts stay whole, row scrolls', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(360, 640);
@@ -339,10 +343,21 @@ void main() {
     await pumpApp(tester, seed: (db) => seed(db, income: 1400000));
     await scrollTo(tester, find.byKey(const ValueKey('coming-periods-strip')));
     await openStrip(tester);
-    expect(find.text('-₺1.200 eksik'), findsNothing);
-    // The row scrolls sideways here; the first columns are built. The
-    // short form keeps "1,2" and "B" together with a no-break space.
-    expect(find.text('-₺1,2\u00a0B eksik'), findsNWidgets(2));
+    final column = tester.getRect(
+      find.byKey(const ValueKey('coming-period-0')),
+    );
+    expect(column.width, greaterThan(ComingPeriodsChart.minColumnWidth));
+    expect(find.byType(SingleChildScrollView), findsWidgets);
+    // The short form keeps "1,2" and "B" together with a no-break space.
+    final amounts = find.text('-₺1,2\u00a0B eksik');
+    expect(amounts, findsWidgets);
+    for (final e in amounts.evaluate()) {
+      final paragraph = e.renderObject! as RenderParagraph;
+      final boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+      expect(boxes.map((b) => b.top).toSet(), hasLength(1));
+    }
     expect(tester.takeException(), isNull);
   });
 

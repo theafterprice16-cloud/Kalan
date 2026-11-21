@@ -12,7 +12,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 8. ~~**Pro satın alma**~~ Tamamlandı (18 Kasım 2026, yol haritası 11): yalnızca ömür boyu tek ürün (Karar 2); aylık ve yıllık yok. `Entitlement` arkasında, resmi `in_app_purchase` ile.
 9. **Ana ekran widget'ı**, iOS ve Android (Subby).
 10. **Türkiye resmi tatil kaydırması**; mağaza hazırlığı.
-11. **8 dili ekle** (docs/ceviriler-beklemede/ dosyalarından başla): İspanyolca, Fransızca, Almanca, Portekizce-Brezilya, Rusça, Çince Basitleştirilmiş, İtalyanca, Endonezce.
+11. **8 dili ekle** (docs/ceviriler-beklemede/ dosyalarından başla): İspanyolca, Fransızca, Almanca, Portekizce-Brezilya, Rusça, Çince Basitleştirilmiş, İtalyanca, Endonezce. Yol haritası 24 (22 yerel sürüm): **altyapı tamam (21 Kasım 2026); çeviriler toplu çeviride** (yol haritasının sonu, `docs/ceviriler/`).
 
 ## Tamamlananlar
 

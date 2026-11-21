@@ -1,6 +1,7 @@
 // Right to left (Roadmap 24, decision 10, Example 3): the app in Arabic,
 // opened here for the test only (no Arabic texts yet, so the words are
 // English, but the layout, dates and numbers are Arabic).
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/locale.dart';
 import 'package:kalan/core/date/local_date.dart';
@@ -118,6 +119,20 @@ void main() {
       find.byKey(const ValueKey('coming-period-1')),
     );
     expect(first.left, greaterThan(second.left));
+    // Each amount under a bar stays on one line ("26.8 ألف ₺" is wider
+    // than English "₺26.8K"; the column grows, the row may scroll).
+    final amounts = find.descendant(
+      of: find.byKey(const ValueKey('coming-period-1')),
+      matching: find.textContaining('₺'),
+    );
+    expect(amounts, findsOneWidget);
+    final paragraph =
+        amounts.evaluate().single.renderObject! as RenderParagraph;
+    final text = paragraph.text.toPlainText();
+    final boxes = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: 0, extentOffset: text.length),
+    );
+    expect(boxes.map((b) => b.top).toSet(), hasLength(1), reason: text);
     // Colors keep their roles: spoken for and left as in left to right.
     expect(find.byKey(const ValueKey('coming-bar-spoken-for')), findsWidgets);
 

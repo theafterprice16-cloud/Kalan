@@ -5,7 +5,7 @@ description: Kalan'da çeviri, ARB metni, tarih/tutar biçimi, para birimi, sağ
 
 # Kalan yerelleştirme kuralları
 
-Hedef: 22 yerel sürüm (16 dil), 75 para birimi. Uygulama bugün Türkçe ve İngilizce çalışır; diğer yerel sürümler yol haritasının 24. maddesinde eklenir. Görev açıkça istemedikçe TR ve EN dışındaki ARB dosyalarını açma ya da değiştirme.
+Hedef: 22 yerel sürüm (16 dil), 75 para birimi. Altyapı 24. maddede kuruldu: her yerel sürümün boş ARB dosyası ve `lib/l10n/app_locales.dart`'ta durumu var; bugün yalnızca tr ve en açık. Yeni metinler yalnızca TR ve EN ARB'ye yazılır; diğer yerel sürümlerin eksikleri `docs/ceviriler/cevrilecekler.json`'da birikir ve dosya her işte commit'lenir; çeviriler yol haritasının sonundaki toplu çeviride yapılır. Görev açıkça istemedikçe TR ve EN dışındaki ARB dosyalarına yazma.
 
 Yerel sürümler: tr, en-US, en-GB, es-ES, es-419, pt-BR, pt-PT, de-DE, de-CH, fr-FR, fr-CA, it, id, ru, zh-Hans, zh-Hant, ar, pl, nl, sv, ja, vi.
 
@@ -36,7 +36,7 @@ Yerel sürümler: tr, en-US, en-GB, es-ES, es-419, pt-BR, pt-PT, de-DE, de-CH, f
 
 - Bütün ekranlar sağdan sola çevrilir; grafikler ve ilerleme çubukları da sağdan başlar.
 - `EdgeInsetsDirectional`, `AlignmentDirectional`, start/end kullan; left/right sabitleme.
-- Rakamların Arap ya da Batı biçiminde gösterilmesi seçilebilir olmalı.
+- Rakamlar her zaman Batı biçiminde (0-9), seçenek yok (ürün sahibi kararı, 24. madde). Arapça klavyeden yazılan ٠-٩ tutar alanında 0-9 olur.
 - Körfez ile Mısır'ın günlük dili farklı; ortak yazı dili (modern standart Arapça) kullan.
 - Arapça para sembolleri (ر.س gibi) bozulmadan görünmeli. SAR ve AED'nin 2025'te duyurulan yeni işaretlerinin yazı tipi desteği doğrulanmadı; Arapça kısaltma ve ISO kodu kullan.
 - Doğrulanmadı: hafta sonunun cuma–cumartesi olması ve "faiz" kelimesinden kaçınma gereği.

@@ -24,7 +24,15 @@ Taksitleri ve "şimdi al, sonra öde" planlarını tek takvimde toplayan, her ma
 
 Ek: Arayüz metni kodda sabit yazılmaz (`lib/l10n/*.arb`, Türkçe ve İngilizce). Durum yalnızca renkle anlatılmaz. Dokunma hedefi en az 48x48.
 
-Uygulama dilleri şimdilik yalnızca Türkçe ve İngilizce. Ayrıca istenmedikçe yeni dil ekleme, mevcut çevirileri değiştirme.
+Yeni metinler yalnızca TR ve EN ARB'ye yazılır; diğer yerel sürümlerin eksikleri docs/ceviriler/cevrilecekler.json'da birikir ve dosya her işte commit'lenir; çeviriler yol haritasının sonundaki toplu çeviride yapılır. TR ve EN dışındaki ARB dosyalarına (boş; yalnızca `@@locale`) çeviri yazılmaz, mevcut çeviriler istenmedikçe değiştirilmez.
+
+## Diller ve yerel sürümler
+
+- Tek kaynak `lib/l10n/app_locales.dart`: 22 yerel sürüm, her birinin durumu (kapalı / taslak / gözden geçirildi), kendi dilindeki adı (çevrilmez; arayüz metni kuralının tek istisnası) ve intl yerel verisi. Bugün yalnızca tr ve en açık. Dil açmak yalnızca durumu değiştirmektir, ardından `dart run tool/sync_locales.dart` (iOS `CFBundleLocalizations`, Android `locales_config.xml`).
+- Sistem dili yalnızca "gözden geçirildi" sürümlerle eşlenir (`matchLocale`, en yakın bölge; yoksa en-US). "Taslak" yalnızca dil seçicide, yanında soluk "Taslak" notuyla.
+- ARB değişince `flutter gen-l10n` (ya da `flutter pub get`) çevrilecekler listesini yeniden yazar; `test/l10n/arb_integrity_test.dart` ve CI listeyi denetler. Sayı sayan her mesaj ICU plural'dır (`test/l10n/plural_test.dart`).
+- Tarih ve sayı yalnızca intl'den, `context.localeName` / `intlLocaleOf` üzerinden (zh_Hant → zh_TW). Her dilde Batı rakamları (0-9), Arapça dahil.
+- Sağdan sola: `lib/` altında left/right yerleşimi yok (start/end, `Directional` sürümler; bekçi `test/app/ui_guard_test.dart`). Arapça düzen `test/features/rtl_test.dart` ve golden 93-94 ile; uzun metin sözde yerelleştirmeyle `test/features/pseudo_overflow_test.dart`.
 
 ## Hatırlatmalar
 
