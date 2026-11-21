@@ -58,10 +58,20 @@ class PseudoLocalizations implements AppLocalizations {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     final symbol = invocation.memberName.toString();
-    final name = symbol.substring('Symbol("'.length, symbol.length - 2);
+    final name = RegExp(r'^Symbol\("(\w+)=?"\)$').firstMatch(symbol)?[1];
     final message = messages[name];
-    if (message == null) return super.noSuchMethod(invocation);
-    final names = parameters[name]!;
+    if (name == null || message == null) {
+      return super.noSuchMethod(invocation);
+    }
+    final names = parameters[name];
+    if (names == null ||
+        names.length != invocation.positionalArguments.length) {
+      throw StateError(
+        'PseudoLocalizations: no signature for "$name" in the generated '
+        'AppLocalizations; has its format changed? (test/helpers/'
+        'pseudo_l10n.dart reads "String name(Type a, …);")',
+      );
+    }
     final values = <String, Object>{
       for (final (i, v) in invocation.positionalArguments.indexed)
         names[i]: v is String ? v : '$v',

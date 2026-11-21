@@ -133,7 +133,12 @@ List<TextInputFormatter> amountInputFormatters(
     final text = westernDigits(newValue.text, localeName: localeName);
     final value = text == newValue.text
         ? newValue
-        : newValue.copyWith(text: text);
+        : text.length == newValue.text.length
+        ? newValue.copyWith(text: text)
+        : TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
     return acceptsAmountInput(text, currency, localeName: localeName)
         ? value
         : oldValue;

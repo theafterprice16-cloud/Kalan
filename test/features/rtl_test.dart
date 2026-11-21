@@ -147,6 +147,31 @@ void main() {
     expect(tester.getCenter(back).dx, greaterThan(appBar.center.dx));
   });
 
+  // The system date picker reads Arabic dates as well: 0-9 there too.
+  testWidgets('the date picker writes 0-9', (tester) async {
+    await pumpArabic(tester);
+    await tester.tap(find.text('Add plan'));
+    await tester.pumpAndSettle();
+    final field = find.byKey(const ValueKey('first-date'));
+    await scrollTo(tester, field);
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    final texts = find.descendant(
+      of: find.byType(DatePickerDialog),
+      matching: find.byType(RichText),
+    );
+    expect(texts, findsWidgets);
+    final eastern = RegExp('[\u0660-\u0669\u06F0-\u06F9]');
+    var digits = 0;
+    for (final e in texts.evaluate()) {
+      final text = (e.widget as RichText).text.toPlainText();
+      expect(eastern.hasMatch(text), isFalse, reason: text);
+      if (RegExp('[0-9]').hasMatch(text)) digits++;
+    }
+    expect(digits, greaterThan(20), reason: 'the month\'s days');
+  });
+
   testWidgets('calendar: the week starts on the right', (tester) async {
     await pumpArabic(tester);
     await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));

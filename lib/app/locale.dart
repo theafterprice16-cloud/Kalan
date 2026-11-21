@@ -59,7 +59,9 @@ Locale appLocale(
 }
 
 /// Loads intl's date data for every locale (Roadmap 24), before the
-/// first frame and in background isolates. Numbers need no loading.
+/// first frame and in background isolates. On screen, Flutter then lays
+/// its own data over it for the locales it knows (both from CLDR);
+/// locales it lacks (es_419) keep intl's. Numbers need no loading.
 Future<void> loadLocaleData() async {
   await initializeDateFormatting();
   useWesternDigits();

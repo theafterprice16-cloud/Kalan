@@ -62,35 +62,54 @@ List<String> offendersIn(String path, String source) {
 /// Layout pinned to the left or the right (Roadmap 24): in Arabic the
 /// screen reads from the right, so start/end and Directional variants
 /// are used. A line may opt out with a `// rtl-ok: <reason>` comment.
+/// Searched across line breaks, since the formatter splits long calls.
 final directionalPatterns = <String, RegExp>{
   'left/right alignment': RegExp(
-    r'\bAlignment\.(centerLeft|centerRight|topLeft|topRight|bottomLeft|bottomRight)\b',
+    r'\b(Alignment|FractionalOffset)\.(centerLeft|centerRight|topLeft|topRight|bottomLeft|bottomRight)\b',
+  ),
+  // Alignment(x, y) with an x other than 0.
+  'left/right alignment value': RegExp(
+    r'\bAlignment\(\s*(?!0(\.0+)?\s*,)[^,()]+,',
   ),
   'left/right text align': RegExp(r'\bTextAlign\.(left|right)\b'),
   'fixed text direction': RegExp(r'\btextDirection:\s*TextDirection\.'),
 };
 
-/// Constructors whose left/right arguments pin the layout.
+/// Constructors whose own left/right arguments pin the layout.
 final directionalCalls = <String, RegExp>{
   'left/right insets': RegExp(r'\bEdgeInsets\.only\('),
-  'left/right position': RegExp(r'\bPositioned\('),
+  'left/right position': RegExp(r'\bPositioned(\.fill)?\('),
   'left/right corners': RegExp(r'\bBorderRadius\.(only|horizontal)\('),
   'left/right border': RegExp(r'\bBorder\('),
 };
 
 final _sideArgument = RegExp(
-  r'\b(left|right|topLeft|topRight|bottomLeft|bottomRight):',
+  r'^(left|right|topLeft|topRight|bottomLeft|bottomRight)\s*:',
 );
 
-/// The arguments of the call whose "(" ends at [open], parentheses
-/// balanced.
-String _argumentsAt(String source, int open) {
+/// The arguments of the call whose "(" is at [open], split at its own
+/// commas (not those of nested calls or collections).
+List<String> _argumentsAt(String source, int open) {
+  final args = <String>[];
   var depth = 0;
+  var start = open + 1;
   for (var i = open; i < source.length; i++) {
-    if (source[i] == '(') depth++;
-    if (source[i] == ')' && --depth == 0) return source.substring(open + 1, i);
+    final c = source[i];
+    if ('([{'.contains(c)) depth++;
+    if (')]}'.contains(c)) depth--;
+    if (depth == 0) {
+      args.add(source.substring(start, i));
+      break;
+    }
+    if (depth == 1 && c == ',') {
+      args.add(source.substring(start, i));
+      start = i + 1;
+    }
   }
-  return source.substring(open + 1);
+  return [
+    for (final a in args)
+      if (a.trim().isNotEmpty) a.trim(),
+  ];
 }
 
 List<String> directionalOffendersIn(String path, String source) {
@@ -99,31 +118,29 @@ List<String> directionalOffendersIn(String path, String source) {
   int lineOf(int offset) =>
       '\n'.allMatches(source.substring(0, offset)).length + 1;
   bool optedOut(int line) => lines[line - 1].contains('// rtl-ok:');
-  for (var i = 0; i < lines.length; i++) {
-    for (final MapEntry(:key, :value) in directionalPatterns.entries) {
-      if (value.hasMatch(lines[i]) && !optedOut(i + 1)) {
-        out.add('$path:${i + 1} ($key)');
-      }
+  void report(int offset, String what) {
+    final line = lineOf(offset);
+    if (!optedOut(line)) out.add('$path:$line ($what)');
+  }
+
+  for (final MapEntry(:key, :value) in directionalPatterns.entries) {
+    for (final m in value.allMatches(source)) {
+      report(m.start, key);
     }
   }
   for (final MapEntry(:key, :value) in directionalCalls.entries) {
     for (final m in value.allMatches(source)) {
       final args = _argumentsAt(source, m.end - 1);
-      final line = lineOf(m.start);
-      if (_sideArgument.hasMatch(args) && !optedOut(line)) {
-        out.add('$path:$line ($key)');
-      }
+      if (args.any(_sideArgument.hasMatch)) report(m.start, key);
     }
   }
-  // fromLTRB with different left and right.
+  // fromLTRB with different left and right, or arguments it cannot read.
   for (final m in RegExp(r'\bEdgeInsets\.fromLTRB\(').allMatches(source)) {
-    final args = _argumentsAt(
-      source,
-      m.end - 1,
-    ).split(',').map((a) => a.trim()).where((a) => a.isNotEmpty).toList();
-    final line = lineOf(m.start);
-    if (args.length == 4 && args[0] != args[2] && !optedOut(line)) {
-      out.add('$path:$line (uneven fromLTRB)');
+    final args = _argumentsAt(source, m.end - 1);
+    if (args.length != 4) {
+      report(m.start, 'unreadable fromLTRB');
+    } else if (args[0] != args[2]) {
+      report(m.start, 'uneven fromLTRB');
     }
   }
   return out;
@@ -165,6 +182,11 @@ void main() {
       'BorderRadius.horizontal(right: r)',
       'Border(left: BorderSide())',
       'Text(a, textDirection: TextDirection.ltr)',
+      'Text(\n  a,\n  textDirection:\n      TextDirection.rtl,\n)',
+      'Positioned.fill(left: 8, child: x)',
+      'alignment: Alignment(-1, 0)',
+      'FractionalOffset.centerRight',
+      'EdgeInsets.fromLTRB(f(a, b), 0, 0, 0)',
     ];
     for (final sample in samples) {
       expect(
@@ -188,6 +210,11 @@ void main() {
       'Directionality.of(context) == TextDirection.rtl',
       'textDirection: Directionality.of(context),',
       'Text(a, textDirection: TextDirection.ltr) // rtl-ok: a code',
+      'Positioned(top: 0, child: Foo(right: 1))',
+      'Positioned.fill(child: x)',
+      'Alignment(0, -1)',
+      'Alignment(0.0, 1)',
+      'EdgeInsets.fromLTRB(f(a, b), 0, f(a, b), 0)',
     ];
     for (final sample in allowed) {
       expect(directionalOffendersIn('x.dart', sample), isEmpty, reason: sample);

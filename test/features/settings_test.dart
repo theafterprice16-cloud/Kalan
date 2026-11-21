@@ -1,7 +1,9 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/locale.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/core/theme/theme_mode.dart';
+import 'package:kalan/data/db/app_database.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -97,6 +99,29 @@ void main() {
     // English texts (no Portuguese yet), saved as pt_BR.
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Português (Brasil)'), findsOneWidget);
+  });
+
+  // Review finding (24): with a language picked, a change of the phone's
+  // language must not stick; "System language" then follows the phone.
+  testWidgets('back to the system language after the phone changed', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      seed: (db) => seedSettings(db, localeCode: 'en'),
+    );
+    expect(find.text('Settings'), findsWidgets);
+    // The phone's language changes while English is picked.
+    tester.platformDispatcher.localeTestValue = const Locale('tr', 'TR');
+    tester.platformDispatcher.localesTestValue = const [Locale('tr', 'TR')];
+    await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsWidgets);
+    await db
+        .update(db.appSettings)
+        .write(const AppSettingsCompanion(localeCode: Value(null)));
+    await tester.pumpAndSettle();
+    expect(find.text('Ayarlar'), findsWidgets);
+    expect(find.text('Settings'), findsNothing);
   });
 
   testWidgets('income and threshold drive the home screen', (tester) async {

@@ -132,8 +132,13 @@ class _KalanAppState extends ConsumerState<KalanApp> {
       darkTheme: KalanTheme.dark(),
       themeMode: ref.watch(themeModeProvider),
       locale: locale,
-      localeResolutionCallback: (device, _) =>
-          locale ?? resolveLocale(device, locales),
+      // Flutter asks for the picked locale itself and, separately, for
+      // the phone's (kept for when the setting goes back to the system):
+      // only the former may answer with the picked one.
+      localeResolutionCallback: (requested, _) =>
+          locale != null && requested == locale
+          ? locale
+          : resolveLocale(requested, locales),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: [
         ref.watch(appLocalizationsDelegateProvider),

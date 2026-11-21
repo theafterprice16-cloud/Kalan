@@ -23,10 +23,57 @@ Map<String, dynamic> loadArb(String code) =>
 Set<String> messageKeys(Map<String, dynamic> arb) =>
     arb.keys.where((k) => !k.startsWith('@')).toSet();
 
-/// Placeholder names a message uses, plain or as a plural/select argument.
-Set<String> placeholdersIn(String message) => {
-  for (final m in RegExp(r'\{(\w+)\s*[,}]').allMatches(message)) m[1]!,
-};
+/// Placeholder names a message uses, plain ("{amount}") or as a plural
+/// or select argument ("{count, plural, …}"); the words inside a branch
+/// ("EUR{Euro}") are text, not placeholders.
+Set<String> placeholdersIn(String message) {
+  final out = <String>{};
+  late final int Function(int) argument;
+  // Reads text from [i] up to its closing "}" (or the end); returns the
+  // index after it.
+  int text(int i) {
+    while (i < message.length) {
+      final c = message[i];
+      if (c == '}') return i + 1;
+      if (c == '{') {
+        i = argument(i + 1);
+      } else {
+        i++;
+      }
+    }
+    return i;
+  }
+
+  argument = (i) {
+    final start = i;
+    while (i < message.length && message[i] != ',' && message[i] != '}') {
+      i++;
+    }
+    out.add(message.substring(start, i).trim());
+    if (i >= message.length || message[i] == '}') return i + 1;
+    final typeStart = ++i;
+    while (i < message.length && message[i] != ',' && message[i] != '}') {
+      i++;
+    }
+    final type = message.substring(typeStart, i).trim();
+    if (i >= message.length || message[i] == '}') return i + 1;
+    i++;
+    if (!{'plural', 'select', 'selectordinal'}.contains(type)) {
+      // A style ("{n, number, compact}"): skip to the closing brace.
+      return text(i);
+    }
+    // Branches: a selector, then its text in braces.
+    while (i < message.length) {
+      final c = message[i];
+      if (c == '}') return i + 1;
+      i = c == '{' ? text(i + 1) : i + 1;
+    }
+    return i;
+  };
+
+  text(0);
+  return out;
+}
 
 /// The ARB codes in lib/l10n ('en', 'en_GB', 'zh_Hant').
 Set<String> arbCodes() => {
@@ -76,6 +123,18 @@ Map<String, List<String>> expectedUntranslated() =>
 
 void main() {
   final en = loadArb('en');
+
+  test('the placeholder reader skips branch text', () {
+    expect(placeholdersIn('{amount} left'), {'amount'});
+    expect(placeholdersIn('{code, select, EUR{Euro} other{{code}}}'), {'code'});
+    expect(placeholdersIn('{code, select, EUR{ユーロ} other{{code}}}'), {'code'});
+    expect(
+      placeholdersIn(
+        '{count, plural, =1{1 plan on {date}} other{{count} plans}} {total}',
+      ),
+      {'count', 'date', 'total'},
+    );
+  });
   final enKeys = messageKeys(en);
 
   test('every registry locale has an ARB file, and no other file', () {

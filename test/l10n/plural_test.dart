@@ -36,27 +36,48 @@ const optionalCategories = {
   'tr': {'one'},
 };
 
-/// The CLDR plural categories of [language], from intl's rules: those
-/// whole numbers reach, and "other" (ICU needs it; in Russian and Polish
-/// it holds fractions).
+/// Whole numbers the plural checks look at.
+final _samples = [...List.generate(1001, (i) => i), 1000000, 1000001];
+
+/// The CLDR category of [n] in [language], from intl's rules.
+String categoryOf(int n, String language) => Intl.pluralLogic(
+  n,
+  locale: language,
+  zero: 'zero',
+  one: 'one',
+  two: 'two',
+  few: 'few',
+  many: 'many',
+  other: 'other',
+  useExplicitNumberCases: false,
+);
+
+/// The CLDR plural categories of [language]: those whole numbers reach,
+/// and "other" (ICU needs it; in Russian and Polish it holds fractions).
 Set<String> categoriesOf(String language) => {
   'other',
-  for (final n in [...List.generate(1001, (i) => i), 1000000, 1000001])
-    Intl.pluralLogic(
-      n,
-      locale: language,
-      zero: 'zero',
-      one: 'one',
-      two: 'two',
-      few: 'few',
-      many: 'many',
-      other: 'other',
-      useExplicitNumberCases: false,
-    ),
+  for (final n in _samples) categoryOf(n, language),
 };
 
-/// Each plural argument in [message] with its selectors, read as
-/// gen-l10n does (=0, =1 and =2 fill zero, one and two).
+/// Whether a plural's [selectors] cover [category] in [language]. gen-l10n
+/// fills zero, one and two from "=0", "=1" and "=2" too, but such a
+/// branch says that one number ("1 plan"): it covers the category only
+/// where the category holds that number alone (English "one" is 1;
+/// Russian "one" is also 21 and 31, so it needs a real "one" branch).
+bool covers(Set<String> selectors, String category, String language) {
+  if (selectors.contains(category)) return true;
+  const explicit = {'zero': '=0', 'one': '=1', 'two': '=2'};
+  final exact = explicit[category];
+  if (exact == null || !selectors.contains(exact)) return false;
+  final members = {
+    for (final n in _samples)
+      if (categoryOf(n, language) == category) n,
+  };
+  return members.length == 1 && members.single == int.parse(exact.substring(1));
+}
+
+/// Each plural argument in [message] with its selectors as written
+/// ("=1", "one", "other").
 List<(String, Set<String>)> pluralsIn(String message) {
   final out = <(String, Set<String>)>[];
   for (final m in RegExp(r'\{(\w+)\s*,\s*plural\s*,').allMatches(message)) {
@@ -71,13 +92,7 @@ List<(String, Set<String>)> pluralsIn(String message) {
       while (message[i] != '{' && message[i].trim().isNotEmpty) {
         i++;
       }
-      final selector = message.substring(start, i);
-      selectors.add(switch (selector) {
-        '=0' => 'zero',
-        '=1' => 'one',
-        '=2' => 'two',
-        _ => selector,
-      });
+      selectors.add(message.substring(start, i));
       while (message[i] != '{') {
         i++;
       }
@@ -109,6 +124,15 @@ void main() {
     expect(categoriesOf('ja'), {'other'});
   });
 
+  test('"=1" stands for "one" only where "one" is 1 alone', () {
+    expect(covers({'=1', 'other'}, 'one', 'en'), isTrue);
+    expect(covers({'=1', 'other'}, 'one', 'ru'), isFalse);
+    expect(covers({'one', 'other'}, 'one', 'ru'), isTrue);
+    expect(covers({'=0', 'other'}, 'zero', 'ar'), isTrue);
+    expect(covers({'=2', 'other'}, 'two', 'ar'), isTrue);
+    expect(covers({'other'}, 'few', 'pl'), isFalse);
+  });
+
   test('a message that counts something is a plural', () {
     for (final k in messages) {
       final meta = en['@$k'] as Map<String, dynamic>?;
@@ -130,7 +154,7 @@ void main() {
       for (final (name, s) in pluralsIn(m)) '$name: ${s.toList()..sort()}',
     ];
     expect(read('{n, plural, =0{none} =1{one {n}} other{{n} of {m}}}'), [
-      'n: [one, other, zero]',
+      'n: [=0, =1, other]',
     ]);
     expect(
       read(
@@ -151,11 +175,13 @@ void main() {
           .difference(optionalCategories[language] ?? const {});
       for (final k in messages) {
         for (final (name, selectors) in pluralsIn(arb[k] as String)) {
-          expect(
-            selectors,
-            containsAll(required),
-            reason: '${locale.code}.$k ($name)',
-          );
+          for (final category in required) {
+            expect(
+              covers(selectors, category, language),
+              isTrue,
+              reason: '${locale.code}.$k ($name): $category',
+            );
+          }
         }
       }
     });

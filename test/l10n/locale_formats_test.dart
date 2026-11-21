@@ -127,6 +127,19 @@ void main() {
     expect(text, isNot(contains('.')));
   });
 
+  test('every locale separates with one character (the cursor stays)', () {
+    for (final l in appLocales) {
+      final symbols = NumberFormat.decimalPattern(l.intlLocale).symbols;
+      expect(symbols.DECIMAL_SEP, hasLength(1), reason: l.code);
+      expect(symbols.GROUP_SEP, hasLength(1), reason: l.code);
+      expect(
+        westernDigits('١٢٣٤٫٥٦', localeName: l.intlLocale),
+        hasLength(7),
+        reason: l.code,
+      );
+    }
+  });
+
   test('an Arabic keyboard types amounts too', () {
     final egp = Currency.fromCode('EGP');
     final tr = Currency.fromCode('TRY');
