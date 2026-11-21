@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
+import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
@@ -142,6 +143,30 @@ void main() {
       find.text('Peşin alsaydın ödeyeceğin fiyat.', skipOffstage: false),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a price typed, then "Pay in 4" chosen: none is stored', (
+    tester,
+  ) async {
+    final db = await pumpTall(
+      tester,
+      seed: (db) => seedSettings(db, currency: 'IDR'),
+    );
+    await openAdd(tester, 'Aylık taksit');
+    await tester.enterText(find.byKey(const ValueKey('source')), 'Kredivo');
+    await tester.enterText(find.byKey(const ValueKey('total')), '400000');
+    await tester.enterText(find.byKey(const ValueKey('count')), '4');
+    await tapKey(tester, 'more-details');
+    await typePrice(tester, '300000');
+    final chip = find.widgetWithText(ChoiceChip, '4 ödemeli plan');
+    await scrollTo(tester, chip);
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('preview-fee-summary')), findsNothing);
+    await tapKey(tester, 'save-plan');
+    final plan = await db.select(db.plans).getSingle();
+    expect(plan.kind, PlanKind.payIn4);
+    expect(plan.productPriceMinor, isNull);
   });
 
   testWidgets('example 1: "Installment" entry, preview, saved, detail', (
@@ -308,4 +333,42 @@ void main() {
     expect(find.text('Product price'), findsOneWidget);
     expect(find.text('Difference'), findsOneWidget);
   });
+
+  for (final brightness in Brightness.values) {
+    testWidgets('colour: labels muted, amounts text, $brightness', (
+      tester,
+    ) async {
+      tester.platformDispatcher.platformBrightnessTestValue = brightness;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      await pumpTall(tester, seed: (db) => seedPutri(db, price: 6000000));
+      await openPlan(tester);
+      final colors = tester
+          .element(find.byKey(const ValueKey('price-summary-difference')))
+          .colors;
+      for (final key in [
+        'fee-summary-total',
+        'price-summary-price',
+        'price-summary-difference',
+      ]) {
+        final texts = tester
+            .widgetList<Text>(
+              find.descendant(
+                of: find.byKey(ValueKey(key)),
+                matching: find.byType(Text),
+              ),
+            )
+            .toList();
+        expect(texts, hasLength(2));
+        expect(texts.first.style?.color, colors.textMuted, reason: key);
+        expect(texts.last.style?.color, colors.text, reason: key);
+        for (final t in texts) {
+          expect(
+            [colors.negative, colors.negativeText, colors.late, colors.accent],
+            isNot(contains(t.style?.color)),
+            reason: key,
+          );
+        }
+      }
+    });
+  }
 }

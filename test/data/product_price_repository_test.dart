@@ -232,4 +232,19 @@ void main() {
       for (final r in gateway.pending) '${r.fireDate} ${r.kind} ${r.body}',
     ], before);
   });
+
+  test('manual entry: stored, added later and cleared', () async {
+    final base = putri();
+    final draft = PlanDraft(
+      kind: PlanKind.manual,
+      installmentCount: base.installmentCount,
+      payments: base.payments,
+    );
+    final id = await save(draft.withProductPrice(6000000));
+    expect((await load(id)).priceDifference?.differenceMinor, 960000);
+    expect(await editPrice(id, 6500000), isNull);
+    expect((await load(id)).priceDifference?.differenceMinor, 460000);
+    expect(await editPrice(id, null), isNull);
+    expect((await load(id)).productPrice, isNull);
+  });
 }

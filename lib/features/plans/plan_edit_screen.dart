@@ -163,6 +163,11 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
     final fee = typedInstallmentFee(context, ref, _fee.text);
+    // A price the section cannot read (closed with text the validator
+    // never saw) leaves the stored price as it is.
+    final priceText = _price.text.trim();
+    final priceReadable =
+        priceText.isEmpty || ref.parseMoney(context, priceText) != null;
     final price = typedProductPrice(context, ref, _price.text);
     final count = _underway ? _paidCount(plan) ?? 0 : 0;
     final back = plan.paidBefore.length - count;
@@ -204,7 +209,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
           installmentFee: canHaveInstallmentFee(plan.plan.kind)
               ? (feeMinor: fee, scope: _feeScope)
               : null,
-          productPrice: canHaveProductPrice(plan.plan.kind)
+          productPrice: canHaveProductPrice(plan.plan.kind) && priceReadable
               ? (priceMinor: price)
               : null,
         );

@@ -309,11 +309,15 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       )
       .withProductPrice(typedProductPrice(context, ref, _price.text));
 
-  /// Monthly installments, card installments and manual entry (23).
-  bool get _hasProductPrice =>
-      _mode == AddMode.monthly ||
-      _mode == AddMode.card ||
-      _mode == AddMode.manual;
+  /// Monthly installments, card installments and manual entry (23): the
+  /// rule lives in [canHaveProductPrice].
+  bool get _hasProductPrice => canHaveProductPrice(switch (_mode) {
+    AddMode.payIn4 => PlanKind.payIn4,
+    AddMode.monthly => PlanKind.monthly,
+    AddMode.card => PlanKind.card,
+    AddMode.manual => PlanKind.manual,
+    AddMode.payLater => PlanKind.payLater,
+  });
 
   PlanDraft? _baseDraft() {
     try {
@@ -1009,7 +1013,8 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
         // Product price (23): after the fee per payment; not for "Pay in 4"
         // or "Pay later".
         if (_hasProductPrice) ...[
-          // Room under the fee's helper, like the fee under the title.
+          // Room under the field or switch above (the fee's helper, or the
+          // cash advance switch on cards).
           const SizedBox(height: KalanSpace.md),
           ProductPriceField(controller: _price, onChanged: _refresh),
         ],
