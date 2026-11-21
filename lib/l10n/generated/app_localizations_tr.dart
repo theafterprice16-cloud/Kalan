@@ -1571,7 +1571,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String proIntro(int limit) {
-    return 'Ücretsiz sürümde $limit açık plan var. Pro ile sınır kalkar ve şunlar açılır:';
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other:
+          'Ücretsiz sürümde $limit açık plan var. Pro ile sınır kalkar ve şunlar açılır:',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1625,7 +1631,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String limitSheetBody(int limit) {
-    return 'Ücretsiz sürümde $limit açık plan var. Bir planı bitirdiğinde ya da Pro ile yenisini ekleyebilirsin.';
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other:
+          'Ücretsiz sürümde $limit açık plan var. Bir planı bitirdiğinde ya da Pro ile yenisini ekleyebilirsin.',
+    );
+    return '$_temp0';
   }
 
   @override

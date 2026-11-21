@@ -1654,7 +1654,7 @@ abstract class AppLocalizations {
   /// Expands the past-due section when it has more than 3 payments.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, other{Show all ({count})}}'**
+  /// **'{count, plural, one{Show all ({count})} other{Show all ({count})}}'**
   String pastDueShowAll(int count);
 
   /// Screen reader label of a past-due row. Calm and non-judgmental: a fact, not a warning. No exclamation marks.
@@ -2151,7 +2151,7 @@ abstract class AppLocalizations {
   /// No description provided for @proIntro.
   ///
   /// In en, this message translates to:
-  /// **'The free version keeps up to {limit} open plans. Pro removes the limit and adds:'**
+  /// **'{limit, plural, =1{The free version keeps up to 1 open plan. Pro removes the limit and adds:} other{The free version keeps up to {limit} open plans. Pro removes the limit and adds:}}'**
   String proIntro(int limit);
 
   /// One line in the list of what Pro adds.
@@ -2247,7 +2247,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitSheetBody.
   ///
   /// In en, this message translates to:
-  /// **'The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.'**
+  /// **'{limit, plural, =1{The free version keeps up to 1 open plan. You can add a new one when a plan finishes, or with Pro.} other{The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.}}'**
   String limitSheetBody(int limit);
 
   /// No description provided for @limitSheetSeePro.
@@ -2405,7 +2405,7 @@ abstract class AppLocalizations {
   /// Screen reader: some of the day's payments are late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, other{{count} late}}'**
+  /// **'{count, plural, one{{count} late} other{{count} late}}'**
   String calendarCellSomeLate(int count);
 
   /// Screen reader: every payment of the day is paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
@@ -2417,7 +2417,7 @@ abstract class AppLocalizations {
   /// Screen reader: some of the day's payments are paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, other{{count} paid}}'**
+  /// **'{count, plural, one{{count} paid} other{{count} paid}}'**
   String calendarCellSomePaid(int count);
 
   /// Screen reader: a pay period starts this day. Joined with a comma. Takvim etiketi; kısa ve sakin.

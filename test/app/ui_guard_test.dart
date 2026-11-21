@@ -59,7 +59,141 @@ List<String> offendersIn(String path, String source) {
   return out;
 }
 
+/// Layout pinned to the left or the right (Roadmap 24): in Arabic the
+/// screen reads from the right, so start/end and Directional variants
+/// are used. A line may opt out with a `// rtl-ok: <reason>` comment.
+final directionalPatterns = <String, RegExp>{
+  'left/right alignment': RegExp(
+    r'\bAlignment\.(centerLeft|centerRight|topLeft|topRight|bottomLeft|bottomRight)\b',
+  ),
+  'left/right text align': RegExp(r'\bTextAlign\.(left|right)\b'),
+  'fixed text direction': RegExp(r'\btextDirection:\s*TextDirection\.'),
+};
+
+/// Constructors whose left/right arguments pin the layout.
+final directionalCalls = <String, RegExp>{
+  'left/right insets': RegExp(r'\bEdgeInsets\.only\('),
+  'left/right position': RegExp(r'\bPositioned\('),
+  'left/right corners': RegExp(r'\bBorderRadius\.(only|horizontal)\('),
+  'left/right border': RegExp(r'\bBorder\('),
+};
+
+final _sideArgument = RegExp(
+  r'\b(left|right|topLeft|topRight|bottomLeft|bottomRight):',
+);
+
+/// The arguments of the call whose "(" ends at [open], parentheses
+/// balanced.
+String _argumentsAt(String source, int open) {
+  var depth = 0;
+  for (var i = open; i < source.length; i++) {
+    if (source[i] == '(') depth++;
+    if (source[i] == ')' && --depth == 0) return source.substring(open + 1, i);
+  }
+  return source.substring(open + 1);
+}
+
+List<String> directionalOffendersIn(String path, String source) {
+  final out = <String>[];
+  final lines = source.split('\n');
+  int lineOf(int offset) =>
+      '\n'.allMatches(source.substring(0, offset)).length + 1;
+  bool optedOut(int line) => lines[line - 1].contains('// rtl-ok:');
+  for (var i = 0; i < lines.length; i++) {
+    for (final MapEntry(:key, :value) in directionalPatterns.entries) {
+      if (value.hasMatch(lines[i]) && !optedOut(i + 1)) {
+        out.add('$path:${i + 1} ($key)');
+      }
+    }
+  }
+  for (final MapEntry(:key, :value) in directionalCalls.entries) {
+    for (final m in value.allMatches(source)) {
+      final args = _argumentsAt(source, m.end - 1);
+      final line = lineOf(m.start);
+      if (_sideArgument.hasMatch(args) && !optedOut(line)) {
+        out.add('$path:$line ($key)');
+      }
+    }
+  }
+  // fromLTRB with different left and right.
+  for (final m in RegExp(r'\bEdgeInsets\.fromLTRB\(').allMatches(source)) {
+    final args = _argumentsAt(
+      source,
+      m.end - 1,
+    ).split(',').map((a) => a.trim()).where((a) => a.isNotEmpty).toList();
+    final line = lineOf(m.start);
+    if (args.length == 4 && args[0] != args[2] && !optedOut(line)) {
+      out.add('$path:$line (uneven fromLTRB)');
+    }
+  }
+  return out;
+}
+
+/// lib/ without generated code.
+Iterable<File> libSources() =>
+    Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where(
+          (f) =>
+              f.path.endsWith('.dart') &&
+              !f.path.endsWith('.g.dart') &&
+              !f.path.endsWith('.steps.dart') &&
+              !f.path.replaceAll(r'\', '/').contains('/l10n/generated/'),
+        );
+
 void main() {
+  test('lib/ lays out by start and end, never left and right', () {
+    final offenders = <String>[];
+    for (final file in libSources()) {
+      final path = file.path.replaceAll(r'\', '/');
+      offenders.addAll(directionalOffendersIn(path, file.readAsStringSync()));
+    }
+    expect(offenders, isEmpty);
+  });
+
+  test('the right-to-left guard catches every form', () {
+    const samples = [
+      'padding: EdgeInsets.only(left: KalanSpace.md)',
+      'EdgeInsets.only(\n  top: 4,\n  right: KalanSpace.sm,\n)',
+      'EdgeInsets.fromLTRB(KalanSpace.md, 0, KalanSpace.xs, 0)',
+      'alignment: Alignment.centerLeft',
+      'Alignment.topRight',
+      'textAlign: TextAlign.right',
+      'Positioned(top: f(1), left: 0, child: x)',
+      'BorderRadius.only(topLeft: r)',
+      'BorderRadius.horizontal(right: r)',
+      'Border(left: BorderSide())',
+      'Text(a, textDirection: TextDirection.ltr)',
+    ];
+    for (final sample in samples) {
+      expect(
+        directionalOffendersIn('x.dart', sample),
+        isNotEmpty,
+        reason: sample,
+      );
+    }
+    const allowed = [
+      'padding: EdgeInsetsDirectional.only(start: KalanSpace.md)',
+      'EdgeInsets.only(top: KalanSpace.xs, bottom: 4)',
+      'EdgeInsets.fromLTRB(KalanSpace.md, 0, KalanSpace.md, KalanSpace.xs)',
+      'alignment: AlignmentDirectional.centerStart',
+      'Alignment.center',
+      'textAlign: TextAlign.start',
+      'PositionedDirectional(start: 0, end: 0, child: x)',
+      'Positioned(top: 0, bottom: 0, child: x)',
+      'BorderRadius.vertical(top: r)',
+      'BorderRadiusDirectional.only(topStart: r)',
+      'Border(top: BorderSide())',
+      'Directionality.of(context) == TextDirection.rtl',
+      'textDirection: Directionality.of(context),',
+      'Text(a, textDirection: TextDirection.ltr) // rtl-ok: a code',
+    ];
+    for (final sample in allowed) {
+      expect(directionalOffendersIn('x.dart', sample), isEmpty, reason: sample);
+    }
+  });
+
   test('screens follow the cross-platform UI rules', () {
     final offenders = <String>[];
     for (final entity in Directory('lib/features').listSync(recursive: true)) {

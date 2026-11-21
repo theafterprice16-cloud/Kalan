@@ -1137,6 +1137,7 @@ class AppLocalizationsZh extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Show all ($countString)',
+      one: 'Show all ($countString)',
     );
     return '$_temp0';
   }
@@ -1556,7 +1557,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String proIntro(int limit) {
-    return 'The free version keeps up to $limit open plans. Pro removes the limit and adds:';
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other:
+          'The free version keeps up to $limit open plans. Pro removes the limit and adds:',
+      one: 'The free version keeps up to 1 open plan. Pro removes the limit and adds:',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1612,7 +1620,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String limitSheetBody(int limit) {
-    return 'The free version keeps up to $limit open plans. You can add a new one when a plan finishes, or with Pro.';
+    String _temp0 = intl.Intl.pluralLogic(
+      limit,
+      locale: localeName,
+      other:
+          'The free version keeps up to $limit open plans. You can add a new one when a plan finishes, or with Pro.',
+      one: 'The free version keeps up to 1 open plan. You can add a new one when a plan finishes, or with Pro.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1751,6 +1766,7 @@ class AppLocalizationsZh extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count late',
+      one: '$count late',
     );
     return '$_temp0';
   }
@@ -1764,6 +1780,7 @@ class AppLocalizationsZh extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count paid',
+      one: '$count paid',
     );
     return '$_temp0';
   }

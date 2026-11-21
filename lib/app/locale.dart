@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 import '../l10n/app_locales.dart';
 
@@ -59,4 +60,17 @@ Locale appLocale(
 
 /// Loads intl's date data for every locale (Roadmap 24), before the
 /// first frame and in background isolates. Numbers need no loading.
-Future<void> loadLocaleData() => initializeDateFormatting();
+Future<void> loadLocaleData() async {
+  await initializeDateFormatting();
+  useWesternDigits();
+}
+
+/// Western digits (0-9) in every date, Arabic included (product owner's
+/// decision, Roadmap 24): Flutter's Arabic date data writes ٠-٩. Numbers
+/// and amounts already use 0-9 in every locale. Runs before any date is
+/// formatted (main, background isolates, the app widget).
+void useWesternDigits() {
+  for (final l in appLocales) {
+    DateFormat.useNativeDigitsByDefaultFor(l.intlLocale, false);
+  }
+}

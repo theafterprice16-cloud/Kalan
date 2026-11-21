@@ -128,10 +128,14 @@ List<TextInputFormatter> amountInputFormatters(
   Currency currency, {
   required String localeName,
 }) => [
-  TextInputFormatter.withFunction(
-    (oldValue, newValue) =>
-        acceptsAmountInput(newValue.text, currency, localeName: localeName)
+  TextInputFormatter.withFunction((oldValue, newValue) {
+    // An Arabic keyboard's ٤ shows as 4 (Western digits everywhere).
+    final text = westernDigits(newValue.text, localeName: localeName);
+    final value = text == newValue.text
         ? newValue
-        : oldValue,
-  ),
+        : newValue.copyWith(text: text);
+    return acceptsAmountInput(text, currency, localeName: localeName)
+        ? value
+        : oldValue;
+  }),
 ];

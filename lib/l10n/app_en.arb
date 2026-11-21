@@ -865,7 +865,7 @@
   "@pastDueMarkPaid": {
     "description": "Text button on a past-due row; opens 'When did you pay?'."
   },
-  "pastDueShowAll": "{count, plural, other{Show all ({count})}}",
+  "pastDueShowAll": "{count, plural, one{Show all ({count})} other{Show all ({count})}}",
   "@pastDueShowAll": {
     "description": "Expands the past-due section when it has more than 3 payments.",
     "placeholders": {
@@ -1443,7 +1443,7 @@
   "@proTitle": {
     "description": "Pro screen title and the Settings row. Product name, not translated."
   },
-  "proIntro": "The free version keeps up to {limit} open plans. Pro removes the limit and adds:",
+  "proIntro": "{limit, plural, =1{The free version keeps up to 1 open plan. Pro removes the limit and adds:} other{The free version keeps up to {limit} open plans. Pro removes the limit and adds:}}",
   "@proIntro": {
     "placeholders": {
       "limit": {
@@ -1481,7 +1481,7 @@
   "settingsProFree": "Free",
   "settingsProOn": "Pro",
   "settingsProPending": "Waiting for approval",
-  "limitSheetBody": "The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.",
+  "limitSheetBody": "{limit, plural, =1{The free version keeps up to 1 open plan. You can add a new one when a plan finishes, or with Pro.} other{The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.}}",
   "@limitSheetBody": {
     "placeholders": {
       "limit": {
@@ -1671,7 +1671,7 @@
   "@calendarCellAllLate": {
     "description": "Screen reader: every payment of the day is late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin."
   },
-  "calendarCellSomeLate": "{count, plural, other{{count} late}}",
+  "calendarCellSomeLate": "{count, plural, one{{count} late} other{{count} late}}",
   "@calendarCellSomeLate": {
     "description": "Screen reader: some of the day's payments are late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.",
     "placeholders": {
@@ -1684,7 +1684,7 @@
   "@calendarCellAllPaid": {
     "description": "Screen reader: every payment of the day is paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin."
   },
-  "calendarCellSomePaid": "{count, plural, other{{count} paid}}",
+  "calendarCellSomePaid": "{count, plural, one{{count} paid} other{{count} paid}}",
   "@calendarCellSomePaid": {
     "description": "Screen reader: some of the day's payments are paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.",
     "placeholders": {

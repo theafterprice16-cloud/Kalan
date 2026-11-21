@@ -125,6 +125,23 @@ String amountInputExample(Currency currency, {required String localeName}) =>
       localeName: localeName,
     );
 
+/// [text] with what Arabic and Persian keyboards type (٠-٩, ۰-۹, ٫, ٬)
+/// as the app writes amounts: Western digits and [localeName]'s
+/// separators (Roadmap 24). Same length, so a cursor stays in place.
+String westernDigits(String text, {required String localeName}) {
+  if (!_easternInput.hasMatch(text)) return text;
+  final symbols = _symbols(localeName);
+  return text.replaceAllMapped(_easternInput, (m) {
+    final unit = m[0]!.codeUnitAt(0);
+    if (unit == 0x066B) return symbols.DECIMAL_SEP;
+    if (unit == 0x066C) return symbols.GROUP_SEP;
+    final zero = unit >= 0x06F0 ? 0x06F0 : 0x0660;
+    return '${unit - zero}';
+  });
+}
+
+final _easternInput = RegExp('[\u0660-\u0669\u066B\u066C\u06F0-\u06F9]');
+
 /// Whether an amount field may hold [text] while typing: digits, spaces
 /// and separators only; no decimal separator for currencies without minor
 /// digits (JPY) and at most [Currency.decimals] digits after it (three for
@@ -135,6 +152,7 @@ bool acceptsAmountInput(
   Currency currency, {
   required String localeName,
 }) {
+  text = westernDigits(text, localeName: localeName);
   if (!RegExp(r'^[0-9., ]*$').hasMatch(text)) return false;
   final decimalSep = _symbols(localeName).DECIMAL_SEP;
   final parts = text.split(decimalSep);
@@ -177,7 +195,7 @@ int? _parseAmount(
 ) {
   if (input.contains('-')) return null;
   // Symbols may hold separators ("B/.", "د.ك"); drop them first.
-  var text = input;
+  var text = westernDigits(input, localeName: localeName);
   for (final s in [
     currency.distinctiveSymbol,
     currency.symbol,

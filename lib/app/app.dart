@@ -40,6 +40,8 @@ class _KalanAppState extends ConsumerState<KalanApp> {
   @override
   void initState() {
     super.initState();
+    // Before Flutter's own date formats load (Arabic: 0-9, not ٠-٩).
+    useWesternDigits();
     _lifecycle = AppLifecycleListener(onResume: _onResume);
     _taps = notificationTaps.stream.listen(_onTap);
     // Pro: the saved state at once, the store checked in the background,

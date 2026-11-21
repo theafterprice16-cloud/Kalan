@@ -148,9 +148,9 @@ class ComingBar extends StatelessWidget {
           // too, but clear of the column's selection frame. Its top edge
           // is the income level: it never covers the part over income.
           if (g.incomeLine != null)
-            Positioned(
-              left: 0,
-              right: 0,
+            PositionedDirectional(
+              start: 0,
+              end: 0,
               bottom: math.max(0, g.incomeLine! - _line),
               height: _line,
               child: Center(

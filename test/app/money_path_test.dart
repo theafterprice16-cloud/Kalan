@@ -29,4 +29,25 @@ void main() {
     }
     expect(offenders, isEmpty);
   });
+
+  // Roadmap 24: dates and numbers read the intl locale (intlLocaleOf),
+  // never the generated localeName as is (zh_Hant would read zh's data).
+  test('dates and amounts use the intl locale', () {
+    final raw = RegExp(
+      r'(?<!intlLocaleOf\()\b(l10n|AppLocalizations\.of\(\w+\))\.localeName\b',
+    );
+    final offenders = <String>[];
+    for (final entity in Directory('lib').listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final path = entity.path.replaceAll(r'\', '/');
+      if (path.startsWith('lib/l10n/generated/')) continue;
+      final lines = entity.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        if (raw.hasMatch(lines[i])) offenders.add('$path:${i + 1}');
+      }
+    }
+    expect(offenders, isEmpty);
+    expect(raw.hasMatch('DateFormat.E(l10n.localeName)'), isTrue);
+    expect(raw.hasMatch('intlLocaleOf(l10n.localeName)'), isFalse);
+  });
 }
