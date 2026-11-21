@@ -781,10 +781,7 @@ void main() {
       );
       final plans = await db.select(db.plans).get();
       expect(plans, isNotEmpty);
-      expect(
-        plans.map((p) => p.productPriceMinor),
-        everyElement(equals(null)),
-      );
+      expect(plans.map((p) => p.productPriceMinor), everyElement(equals(null)));
       await db.close();
     },
   );

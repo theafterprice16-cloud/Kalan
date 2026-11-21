@@ -2349,7 +2349,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get installmentFeesLabel => 'Taksit ücretleri';
 
   @override
-  String get planTotalLabel => 'Toplam';
+  String get planTotalLabel => 'Toplam geri ödeme';
 
   @override
   String installmentFeeAffects(int count) {
@@ -2377,4 +2377,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String adjustFeesStay(String fees) {
     return 'Taksit ücretleri ($fees) aynı kalır.';
   }
+
+  @override
+  String get productPriceLabel => 'Ürün fiyatı';
+
+  @override
+  String get productPriceHelper => 'Peşin alsaydın ödeyeceğin fiyat.';
+
+  @override
+  String get priceDifferenceLabel => 'Fark';
 }

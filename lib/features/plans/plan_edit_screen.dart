@@ -18,6 +18,7 @@ import 'installment_fee_fields.dart';
 import 'interval_field.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
+import 'product_price_field.dart';
 
 /// "This plan is already underway", changed after the plan was added: the
 /// same switch and fields as on the add screen, filled in. Payments marked
@@ -54,9 +55,13 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
   final _fee = TextEditingController();
   InstallmentFeeScope _feeScope = InstallmentFeeScope.everyPayment;
 
+  /// Product price (23); empty is not entered.
+  final _price = TextEditingController();
+
   @override
   void dispose() {
     _fee.dispose();
+    _price.dispose();
     _paid.dispose();
     _count.dispose();
     _interval?.dispose();
@@ -78,6 +83,9 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     _feeScope = plan.plan.installmentFeeScope;
     if (plan.installmentFee case final fee?) {
       _fee.text = ref.moneyInput(context, fee);
+    }
+    if (plan.productPrice case final price?) {
+      _price.text = ref.moneyInput(context, price);
     }
   }
 
@@ -155,6 +163,7 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
     final messenger = ScaffoldMessenger.of(context);
     final tabs = ref.read(tabMessengersProvider);
     final fee = typedInstallmentFee(context, ref, _fee.text);
+    final price = typedProductPrice(context, ref, _price.text);
     final count = _underway ? _paidCount(plan) ?? 0 : 0;
     final back = plan.paidBefore.length - count;
     if (back > 0) {
@@ -194,6 +203,9 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
           interval: _interval?.interval,
           installmentFee: canHaveInstallmentFee(plan.plan.kind)
               ? (feeMinor: fee, scope: _feeScope)
+              : null,
+          productPrice: canHaveProductPrice(plan.plan.kind)
+              ? (priceMinor: price)
               : null,
         );
     if (rejected != null) {
@@ -361,8 +373,10 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                 onChargeSourceChanged: (id) =>
                     setState(() => _chargeSourceId = id),
               ),
-              // Fee per payment (22): never for card installments.
-              if (canHaveInstallmentFee(plan.plan.kind)) ...[
+              // Fee per payment (22, never for card installments) and
+              // product price (23, monthly, card and manual).
+              if (canHaveInstallmentFee(plan.plan.kind) ||
+                  canHaveProductPrice(plan.plan.kind)) ...[
                 const SizedBox(height: KalanSpace.xs),
                 _FeeSection(
                   plan: plan,
@@ -370,6 +384,9 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
                   scope: _feeScope,
                   onScopeChanged: (v) => setState(() => _feeScope = v),
                   onChanged: () => setState(() {}),
+                  priceController: canHaveProductPrice(plan.plan.kind)
+                      ? _price
+                      : null,
                 ),
               ],
               gap,
@@ -559,10 +576,12 @@ class _PayLaterEditState extends ConsumerState<_PayLaterEdit> {
   }
 }
 
-/// "More options" on the edit screens (22): the fee per payment, closed
-/// unless the plan has one. Says calmly how many unpaid payments the
-/// change touches, or that "first payment only" adds nothing because the
-/// first payment is paid. Paid payments never change.
+/// "More options" on the edit screens: the fee per payment (22) where the
+/// kind has one, then the product price (23) when [priceController] is
+/// given. Closed unless the plan has a fee or a price. Says calmly how many
+/// unpaid payments the fee change touches, or that "first payment only"
+/// adds nothing because the first payment is paid. Paid payments never
+/// change; the price changes no payment at all.
 class _FeeSection extends ConsumerWidget {
   const _FeeSection({
     required this.plan,
@@ -570,7 +589,11 @@ class _FeeSection extends ConsumerWidget {
     required this.scope,
     required this.onScopeChanged,
     required this.onChanged,
+    this.priceController,
   });
+
+  /// Product price (23); null where the kind has none.
+  final TextEditingController? priceController;
 
   final PlanWithPayments plan;
   final TextEditingController controller;
@@ -597,7 +620,9 @@ class _FeeSection extends ConsumerWidget {
     return ExpansionTile(
       key: const ValueKey('more-options'),
       title: Text(l10n.moreOptions),
-      initiallyExpanded: plan.installmentFee != null,
+      initiallyExpanded:
+          plan.installmentFee != null ||
+          (priceController != null && plan.productPrice != null),
       tilePadding: EdgeInsets.zero,
       // Room above the field, so its floating label is never cut off.
       childrenPadding: const EdgeInsets.only(
@@ -605,21 +630,30 @@ class _FeeSection extends ConsumerWidget {
         bottom: KalanSpace.xs,
       ),
       children: [
-        InstallmentFeeFields(
-          controller: controller,
-          scope: scope,
-          showScope: !plan.isPayLater,
-          // A paid "Pay later" keeps its fee, like its amount and date.
-          enabled: !(plan.isPayLater && plan.allPayments.first.isPaid),
-          onScopeChanged: onScopeChanged,
-          onChanged: onChanged,
-          notes: [
-            if (addsNothing)
-              ('installment-fee-first-paid', l10n.installmentFeeFirstPaid)
-            else if (changes > 0)
-              ('installment-fee-affects', l10n.installmentFeeAffects(changes)),
-          ],
-        ),
+        if (canHaveInstallmentFee(plan.plan.kind))
+          InstallmentFeeFields(
+            controller: controller,
+            scope: scope,
+            showScope: !plan.isPayLater,
+            // A paid "Pay later" keeps its fee, like its amount and date.
+            enabled: !(plan.isPayLater && plan.allPayments.first.isPaid),
+            onScopeChanged: onScopeChanged,
+            onChanged: onChanged,
+            notes: [
+              if (addsNothing)
+                ('installment-fee-first-paid', l10n.installmentFeeFirstPaid)
+              else if (changes > 0)
+                (
+                  'installment-fee-affects',
+                  l10n.installmentFeeAffects(changes),
+                ),
+            ],
+          ),
+        if (priceController case final price?) ...[
+          if (canHaveInstallmentFee(plan.plan.kind))
+            const SizedBox(height: KalanSpace.md),
+          ProductPriceField(controller: price, onChanged: onChanged),
+        ],
       ],
     );
   }

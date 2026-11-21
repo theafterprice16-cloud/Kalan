@@ -1620,6 +1620,145 @@ void main() {
         });
       }
 
+      // Product price (23): Putri's phone, IDR 12 × 580.000 from 10 Dec
+      // with a Rp6.000.000 price, entered as "Installment" (example 1);
+      // TRY 6 × 1.100,00 with a 10,00 fee per payment and a 6.000,00
+      // price (example 2, monthly: card installments take no fee, 22).
+      for (final (lang, locale, addPlan, monthly, installment, plansTab) in [
+        (
+          'tr',
+          const Locale('tr', 'TR'),
+          'Plan ekle',
+          'Aylık taksit',
+          'Taksit',
+          'Planlar',
+        ),
+        (
+          'en',
+          const Locale('en', 'US'),
+          'Add plan',
+          'Monthly installments',
+          'Installment',
+          'Plans',
+        ),
+      ]) {
+        Future<void> seedPriced(
+          AppDatabase db, {
+          required String currency,
+          required int installment,
+          required int count,
+          required int price,
+          int? fee,
+        }) async {
+          await seedSettings(db, currency: currency, payDay: 25);
+          final plans = PlanRepository(db);
+          await plans.saveDraft(
+            PlanCalculator.monthly(
+                  firstDate: LocalDate(2026, 12, 10),
+                  totalMinor: installment * count,
+                  count: count,
+                )
+                .withInstallmentFee(fee, InstallmentFeeScope.everyPayment)
+                .withProductPrice(price),
+            sourceId: await SourceRepository(
+              db,
+              plans,
+            ).findOrCreateProvider('Kredivo'),
+            origin: PlanOrigin.template,
+            title: 'Telefon',
+          );
+        }
+
+        testWidgets('add plan, product price, example 1, $lang', (
+          tester,
+        ) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedSettings(db, currency: 'IDR', payDay: 25),
+          );
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+          await tester.tap(find.widgetWithText(ChoiceChip, monthly));
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const ValueKey('source')),
+            'Kredivo',
+          );
+          final segment = find.descendant(
+            of: find.byKey(const ValueKey('amount-entry')),
+            matching: find.text(installment),
+          );
+          await tester.ensureVisible(segment);
+          await tester.pumpAndSettle();
+          await tester.tap(segment);
+          await tester.pumpAndSettle();
+          await tester.enterText(
+            find.byKey(const ValueKey('installment')),
+            '580000',
+          );
+          await tester.enterText(find.byKey(const ValueKey('count')), '12');
+          final details = find.byKey(const ValueKey('more-details'));
+          await scrollTo(tester, details);
+          await tester.tap(details);
+          await tester.pumpAndSettle();
+          final price = find.byKey(const ValueKey('product-price'));
+          await scrollTo(tester, price);
+          await tester.enterText(price, '6000000');
+          await tester.pumpAndSettle();
+          FocusManager.instance.primaryFocus?.unfocus();
+          await tester.pumpAndSettle();
+          await shoot(tester, '89-add-plan-price-$lang-$theme');
+          await scrollTo(
+            tester,
+            find.byKey(const ValueKey('preview-fee-summary')),
+          );
+          await shoot(tester, '90-add-plan-price-preview-$lang-$theme');
+        });
+
+        testWidgets('plan detail, product price, example 1, $lang', (
+          tester,
+        ) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedPriced(
+              db,
+              currency: 'IDR',
+              installment: 580000,
+              count: 12,
+              price: 6000000,
+            ),
+          );
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Telefon'));
+          await shoot(tester, '91-plan-detail-price-$lang-$theme');
+        });
+
+        testWidgets('plan detail, price and fee, example 2, $lang', (
+          tester,
+        ) async {
+          await start(
+            tester,
+            locale: locale,
+            today: feeToday,
+            seed: (db) => seedPriced(
+              db,
+              currency: 'TRY',
+              installment: 110000,
+              count: 6,
+              price: 600000,
+              fee: 1000,
+            ),
+          );
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Telefon'));
+          await shoot(tester, '92-plan-detail-price-fee-$lang-$theme');
+        });
+      }
+
       testWidgets('ios, change date', variant: ios, (tester) async {
         await start(
           tester,

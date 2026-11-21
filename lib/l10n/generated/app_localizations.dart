@@ -3133,10 +3133,10 @@ abstract class AppLocalizations {
   /// **'Payment fees'**
   String get installmentFeesLabel;
 
-  /// Plan summary row label: plan amount plus payment fees. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
+  /// Plan summary row label: every payment of the plan (paid, unpaid and paid before Kalan) with its fees per payment; extra fees added later are not in it. The one total row of the plan summary (22, 23). Display only; a plain number, never a judgement or a comparison. Never use the word 'interest'. (Yalnızca gösterim; hüküm ya da karşılaştırma yok. 'Faiz' kelimesini kullanma.)
   ///
   /// In en, this message translates to:
-  /// **'Total'**
+  /// **'Total you repay'**
   String get planTotalLabel;
 
   /// Calm line on the edit plan screen when the fee per payment change touches unpaid payments; paid payments never change. Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma. (A fixed fee of the plan, known from the start. A neutral field name; never a blaming or warning word.)
@@ -3168,6 +3168,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment fees ({fees}) stay the same.'**
   String adjustFeesStay(String fees);
+
+  /// Optional field under 'More details' / 'More options' of monthly, card and manual plans: the cash price of what was bought (23). Also a plan summary row label. Display only; a plain number, never a judgement or a comparison. Never use the word 'interest'. (Yalnızca gösterim; hüküm ya da karşılaştırma yok. 'Faiz' kelimesini kullanma.)
+  ///
+  /// In en, this message translates to:
+  /// **'Product price'**
+  String get productPriceLabel;
+
+  /// Muted helper under the 'Product price' field (23): the price if paid in one go, at purchase. Display only; a plain number, never a judgement or a comparison. Never use the word 'interest'. (Yalnızca gösterim; hüküm ya da karşılaştırma yok. 'Faiz' kelimesini kullanma.)
+  ///
+  /// In en, this message translates to:
+  /// **'What you\'d have paid up front.'**
+  String get productPriceHelper;
+
+  /// Toplam geri ödeme ile peşin fiyat arasındaki fark. 'Faiz' kelimesini kullanma; nötr bir kelime seç. Arapça gibi bazı pazarlarda 'faiz' hassas olabilir. (The difference between the total repaid and the cash price. Never use the word 'interest'; pick a neutral word. In some markets, such as Arabic ones, 'interest' can be sensitive.)
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get priceDifferenceLabel;
 }
 
 class _AppLocalizationsDelegate

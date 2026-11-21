@@ -2342,7 +2342,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get installmentFeesLabel => 'Payment fees';
 
   @override
-  String get planTotalLabel => 'Total';
+  String get planTotalLabel => 'Total you repay';
 
   @override
   String installmentFeeAffects(int count) {
@@ -2371,4 +2371,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String adjustFeesStay(String fees) {
     return 'Payment fees ($fees) stay the same.';
   }
+
+  @override
+  String get productPriceLabel => 'Product price';
+
+  @override
+  String get productPriceHelper => 'What you\'d have paid up front.';
+
+  @override
+  String get priceDifferenceLabel => 'Difference';
 }
