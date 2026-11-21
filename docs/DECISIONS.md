@@ -721,3 +721,25 @@ Yol Haritası 22. Açık sorular (alanın yeri, "yalnızca ilk taksit") ürün s
 | Ödenmiş "Sonra öde" (inceleme bulgusu) | Tutar ve tarih gibi ücret alanı da kilitli; ödenmiş ödeme kendi ücretini korur. |
 | Para birimi değişince | Planın ücreti ve her ödemenin ücreti ödeme tutarı gibi yeni ölçeğe taşınır, en az 1 küçük birim (testli). |
 | Metinler | Bütün yeni anahtarların çevirmen açıklamasında "Planın baştan bilinen, sabit ücreti. Nötr bir alan adı; suçlayıcı ya da uyarı veren bir kelime kullanma." notu. "This changes {count} unpaid payments." EN'de =1 dalıyla. |
+
+## Ürün fiyatı ve toplam geri ödeme (23) (21 Kasım 2026)
+
+Yol Haritası 23. Açık sorular (etiket, plan türleri) ve toplamın kapsamı ürün sahibi iş tanımında cevapladı (Karar 1-3); alanın yeri bağlayıcı kural (Karar 4); 5-12 iş tanımındaki kararlar; en alttakiler uygulama sırasında verilen kararlar.
+
+| Konu | Karar |
+|---|---|
+| Etiket (ürün sahibi, Karar 1) | "Fark" / "Difference". "Faiz" kelimesi hiçbir metinde yok; çevirmen açıklamasında bu kural ve Arapça pazar notu var. |
+| Türler (ürün sahibi, Karar 2) | Aylık taksit, kredi kartı taksidi, elle giriş (`canHaveProductPrice`). 4 ödemeli planda ve "Sonra öde"de alan yok; taslak türe göre fiyatı düşürür (`PlanDraft.withProductPrice`), depo da yazmaz. |
+| Toplam (ürün sahibi, Karar 3; Karar 5) | Toplam geri ödeme = saklanan bütün taksit tutarları (ödenmiş, ödenmemiş, "zaten sürüyor") + taksit başı ücretleri (22). Ek ücret (21) girmez. Saf Dart `totalRepaidMinor` ve `priceDifferenceOf` (`lib/core/engine/product_price.dart`, tablo testli); fark = toplam − fiyat, hepsi int. |
+| Yer (Karar 4) | Plan ekleme ekranında kapalı "Ayrıntı ekle" bölümünde "Taksit başı ücret"ten sonra (repoda ekleme ekranının bölümü bu; 22 de orada). Düzenleme ekranında "Daha fazla seçenek" içinde ücretten sonra; fiyatı olan planda bölüm açık gelir. Kart taksidi düzenlemesinde bu bölüm artık var (yalnızca fiyat alanı). Varsayılan ekleme görünümü değişmedi (golden 04 aynı). |
+| Görünürlük (Karar 6, 10) | "Ürün fiyatı" ve "Fark" satırları yalnızca fiyat girilmiş, fark sıfırdan büyük ve plan açıkken; beklemede ve kapatılmış planda yok (fiyat saklı kalır, yeniden açınca döner). Fiyat toplamdan büyük ya da eşitse kayıt yapılır, uyarı yok, satırlar gizli. |
+| Özet (Karar 7, 8) | 22'nin "Toplam" satırı "Toplam geri ödeme" / "Total you repay" oldu; tek toplam satırı. Plan ayrıntısında özet satırları ücret varsa ya da fark görünürse çıkar ve o zaman düz "Toplam …" satırı gizlenir; ikisi de yoksa ekran eskisi gibi. "Plan tutarı / Taksit ücretleri" yalnızca ücret varken. Önizlemede aynı satırlar. Etiketler textMuted, tutarlar text; accent, negative, late, chartCommitted yok. |
+| 8. madde ile uyum (Karar 9) | Taslak her iki yolda toplamla kurulduğu için toplam geri ödeme "Toplam" yolunda girilen toplam, "Taksit" yolunda taksit × sayıdır; fiyat ayrı alan. |
+| "Tutarı düzelt" (Karar 10) | Fark ödemelerden canlı hesaplanır; yeni taksitlerden hesaplanır, fiyat aynı kalır (testli). |
+| Veri (Karar 11) | Şema v18: `plans.product_price_minor` (boş olabilir, 1 ve üstü). Göçte boş; tutar, tarih, ücret ve dönem değişmez (göç testi). Repoda yedek ya da dışa aktarma yok; 29-30. maddeler bu alanı eklemeli. Düzenlemede `editPlan(productPrice:)` aynı işlem içinde yazar; reddedilen düzenlemede fiyat da geri alınır. |
+| Giriş (Karar 12) | Uygulamanın para giriş yolu; boş ya da sıfır "girilmedi". |
+| Para birimi değişince | Fiyat, ücret gibi yeni ölçeğe taşınır, en az 1 küçük birim (testli). |
+| Eski "yarıda başlayan" planlar (uygulama kararı) | İlk taksitleri hiç saklanmamış eski planlarda (ilk sıra 1 değil) satırlar gösterilmez; bu planların düzenleme düğmesi zaten yok. |
+| Ücretli "Sonra öde" (uygulama kararı) | Özetin toplam satırı orada da "Toplam geri ödeme" der (aynı satır); fiyat alanı yok. |
+| Örnek 2 (uygulama kararı) | Kart taksidinde taksit başı ücret yok (22, Karar 3); örnek 2'nin ücretli hâli aylık taksitle test edildi ve golden 92'de. Kartta fiyat ve fark ücretsiz toplamla çalışır. |
+| Yardım metni | TR "Peşin alsaydın ödeyeceğin fiyat.", EN "What you'd have paid up front." |

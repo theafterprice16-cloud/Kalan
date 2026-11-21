@@ -49,13 +49,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 22. Taksit başı ücret (20 Kasım 2026): plan ekleme ekranında "Ayrıntı ekle" altında, düzenleme ekranlarında kapalı "Daha fazla seçenek" altında "Taksit başı ücret" (boş ya da sıfır: ücret yok) ve ücret yazılınca "Her taksitte" (varsayılan) / "Yalnızca ilk taksitte"; "Sonra öde"de seçim yok; kart taksitlerinde alan yok; ücret her ödemeye ayrıca yazılır, yalnızca ödenmemiş taksitler değişir, "zaten sürüyor" taksitleri ücret almaz; ilk taksit ödenmişken "yalnızca ilk" hiçbir şeye eklenmez ve sakin bir satırla söylenir; satırlarda ücret dahil tutar ve "{fee} taksit ücreti dahil"; önizleme ve plan kartında "Plan tutarı / Taksit ücretleri / Toplam"; Ödenecek tutar ücret dahil; ücret dönem toplamına, kalana, ileriki dönemlere, takvim gün toplamına, yoğun haftaya, hazır tutulacak tutara ve hatırlatma tutarına girer (ek ücretle aynı tek noktada); "Tutarı düzelt" ücreti korur; şema v17
 
+- 23. Faizli planlarda toplam geri ödeme (21 Kasım 2026): aylık taksit, kart taksidi ve elle girişte "Ayrıntı ekle" / "Daha fazla seçenek" altında isteğe bağlı "Ürün fiyatı" ("Peşin alsaydın ödeyeceğin fiyat."); plan özetinde tek "Toplam geri ödeme" satırı (22'nin "Toplam"ı), altında "Ürün fiyatı" ve "Fark" yalnızca fark sıfırdan büyükken ve plan açıkken; önizlemede de; toplam bütün taksitler + taksit başı ücret, ek ücret hariç; yalnızca gösterim, kalan, dönem ve bildirim değişmez; para birimi değişince fiyat ölçeklenir; şema v18
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 23. maddeden devam (liste: `kalan_kaynak.py liste`)
+- 24. maddeden devam (liste: `kalan_kaynak.py liste`)
 
 ## Yarım kalan
 
