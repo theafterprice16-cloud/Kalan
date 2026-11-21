@@ -272,9 +272,9 @@ class ComingPeriodsChart extends ConsumerWidget {
         // Every column shows full amounts when all of them fit ("-1.200"),
         // otherwise short ones ("-1,2 B"), so the row never mixes the
         // two. A column is never narrower than one of them on one line:
-        // some languages write the short one wider ("26,8 тыс. ₺",
-        // "26.8 ألف ₺"); then the column grows and the row scrolls. Type
-        // is never made smaller.
+        // some languages write the short one wider (Russian "тыс.",
+        // Arabic "ألف" for thousands); then the column grows and the row
+        // scrolls. Type is never made smaller.
         final fullNeed =
             _widestAmount(context, ref, short: false) + _amountRoom;
         // The column's own padding only: a short amount may reach the
