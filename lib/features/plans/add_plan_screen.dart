@@ -20,6 +20,7 @@ import 'installment_fee_fields.dart';
 import 'interval_field.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
+import 'product_price_field.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
 /// four fields. Any of them can be "already underway". "Pay later" is one
@@ -75,6 +76,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   /// Fee per payment (22), under "More details"; empty is no fee.
   final _fee = TextEditingController();
+
+  /// Product price (23); empty is not entered.
+  final _price = TextEditingController();
   InstallmentFeeScope _feeScope = InstallmentFeeScope.everyPayment;
 
   AddMode _mode = AddMode.payIn4;
@@ -173,6 +177,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
       _defer,
       _title,
       _fee,
+      _price,
     ]) {
       c.dispose();
     }
@@ -294,12 +299,25 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   bool get _nextDateSuggested =>
       _mode == AddMode.card && _cardTerms != null && !_nextDateTouched;
 
-  /// The draft for the current inputs with the fee per payment (22), or
-  /// null while incomplete.
-  PlanDraft? _buildDraft() => _baseDraft()?.withInstallmentFee(
-    typedInstallmentFee(context, ref, _fee.text),
-    _feeScope,
-  );
+  /// The draft for the current inputs with the fee per payment (22) and
+  /// the product price (23), or null while incomplete. A kind without a
+  /// price drops it ([PlanDraft.withProductPrice]).
+  PlanDraft? _buildDraft() => _baseDraft()
+      ?.withInstallmentFee(
+        typedInstallmentFee(context, ref, _fee.text),
+        _feeScope,
+      )
+      .withProductPrice(typedProductPrice(context, ref, _price.text));
+
+  /// Monthly installments, card installments and manual entry (23): the
+  /// rule lives in [canHaveProductPrice].
+  bool get _hasProductPrice => canHaveProductPrice(switch (_mode) {
+    AddMode.payIn4 => PlanKind.payIn4,
+    AddMode.monthly => PlanKind.monthly,
+    AddMode.card => PlanKind.card,
+    AddMode.manual => PlanKind.manual,
+    AddMode.payLater => PlanKind.payLater,
+  });
 
   PlanDraft? _baseDraft() {
     try {
@@ -992,6 +1010,14 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             ],
           ),
         ],
+        // Product price (23): after the fee per payment; not for "Pay in 4"
+        // or "Pay later".
+        if (_hasProductPrice) ...[
+          // Room under the field or switch above (the fee's helper, or the
+          // cash advance switch on cards).
+          const SizedBox(height: KalanSpace.md),
+          ProductPriceField(controller: _price, onChanged: _refresh),
+        ],
         const SizedBox(height: KalanSpace.xs),
         PaymentMethodFields(
           method: _paymentMethod,
@@ -1180,12 +1206,15 @@ class _Preview extends ConsumerWidget {
                     ),
                   ),
                 ),
-              if (d.installmentFeesMinor > 0) ...[
+              // Fees per payment (22) and the product price (23): one
+              // "Total you repay" row.
+              if (d.installmentFeesMinor > 0 || d.priceDifference != null) ...[
                 const SizedBox(height: KalanSpace.xs),
                 InstallmentFeeSummary(
                   key: const ValueKey('preview-fee-summary'),
                   planMinor: d.totalMinor,
                   feesMinor: d.installmentFeesMinor,
+                  price: d.priceDifference,
                 ),
               ],
               const SizedBox(height: KalanSpace.xs),

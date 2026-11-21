@@ -39,6 +39,8 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 - ~~**Ek ücret kaydı**~~ Tamamlandı (20 Kasım 2026, yol haritası 21): bir ödemeye sağlayıcının eklediği tek seferlik ücreti elle kaydetme (tutar ve isteğe bağlı kısa not); geciken satırda "Ek ücret ekle", diğer ödemelerde işlem listesinde; ücret ödemenin sayıldığı dönemin söz verilmiş tutarına ve hatırlatma tutarına girer; plan toplamına ve kart ekstresine girmez; silmede "Geri al". Ücretsiz. Kapsam dışı: ücret hesaplama ya da önerme, gecikme faizi, yıllık toplam, sabit ödemelere ücret.
 - ~~**Taksit başı ücret**~~ Tamamlandı (20 Kasım 2026, yol haritası 22): planın her taksitte (ya da yalnızca ilk taksitte) aldığı sabit ücret; plan ekleme ve düzenlemede kapalı bölümde, varsayılan boş; kart taksitlerinde yok; ücret yalnızca ödenmemiş taksitlere yazılır, ödenmişler kendi ücretini korur; taksit satırında ücret dahil tutar ve "taksit ücreti dahil" notu; plan özetinde "Plan tutarı / Taksit ücretleri / Toplam"; ücret dönem toplamına, kalana ve hatırlatma tutarına girer. Ücretsiz. Kapsam dışı: yüzdeli ücret ve faiz (23).
 
+- ~~**Faizli planlarda toplam geri ödeme**~~ Tamamlandı (21 Kasım 2026, yol haritası 23): aylık taksit, kart taksidi ve elle girişte isteğe bağlı "Ürün fiyatı" (kapalı bölümde); plan özetinde tek "Toplam geri ödeme" satırı, altında "Ürün fiyatı" ve "Fark" (yalnızca fark sıfırdan büyükken, açık planda); taslak önizlemesinde de; yalnızca gösterim, kalan, dönem ve bildirim değişmez; faiz oranı sorulmaz. Ücretsiz.
+
 ## Notlar
 
 - Tutar gösteren her yeni yer (bildirim, widget, dışa aktarma) `formatMoney` kullanır; dışa aktarma ham tam sayı tutarı ve para birimi kodunu yazar.

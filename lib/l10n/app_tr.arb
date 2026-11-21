@@ -501,10 +501,13 @@
   "installmentFeeIncluded": "{fee} taksit ücreti dahil",
   "planAmountLabel": "Plan tutarı",
   "installmentFeesLabel": "Taksit ücretleri",
-  "planTotalLabel": "Toplam",
+  "planTotalLabel": "Toplam geri ödeme",
   "installmentFeeAffects": "{count, plural, other{Bu değişiklik ödenmemiş {count} taksiti etkiler.}}",
   "installmentFeeFirstPaid": "İlk taksit ödendiği için ücret hiçbir taksite eklenmez.",
   "moreOptions": "Daha fazla seçenek",
   "installmentFeeOnTop": "{fee} taksit ücreti bu tutara ayrıca eklenir.",
-  "adjustFeesStay": "Taksit ücretleri ({fees}) aynı kalır."
+  "adjustFeesStay": "Taksit ücretleri ({fees}) aynı kalır.",
+  "productPriceLabel": "Ürün fiyatı",
+  "productPriceHelper": "Peşin alsaydın ödeyeceğin fiyat.",
+  "priceDifferenceLabel": "Fark"
 }

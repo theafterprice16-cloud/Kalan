@@ -103,18 +103,25 @@ class InstallmentFeeFields extends ConsumerWidget {
   }
 }
 
-/// "Plan amount / Payment fees / Total" (22): shown only when the plan
-/// has fees per payment. Labels textMuted, amounts text; no accent, no
-/// warning (the fee is a known part of the plan).
+/// The plan summary rows: "Plan amount / Payment fees" when the plan has
+/// fees per payment (22), the one "Total you repay" row, and "Product
+/// price / Difference" when [price] is shown (23). Shown only when there
+/// is a fee or a price to show; otherwise screens keep their plain "Total"
+/// line. Labels textMuted, amounts text; no accent, no warning, no
+/// judgement (the fee and the price are known parts of the plan).
 class InstallmentFeeSummary extends ConsumerWidget {
   const InstallmentFeeSummary({
     required this.planMinor,
     required this.feesMinor,
+    this.price,
     super.key,
   });
 
   final int planMinor;
   final int feesMinor;
+
+  /// "Product price" and "Difference" (23); null hides both rows.
+  final PriceDifference? price;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -142,9 +149,23 @@ class InstallmentFeeSummary extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        row('fee-summary-plan', l10n.planAmountLabel, planMinor),
-        row('fee-summary-fees', l10n.installmentFeesLabel, feesMinor),
+        if (feesMinor > 0) ...[
+          row('fee-summary-plan', l10n.planAmountLabel, planMinor),
+          row('fee-summary-fees', l10n.installmentFeesLabel, feesMinor),
+        ],
         row('fee-summary-total', l10n.planTotalLabel, planMinor + feesMinor),
+        if (price case final price?) ...[
+          row(
+            'price-summary-price',
+            l10n.productPriceLabel,
+            price.productPriceMinor,
+          ),
+          row(
+            'price-summary-difference',
+            l10n.priceDifferenceLabel,
+            price.differenceMinor,
+          ),
+        ],
       ],
     );
   }

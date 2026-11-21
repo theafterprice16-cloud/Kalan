@@ -914,6 +914,20 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
       ).withConverter<InstallmentFeeScope>(
         $PlansTable.$converterinstallmentFeeScope,
       );
+  static const VerificationMeta _productPriceMinorMeta = const VerificationMeta(
+    'productPriceMinor',
+  );
+  @override
+  late final GeneratedColumn<int> productPriceMinor = GeneratedColumn<int>(
+    'product_price_minor',
+    aliasedName,
+    true,
+    check: () =>
+        productPriceMinor.isNull() |
+        ComparableExpr(productPriceMinor).isBiggerOrEqualValue(1),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -942,6 +956,7 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
     closedDay,
     installmentFeeMinor,
     installmentFeeScope,
+    productPriceMinor,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1101,6 +1116,15 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
         ),
       );
     }
+    if (data.containsKey('product_price_minor')) {
+      context.handle(
+        _productPriceMinorMeta,
+        productPriceMinor.isAcceptableOrUnknown(
+          data['product_price_minor']!,
+          _productPriceMinorMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1230,6 +1254,10 @@ class $PlansTable extends Plans with TableInfo<$PlansTable, PlanRow> {
           data['${effectivePrefix}installment_fee_scope'],
         )!,
       ),
+      productPriceMinor: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}product_price_minor'],
+      ),
     );
   }
 
@@ -1345,6 +1373,12 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   /// Which payments take the fee: every payment unless "first payment
   /// only" is chosen. Always every payment for "Pay later".
   final InstallmentFeeScope installmentFeeScope;
+
+  /// The product's cash price as typed (schema v18, 23): what the user
+  /// would have paid up front. Display only, never part of any total,
+  /// period or reminder. Empty when not entered; only on monthly, card and
+  /// manual plans ([canHaveProductPrice]).
+  final int? productPriceMinor;
   const PlanRow({
     required this.id,
     this.sourceId,
@@ -1372,6 +1406,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     this.closedDay,
     this.installmentFeeMinor,
     required this.installmentFeeScope,
+    this.productPriceMinor,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1456,6 +1491,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         $PlansTable.$converterinstallmentFeeScope.toSql(installmentFeeScope),
       );
     }
+    if (!nullToAbsent || productPriceMinor != null) {
+      map['product_price_minor'] = Variable<int>(productPriceMinor);
+    }
     return map;
   }
 
@@ -1519,6 +1557,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ? const Value.absent()
           : Value(installmentFeeMinor),
       installmentFeeScope: Value(installmentFeeScope),
+      productPriceMinor: productPriceMinor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(productPriceMinor),
     );
   }
 
@@ -1572,6 +1613,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       installmentFeeScope: $PlansTable.$converterinstallmentFeeScope.fromJson(
         serializer.fromJson<String>(json['installmentFeeScope']),
       ),
+      productPriceMinor: serializer.fromJson<int?>(json['productPriceMinor']),
     );
   }
   @override
@@ -1620,6 +1662,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       'installmentFeeScope': serializer.toJson<String>(
         $PlansTable.$converterinstallmentFeeScope.toJson(installmentFeeScope),
       ),
+      'productPriceMinor': serializer.toJson<int?>(productPriceMinor),
     };
   }
 
@@ -1650,6 +1693,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     Value<int?> closedDay = const Value.absent(),
     Value<int?> installmentFeeMinor = const Value.absent(),
     InstallmentFeeScope? installmentFeeScope,
+    Value<int?> productPriceMinor = const Value.absent(),
   }) => PlanRow(
     id: id ?? this.id,
     sourceId: sourceId.present ? sourceId.value : this.sourceId,
@@ -1687,6 +1731,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
         ? installmentFeeMinor.value
         : this.installmentFeeMinor,
     installmentFeeScope: installmentFeeScope ?? this.installmentFeeScope,
+    productPriceMinor: productPriceMinor.present
+        ? productPriceMinor.value
+        : this.productPriceMinor,
   );
   PlanRow copyWithCompanion(PlansCompanion data) {
     return PlanRow(
@@ -1752,6 +1799,9 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
       installmentFeeScope: data.installmentFeeScope.present
           ? data.installmentFeeScope.value
           : this.installmentFeeScope,
+      productPriceMinor: data.productPriceMinor.present
+          ? data.productPriceMinor.value
+          : this.productPriceMinor,
     );
   }
 
@@ -1783,7 +1833,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           ..write('reopenedDay: $reopenedDay, ')
           ..write('closedDay: $closedDay, ')
           ..write('installmentFeeMinor: $installmentFeeMinor, ')
-          ..write('installmentFeeScope: $installmentFeeScope')
+          ..write('installmentFeeScope: $installmentFeeScope, ')
+          ..write('productPriceMinor: $productPriceMinor')
           ..write(')'))
         .toString();
   }
@@ -1816,6 +1867,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
     closedDay,
     installmentFeeMinor,
     installmentFeeScope,
+    productPriceMinor,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1846,7 +1898,8 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
           other.reopenedDay == this.reopenedDay &&
           other.closedDay == this.closedDay &&
           other.installmentFeeMinor == this.installmentFeeMinor &&
-          other.installmentFeeScope == this.installmentFeeScope);
+          other.installmentFeeScope == this.installmentFeeScope &&
+          other.productPriceMinor == this.productPriceMinor);
 }
 
 class PlansCompanion extends UpdateCompanion<PlanRow> {
@@ -1876,6 +1929,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
   final Value<int?> closedDay;
   final Value<int?> installmentFeeMinor;
   final Value<InstallmentFeeScope> installmentFeeScope;
+  final Value<int?> productPriceMinor;
   const PlansCompanion({
     this.id = const Value.absent(),
     this.sourceId = const Value.absent(),
@@ -1903,6 +1957,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.closedDay = const Value.absent(),
     this.installmentFeeMinor = const Value.absent(),
     this.installmentFeeScope = const Value.absent(),
+    this.productPriceMinor = const Value.absent(),
   });
   PlansCompanion.insert({
     this.id = const Value.absent(),
@@ -1931,6 +1986,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     this.closedDay = const Value.absent(),
     this.installmentFeeMinor = const Value.absent(),
     this.installmentFeeScope = const Value.absent(),
+    this.productPriceMinor = const Value.absent(),
   }) : kind = Value(kind),
        installmentCount = Value(installmentCount),
        origin = Value(origin);
@@ -1961,6 +2017,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Expression<int>? closedDay,
     Expression<int>? installmentFeeMinor,
     Expression<String>? installmentFeeScope,
+    Expression<int>? productPriceMinor,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1991,6 +2048,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
         'installment_fee_minor': installmentFeeMinor,
       if (installmentFeeScope != null)
         'installment_fee_scope': installmentFeeScope,
+      if (productPriceMinor != null) 'product_price_minor': productPriceMinor,
     });
   }
 
@@ -2021,6 +2079,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
     Value<int?>? closedDay,
     Value<int?>? installmentFeeMinor,
     Value<InstallmentFeeScope>? installmentFeeScope,
+    Value<int?>? productPriceMinor,
   }) {
     return PlansCompanion(
       id: id ?? this.id,
@@ -2049,6 +2108,7 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
       closedDay: closedDay ?? this.closedDay,
       installmentFeeMinor: installmentFeeMinor ?? this.installmentFeeMinor,
       installmentFeeScope: installmentFeeScope ?? this.installmentFeeScope,
+      productPriceMinor: productPriceMinor ?? this.productPriceMinor,
     );
   }
 
@@ -2151,6 +2211,9 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
         ),
       );
     }
+    if (productPriceMinor.present) {
+      map['product_price_minor'] = Variable<int>(productPriceMinor.value);
+    }
     return map;
   }
 
@@ -2182,7 +2245,8 @@ class PlansCompanion extends UpdateCompanion<PlanRow> {
           ..write('reopenedDay: $reopenedDay, ')
           ..write('closedDay: $closedDay, ')
           ..write('installmentFeeMinor: $installmentFeeMinor, ')
-          ..write('installmentFeeScope: $installmentFeeScope')
+          ..write('installmentFeeScope: $installmentFeeScope, ')
+          ..write('productPriceMinor: $productPriceMinor')
           ..write(')'))
         .toString();
   }
@@ -5913,6 +5977,7 @@ typedef $$PlansTableCreateCompanionBuilder = PlansCompanion Function({
   Value<int?> closedDay,
   Value<int?> installmentFeeMinor,
   Value<InstallmentFeeScope> installmentFeeScope,
+  Value<int?> productPriceMinor,
 });
 typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int> id,
@@ -5941,6 +6006,7 @@ typedef $$PlansTableUpdateCompanionBuilder = PlansCompanion Function({
   Value<int?> closedDay,
   Value<int?> installmentFeeMinor,
   Value<InstallmentFeeScope> installmentFeeScope,
+  Value<int?> productPriceMinor,
 });
 
 final class $$PlansTableReferences
@@ -6138,6 +6204,11 @@ class $$PlansTableFilterComposer extends Composer<_$AppDatabase, $PlansTable> {
   get installmentFeeScope => $composableBuilder(
     column: $table.installmentFeeScope,
     builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get productPriceMinor => $composableBuilder(
+    column: $table.productPriceMinor,
+    builder: (column) => ColumnFilters(column),
   );
 
   $$SourcesTableFilterComposer get sourceId {
@@ -6341,6 +6412,11 @@ class $$PlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get productPriceMinor => $composableBuilder(
+    column: $table.productPriceMinor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$SourcesTableOrderingComposer get sourceId {
     final $$SourcesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6508,6 +6584,11 @@ class $$PlansTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get productPriceMinor => $composableBuilder(
+    column: $table.productPriceMinor,
+    builder: (column) => column,
+  );
+
   $$SourcesTableAnnotationComposer get sourceId {
     final $$SourcesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -6639,6 +6720,7 @@ class $$PlansTableTableManager
                 Value<int?> installmentFeeMinor = const Value.absent(),
                 Value<InstallmentFeeScope> installmentFeeScope =
                     const Value.absent(),
+                Value<int?> productPriceMinor = const Value.absent(),
               }) => PlansCompanion(
                 id: id,
                 sourceId: sourceId,
@@ -6666,6 +6748,7 @@ class $$PlansTableTableManager
                 closedDay: closedDay,
                 installmentFeeMinor: installmentFeeMinor,
                 installmentFeeScope: installmentFeeScope,
+                productPriceMinor: productPriceMinor,
               ),
           createCompanionCallback:
               ({
@@ -6696,6 +6779,7 @@ class $$PlansTableTableManager
                 Value<int?> installmentFeeMinor = const Value.absent(),
                 Value<InstallmentFeeScope> installmentFeeScope =
                     const Value.absent(),
+                Value<int?> productPriceMinor = const Value.absent(),
               }) => PlansCompanion.insert(
                 id: id,
                 sourceId: sourceId,
@@ -6723,6 +6807,7 @@ class $$PlansTableTableManager
                 closedDay: closedDay,
                 installmentFeeMinor: installmentFeeMinor,
                 installmentFeeScope: installmentFeeScope,
+                productPriceMinor: productPriceMinor,
               ),
           withReferenceMapper: (p0) => p0
               .map(

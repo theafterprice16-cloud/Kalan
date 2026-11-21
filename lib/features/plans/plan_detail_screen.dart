@@ -89,6 +89,10 @@ class PlanDetailScreen extends ConsumerWidget {
         ? plan.paidWithFeesMinor
         : plan.remainingWithFeesMinor;
     final fees = plan.installmentFeesMinor;
+    // "Product price / Difference" (23): open plans only, above zero.
+    final price = plan.priceDifference;
+    // One total row: the summary rows replace the plain "Total" line.
+    final summary = fees > 0 || price != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -221,8 +225,9 @@ class PlanDetailScreen extends ConsumerWidget {
                             paid: plan.paidCount,
                             total: plan.plan.installmentCount,
                           ),
-                        // With fees per payment (22): the three rows below.
-                        if (fees == 0)
+                        // With fees per payment (22) or a product price
+                        // (23): the summary rows below.
+                        if (!summary)
                           Text(
                             l10n.planTotal(ref.money(context, plan.totalMinor)),
                           ),
@@ -236,13 +241,15 @@ class PlanDetailScreen extends ConsumerWidget {
                           ),
                       ],
                     ),
-                    // "Plan amount / Payment fees / Total" (22).
-                    if (fees > 0) ...[
+                    // "Plan amount / Payment fees" (22), "Total you repay",
+                    // "Product price / Difference" (23).
+                    if (summary) ...[
                       const SizedBox(height: KalanSpace.xs),
                       InstallmentFeeSummary(
                         key: const ValueKey('plan-fee-summary'),
                         planMinor: plan.totalMinor,
                         feesMinor: fees,
+                        price: price,
                       ),
                     ],
                     // Fees on this plan's payments (21): beside its total,

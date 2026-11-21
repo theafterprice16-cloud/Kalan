@@ -54,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -228,6 +228,11 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(schema.plans, schema.plans.installmentFeeMinor);
         await m.addColumn(schema.plans, schema.plans.installmentFeeScope);
         await m.addColumn(schema.payments, schema.payments.installmentFeeMinor);
+      },
+      // v18: a plan's product price (23), display only. Empty for every
+      // existing plan; no date, amount or period changes.
+      from17To18: (m, schema) async {
+        await m.addColumn(schema.plans, schema.plans.productPriceMinor);
       },
     ),
     beforeOpen: (details) async {
