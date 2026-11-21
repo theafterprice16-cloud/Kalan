@@ -191,7 +191,7 @@ void main() {
   });
 
   testWidgets('example 3: "Total" entry in TRY', (tester) async {
-    await pumpTall(tester, seed: (db) => seedSettings(db));
+    await pumpTall(tester, seed: seedSettings);
     await openAdd(tester, 'Aylık taksit');
     await tester.enterText(find.byKey(const ValueKey('source')), 'Banka');
     await tester.enterText(find.byKey(const ValueKey('total')), '12000');
