@@ -4,7 +4,6 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/app.dart';
@@ -31,41 +30,8 @@ import '../helpers/calendar_seed.dart';
 import '../helpers/charge_seed.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
+import '../helpers/fonts.dart';
 import '../helpers/statement_seed.dart';
-
-/// Real fonts from the Flutter SDK so screenshots are readable.
-Future<void> loadFonts() async {
-  var dir = File(Platform.resolvedExecutable).parent;
-  Directory? fonts;
-  for (var i = 0; i < 8 && fonts == null; i++) {
-    final candidate = Directory(
-      '${dir.path}/bin/cache/artifacts/material_fonts',
-    );
-    if (candidate.existsSync()) fonts = candidate;
-    final env = Platform.environment['FLUTTER_ROOT'];
-    if (fonts == null && env != null) {
-      final fromEnv = Directory('$env/bin/cache/artifacts/material_fonts');
-      if (fromEnv.existsSync()) fonts = fromEnv;
-    }
-    dir = dir.parent;
-  }
-  if (fonts == null) return;
-  Future<void> family(String name, List<String> files) async {
-    final loader = FontLoader(name);
-    for (final f in files) {
-      final bytes = File('${fonts!.path}/$f').readAsBytesSync();
-      loader.addFont(Future.value(ByteData.sublistView(bytes)));
-    }
-    await loader.load();
-  }
-
-  const roboto = ['Roboto-Regular.ttf', 'Roboto-Medium.ttf', 'Roboto-Bold.ttf'];
-  await family('Roboto', roboto);
-  // iOS text styles ask for the system font; Roboto stands in for it.
-  await family('CupertinoSystemText', roboto);
-  await family('CupertinoSystemDisplay', roboto);
-  await family('MaterialIcons', ['MaterialIcons-Regular.otf']);
-}
 
 /// A plan with a past unpaid payment (overdue), a card plan, rent.
 Future<void> seedRich(AppDatabase db, {required int? incomeMinor}) async {

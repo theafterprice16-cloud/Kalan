@@ -287,10 +287,13 @@ class OverdueBadge extends StatelessWidget {
       children: [
         Icon(Icons.schedule, size: 16, color: late),
         const SizedBox(width: 4),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium
-              ?.copyWith(color: late, fontWeight: FontWeight.w600),
+        // Wraps in a narrow column (longer languages, large text).
+        Flexible(
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: late, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );
