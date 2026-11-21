@@ -20,6 +20,12 @@ import 'providers.dart';
 
 export 'locale.dart';
 
+/// The app's texts; tests swap in longer ones (pseudo-localization).
+final appLocalizationsDelegateProvider =
+    Provider<LocalizationsDelegate<AppLocalizations>>(
+      (ref) => AppLocalizations.delegate,
+    );
+
 class KalanApp extends ConsumerStatefulWidget {
   const KalanApp({super.key});
 
@@ -112,17 +118,23 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     final localeCode = ref.watch(
       settingsProvider.select((s) => s.value?.localeCode),
     );
+    final locales = ref.watch(appLocalesProvider);
+    // The picked language when it is open; otherwise the phone's, matched
+    // to the reviewed locales only (a closed one is never shown).
+    final chosen = chosenLocale(localeCode, locales);
+    final locale = chosen == null ? null : localeOf(chosen);
     return MaterialApp.router(
       routerConfig: router,
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: KalanTheme.light(),
       darkTheme: KalanTheme.dark(),
       themeMode: ref.watch(themeModeProvider),
-      locale: localeCode == null ? null : Locale(localeCode),
-      localeResolutionCallback: resolveLocale,
+      locale: locale,
+      localeResolutionCallback: (device, _) =>
+          locale ?? resolveLocale(device, locales),
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
+      localizationsDelegates: [
+        ref.watch(appLocalizationsDelegateProvider),
         ...GlobalMaterialLocalizations.delegates,
       ],
       debugShowCheckedModeBanner: false,

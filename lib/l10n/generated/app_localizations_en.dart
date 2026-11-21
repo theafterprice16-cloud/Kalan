@@ -523,10 +523,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageSystem => 'System language';
 
   @override
-  String get languageTurkish => 'Türkçe';
-
-  @override
-  String get languageEnglish => 'English';
+  String get languageDraft => 'Draft';
 
   @override
   String get settingsCurrency => 'Currency';
@@ -2380,4 +2377,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceDifferenceLabel => 'Difference';
+}
+
+/// The translations for English, as used in the United Kingdom (`en_GB`).
+class AppLocalizationsEnGb extends AppLocalizationsEn {
+  AppLocalizationsEnGb() : super('en_GB');
 }

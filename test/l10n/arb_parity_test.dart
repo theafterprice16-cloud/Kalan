@@ -39,15 +39,6 @@ void main() {
     }
   });
 
-  test('only Turkish and English ship', () {
-    final files = Directory('lib/l10n')
-        .listSync()
-        .map((e) => e.uri.pathSegments.last)
-        .where((n) => n.endsWith('.arb'))
-        .toSet();
-    expect(files, {'app_en.arb', 'app_tr.arb'});
-  });
-
   test('every currency has a name in both languages', () {
     for (final m in [en, tr]) {
       final message = m['currencyName'] as String;

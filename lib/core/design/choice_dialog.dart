@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../theme/kalan_theme.dart';
 import 'kalan_dialog.dart';
 
 /// A picked value, so a null pick can be told apart from "dismissed".
@@ -17,12 +18,16 @@ class ChoiceDialog<T> extends StatelessWidget {
     required this.options,
     super.key,
     this.note,
+    this.notes = const {},
   });
 
   final String title;
   final T selected;
   final List<(T, String)> options;
   final String? note;
+
+  /// A small muted word beside an option's label ("Draft").
+  final Map<T, String> notes;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +45,21 @@ class ChoiceDialog<T> extends StatelessWidget {
             child: ListTile(
               key: ValueKey('choice-$value'),
               minTileHeight: 48,
-              title: Text(label),
+              title: notes[value] == null
+                  ? Text(label)
+                  : Text.rich(
+                      TextSpan(
+                        text: label,
+                        children: [
+                          const TextSpan(text: '  '),
+                          TextSpan(
+                            text: notes[value],
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: context.colors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
               trailing: value == selected ? const Icon(Icons.check) : null,
               onTap: () => Navigator.pop(context, Choice<T>(value)),
             ),

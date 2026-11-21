@@ -518,10 +518,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get languageSystem => 'Sistem dili';
 
   @override
-  String get languageTurkish => 'Türkçe';
-
-  @override
-  String get languageEnglish => 'English';
+  String get languageDraft => 'Taslak';
 
   @override
   String get settingsCurrency => 'Para birimi';

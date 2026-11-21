@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/app/locale.dart';
 import 'package:kalan/core/theme/kalan_theme.dart';
 import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:material_ui/material_ui.dart';
@@ -17,6 +18,85 @@ void main() {
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Settings'), findsWidgets);
     expect((await db.select(db.appSettings).getSingle()).localeCode, 'en');
+  });
+
+  // Roadmap 24: only open locales, each in its own words; a draft one
+  // carries a muted "Taslak" note; a closed one is nowhere.
+  testWidgets('the language picker lists only open languages', (tester) async {
+    await pumpApp(tester, seed: seedSettings);
+    await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Dil'));
+    await tester.tap(find.text('Dil'));
+    await tester.pumpAndSettle();
+    final options = find.descendant(
+      of: find.byType(SimpleDialog),
+      matching: find.byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('choice-'),
+      ),
+    );
+    expect(tester.widgetList(options).map((w) => (w.key! as ValueKey).value), [
+      'choice-null',
+      'choice-tr',
+      'choice-en',
+    ]);
+    Finder inDialog(Finder f) =>
+        find.descendant(of: find.byType(SimpleDialog), matching: f);
+    expect(inDialog(find.text('Sistem dili')), findsOneWidget);
+    expect(inDialog(find.text('Türkçe')), findsOneWidget);
+    expect(inDialog(find.text('English')), findsOneWidget);
+    expect(find.textContaining('Taslak', findRichText: true), findsNothing);
+    expect(find.textContaining('Deutsch', findRichText: true), findsNothing);
+  });
+
+  testWidgets('a draft language shows a note; closed ones stay hidden', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      seed: seedSettings,
+      overrides: [
+        appLocalesProvider.overrideWithValue([
+          for (final l in appLocales)
+            switch (l.code) {
+              'pt_BR' => l.withStatus(LocaleStatus.draft),
+              'pt_PT' => l.withStatus(LocaleStatus.reviewed),
+              _ => l,
+            },
+        ]),
+      ],
+    );
+    await openTab(tester, 'Ayarlar');
+    await scrollTo(tester, find.text('Dil'));
+    await tester.tap(find.text('Dil'));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('Português (Brasil)  Taslak', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.text('Português (Portugal)'), findsOneWidget);
+    expect(find.textContaining('Deutsch', findRichText: true), findsNothing);
+    // The note is muted, smaller text beside the name.
+    final rich = tester.widget<RichText>(
+      find.descendant(
+        of: find.byKey(const ValueKey('choice-pt_BR')),
+        matching: find.byType(RichText),
+      ),
+    );
+    TextSpan? note;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.text == 'Taslak') note = span;
+      return note == null;
+    });
+    final context = tester.element(find.byType(SimpleDialog));
+    expect(note?.style?.color, context.colors.textMuted);
+
+    await tester.tap(find.byKey(const ValueKey('choice-pt_BR')));
+    await tester.pumpAndSettle();
+    // English texts (no Portuguese yet), saved as pt_BR.
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('Português (Brasil)'), findsOneWidget);
   });
 
   testWidgets('income and threshold drive the home screen', (tester) async {
