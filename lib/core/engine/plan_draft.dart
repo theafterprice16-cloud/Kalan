@@ -1,6 +1,7 @@
 import '../date/local_date.dart';
 import 'installment_fee.dart';
 import 'pay_later.dart';
+import 'product_price.dart';
 import 'schedule.dart';
 
 /// How a plan's payments were laid out. Stored with the plan.
@@ -57,6 +58,7 @@ class PlanDraft {
     this.interval,
     this.installmentFeeMinor,
     this.installmentFeeScope = InstallmentFeeScope.everyPayment,
+    this.productPriceMinor,
   });
 
   final PlanKind kind;
@@ -92,6 +94,11 @@ class PlanDraft {
   /// Which payments take [installmentFeeMinor].
   final InstallmentFeeScope installmentFeeScope;
 
+  /// The product price as typed (23); null when not entered. Display
+  /// only: never part of a total, period or reminder. Only on kinds that
+  /// [canHaveProductPrice].
+  final int? productPriceMinor;
+
   /// The same draft with its first [count] payments paid before Kalan.
   PlanDraft withPaidBefore(int count) => _copy(paidBeforeCount: count);
 
@@ -108,10 +115,21 @@ class PlanDraft {
             : scope,
       );
 
+  /// The same draft with a product price (23): ignored on kinds that
+  /// cannot have one; empty or zero is "not entered".
+  PlanDraft withProductPrice(int? priceMinor) => _copy(
+    setsPrice: true,
+    priceMinor: canHaveProductPrice(kind)
+        ? normalizeProductPrice(priceMinor)
+        : null,
+  );
+
   PlanDraft _copy({
     int? paidBeforeCount,
     int? feeMinor,
     InstallmentFeeScope? scope,
+    bool setsPrice = false,
+    int? priceMinor,
   }) => PlanDraft(
     kind: kind,
     installmentCount: installmentCount,
@@ -124,6 +142,7 @@ class PlanDraft {
     interval: interval,
     installmentFeeMinor: scope == null ? installmentFeeMinor : feeMinor,
     installmentFeeScope: scope ?? installmentFeeScope,
+    productPriceMinor: setsPrice ? priceMinor : productPriceMinor,
   );
 
   /// The fee the payment at [index] of [payments] takes: none for one
@@ -165,6 +184,16 @@ class PlanDraft {
 
   /// "Total": the plan amount and its fees per payment (22).
   int get totalWithFeesMinor => totalMinor + installmentFeesMinor;
+
+  /// "Product price" and "Difference" (23), or null when hidden: "Total
+  /// you repay" is [totalWithFeesMinor] (every payment, paid before Kalan
+  /// included, with its fee per payment).
+  PriceDifference? get priceDifference => startedMidway
+      ? null
+      : priceDifferenceOf(
+          totalRepaidMinor: totalWithFeesMinor,
+          productPriceMinor: productPriceMinor,
+        );
 
   int get firstTrackedSeq => payments.first.seq;
 

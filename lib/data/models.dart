@@ -238,6 +238,29 @@ class PlanWithPayments {
   /// The plan's fee per payment as typed (22); null for none.
   int? get installmentFee => plan.installmentFeeMinor;
 
+  /// The plan's product price as typed (23); null when not entered.
+  int? get productPrice => plan.productPriceMinor;
+
+  /// "Product price" and "Difference" (23), or null when hidden: no price,
+  /// a difference of zero or below, a plan on hold or closed (19), or an
+  /// old plan added midway whose first payments were never stored. "Total
+  /// you repay" is [totalWithFeesMinor]: every payment, paid before Kalan
+  /// included, with its fee per payment; extra fees (21) are not in it.
+  PriceDifference? get priceDifference =>
+      allPayments.isEmpty || allPayments.first.seq != 1
+      ? null
+      : priceDifferenceOf(
+          totalRepaidMinor: totalRepaidMinor([
+            for (final p in allPayments)
+              (
+                amountMinor: p.amountMinor,
+                installmentFeeMinor: p.installmentFeeMinor,
+              ),
+          ]),
+          productPriceMinor: productPrice,
+          status: status,
+        );
+
   /// Paid before Kalan plus paid in Kalan.
   int get paidCount =>
       (allPayments.isEmpty ? 0 : allPayments.first.seq - 1) +

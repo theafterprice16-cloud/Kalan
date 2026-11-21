@@ -95,7 +95,7 @@ void main() {
       test(name, () {
         final repaid = totalRepaidMinor(payments);
         expect(repaid, total);
-        final d = priceDifference(
+        final d = priceDifferenceOf(
           totalRepaidMinor: repaid,
           productPriceMinor: price,
         );
@@ -125,7 +125,7 @@ void main() {
     ]);
     expect(repaid, 6960000);
     expect(
-      priceDifference(
+      priceDifferenceOf(
         totalRepaidMinor: repaid,
         productPriceMinor: 6000000,
       )?.differenceMinor,
@@ -139,6 +139,57 @@ void main() {
     expect(repaid, 666000);
   });
 
+  group('PlanDraft.withProductPrice', () {
+    PlanDraft monthly() => PlanCalculator.monthly(
+      totalMinor: 6960000,
+      count: 12,
+      firstDate: LocalDate(2026, 1, 15),
+    );
+
+    test('example 1 on the draft', () {
+      final d = monthly().withProductPrice(6000000);
+      expect(d.productPriceMinor, 6000000);
+      expect(d.priceDifference?.totalRepaidMinor, 6960000);
+      expect(d.priceDifference?.differenceMinor, 960000);
+    });
+
+    test('kept by the other copies, in any order', () {
+      final a = monthly()
+          .withProductPrice(6000000)
+          .withPaidBefore(5)
+          .withInstallmentFee(1000, InstallmentFeeScope.everyPayment);
+      final b = monthly()
+          .withInstallmentFee(1000, InstallmentFeeScope.everyPayment)
+          .withPaidBefore(5)
+          .withProductPrice(6000000);
+      expect(a.productPriceMinor, 6000000);
+      expect(b.productPriceMinor, 6000000);
+      // Paid before Kalan takes no fee (22): 7 fees.
+      expect(a.priceDifference?.totalRepaidMinor, 6960000 + 7 * 1000);
+      expect(b.priceDifference, a.priceDifference);
+    });
+
+    test('zero and empty clear it', () {
+      expect(
+        monthly()
+            .withProductPrice(6000000)
+            .withProductPrice(0)
+            .productPriceMinor,
+        isNull,
+      );
+      expect(monthly().withProductPrice(null).priceDifference, isNull);
+    });
+
+    test('dropped on Pay in 4 and Pay later', () {
+      final payIn4 = PlanCalculator.payIn4(
+        totalMinor: 40000,
+        firstDate: LocalDate(2026, 1, 15),
+      ).withProductPrice(30000);
+      expect(payIn4.productPriceMinor, isNull);
+      expect(payIn4.priceDifference, isNull);
+    });
+  });
+
   group('status (19)', () {
     for (final (status, shown) in [
       (PlanStatus.open, true),
@@ -146,7 +197,7 @@ void main() {
       (PlanStatus.closed, false),
     ]) {
       test('$status -> ${shown ? 'shown' : 'hidden'}', () {
-        final d = priceDifference(
+        final d = priceDifferenceOf(
           totalRepaidMinor: 6960000,
           productPriceMinor: 6000000,
           status: status,

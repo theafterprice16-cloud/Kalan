@@ -40,7 +40,7 @@ class PriceDifference {
   final int totalRepaidMinor;
   final int productPriceMinor;
 
-  /// "Difference": always above zero ([priceDifference]).
+  /// "Difference": always above zero ([priceDifferenceOf]).
   int get differenceMinor => totalRepaidMinor - productPriceMinor;
 
   @override
@@ -60,7 +60,7 @@ class PriceDifference {
 /// The rows to show, or null when they stay hidden: no price entered, a
 /// difference of zero or below (no warning either), or a plan on hold or
 /// closed (19).
-PriceDifference? priceDifference({
+PriceDifference? priceDifferenceOf({
   required int totalRepaidMinor,
   required int? productPriceMinor,
   PlanStatus status = PlanStatus.open,

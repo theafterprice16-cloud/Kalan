@@ -108,6 +108,7 @@ class PlanRepository {
             ),
             installmentFeeMinor: Value(draft.installmentFeeMinor),
             installmentFeeScope: Value(draft.installmentFeeScope),
+            productPriceMinor: Value(draft.productPriceMinor),
           ),
         );
     await _db.batch((b) {
@@ -238,6 +239,22 @@ class PlanRepository {
       ),
     );
     await _applyInstallmentFee(planId);
+  }
+
+  /// Stores the plan's product price (23): display only, no payment
+  /// changes. Empty or zero clears it. Never on a closed plan; ignored on
+  /// kinds that cannot have one.
+  Future<void> _setProductPrice(int planId, int? priceMinor) async {
+    final plan = await _plan(planId);
+    if (plan.status == PlanStatus.closed) {
+      throw StateError('plan $planId is closed');
+    }
+    if (!canHaveProductPrice(plan.kind)) return;
+    await (_db.update(_db.plans)..where((p) => p.id.equals(planId))).write(
+      PlansCompanion(
+        productPriceMinor: Value(normalizeProductPrice(priceMinor)),
+      ),
+    );
   }
 
   /// "Put on hold" (19): the unpaid payments leave every total, period,
@@ -746,6 +763,7 @@ class PlanRepository {
     UnderwayPattern? pattern,
     PaymentInterval? interval,
     InstallmentFeeInput? installmentFee,
+    ProductPriceInput? productPrice,
   }) => _db
       .transaction<ResizeRejection?>(() async {
         if (paidBefore < 0 || paidBefore >= count) {
@@ -804,6 +822,9 @@ class PlanRepository {
             installmentFee.feeMinor,
             installmentFee.scope,
           );
+        }
+        if (productPrice != null) {
+          await _setProductPrice(planId, productPrice.priceMinor);
         }
         return null;
       })
@@ -915,6 +936,10 @@ class PlanRepository {
 /// A plan's fee per payment (22) as chosen on the edit screen: the fee
 /// (null or zero: none) and which payments take it.
 typedef InstallmentFeeInput = ({int? feeMinor, InstallmentFeeScope scope});
+
+/// A product price change for [PlanRepository.editPlan] (23); a null
+/// [priceMinor] clears it.
+typedef ProductPriceInput = ({int? priceMinor});
 
 /// Undoes an [PlanRepository.editPlan] whose second step was refused.
 class _Rollback implements Exception {
