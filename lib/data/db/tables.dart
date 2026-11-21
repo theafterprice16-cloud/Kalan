@@ -138,6 +138,14 @@ class Plans extends Table {
   /// only" is chosen. Always every payment for "Pay later".
   TextColumn get installmentFeeScope => textEnum<InstallmentFeeScope>()
       .withDefault(const Constant('everyPayment'))();
+
+  /// The product's cash price as typed (schema v18, 23): what the user
+  /// would have paid up front. Display only, never part of any total,
+  /// period or reminder. Empty when not entered; only on monthly, card and
+  /// manual plans (`canHaveProductPrice`).
+  IntColumn get productPriceMinor => integer().nullable().check(
+    productPriceMinor.isNull() | productPriceMinor.isBiggerOrEqualValue(1),
+  )();
 }
 
 @DataClassName('PaymentRow')

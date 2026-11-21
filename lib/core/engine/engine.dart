@@ -20,6 +20,7 @@ export 'plan_calculator.dart';
 export 'plan_draft.dart';
 export 'plan_resize.dart';
 export 'plan_status.dart';
+export 'product_price.dart';
 export 'recurring.dart';
 export 'schedule.dart';
 export 'split.dart';

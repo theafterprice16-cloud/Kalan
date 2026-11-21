@@ -734,6 +734,86 @@ void main() {
     },
   );
 
+  test(
+    'v17 -> current: dates, amounts, fees and periods unchanged, no price',
+    () async {
+      final schema = await verifier.schemaAt(17);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, paid_at, '
+        'is_edited, paid_on_day, original_day, extra_fee_minor, '
+        'extra_fee_note, installment_fee_minor) '
+        "VALUES (1, 3, 20400, 6000, 1700000000, 1, 20403, 20390, 600, 'x', "
+        '150)',
+      );
+      schema.rawDatabase.execute(
+        'UPDATE plans SET installment_fee_minor = 150, '
+        "installment_fee_scope = 'firstPaymentOnly' WHERE id = 1",
+      );
+      const columns =
+          'plan_id, seq, due_day, amount_minor, paid_at, is_edited, '
+          'paid_before_kalan, paid_on_day, original_day, extra_fee_minor, '
+          'extra_fee_note, installment_fee_minor';
+      const planColumns =
+          'id, kind, installment_count, status, installment_fee_minor, '
+          'installment_fee_scope';
+      final before = schema.rawDatabase.select(
+        'SELECT $columns FROM payments ORDER BY plan_id, seq',
+      );
+      final plansBefore = schema.rawDatabase.select(
+        'SELECT $planColumns FROM plans ORDER BY id',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final after = await db
+          .customSelect('SELECT $columns FROM payments ORDER BY plan_id, seq')
+          .get();
+      expect(
+        [for (final r in after) r.data],
+        [for (final r in before) Map<String, Object?>.of(r)],
+      );
+      final plansAfter = await db
+          .customSelect('SELECT $planColumns FROM plans ORDER BY id')
+          .get();
+      expect(
+        [for (final r in plansAfter) r.data],
+        [for (final r in plansBefore) Map<String, Object?>.of(r)],
+      );
+      final plans = await db.select(db.plans).get();
+      expect(plans, isNotEmpty);
+      expect(
+        plans.map((p) => p.productPriceMinor),
+        everyElement(equals(null)),
+      );
+      await db.close();
+    },
+  );
+
+  test('a product price below 1 is refused', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    final planId = await db
+        .into(db.plans)
+        .insert(
+          PlansCompanion.insert(
+            kind: PlanKind.monthly,
+            installmentCount: 1,
+            origin: PlanOrigin.template,
+          ),
+        );
+    await expectLater(
+      (db.update(db.plans)..where((p) => p.id.equals(planId))).write(
+        const PlansCompanion(productPriceMinor: Value(0)),
+      ),
+      throwsA(anything),
+    );
+    await (db.update(db.plans)..where((p) => p.id.equals(planId))).write(
+      const PlansCompanion(productPriceMinor: Value(600000000)),
+    );
+    final plan = await db.select(db.plans).getSingle();
+    expect(plan.productPriceMinor, 600000000);
+    await db.close();
+  });
+
   test('a fee per payment below 1 is refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final planId = await db
