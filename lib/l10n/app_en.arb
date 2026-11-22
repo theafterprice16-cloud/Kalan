@@ -300,8 +300,10 @@
   "recurringEnded": "Ended",
   "settingsLanguage": "Language",
   "languageSystem": "System language",
-  "languageTurkish": "Türkçe",
-  "languageEnglish": "English",
+  "languageDraft": "Draft",
+  "@languageDraft": {
+    "description": "Small muted note beside a language in the language picker whose translation has not yet been read by a native speaker. One word."
+  },
   "settingsCurrency": "Currency",
   "settingsCurrencyNote": "Amounts aren't converted; only the currency label changes.",
   "currencyName": "{code, select, TRY{Turkish lira} USD{US dollar} EUR{Euro} GBP{British pound} BRL{Brazilian real} MXN{Mexican peso} COP{Colombian peso} CLP{Chilean peso} RUB{Russian ruble} KZT{Kazakhstani tenge} CNY{Chinese yuan} SGD{Singapore dollar} MYR{Malaysian ringgit} IDR{Indonesian rupiah} CAD{Canadian dollar} AUD{Australian dollar} CHF{Swiss franc} NZD{New Zealand dollar} ZAR{South African rand} ARS{Argentine peso} PEN{Peruvian sol} UYU{Uruguayan peso} PYG{Paraguayan guaraní} BOB{Bolivian boliviano} VES{Venezuelan bolívar} CRC{Costa Rican colón} GTQ{Guatemalan quetzal} HNL{Honduran lempira} NIO{Nicaraguan córdoba} DOP{Dominican peso} PAB{Panamanian balboa} AOA{Angolan kwanza} MZN{Mozambican metical} XOF{West African CFA franc} XAF{Central African CFA franc} BYN{Belarusian ruble} KGS{Kyrgyzstani som} UZS{Uzbekistani som} TWD{New Taiwan dollar} HKD{Hong Kong dollar} MOP{Macanese pataca} SAR{Saudi riyal} AED{UAE dirham} QAR{Qatari riyal} KWD{Kuwaiti dinar} BHD{Bahraini dinar} OMR{Omani rial} EGP{Egyptian pound} JOD{Jordanian dinar} IQD{Iraqi dinar} MAD{Moroccan dirham} DZD{Algerian dinar} TND{Tunisian dinar} LBP{Lebanese pound} LYD{Libyan dinar} INR{Indian rupee} PKR{Pakistani rupee} NGN{Nigerian naira} PHP{Philippine peso} KES{Kenyan shilling} CDF{Congolese franc} GNF{Guinean franc} HTG{Haitian gourde} MGA{Malagasy ariary} SRD{Surinamese dollar} TJS{Tajikistani somoni} SDG{Sudanese pound} YER{Yemeni rial} SYP{Syrian pound} MRU{Mauritanian ouguiya} ILS{Israeli new shekel} PLN{Polish złoty} SEK{Swedish krona} JPY{Japanese yen} VND{Vietnamese dong} other{{code}}}",
@@ -863,7 +865,7 @@
   "@pastDueMarkPaid": {
     "description": "Text button on a past-due row; opens 'When did you pay?'."
   },
-  "pastDueShowAll": "{count, plural, other{Show all ({count})}}",
+  "pastDueShowAll": "{count, plural, one{Show all ({count})} other{Show all ({count})}}",
   "@pastDueShowAll": {
     "description": "Expands the past-due section when it has more than 3 payments.",
     "placeholders": {
@@ -1441,7 +1443,7 @@
   "@proTitle": {
     "description": "Pro screen title and the Settings row. Product name, not translated."
   },
-  "proIntro": "The free version keeps up to {limit} open plans. Pro removes the limit and adds:",
+  "proIntro": "{limit, plural, =1{The free version keeps up to 1 open plan. Pro removes the limit and adds:} other{The free version keeps up to {limit} open plans. Pro removes the limit and adds:}}",
   "@proIntro": {
     "placeholders": {
       "limit": {
@@ -1479,7 +1481,7 @@
   "settingsProFree": "Free",
   "settingsProOn": "Pro",
   "settingsProPending": "Waiting for approval",
-  "limitSheetBody": "The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.",
+  "limitSheetBody": "{limit, plural, =1{The free version keeps up to 1 open plan. You can add a new one when a plan finishes, or with Pro.} other{The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.}}",
   "@limitSheetBody": {
     "placeholders": {
       "limit": {
@@ -1669,7 +1671,7 @@
   "@calendarCellAllLate": {
     "description": "Screen reader: every payment of the day is late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin."
   },
-  "calendarCellSomeLate": "{count, plural, other{{count} late}}",
+  "calendarCellSomeLate": "{count, plural, one{{count} late} other{{count} late}}",
   "@calendarCellSomeLate": {
     "description": "Screen reader: some of the day's payments are late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.",
     "placeholders": {
@@ -1682,7 +1684,7 @@
   "@calendarCellAllPaid": {
     "description": "Screen reader: every payment of the day is paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin."
   },
-  "calendarCellSomePaid": "{count, plural, other{{count} paid}}",
+  "calendarCellSomePaid": "{count, plural, one{{count} paid} other{{count} paid}}",
   "@calendarCellSomePaid": {
     "description": "Screen reader: some of the day's payments are paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.",
     "placeholders": {

@@ -479,9 +479,9 @@ class _DayCell extends StatelessWidget {
               ),
             ),
             if (busyWeek case final w?)
-              Positioned(
-                left: 0,
-                right: 0,
+              PositionedDirectional(
+                start: 0,
+                end: 0,
                 top: PaymentCalendar.busyLineTop,
                 height: _BusyLine.thickness,
                 child: _BusyLine(

@@ -20,6 +20,12 @@ import 'providers.dart';
 
 export 'locale.dart';
 
+/// The app's texts; tests swap in longer ones (pseudo-localization).
+final appLocalizationsDelegateProvider =
+    Provider<LocalizationsDelegate<AppLocalizations>>(
+      (ref) => AppLocalizations.delegate,
+    );
+
 class KalanApp extends ConsumerStatefulWidget {
   const KalanApp({super.key});
 
@@ -34,6 +40,8 @@ class _KalanAppState extends ConsumerState<KalanApp> {
   @override
   void initState() {
     super.initState();
+    // Before Flutter's own date formats load (Arabic: 0-9, not ٠-٩).
+    useWesternDigits();
     _lifecycle = AppLifecycleListener(onResume: _onResume);
     _taps = notificationTaps.stream.listen(_onTap);
     // Pro: the saved state at once, the store checked in the background,
@@ -112,17 +120,29 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     final localeCode = ref.watch(
       settingsProvider.select((s) => s.value?.localeCode),
     );
+    final locales = ref.watch(appLocalesProvider);
+    // The picked language when it is open; otherwise the phone's, matched
+    // to the reviewed locales only (a closed one is never shown).
+    final chosen = chosenLocale(localeCode, locales);
+    final locale = chosen == null ? null : localeOf(chosen);
     return MaterialApp.router(
       routerConfig: router,
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: KalanTheme.light(),
       darkTheme: KalanTheme.dark(),
       themeMode: ref.watch(themeModeProvider),
-      locale: localeCode == null ? null : Locale(localeCode),
-      localeResolutionCallback: resolveLocale,
+      locale: locale,
+      // Flutter asks for the picked locale itself (this very object) and,
+      // separately, for the phone's, kept for when the setting goes back
+      // to the system: only the former answers with the picked one, so a
+      // draft picked by hand is never kept as the phone's match.
+      localeResolutionCallback: (requested, _) =>
+          locale != null && identical(requested, locale)
+          ? locale
+          : resolveLocale(requested, locales),
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
+      localizationsDelegates: [
+        ref.watch(appLocalizationsDelegateProvider),
         ...GlobalMaterialLocalizations.delegates,
       ],
       debugShowCheckedModeBanner: false,

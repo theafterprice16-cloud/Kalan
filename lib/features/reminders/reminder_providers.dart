@@ -36,7 +36,7 @@ final reminderSchedulerProvider = Provider((ref) {
     gateway: ref.watch(notificationGatewayProvider),
     location: () => tz.local,
     now: ref.watch(clockProvider),
-    localeFor: (s) => appLocale(s.localeCode),
+    localeFor: (s) => appLocale(s.localeCode, ref.watch(appLocalesProvider)),
   );
 });
 

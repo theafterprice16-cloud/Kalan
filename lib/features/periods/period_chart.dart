@@ -148,9 +148,9 @@ class ComingBar extends StatelessWidget {
           // too, but clear of the column's selection frame. Its top edge
           // is the income level: it never covers the part over income.
           if (g.incomeLine != null)
-            Positioned(
-              left: 0,
-              right: 0,
+            PositionedDirectional(
+              start: 0,
+              end: 0,
               bottom: math.max(0, g.incomeLine! - _line),
               height: _line,
               child: Center(
@@ -231,39 +231,60 @@ class ComingPeriodsChart extends ConsumerWidget {
   /// (negative when short), otherwise spoken for.
   static int amountOf(ComingPeriod p) => p.leftMinor ?? p.spokenForMinor;
 
-  /// Whether every period's amount fits its column in full ("-1.200")
-  /// on one line, at the user's text size. All columns then show full
-  /// amounts; otherwise all show short ones ("-1,2 B"), so the row never
-  /// mixes the two, and never cuts or wraps an amount.
-  bool _fullAmountsFit(BuildContext context, WidgetRef ref, double column) {
-    // The column's outer padding, then the same again inside the
-    // selection frame, so no amount touches it.
-    final room = column - 4 * KalanSpace.xxs;
+  /// The widest amount under the bars, full ("-1.200") or short
+  /// ("-1,2 B"), on one line at the user's text size.
+  double _widestAmount(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool short,
+  }) {
     final style = amountStyle(Theme.of(context));
+    var widest = 0.0;
     for (final p in periods) {
+      final minor = amountOf(p);
       final painter = TextPainter(
-        text: TextSpan(text: ref.money(context, amountOf(p)), style: style),
+        text: TextSpan(
+          text: short
+              ? ref.moneyShort(context, minor)
+              : ref.money(context, minor),
+          style: style,
+        ),
         textDirection: Directionality.of(context),
         textScaler: MediaQuery.textScalerOf(context),
         maxLines: 1,
       )..layout();
-      final width = painter.width;
+      widest = math.max(widest, painter.width);
       painter.dispose();
-      if (width > room) return false;
     }
-    return true;
+    return widest;
   }
+
+  /// Room a column keeps around a full amount: the column's outer
+  /// padding, then the same again inside the selection frame, so no full
+  /// amount touches it.
+  static const double _amountRoom = 4 * KalanSpace.xxs;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scale = BarGeometry.scaleOf(periods);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final fits = constraints.maxWidth / periods.length >= minColumnWidth;
-        final width = fits
-            ? constraints.maxWidth / periods.length
-            : minColumnWidth;
-        final fullAmounts = _fullAmountsFit(context, ref, width);
+        // Every column shows full amounts when all of them fit ("-1.200"),
+        // otherwise short ones ("-1,2 B"), so the row never mixes the
+        // two. A column is never narrower than one of them on one line:
+        // some languages write the short one wider (Russian "тыс.",
+        // Arabic "ألف" for thousands); then the column grows and the row
+        // scrolls. Type is never made smaller.
+        final fullNeed =
+            _widestAmount(context, ref, short: false) + _amountRoom;
+        // The column's own padding only: a short amount may reach the
+        // frame.
+        final shortNeed =
+            _widestAmount(context, ref, short: true) + 2 * KalanSpace.xxs;
+        final least = math.max(minColumnWidth, math.min(fullNeed, shortNeed));
+        final fits = constraints.maxWidth / periods.length >= least;
+        final width = fits ? constraints.maxWidth / periods.length : least;
+        final fullAmounts = fullNeed <= width;
         final row = Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

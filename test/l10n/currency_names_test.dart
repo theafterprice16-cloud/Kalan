@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/money/currency.dart';
+import 'package:kalan/l10n/app_locales.dart';
 import 'package:kalan/l10n/generated/app_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -20,10 +21,8 @@ void main() {
     });
   }
 
-  test('only Turkish and English ship', () {
-    expect(
-      AppLocalizations.supportedLocales.map((l) => l.languageCode).toSet(),
-      {'tr', 'en'},
-    );
+  // Roadmap 24: every locale has a file, but only translated ones open.
+  test('only Turkish and English are open', () {
+    expect(openLocales().map((l) => l.code), ['tr', 'en']);
   });
 }

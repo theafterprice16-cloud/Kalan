@@ -4,6 +4,7 @@ import '../../core/date/local_date.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
 import '../../core/reminders/reminder_models.dart';
+import '../../l10n/app_locales.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 /// Notification text in the app language and the user's currency. Dates
@@ -26,15 +27,17 @@ class L10nReminderTexts implements ReminderTexts {
     ReminderAction.remindTomorrow => l10n.reminderActionRemindTomorrow,
   };
 
+  /// Dates and numbers in the app language's intl data (Roadmap 24).
+  String get _locale => intlLocaleOf(l10n.localeName);
+
   String _date(LocalDate date) =>
-      DateFormat.MMMMEEEEd(l10n.localeName).format(date.toDateTime());
+      DateFormat.MMMMEEEEd(_locale).format(date.toDateTime());
 
   /// Day and month only ("14 Kasım", "November 14").
   String _dayMonth(LocalDate date) =>
-      DateFormat.MMMMd(l10n.localeName).format(date.toDateTime());
+      DateFormat.MMMMd(_locale).format(date.toDateTime());
 
-  String _money(int minor) =>
-      formatMoney(minor, currency, localeName: l10n.localeName);
+  String _money(int minor) => formatMoney(minor, currency, localeName: _locale);
 
   @override
   ReminderText describe({

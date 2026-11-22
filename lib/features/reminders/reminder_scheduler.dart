@@ -1,8 +1,8 @@
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:material_ui/material_ui.dart' show Locale;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/format.dart' show planNameIn;
+import '../../app/locale.dart' show loadLocaleData;
 import '../../app/providers.dart' show payScheduleOf;
 import '../../core/date/local_date.dart';
 import '../../core/money/currency.dart';
@@ -205,7 +205,7 @@ class ReminderScheduler {
 
     final l10n = lookupAppLocalizations(localeFor(settings));
     // Month and weekday names, also in a background isolate.
-    await initializeDateFormatting(l10n.localeName);
+    await loadLocaleData();
 
     // Dates are the effective due dates the engine stored: the same day
     // the screens show (card statement and weekend shift applied).

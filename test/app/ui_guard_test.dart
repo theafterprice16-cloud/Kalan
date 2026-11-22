@@ -59,7 +59,229 @@ List<String> offendersIn(String path, String source) {
   return out;
 }
 
+/// Layout pinned to the left or the right (Roadmap 24): in Arabic the
+/// screen reads from the right, so start/end and Directional variants
+/// are used. A line may opt out with a `// rtl-ok: <reason>` comment.
+/// Searched across line breaks, since the formatter splits long calls.
+final directionalPatterns = <String, RegExp>{
+  'left/right alignment': RegExp(
+    r'\b(Alignment|FractionalOffset)\.(centerLeft|centerRight|topLeft|topRight|bottomLeft|bottomRight)\b',
+  ),
+  'left/right text align': RegExp(r'\bTextAlign\.(left|right)\b'),
+  'fixed text direction': RegExp(r'\btextDirection:\s*TextDirection\.'),
+};
+
+/// Constructors whose own left/right arguments pin the layout.
+final directionalCalls = <String, RegExp>{
+  'left/right insets': RegExp(r'\bEdgeInsets\.only\('),
+  'left/right position': RegExp(r'\bPositioned(\.fill)?\('),
+  // A Rect is measured from the left.
+  'left/right rect': RegExp(r'\bPositioned\.from(Rect|RelativeRect)\('),
+  'left/right corners': RegExp(r'\bBorderRadius\.(only|horizontal)\('),
+  'left/right border': RegExp(r'\bBorder\('),
+};
+
+final _sideArgument = RegExp(
+  r'^(left|right|topLeft|topRight|bottomLeft|bottomRight)\s*:',
+);
+
+/// The arguments of the call whose "(" is at [open], split at its own
+/// commas (not those of nested calls or collections), each with the
+/// offset where it ends.
+List<(String, int)> _argumentsAt(String source, int open) {
+  final args = <(String, int)>[];
+  var depth = 0;
+  var start = open + 1;
+  for (var i = open; i < source.length; i++) {
+    final c = source[i];
+    if ('([{'.contains(c)) depth++;
+    if (')]}'.contains(c)) depth--;
+    if (depth == 0) {
+      args.add((source.substring(start, i), i));
+      break;
+    }
+    if (depth == 1 && c == ',') {
+      args.add((source.substring(start, i), i));
+      start = i + 1;
+    }
+  }
+  return [
+    for (final (a, end) in args)
+      if (a.trim().isNotEmpty) (a.trim(), end),
+  ];
+}
+
+/// Whether [text] is the number [value] ("0", "0.0", "-0", ".5", "0.50").
+bool _isNumber(String text, double value) => double.tryParse(text) == value;
+
+/// The index of the ")" closing the call whose "(" is at [open].
+int _callEnd(String source, int open) {
+  var depth = 0;
+  for (var i = open; i < source.length; i++) {
+    if ('([{'.contains(source[i])) depth++;
+    if (')]}'.contains(source[i]) && --depth == 0) return i;
+  }
+  return source.length - 1;
+}
+
+List<String> directionalOffendersIn(String path, String source) {
+  final out = <String>[];
+  final lines = source.split('\n');
+  int lineOf(int offset) =>
+      '\n'.allMatches(source.substring(0, offset)).length + 1;
+  // The opt-out may sit on any line from the match to the end of the
+  // argument at fault (the formatter splits long calls), not further: a
+  // child's opt-out does not cover its parent.
+  void report(int start, String what, [int? end]) {
+    final first = lineOf(start);
+    final last = lineOf(end ?? start);
+    for (var l = first; l <= last; l++) {
+      if (lines[l - 1].contains('// rtl-ok:')) return;
+    }
+    out.add('$path:$first ($what)');
+  }
+
+  /// [source] up to the end of the line holding [offset].
+  int lineEnd(int offset) {
+    final next = source.indexOf('\n', offset);
+    return next < 0 ? source.length : next;
+  }
+
+  for (final MapEntry(:key, :value) in directionalPatterns.entries) {
+    for (final m in value.allMatches(source)) {
+      report(m.start, key, lineEnd(m.end));
+    }
+  }
+  for (final MapEntry(:key, :value) in directionalCalls.entries) {
+    for (final m in value.allMatches(source)) {
+      final args = _argumentsAt(source, m.end - 1);
+      if (key == 'left/right rect') {
+        // A rect from start and end is fine.
+        if (args.any((a) => a.$1.contains('fromDirectional'))) continue;
+        report(m.start, key, lineEnd(m.end));
+        continue;
+      }
+      for (final (arg, end) in args) {
+        if (_sideArgument.hasMatch(arg)) {
+          report(m.start, key, lineEnd(end));
+          break;
+        }
+      }
+    }
+  }
+  // Alignment(x, y) with an x other than 0; FractionalOffset(x, y) with
+  // an x other than 0.5.
+  for (final (pattern, centre) in [
+    (RegExp(r'\bAlignment\('), 0.0),
+    (RegExp(r'\bFractionalOffset\('), 0.5),
+  ]) {
+    for (final m in pattern.allMatches(source)) {
+      final args = _argumentsAt(source, m.end - 1);
+      if (args.isNotEmpty && !_isNumber(args.first.$1, centre)) {
+        report(m.start, 'left/right alignment value', lineEnd(args.first.$2));
+      }
+    }
+  }
+  // fromLTRB with different left and right, or arguments it cannot read.
+  for (final m in RegExp(r'\bEdgeInsets\.fromLTRB\(').allMatches(source)) {
+    final args = _argumentsAt(source, m.end - 1);
+    final end = lineEnd(_callEnd(source, m.end - 1));
+    if (args.length != 4) {
+      report(m.start, 'unreadable fromLTRB', end);
+    } else if (args[0].$1 != args[2].$1) {
+      report(m.start, 'uneven fromLTRB', end);
+    }
+  }
+  return out;
+}
+
+/// lib/ without generated code.
+Iterable<File> libSources() =>
+    Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where(
+          (f) =>
+              f.path.endsWith('.dart') &&
+              !f.path.endsWith('.g.dart') &&
+              !f.path.endsWith('.steps.dart') &&
+              !f.path.replaceAll(r'\', '/').contains('/l10n/generated/'),
+        );
+
 void main() {
+  test('lib/ lays out by start and end, never left and right', () {
+    final offenders = <String>[];
+    for (final file in libSources()) {
+      final path = file.path.replaceAll(r'\', '/');
+      offenders.addAll(directionalOffendersIn(path, file.readAsStringSync()));
+    }
+    expect(offenders, isEmpty);
+  });
+
+  test('the right-to-left guard catches every form', () {
+    const samples = [
+      'padding: EdgeInsets.only(left: KalanSpace.md)',
+      'EdgeInsets.only(\n  top: 4,\n  right: KalanSpace.sm,\n)',
+      'EdgeInsets.fromLTRB(KalanSpace.md, 0, KalanSpace.xs, 0)',
+      'alignment: Alignment.centerLeft',
+      'Alignment.topRight',
+      'textAlign: TextAlign.right',
+      'Positioned(top: f(1), left: 0, child: x)',
+      'BorderRadius.only(topLeft: r)',
+      'BorderRadius.horizontal(right: r)',
+      'Border(left: BorderSide())',
+      'Text(a, textDirection: TextDirection.ltr)',
+      'Text(\n  a,\n  textDirection:\n      TextDirection.rtl,\n)',
+      'Positioned.fill(left: 8, child: x)',
+      'alignment: Alignment(-1, 0)',
+      'FractionalOffset.centerRight',
+      'EdgeInsets.fromLTRB(f(a, b), 0, 0, 0)',
+      'Alignment(f(x), 0)',
+      'FractionalOffset(0, 0.5)',
+      'Positioned.fromRect(rect: r, child: x)',
+      // A child's opt-out does not cover the parent's left.
+      'Positioned(\n  left: 0,\n  child: Text(\n    a,\n    textDirection: TextDirection.ltr, // rtl-ok: a code\n  ),\n)',
+    ];
+    for (final sample in samples) {
+      expect(
+        directionalOffendersIn('x.dart', sample),
+        isNotEmpty,
+        reason: sample,
+      );
+    }
+    const allowed = [
+      'padding: EdgeInsetsDirectional.only(start: KalanSpace.md)',
+      'EdgeInsets.only(top: KalanSpace.xs, bottom: 4)',
+      'EdgeInsets.fromLTRB(KalanSpace.md, 0, KalanSpace.md, KalanSpace.xs)',
+      'alignment: AlignmentDirectional.centerStart',
+      'Alignment.center',
+      'textAlign: TextAlign.start',
+      'PositionedDirectional(start: 0, end: 0, child: x)',
+      'Positioned(top: 0, bottom: 0, child: x)',
+      'BorderRadius.vertical(top: r)',
+      'BorderRadiusDirectional.only(topStart: r)',
+      'Border(top: BorderSide())',
+      'Directionality.of(context) == TextDirection.rtl',
+      'textDirection: Directionality.of(context),',
+      'Text(a, textDirection: TextDirection.ltr) // rtl-ok: a code',
+      'Positioned(top: 0, child: Foo(right: 1))',
+      'Positioned.fill(child: x)',
+      'Alignment(0, -1)',
+      'Alignment(0.0, 1)',
+      'EdgeInsets.fromLTRB(f(a, b), 0, f(a, b), 0)',
+      'FractionalOffset(0.5, 1)',
+      'FractionalOffset(.5, 0)',
+      'Alignment(-0, 1)',
+      'Alignment(0.00, 1)',
+      'Positioned.fromRelativeRect(\n  rect: RelativeRect.fromDirectional(\n    textDirection: d,\n    start: 0,\n    top: 0,\n    end: 0,\n    bottom: 0,\n  ),\n  child: x,\n)',
+      'Text(\n  a,\n  textDirection:\n      TextDirection.ltr, // rtl-ok: a code\n)',
+      'EdgeInsets.only(\n  left: 4, // rtl-ok: a ruler\n)',
+    ];
+    for (final sample in allowed) {
+      expect(directionalOffendersIn('x.dart', sample), isEmpty, reason: sample);
+    }
+  });
+
   test('screens follow the cross-platform UI rules', () {
     final offenders = <String>[];
     for (final entity in Directory('lib/features').listSync(recursive: true)) {

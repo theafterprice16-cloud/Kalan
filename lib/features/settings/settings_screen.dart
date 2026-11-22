@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
+import '../../app/locale.dart';
 import '../../app/providers.dart';
 import '../../core/date/local_date.dart';
 import '../../core/design/choice_dialog.dart';
@@ -69,16 +70,23 @@ class SettingsScreen extends ConsumerWidget {
     SettingsRow s,
   ) async {
     final l10n = context.l10n;
+    final locales = ref.read(appLocalesProvider);
+    final open = openLocales(locales);
     final picked = await showKalanDialog<Choice<String?>>(
       context: context,
       builder: (_) => ChoiceDialog<String?>(
         title: l10n.settingsLanguage,
-        selected: s.localeCode,
+        // A saved language that is no longer open reads as the phone's.
+        selected: chosenLocale(s.localeCode, locales)?.code,
         options: [
           (null, l10n.languageSystem),
-          ('tr', l10n.languageTurkish),
-          ('en', l10n.languageEnglish),
+          // Each language in its own words; never translated.
+          for (final l in open) (l.code, pickerNameOf(l, locales)),
         ],
+        notes: {
+          for (final l in open)
+            if (l.status == LocaleStatus.draft) l.code: l10n.languageDraft,
+        },
       ),
     );
     if (picked != null) {
@@ -163,11 +171,11 @@ class SettingsScreen extends ConsumerWidget {
         : pro.status == ProStatus.pending
         ? l10n.settingsProPending
         : l10n.settingsProFree;
-    final languageLabel = switch (s.localeCode) {
-      'tr' => l10n.languageTurkish,
-      'en' => l10n.languageEnglish,
-      _ => l10n.languageSystem,
-    };
+    final locales = ref.watch(appLocalesProvider);
+    final chosen = chosenLocale(s.localeCode, locales);
+    final languageLabel = chosen == null
+        ? l10n.languageSystem
+        : pickerNameOf(chosen, locales);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navSettings)),

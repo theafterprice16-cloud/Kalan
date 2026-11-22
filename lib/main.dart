@@ -15,6 +15,8 @@ import 'l10n/generated/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Dates of every locale, before Flutter loads its own (Roadmap 24).
+  await loadLocaleData();
   final overrides = <Override>[
     themeModeStoreProvider.overrideWithValue(await PrefsThemeModeStore.open()),
     // The last known Pro state, read before the first frame: Pro works

@@ -7,6 +7,7 @@ import '../core/date/local_date.dart';
 import '../core/money/currency.dart';
 import '../core/money/money_format.dart';
 import '../data/models.dart';
+import '../l10n/app_locales.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'providers.dart';
 
@@ -15,7 +16,7 @@ import 'providers.dart';
 /// change; nothing is stored).
 String payLaterAutoName(AppLocalizations l10n, LocalDate due) =>
     l10n.payLaterAutoName(
-      DateFormat.MMMd(l10n.localeName).format(due.toDateTime()),
+      DateFormat.MMMd(intlLocaleOf(l10n.localeName)).format(due.toDateTime()),
     );
 
 /// A plan's name in [l10n]'s language: its own name, or the automatic one.
@@ -27,7 +28,10 @@ extension L10nX on BuildContext {
 
   /// A plan's name, or "Pay later · Dec 14" for an untitled one.
   String planName(PlanWithPayments plan) => planNameIn(l10n, plan);
-  String get localeName => AppLocalizations.of(this).localeName;
+
+  /// The intl locale for dates and numbers: the app language's
+  /// ([intlLocaleOf]; zh_Hant reads zh_TW's data).
+  String get localeName => intlLocaleOf(AppLocalizations.of(this).localeName);
 
   /// "14 Kas" / "Nov 14".
   String shortDate(LocalDate date) =>
@@ -124,10 +128,19 @@ List<TextInputFormatter> amountInputFormatters(
   Currency currency, {
   required String localeName,
 }) => [
-  TextInputFormatter.withFunction(
-    (oldValue, newValue) =>
-        acceptsAmountInput(newValue.text, currency, localeName: localeName)
+  TextInputFormatter.withFunction((oldValue, newValue) {
+    // An Arabic keyboard's ٤ shows as 4 (Western digits everywhere).
+    final text = westernDigits(newValue.text, localeName: localeName);
+    final value = text == newValue.text
         ? newValue
-        : oldValue,
-  ),
+        : text.length == newValue.text.length
+        ? newValue.copyWith(text: text)
+        : TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          );
+    return acceptsAmountInput(text, currency, localeName: localeName)
+        ? value
+        : oldValue;
+  }),
 ];

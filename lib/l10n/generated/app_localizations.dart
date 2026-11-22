@@ -5,8 +5,22 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_it.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_nl.dart';
+import 'app_localizations_pl.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_sv.dart';
 import 'app_localizations_tr.dart';
+import 'app_localizations_vi.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -94,8 +108,29 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('de'),
+    Locale('de', 'CH'),
     Locale('en'),
+    Locale('en', 'GB'),
+    Locale('es'),
+    Locale('es', '419'),
+    Locale('fr'),
+    Locale('fr', 'CA'),
+    Locale('id'),
+    Locale('it'),
+    Locale('ja'),
+    Locale('nl'),
+    Locale('pl'),
+    Locale('pt'),
+    Locale('pt', 'BR'),
+    Locale('pt', 'PT'),
+    Locale('ru'),
+    Locale('sv'),
     Locale('tr'),
+    Locale('vi'),
+    Locale('zh'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
 
   /// No description provided for @appTitle.
@@ -986,17 +1021,11 @@ abstract class AppLocalizations {
   /// **'System language'**
   String get languageSystem;
 
-  /// No description provided for @languageTurkish.
+  /// Small muted note beside a language in the language picker whose translation has not yet been read by a native speaker. One word.
   ///
   /// In en, this message translates to:
-  /// **'Türkçe'**
-  String get languageTurkish;
-
-  /// No description provided for @languageEnglish.
-  ///
-  /// In en, this message translates to:
-  /// **'English'**
-  String get languageEnglish;
+  /// **'Draft'**
+  String get languageDraft;
 
   /// No description provided for @settingsCurrency.
   ///
@@ -1625,7 +1654,7 @@ abstract class AppLocalizations {
   /// Expands the past-due section when it has more than 3 payments.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, other{Show all ({count})}}'**
+  /// **'{count, plural, one{Show all ({count})} other{Show all ({count})}}'**
   String pastDueShowAll(int count);
 
   /// Screen reader label of a past-due row. Calm and non-judgmental: a fact, not a warning. No exclamation marks.
@@ -2122,7 +2151,7 @@ abstract class AppLocalizations {
   /// No description provided for @proIntro.
   ///
   /// In en, this message translates to:
-  /// **'The free version keeps up to {limit} open plans. Pro removes the limit and adds:'**
+  /// **'{limit, plural, =1{The free version keeps up to 1 open plan. Pro removes the limit and adds:} other{The free version keeps up to {limit} open plans. Pro removes the limit and adds:}}'**
   String proIntro(int limit);
 
   /// One line in the list of what Pro adds.
@@ -2218,7 +2247,7 @@ abstract class AppLocalizations {
   /// No description provided for @limitSheetBody.
   ///
   /// In en, this message translates to:
-  /// **'The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.'**
+  /// **'{limit, plural, =1{The free version keeps up to 1 open plan. You can add a new one when a plan finishes, or with Pro.} other{The free version keeps up to {limit} open plans. You can add a new one when a plan finishes, or with Pro.}}'**
   String limitSheetBody(int limit);
 
   /// No description provided for @limitSheetSeePro.
@@ -2376,7 +2405,7 @@ abstract class AppLocalizations {
   /// Screen reader: some of the day's payments are late. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, other{{count} late}}'**
+  /// **'{count, plural, one{{count} late} other{{count} late}}'**
   String calendarCellSomeLate(int count);
 
   /// Screen reader: every payment of the day is paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
@@ -2388,7 +2417,7 @@ abstract class AppLocalizations {
   /// Screen reader: some of the day's payments are paid. Joined after the payment count with a comma. Takvim etiketi; kısa ve sakin.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, other{{count} paid}}'**
+  /// **'{count, plural, one{{count} paid} other{{count} paid}}'**
   String calendarCellSomePaid(int count);
 
   /// Screen reader: a pay period starts this day. Joined with a comma. Takvim etiketi; kısa ve sakin.
@@ -3198,20 +3227,122 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'tr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'id',
+    'it',
+    'ja',
+    'nl',
+    'pl',
+    'pt',
+    'ru',
+    'sv',
+    'tr',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+script codes are specified.
+  switch (locale.languageCode) {
+    case 'zh':
+      {
+        switch (locale.scriptCode) {
+          case 'Hant':
+            return AppLocalizationsZhHant();
+        }
+        break;
+      }
+  }
+
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'de':
+      {
+        switch (locale.countryCode) {
+          case 'CH':
+            return AppLocalizationsDeCh();
+        }
+        break;
+      }
+    case 'en':
+      {
+        switch (locale.countryCode) {
+          case 'GB':
+            return AppLocalizationsEnGb();
+        }
+        break;
+      }
+    case 'es':
+      {
+        switch (locale.countryCode) {
+          case '419':
+            return AppLocalizationsEs419();
+        }
+        break;
+      }
+    case 'fr':
+      {
+        switch (locale.countryCode) {
+          case 'CA':
+            return AppLocalizationsFrCa();
+        }
+        break;
+      }
+    case 'pt':
+      {
+        switch (locale.countryCode) {
+          case 'BR':
+            return AppLocalizationsPtBr();
+          case 'PT':
+            return AppLocalizationsPtPt();
+        }
+        break;
+      }
+  }
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'id':
+      return AppLocalizationsId();
+    case 'it':
+      return AppLocalizationsIt();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'nl':
+      return AppLocalizationsNl();
+    case 'pl':
+      return AppLocalizationsPl();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'sv':
+      return AppLocalizationsSv();
     case 'tr':
       return AppLocalizationsTr();
+    case 'vi':
+      return AppLocalizationsVi();
+    case 'zh':
+      return AppLocalizationsZh();
   }
 
   throw FlutterError(

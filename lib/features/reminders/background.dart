@@ -36,6 +36,7 @@ Future<void> refreshLocalTimeZone() async {
 Future<void> _withDatabase(Future<void> Function(AppDatabase db) body) async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
+  await loadLocaleData();
   await refreshLocalTimeZone();
   final db = AppDatabase();
   try {
