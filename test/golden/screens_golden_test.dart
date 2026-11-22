@@ -151,6 +151,31 @@ Future<void> seedUnderway(AppDatabase db) async {
   );
 }
 
+/// Public holidays (26): "today" before Hakan's 29 Oct due date.
+final holidayToday = LocalDate(2026, 10, 20);
+
+/// Hakan's card (statement 19, due 29, Türkiye) and a phone bought on
+/// 10 Oct 2026 in 3 installments, stored as before Roadmap 26.
+Future<void> seedHoliday(AppDatabase db) async {
+  await seedSettings(db, incomeMinor: 4500000, holidayCountry: 'TR');
+  final plans = PlanRepository(db);
+  final card = await SourceRepository(
+    db,
+    plans,
+  ).create(name: 'Bonus', kind: SourceKind.card, statementDay: 19, dueDay: 29);
+  await plans.saveDraft(
+    PlanCalculator.card(
+      purchaseDate: LocalDate(2026, 10, 10),
+      totalMinor: 900000,
+      count: 3,
+      terms: const CardTerms(statementDay: 19, dueDay: 29),
+    ),
+    sourceId: card,
+    origin: PlanOrigin.template,
+    title: 'Telefon',
+  );
+}
+
 Future<void> shoot(WidgetTester tester, String name) async {
   await tester.pumpAndSettle();
   await expectLater(
@@ -1771,6 +1796,55 @@ void main() {
           FocusManager.instance.primaryFocus?.unfocus();
           await scrollTo(tester, find.byKey(const ValueKey('template-note')));
           await shoot(tester, '97-add-plan-template-filled-$lang-$theme');
+        });
+      }
+
+      // Public holidays (26): Hakan's card, Türkiye, 20 Oct 2026. The
+      // stored 29 Oct moves to 30 Oct on start.
+      for (final (lang, locale, plansTab) in [
+        ('tr', const Locale('tr', 'TR'), 'Planlar'),
+        ('en', const Locale('en', 'TR'), 'Plans'),
+      ]) {
+        Future<void> openHakan(WidgetTester tester, {String? route}) async {
+          await start(
+            tester,
+            locale: locale,
+            today: holidayToday,
+            route: route,
+            seed: seedHoliday,
+          );
+          await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('card settings, public holidays, $lang', (tester) async {
+          await openHakan(tester, route: Routes.sources);
+          await tester.tap(find.text('Bonus').first);
+          await tester.pumpAndSettle();
+          await scrollTo(tester, find.byKey(const ValueKey('holiday-shift')));
+          await shoot(tester, '98-card-settings-holidays-$lang-$theme');
+        });
+
+        testWidgets('holiday country list, $lang', (tester) async {
+          await openHakan(tester, route: Routes.settings);
+          final row = find.byKey(const ValueKey('settings-holiday-country'));
+          await scrollTo(tester, row);
+          await tester.tap(row);
+          await shoot(tester, '99-holiday-country-list-$lang-$theme');
+        });
+
+        testWidgets('plan detail, moved for a holiday, $lang', (tester) async {
+          await openHakan(tester);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Telefon'));
+          await tester.pumpAndSettle();
+          await scrollTo(
+            tester,
+            find.textContaining(
+              lang == 'tr' ? 'Resmî tatil' : 'public holiday',
+            ),
+          );
+          await shoot(tester, '100-plan-detail-holiday-$lang-$theme');
         });
       }
 
