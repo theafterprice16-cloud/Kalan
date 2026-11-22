@@ -9,7 +9,7 @@ import '../../data/models.dart';
 import 'holiday_providers.dart';
 
 /// Whether [payment]'s date is a card due date moved past a public holiday
-/// (decision 7): the card's own installment, not edited, on exactly the
+/// (decision 7): the card's own installment, not edited or moved, on the
 /// date the card's rule gives its statement with at least one holiday
 /// skipped. A move only off a weekend shows nothing, as before.
 bool movedForHoliday(
@@ -17,7 +17,11 @@ bool movedForHoliday(
   PaymentRow payment,
   HolidayCalendar? holidays,
 ) {
-  if (payment.isEdited || plan.ownCardId == null) return false;
+  if (payment.isEdited ||
+      payment.originalDay != null ||
+      plan.ownCardId == null) {
+    return false;
+  }
   final terms = plan.source?.cardTermsIn(holidays);
   return terms != null && terms.movedForHoliday(payment.date);
 }

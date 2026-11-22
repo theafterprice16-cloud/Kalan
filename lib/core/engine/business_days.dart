@@ -22,8 +22,10 @@ class BusinessDayShift {
 
   final LocalDate date;
 
-  /// At least one skipped day was a public holiday: the "moved for a
-  /// public holiday" note. A date moved only off a weekend has none.
+  /// A public holiday moved the date: it lands later than the weekend
+  /// alone would move it (the "moved for a public holiday" note). A date
+  /// moved only off a weekend, or a holiday on a weekend day the weekend
+  /// already skips, has none.
   final bool skippedHoliday;
 }
 
@@ -46,15 +48,19 @@ BusinessDayShift nextBusinessDay(
       holidays && calendar != null && calendar.isHoliday(d);
   bool skip(LocalDate d) =>
       weekends && weekend.contains(d.weekday) || holiday(d);
-  var day = date;
-  var skippedHoliday = false;
-  // A calendar always leaves business days (the data file allows at most
-  // two weekend days); the bound only guards a malformed one.
-  for (var i = 0; i < 366 && skip(day); i++) {
-    if (holiday(day)) skippedHoliday = true;
-    day = day.addDays(1);
+  LocalDate first(bool Function(LocalDate) skips) {
+    var day = date;
+    // A calendar always leaves business days (the data file allows at
+    // most two weekend days); the bound only guards a malformed one.
+    for (var i = 0; i < 366 && skips(day); i++) {
+      day = day.addDays(1);
+    }
+    return day;
   }
-  return BusinessDayShift(day, skippedHoliday: skippedHoliday);
+
+  final day = first(skip);
+  final weekendOnly = first((d) => weekends && weekend.contains(d.weekday));
+  return BusinessDayShift(day, skippedHoliday: day != weekendOnly);
 }
 
 /// Moves a Saturday or Sunday to the following Monday.

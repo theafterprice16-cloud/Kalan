@@ -11,6 +11,7 @@ import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/models.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
+import 'package:kalan/features/holidays/holiday_providers.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -213,6 +214,53 @@ void main() {
       find.descendant(of: row, matching: find.text('Yok')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a holiday file that does not read changes nothing and '
+      'hides the row', (tester) async {
+    late ({int card, int plan}) ids;
+    final db = await pumpApp(
+      tester,
+      today: today,
+      seed: (db) async => ids = await seedHakan(db),
+      overrides: [
+        initialRouteProvider.overrideWithValue(Routes.settings),
+        holidaysSourceProvider.overrideWith((ref) async => '{not json'),
+      ],
+    );
+    await settle(tester);
+    expect(
+      (await db.select(db.appSettings).getSingle()).holidayCountry,
+      isNull,
+    );
+    expect((await datesOf(db, ids.plan)).first, LocalDate(2026, 10, 29));
+    // Next to the currency and language rows, where it would be.
+    // (built with the list's cache extent).
+    await scrollTo(tester, find.text('Dil'));
+    expect(
+      find.byKey(const ValueKey('settings-holiday-country')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('onboarding: the settings saved while the app runs get the '
+      'suggested country', (tester) async {
+    final db = await pumpApp(tester, today: today);
+    await settle(tester);
+    await tester.runAsync(
+      () => db
+          .into(db.appSettings)
+          .insert(
+            AppSettingsCompanion.insert(
+              currencyCode: 'TRY',
+              payFrequency: PayFrequency.monthly,
+              payDay: const Value(15),
+            ),
+          ),
+    );
+    await settle(tester);
+    await settle(tester);
+    expect((await db.select(db.appSettings).getSingle()).holidayCountry, 'TR');
   });
 
   testWidgets('English texts', (tester) async {

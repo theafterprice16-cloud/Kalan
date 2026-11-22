@@ -246,6 +246,7 @@ void main() {
       card: cardRow,
       plans: await plans.all(),
       today: today,
+      holidays: null,
     )!.statements.map((s) => s.totalMinor).toList();
     final periodBefore = await summaryOf(first.date.toString());
 
@@ -255,6 +256,7 @@ void main() {
       card: cardRow,
       plans: await plans.all(),
       today: today,
+      holidays: null,
     )!.statements.map((s) => s.totalMinor).toList();
     expect(statementAfter, statementBefore);
     expect(

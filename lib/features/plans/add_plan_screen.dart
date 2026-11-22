@@ -358,7 +358,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   List<SourceRow> get _cards => [
     for (final s in ref.watch(sourcesProvider).value ?? const <SourceRow>[])
-      if (s.cardTermsIn(null) != null) s,
+      if (s.hasCardDays) s,
   ];
 
   CardTerms? get _cardTerms => _sources
@@ -489,6 +489,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    // The card terms (with the holiday calendar, 26) the draft is built
+    // with; saving checks them against the stored calendar.
+    final cardTerms = _mode == AddMode.card ? _cardTerms : null;
     final draft = _buildDraft();
     if (draft == null) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -539,6 +542,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             _chargeSourceId ?? _ownCardId,
             _ownCardId,
           ),
+          cardTerms: cardTerms == null ? null : (terms: cardTerms),
         );
     KalanHaptics.success();
     final settings = ref.read(settingsRepositoryProvider);

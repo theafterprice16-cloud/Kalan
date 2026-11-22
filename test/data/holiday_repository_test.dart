@@ -275,6 +275,52 @@ void main() {
     expect((await datesOf(planId)).first, day('2026-10-27'));
   });
 
+  test('a payment the user moved (20) never moves', () async {
+    await settings();
+    final open = await cardPlan(await card());
+    await (db.update(
+      db.payments,
+    )..where((p) => p.planId.equals(open) & p.seq.equals(1))).write(
+      PaymentsCompanion(originalDay: Value(day('2026-10-27').epochDay)),
+    );
+    await holidays.sync(countries: shipped, region: 'TR');
+    expect((await datesOf(open)).first, day('2026-10-29'));
+  });
+
+  test('a card plan computed with an old calendar is saved on the '
+      'stored one', () async {
+    await settings();
+    final cardId = await card();
+    await holidays.sync(countries: shipped, region: 'TR');
+    // The screen built the draft before the country changed.
+    final planId = await plans.saveDraft(
+      PlanCalculator.card(
+        purchaseDate: day('2026-10-10'),
+        totalMinor: 300000,
+        count: 3,
+        terms: none,
+      ),
+      sourceId: cardId,
+      origin: PlanOrigin.template,
+      cardTerms: (terms: none),
+    );
+    expect((await datesOf(planId)).first, day('2026-10-30'));
+    // Built with the stored calendar: nothing to do.
+    final tr = shipped.firstWhere((c) => c.country == 'TR');
+    final same = await plans.saveDraft(
+      PlanCalculator.card(
+        purchaseDate: day('2026-10-10'),
+        totalMinor: 300000,
+        count: 3,
+        terms: none.withHolidays(tr),
+      ),
+      sourceId: cardId,
+      origin: PlanOrigin.template,
+      cardTerms: (terms: none.withHolidays(tr)),
+    );
+    expect((await datesOf(same)).first, day('2026-10-30'));
+  });
+
   group('the suggestion is saved once (decision 5)', () {
     test('device region', () async {
       await settings(currency: 'USD');

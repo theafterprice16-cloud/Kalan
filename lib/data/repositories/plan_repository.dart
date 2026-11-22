@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../core/engine/engine.dart';
+import '../../core/holidays/holidays.dart';
 import '../../core/reminders/reminder_models.dart' show ReminderRepeat;
 import '../db/app_database.dart';
 import '../models.dart';
@@ -84,6 +85,7 @@ class PlanRepository {
     PaymentMethod? paymentMethod,
     int? chargeSourceId,
     DateTime? now,
+    ({CardTerms terms})? cardTerms,
   }) => _db.transaction(() async {
     final paidAt = now ?? DateTime.now();
     final trimmed = title?.trim();
@@ -125,8 +127,31 @@ class PlanRepository {
           ),
       ]);
     });
+    // A card plan's dates were computed on screen with [cardTerms]; should
+    // the holiday calendar have changed since (26), they follow the
+    // stored one, as every other card date already does.
+    if (cardTerms case (:final terms) when sourceId != null) {
+      final applied = terms.withHolidays(await _appliedHolidays());
+      if (snapshotOf(_asCountry(terms.holidays)) !=
+          snapshotOf(_asCountry(applied.holidays))) {
+        await reshiftCardPlans(
+          sourceId: sourceId,
+          oldTerms: terms,
+          newTerms: applied,
+          planId: planId,
+        );
+      }
+    }
     return planId;
   });
+
+  Future<CountryHolidays?> _appliedHolidays() async =>
+      CountryHolidays.fromSnapshot(
+        (await _db.select(_db.appSettings).getSingleOrNull())?.appliedHolidays,
+      );
+
+  static CountryHolidays? _asCountry(HolidayCalendar? calendar) =>
+      calendar is CountryHolidays ? calendar : null;
 
   /// Nothing is marked or unmarked on a closed plan: its history stays as
   /// it was when it was closed (19). An unmarked payment is unpaid again
@@ -770,6 +795,15 @@ class PlanRepository {
           throw ArgumentError.value(paidBefore, 'paidBefore');
         }
         await _requireNotClosed(planId);
+        // A card's dates follow the calendar the stored dates were
+        // computed with (26), read here so a country changed while the
+        // edit screen was open cannot leave dates on the old one.
+        final given = pattern;
+        if (given is CardPattern) {
+          pattern = CardPattern(
+            given.terms.withHolidays(await _appliedHolidays()),
+          );
+        }
         final current = await (_db.select(
           _db.plans,
         )..where((p) => p.id.equals(planId))).getSingle();
@@ -896,11 +930,15 @@ class PlanRepository {
     required int sourceId,
     required CardTerms oldTerms,
     required CardTerms newTerms,
+    int? planId,
   }) => _db.transaction(() async {
     final plans =
         await (_db.select(_db.plans)..where(
               (p) =>
                   p.sourceId.equals(sourceId) &
+                  (planId == null
+                      ? const Constant(true)
+                      : p.id.equals(planId)) &
                   p.kind.equalsValue(PlanKind.card) &
                   p.status.equalsValue(PlanStatus.closed).not(),
             ))
@@ -911,7 +949,9 @@ class PlanRepository {
               (p) =>
                   p.planId.isIn([for (final plan in plans) plan.id]) &
                   p.paidAt.isNull() &
-                  p.isEdited.equals(false),
+                  p.isEdited.equals(false) &
+                  // A date the user changed (20) is theirs.
+                  p.originalDay.isNull(),
             ))
             .get();
     var moved = 0;

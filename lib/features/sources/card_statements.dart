@@ -43,7 +43,7 @@ CardStatementsView? cardStatementsOf({
   required SourceRow card,
   required Iterable<PlanWithPayments> plans,
   required LocalDate today,
-  HolidayCalendar? holidays,
+  required HolidayCalendar? holidays,
 }) {
   final terms = card.cardTermsIn(holidays);
   if (terms == null) return null;

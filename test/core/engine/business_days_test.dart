@@ -43,13 +43,18 @@ void main() {
       // Kurban Bayramı 27-30 May 2026 and the weekend after it in one
       // step, across the month end.
       ('2026-05-27', true, true, '2026-06-01', true),
-      // A weekend day that is also a holiday (30 May 2026, a Saturday).
-      ('2026-05-30', true, true, '2026-06-01', true),
+      // A weekend day that is also a holiday (30 May 2026, a Saturday):
+      // the weekend alone gives the same Monday, so no holiday note.
+      ('2026-05-30', true, true, '2026-06-01', false),
+      // 1 May 2027 is a Saturday: the weekend moves it, not the holiday.
+      ('2027-05-01', true, true, '2027-05-03', false),
       // Weekend off: Saturday 30 May 2026 is still a holiday.
       ('2026-05-30', false, true, '2026-05-31', true),
       // Year end into New Year's Day 2028 (a Saturday) and Sunday.
       ('2027-12-31', true, true, '2027-12-31', false),
-      ('2028-01-01', true, true, '2028-01-03', true),
+      ('2028-01-01', true, true, '2028-01-03', false),
+      // Weekend off: the Saturday holiday alone moves it to Sunday.
+      ('2028-01-01', false, true, '2028-01-02', true),
       // Example 5: after the list (2029), only the weekend moves.
       ('2029-01-01', true, true, '2029-01-01', false),
       ('2029-10-29', true, true, '2029-10-29', false),

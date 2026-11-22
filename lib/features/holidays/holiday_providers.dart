@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,9 +59,10 @@ final holidaySyncProvider = Provider<void>((ref) {
       return;
     }
   }
-  unawaited(
-    ref
-        .read(holidayRepositoryProvider)
-        .sync(countries: countries, region: ref.read(deviceRegionProvider)),
-  );
+  // Best effort: should it fail (the database closing as the app goes
+  // away), the next start or settings change runs it again.
+  ref
+      .read(holidayRepositoryProvider)
+      .sync(countries: countries, region: ref.read(deviceRegionProvider))
+      .ignore();
 });
