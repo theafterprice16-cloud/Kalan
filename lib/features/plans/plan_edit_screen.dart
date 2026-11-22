@@ -13,6 +13,7 @@ import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
+import '../holidays/holiday_providers.dart';
 import 'add_plan_screen.dart' show findSourceByName;
 import 'installment_fee_fields.dart';
 import 'interval_field.dart';
@@ -103,7 +104,9 @@ class _PlanEditScreenState extends ConsumerState<PlanEditScreen> {
       final interval? => IntervalPattern(interval),
       null => null,
     },
-    PlanKind.card => switch (plan.source?.cardTerms) {
+    PlanKind.card => switch (plan.source?.cardTermsIn(
+      ref.read(appliedHolidaysProvider),
+    )) {
       final terms? => CardPattern(terms),
       null => null,
     },

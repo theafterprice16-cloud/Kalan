@@ -886,6 +886,50 @@ class PlanRepository {
   Future<void> deletePlan(int planId) =>
       (_db.delete(_db.plans)..where((p) => p.id.equals(planId))).go();
 
+  /// Moves unpaid, unedited payments of a card's plans when only the days
+  /// to skip change (26): the card's holiday switch, the holiday country
+  /// or the shipped holiday list. A payment moves only when its date is
+  /// exactly what [oldTerms] give its statement ([reshiftCardDue]); a
+  /// date entered by hand stays. Paid and edited payments never move
+  /// (DECISIONS 12); a closed plan never changes. Returns how many moved.
+  Future<int> reshiftCardPlans({
+    required int sourceId,
+    required CardTerms oldTerms,
+    required CardTerms newTerms,
+  }) => _db.transaction(() async {
+    final plans =
+        await (_db.select(_db.plans)..where(
+              (p) =>
+                  p.sourceId.equals(sourceId) &
+                  p.kind.equalsValue(PlanKind.card) &
+                  p.status.equalsValue(PlanStatus.closed).not(),
+            ))
+            .get();
+    if (plans.isEmpty) return 0;
+    final rows =
+        await (_db.select(_db.payments)..where(
+              (p) =>
+                  p.planId.isIn([for (final plan in plans) plan.id]) &
+                  p.paidAt.isNull() &
+                  p.isEdited.equals(false),
+            ))
+            .get();
+    var moved = 0;
+    for (final r in rows) {
+      final next = reshiftCardDue(
+        r.date,
+        oldTerms: oldTerms,
+        newTerms: newTerms,
+      );
+      if (next == null) continue;
+      await (_db.update(_db.payments)..where((p) => p.id.equals(r.id))).write(
+        PaymentsCompanion(dueDay: Value(next.epochDay)),
+      );
+      moved++;
+    }
+    return moved;
+  });
+
   /// Moves unpaid, unedited payments of a card's plans to new dates.
   Future<void> recomputeCardPlans({
     required int sourceId,

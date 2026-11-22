@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../db/app_database.dart';
 import '../models.dart';
+import 'holiday_repository.dart';
 import 'plan_repository.dart';
 
 class SourceRepository {
@@ -26,6 +27,7 @@ class SourceRepository {
     int? statementDay,
     int? dueDay,
     bool shiftDueToBusinessDay = true,
+    bool shiftDueForHolidays = true,
     bool statementReminderEnabled = false,
     int statementReminderDays = 2,
   }) => _db
@@ -37,6 +39,7 @@ class SourceRepository {
           statementDay: Value(kind == SourceKind.card ? statementDay : null),
           dueDay: Value(kind == SourceKind.card ? dueDay : null),
           shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
+          shiftDueForHolidays: Value(shiftDueForHolidays),
           statementReminderEnabled: Value(
             kind == SourceKind.card &&
                 statementDay != null &&
@@ -59,10 +62,13 @@ class SourceRepository {
     return create(name: trimmed, kind: SourceKind.provider);
   }
 
-  /// Saves changes. When a card's days change, unpaid and unedited
-  /// payments of its card plans are moved to the new dates.
+  /// Saves changes. When a card's days or weekend switch change, unpaid
+  /// and unedited payments of its card plans are moved to the new dates
+  /// (DECISIONS 12); when only its holiday switch changes, only the dates
+  /// the card's rule gave move (26, [PlanRepository.reshiftCardPlans]).
   Future<void> update(SourceRow updated) => _db.transaction(() async {
     final old = await byId(updated.id);
+    final holidays = await appliedHolidaysOf(_db);
     var normalized = updated.kind == SourceKind.card
         ? updated
         : updated.copyWith(
@@ -71,18 +77,23 @@ class SourceRepository {
             statementReminderEnabled: false,
           );
     // The closing reminder needs the card's days.
-    if (normalized.cardTerms == null) {
+    if (normalized.cardTermsIn(holidays) == null) {
       normalized = normalized.copyWith(statementReminderEnabled: false);
     }
     await _db.update(_db.sources).replace(normalized);
-    final oldTerms = old?.cardTerms;
-    final newTerms = normalized.cardTerms;
-    if (oldTerms != null &&
-        newTerms != null &&
-        (oldTerms.statementDay != newTerms.statementDay ||
-            oldTerms.dueDay != newTerms.dueDay ||
-            oldTerms.shiftDueToBusinessDay != newTerms.shiftDueToBusinessDay)) {
+    final oldTerms = old?.cardTermsIn(holidays);
+    final newTerms = normalized.cardTermsIn(holidays);
+    if (oldTerms == null || newTerms == null) return;
+    if (oldTerms.statementDay != newTerms.statementDay ||
+        oldTerms.dueDay != newTerms.dueDay ||
+        oldTerms.shiftDueToBusinessDay != newTerms.shiftDueToBusinessDay) {
       await _plans.recomputeCardPlans(
+        sourceId: updated.id,
+        oldTerms: oldTerms,
+        newTerms: newTerms,
+      );
+    } else if (oldTerms.shiftDueForHolidays != newTerms.shiftDueForHolidays) {
+      await _plans.reshiftCardPlans(
         sourceId: updated.id,
         oldTerms: oldTerms,
         newTerms: newTerms,

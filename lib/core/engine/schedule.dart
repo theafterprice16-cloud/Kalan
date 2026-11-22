@@ -1,13 +1,9 @@
 import '../date/local_date.dart';
+import 'business_days.dart';
+
+export 'business_days.dart';
 
 enum IntervalUnit { day, week, month }
-
-/// Moves a Saturday or Sunday to the following Monday.
-LocalDate shiftToBusinessDay(LocalDate date) => switch (date.weekday) {
-  DateTime.saturday => date.addDays(2),
-  DateTime.sunday => date.addDays(1),
-  _ => date,
-};
 
 /// How often the payments of an installment plan repeat: the same day
 /// each month, or every N days (30 days, two weeks, a week, any 1-365).
@@ -121,6 +117,8 @@ class CardTerms {
     required this.statementDay,
     required this.dueDay,
     this.shiftDueToBusinessDay = true,
+    this.shiftDueForHolidays = true,
+    this.holidays,
   }) : assert(statementDay >= 1 && statementDay <= 31, 'statementDay 1-31'),
        assert(dueDay >= 1 && dueDay <= 31, 'dueDay 1-31');
 
@@ -130,8 +128,27 @@ class CardTerms {
   /// Day of month the statement must be paid (clamped in short months).
   final int dueDay;
 
-  /// Moves a due date on a weekend to the next Monday.
+  /// Moves a due date off the weekend (Saturday and Sunday, or the
+  /// holiday country's weekend days).
   final bool shiftDueToBusinessDay;
+
+  /// Moves a due date off the holiday country's public holidays (26).
+  /// Nothing moves without [holidays].
+  final bool shiftDueForHolidays;
+
+  /// The holiday country's weekend and holidays; null: "None" (Saturday
+  /// and Sunday, no holidays, exactly the rule before Roadmap 26).
+  final HolidayCalendar? holidays;
+
+  /// The same card with another holiday country (the card's days and
+  /// switches kept).
+  CardTerms withHolidays(HolidayCalendar? calendar) => CardTerms(
+    statementDay: statementDay,
+    dueDay: dueDay,
+    shiftDueToBusinessDay: shiftDueToBusinessDay,
+    shiftDueForHolidays: shiftDueForHolidays,
+    holidays: calendar,
+  );
 
   /// The statement a purchase on [purchase] lands on. A purchase on the
   /// statement day itself is included in that statement.
@@ -145,17 +162,37 @@ class CardTerms {
   LocalDate nominalDue(int year, int month) =>
       LocalDate.clamped(year, month, dueDay);
 
-  LocalDate _shift(LocalDate date) =>
-      shiftDueToBusinessDay ? shiftToBusinessDay(date) : date;
+  /// [nominal] moved by the engine's one rule ([nextBusinessDay]).
+  BusinessDayShift shiftDue(LocalDate nominal) => nextBusinessDay(
+    nominal,
+    weekends: shiftDueToBusinessDay,
+    holidays: shiftDueForHolidays,
+    calendar: holidays,
+  );
+
+  LocalDate _shift(LocalDate date) => shiftDue(date).date;
+
+  /// Whether [due], a date this card's rule gives one of its statements,
+  /// was moved past at least one public holiday: the "moved for a public
+  /// holiday" note (26). False for a date the rule does not give (an
+  /// edited or entered date) and for one moved only off a weekend.
+  bool movedForHoliday(LocalDate due) {
+    if (holidays == null || !shiftDueForHolidays) return false;
+    final statement = statementForDue(due);
+    final shift = shiftDue(_nominalDueFor(statement));
+    return shift.date == due && shift.skippedHoliday;
+  }
+
+  /// The unshifted due date of [statement]'s payment.
+  LocalDate _nominalDueFor(LocalDate statement) {
+    final nominal = nominalDue(statement.year, statement.month);
+    return nominal <= statement
+        ? nominalDue(statement.year, statement.month + 1)
+        : nominal;
+  }
 
   /// The first due date strictly after [statement], shifted if enabled.
-  LocalDate dueFor(LocalDate statement) {
-    var nominal = nominalDue(statement.year, statement.month);
-    if (nominal <= statement) {
-      nominal = nominalDue(statement.year, statement.month + 1);
-    }
-    return _shift(nominal);
-  }
+  LocalDate dueFor(LocalDate statement) => _shift(_nominalDueFor(statement));
 
   /// Due date for the month [year]/[month], shifted if enabled.
   LocalDate dueInMonth(int year, int month) => _shift(nominalDue(year, month));
@@ -279,6 +316,27 @@ LocalDate dueAfterStatements(LocalDate due, CardTerms terms, int offset) {
     statement = step(statement, 1);
   }
   return terms.dueFor(step(statement, offset));
+}
+
+/// The date a stored card payment on [date] moves to when only the days
+/// to skip change (the holiday switch, the holiday country or the holiday
+/// data, 26), or null when it stays: [date] must be exactly the date
+/// [oldTerms] give its statement, so an entered or edited date is never
+/// touched. Both terms have the same statement and due day.
+LocalDate? reshiftCardDue(
+  LocalDate date, {
+  required CardTerms oldTerms,
+  required CardTerms newTerms,
+}) {
+  assert(
+    oldTerms.statementDay == newTerms.statementDay &&
+        oldTerms.dueDay == newTerms.dueDay,
+    'only the days to skip change',
+  );
+  final statement = oldTerms.statementForDue(date);
+  if (oldTerms.dueFor(statement) != date) return null;
+  final next = newTerms.dueFor(statement);
+  return next == date ? null : next;
 }
 
 /// Card plan started midway: the next payment is on [nextDue] as the user

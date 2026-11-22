@@ -15,6 +15,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
+import '../holidays/holiday_providers.dart';
 import '../pro/pro_limit_sheet.dart';
 import '../reminders/reminder_prompt.dart';
 import 'installment_fee_fields.dart';
@@ -357,11 +358,13 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   List<SourceRow> get _cards => [
     for (final s in ref.watch(sourcesProvider).value ?? const <SourceRow>[])
-      if (s.cardTerms != null) s,
+      if (s.cardTermsIn(null) != null) s,
   ];
 
-  CardTerms? get _cardTerms =>
-      _sources.where((s) => s.id == _cardId).firstOrNull?.cardTerms;
+  CardTerms? get _cardTerms => _sources
+      .where((s) => s.id == _cardId)
+      .firstOrNull
+      ?.cardTermsIn(ref.read(appliedHolidaysProvider));
 
   /// The card's next due date after today: the suggested next payment date.
   void _suggestNextDate() {

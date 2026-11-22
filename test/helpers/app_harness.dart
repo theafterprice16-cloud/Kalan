@@ -61,6 +61,9 @@ Future<void> seedSettings(
   int? thresholdMinor,
   String? localeCode,
   int payDay = 15,
+  // "None" unless a test is about holidays (26): fixed test dates that
+  // happen to fall on a public holiday keep their old results.
+  String holidayCountry = '',
 }) => db
     .into(db.appSettings)
     .insert(
@@ -71,6 +74,7 @@ Future<void> seedSettings(
         netIncomeMinor: Value(incomeMinor),
         tightThresholdMinor: Value(thresholdMinor),
         localeCode: Value(localeCode),
+        holidayCountry: Value(holidayCountry),
       ),
     );
 
