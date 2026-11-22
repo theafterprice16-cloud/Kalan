@@ -228,8 +228,9 @@ void main() {
     expect(find.byKey(const ValueKey('choice-')), findsOneWidget);
     expect(find.byKey(const ValueKey('choice-TR')), findsOneWidget);
     expect(find.byKey(const ValueKey('choice-JP')), findsOneWidget);
-    // No verified list: not offered.
-    expect(find.byKey(const ValueKey('choice-TW')), findsNothing);
+    expect(find.byKey(const ValueKey('choice-TW')), findsOneWidget);
+    // No official year list: not offered.
+    expect(find.byKey(const ValueKey('choice-SA')), findsNothing);
     expect(
       find.descendant(
         of: find.byKey(const ValueKey('choice-TR')),

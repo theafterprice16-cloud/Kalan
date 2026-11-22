@@ -3315,7 +3315,7 @@ abstract class AppLocalizations {
   /// Country name by ISO 3166-1 code in the holiday country list. Add a branch when adding a country to assets/holidays.json. Use the usual short name in your language.
   ///
   /// In en, this message translates to:
-  /// **'{code, select, AR{Argentina} BR{Brazil} CA{Canada} CH{Switzerland} CL{Chile} CN{China} CO{Colombia} DE{Germany} ES{Spain} FR{France} GB{United Kingdom} ID{Indonesia} IT{Italy} JP{Japan} MX{Mexico} NL{Netherlands} PL{Poland} PT{Portugal} RU{Russia} SE{Sweden} TR{Türkiye} US{United States} other{{code}}}'**
+  /// **'{code, select, AR{Argentina} BR{Brazil} CA{Canada} CH{Switzerland} CL{Chile} CN{China} CO{Colombia} DE{Germany} ES{Spain} FR{France} GB{United Kingdom} ID{Indonesia} IT{Italy} JP{Japan} MX{Mexico} NL{Netherlands} PL{Poland} PT{Portugal} RU{Russia} SE{Sweden} TR{Türkiye} TW{Taiwan} US{United States} VN{Vietnam} other{{code}}}'**
   String holidayCountryName(String code);
 }
 

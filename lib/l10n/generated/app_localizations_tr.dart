@@ -2542,7 +2542,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'RU': 'Rusya',
       'SE': 'İsveç',
       'TR': 'Türkiye',
+      'TW': 'Tayvan',
       'US': 'ABD',
+      'VN': 'Vietnam',
       'other': '$code',
     });
     return '$_temp0';

@@ -8,9 +8,12 @@ import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/l10n/app_locales.dart';
 
 /// The main countries of the 22 local versions (Ülke Notları; es-419 and
-/// ar name several, decision 1) whose official sources could not be
-/// verified on 22 November 2026. They are not in the file.
-const unverified = {'TW', 'VN', 'SA', 'AE', 'EG'};
+/// ar name several, decision 1) with no official year list: religious
+/// holidays are announced only after the moon is sighted. They stay out
+/// until an official list exists (product owner, 22 November 2026: no
+/// Umm al-Qura estimate, no central bank list, no short announced period,
+/// no weekend-only entry).
+const unverified = {'SA', 'AE', 'EG'};
 
 /// Every main country decision 1 asks for, by local version.
 const mainCountries = <String, List<String>>{
@@ -321,8 +324,8 @@ void main() {
     test('"None" when neither has data', () {
       expect(
         suggestHolidayCountry(
-          region: 'TW',
-          currencyCountries: of('TWD'),
+          region: 'SA',
+          currencyCountries: of('SAR'),
           available: available,
         ),
         isNull,
