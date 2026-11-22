@@ -111,6 +111,37 @@ void main() {
     expect(find.text('30 Kas 2026'), findsOneWidget);
   });
 
+  testWidgets('a payment the user moved carries no holiday note', (
+    tester,
+  ) async {
+    late ({int card, int plan}) ids;
+    final db = await pumpApp(
+      tester,
+      today: today,
+      seed: (db) async => ids = await seedHakan(db),
+    );
+    await settle(tester);
+    await tester.runAsync(
+      () =>
+          (db.update(
+            db.payments,
+          )..where((p) => p.planId.equals(ids.plan) & p.seq.equals(1))).write(
+            PaymentsCompanion(
+              originalDay: Value(LocalDate(2026, 10, 29).epochDay),
+            ),
+          ),
+    );
+    await settle(tester);
+    unawaited(
+      ProviderScope.containerOf(tester.element(find.byType(KalanApp)))
+          .read(routerProvider)
+          .push(Routes.plan(ids.plan)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('30 Eki 2026'), findsOneWidget);
+    expect(find.text('Resmî tatil nedeniyle kaydırıldı'), findsNothing);
+  });
+
   testWidgets('card settings: the switch under the weekend one, its note, '
       'and turning it off moves the date back (example 1 to 6)', (
     tester,

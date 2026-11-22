@@ -232,17 +232,26 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                       key: const ValueKey('holiday-shift'),
                       contentPadding: EdgeInsets.zero,
                       title: Text(l10n.fieldShiftHolidays),
-                      subtitle: Text(
-                        switch (ref.watch(appliedHolidaysProvider)) {
-                          final calendar? => l10n.holidayListUntil(
-                            calendar.lastYear,
-                          ),
-                          null => l10n.holidayNoCountry,
-                        },
-                        key: const ValueKey('holiday-list-note'),
-                        style: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: context.colors.textMuted),
-                      ),
+                      subtitle: switch ((
+                        ref.watch(appliedHolidaysProvider),
+                        ref.watch(holidayCountriesProvider),
+                      )) {
+                        (final calendar?, _) => Text(
+                          l10n.holidayListUntil(calendar.lastYear),
+                          key: const ValueKey('holiday-list-note'),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.colors.textMuted),
+                        ),
+                        // "None": Settings has the choice. Without a list
+                        // (it did not read) Settings has no row: no note.
+                        (null, _?) => Text(
+                          l10n.holidayNoCountry,
+                          key: const ValueKey('holiday-list-note'),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.colors.textMuted),
+                        ),
+                        (null, null) => null,
+                      },
                       value: _holidayShift,
                       onChanged: (v) => setState(() => _holidayShift = v),
                     ),

@@ -321,6 +321,37 @@ void main() {
     expect((await datesOf(same)).first, day('2026-10-30'));
   });
 
+  test('an edit adding a payment uses the stored calendar', () async {
+    await settings();
+    final cardId = await card();
+    await holidays.sync(countries: shipped, region: 'TR');
+    final tr = shipped.firstWhere((c) => c.country == 'TR');
+    // 29 Aug 2026 is a Saturday: due 31 Aug, then 29 Sep.
+    final planId = await plans.saveDraft(
+      PlanCalculator.midway(
+        totalCount: 2,
+        remainingCount: 2,
+        installmentMinor: 1000,
+        nextDate: day('2026-08-31'),
+        cardTerms: none.withHolidays(tr),
+      ),
+      sourceId: cardId,
+      origin: PlanOrigin.manual,
+    );
+    // The edit screen still had the calendar from before ("None").
+    await plans.editPlan(
+      planId,
+      count: 3,
+      paidBefore: 0,
+      pattern: const CardPattern(none),
+    );
+    expect(await datesOf(planId), [
+      day('2026-08-31'),
+      day('2026-09-29'),
+      day('2026-10-30'),
+    ]);
+  });
+
   group('the suggestion is saved once (decision 5)', () {
     test('device region', () async {
       await settings(currency: 'USD');
