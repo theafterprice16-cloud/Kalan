@@ -508,5 +508,14 @@
   "adjustFeesStay": "Taksit ücretleri ({fees}) aynı kalır.",
   "productPriceLabel": "Ürün fiyatı",
   "productPriceHelper": "Peşin alsaydın ödeyeceğin fiyat.",
-  "priceDifferenceLabel": "Fark"
+  "priceDifferenceLabel": "Fark",
+  "providerStartTitle": "Sağlayıcıdan başla",
+  "providerStartHint": "Ödeme sayısı ve tarihler dolu gelir; hepsini değiştirebilirsin.",
+  "providerVariantSameDay": "{count, plural, other{{count} taksit · aylık}}",
+  "providerVariantEveryDays": "{count, plural, other{{count} taksit}} · {days, plural, other{{days} günde bir}}",
+  "providerVariantBiweekly": "{count, plural, other{{count} taksit · iki haftada bir}}",
+  "providerVariantPayLaterDays": "{days, plural, other{Tek ödeme · {days} gün sonra}}",
+  "providerVariantPayLaterNextMonth": "Tek ödeme · gelecek ayın {day}. günü",
+  "providerVariantOptions": "{count, plural, other{{count} seçenek}}",
+  "providerTemplateNote": "{provider} için başlangıç değerleri · Son kontrol: {date}. Koşulların farklıysa değiştir."
 }

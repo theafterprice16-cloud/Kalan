@@ -1,0 +1,928 @@
+{
+  "schemaVersion": 1,
+  "templates": [
+    {
+      "country": "AE",
+      "id": "tabby",
+      "name": "Tabby",
+      "sources": [
+        "https://tabby.ai/en-AE/pay-in-4"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "BE",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/be/betaalmethodes/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "BE",
+      "id": "riverty",
+      "name": "Riverty",
+      "sources": [
+        "https://www.riverty.com/nl-be/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 14
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "CA",
+      "id": "afterpay",
+      "name": "Afterpay",
+      "sources": [
+        "https://www.afterpay.com/en-CA/how-it-works"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    },
+    {
+      "country": "CA",
+      "id": "paypal",
+      "name": "PayPal",
+      "sources": [
+        "https://www.paypal.com/ca/cshelp/article/what-is-pay-in-4-help463"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    },
+    {
+      "country": "CH",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/ch/zahlungsmethoden/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "CH",
+      "id": "twint",
+      "name": "TWINT",
+      "sources": [
+        "https://www.twint.ch/privatkunden/bezahlen/spaeter-bezahlen/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "DE",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/de/zahlungsmethoden/bezahle-in-3-raten/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "DE",
+      "id": "paypal",
+      "name": "PayPal",
+      "sources": [
+        "https://www.paypal.com/de/cshelp/article/was-ist-bezahlung-nach-30-tagen-help463"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "DE",
+      "id": "riverty",
+      "name": "Riverty",
+      "sources": [
+        "https://www.riverty.com/de/jetzt-kaufen-spaeter-bezahlen/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 14
+        }
+      ]
+    },
+    {
+      "country": "ES",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/es/formas-de-pago/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "ES",
+      "id": "scalapay",
+      "name": "Scalapay",
+      "sources": [
+        "https://www.scalapay.com/es/app-scalapay"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "ES",
+      "id": "sequra",
+      "name": "seQura",
+      "sources": [
+        "https://www.sequra.com/es"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 7
+        }
+      ]
+    },
+    {
+      "country": "FR",
+      "id": "alma",
+      "name": "Alma",
+      "sources": [
+        "https://almapay.com/fr-FR/produits/pay-later"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 15
+        }
+      ]
+    },
+    {
+      "country": "FR",
+      "id": "floa",
+      "name": "FLOA",
+      "sources": [
+        "https://www.floa.com/solution-paiement/paiement-3-4-fois"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "FR",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/fr/paiements/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "FR",
+      "id": "oney",
+      "name": "Oney",
+      "sources": [
+        "https://www.oney.fr/guide-pratique-au-quotidien/a-vos-cotes/solutions/tout-comprendre-au-3fois-4fois"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "everyDays",
+          "intervalDays": 30
+        }
+      ]
+    },
+    {
+      "country": "FR",
+      "id": "paypal",
+      "name": "PayPal",
+      "sources": [
+        "https://www.paypal.com/fr/cshelp/article/quest-ce-que-le-paiement-en-4x%C2%A0-help463"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "GB",
+      "id": "clearpay",
+      "name": "Clearpay",
+      "sources": [
+        "https://developers.clearpay.co.uk/what-is-clearpay"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    },
+    {
+      "country": "GB",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/uk/payments/pay-in-3/",
+        "https://www.klarna.com/uk/payments/pay-in-30-days/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "GB",
+      "id": "paypal",
+      "name": "PayPal",
+      "sources": [
+        "https://www.paypal.com/uk/cshelp/article/what-is-pay-in-3--help463"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "ID",
+      "id": "kredivo",
+      "name": "Kredivo",
+      "sources": [
+        "https://www.kredivo.com/faqs/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        },
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30,
+          "first": "afterInterval"
+        },
+        {
+          "kind": "monthly",
+          "count": 6,
+          "interval": "everyDays",
+          "intervalDays": 30,
+          "first": "afterInterval"
+        },
+        {
+          "kind": "monthly",
+          "count": 12,
+          "interval": "everyDays",
+          "intervalDays": 30,
+          "first": "afterInterval"
+        }
+      ]
+    },
+    {
+      "country": "IT",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/it/opzioni-di-pagamento/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "IT",
+      "id": "paypal",
+      "name": "PayPal",
+      "sources": [
+        "https://www.paypal.com/it/cshelp/article/cos%C3%A8-paga-in-3-rate-help463"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "IT",
+      "id": "scalapay",
+      "name": "Scalapay",
+      "sources": [
+        "https://www.scalapay.com/it/come-funziona-scalapay"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "JP",
+      "id": "paidy",
+      "name": "Paidy",
+      "sources": [
+        "https://paidy.com/guide/",
+        "https://cs-support.paidy.com/support/solutions/articles/150000040637-3%E3%83%BB6%E3%83%BB12%E5%9B%9E%E3%81%82%E3%81%A8%E6%89%95%E3%81%84%E3%81%8C%E3%81%A9%E3%82%93%E3%81%AA%E3%82%B5%E3%83%BC%E3%83%93%E3%82%B9%E3%81%8B%E7%9F%A5%E3%82%8A%E3%81%9F%E3%81%84"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "nextMonthDay",
+          "payLaterValue": 27
+        },
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay",
+          "first": "nextMonthDay",
+          "firstDay": 27
+        },
+        {
+          "kind": "monthly",
+          "count": 6,
+          "interval": "sameDay",
+          "first": "nextMonthDay",
+          "firstDay": 27
+        },
+        {
+          "kind": "monthly",
+          "count": 12,
+          "interval": "sameDay",
+          "first": "nextMonthDay",
+          "firstDay": 27
+        }
+      ]
+    },
+    {
+      "country": "MY",
+      "id": "atome",
+      "name": "Atome",
+      "sources": [
+        "https://www.atome.my/en-my/how-it-works"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "MY",
+      "id": "grab-paylater",
+      "name": "Grab PayLater",
+      "sources": [
+        "https://help.grab.com/passenger/en-my/900003459066"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 8,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 12,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "NL",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/nl/betaalmethodes/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "NL",
+      "id": "riverty",
+      "name": "Riverty",
+      "sources": [
+        "https://www.riverty.com/nl-nl/achteraf-betalen/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30,
+          "first": "afterInterval"
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 14
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "PL",
+      "id": "allegro-pay",
+      "name": "Allegro Pay",
+      "sources": [
+        "https://allegro.pl/pomoc/dla-kupujacych/allegro-pay/czym-jest-i-jak-dziala-allegro-pay-9dmDRk7x7HP"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "PL",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/pl/opcje-platnosci/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "PL",
+      "id": "paypo",
+      "name": "PayPo",
+      "sources": [
+        "https://paypo.pl/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "PL",
+      "id": "twisto",
+      "name": "Twisto",
+      "sources": [
+        "https://www.twisto.pl/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        },
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "PT",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/pt/formas-de-pagamento/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "everyDays",
+          "intervalDays": 30
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "PT",
+      "id": "scalapay",
+      "name": "Scalapay",
+      "sources": [
+        "https://www.scalapay.com/pt/como-funciona-o-scalapay"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "RU",
+      "id": "dolyame",
+      "name": "Долями",
+      "sources": [
+        "https://dolyame.ru/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    },
+    {
+      "country": "RU",
+      "id": "yandex-split",
+      "name": "Яндекс Сплит",
+      "sources": [
+        "https://bank.yandex.ru/split"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    },
+    {
+      "country": "SE",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/se/betalningsalternativ/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "SE",
+      "id": "qliro",
+      "name": "Qliro",
+      "sources": [
+        "https://qliro.com/sv/for-shoppare/betala"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 14
+        }
+      ]
+    },
+    {
+      "country": "SG",
+      "id": "atome",
+      "name": "Atome",
+      "sources": [
+        "https://www.atome.sg/how-it-works"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "SG",
+      "id": "grab-paylater",
+      "name": "Grab PayLater",
+      "sources": [
+        "https://help.grab.com/passenger/en-sg/900003459066",
+        "https://www.grab.com/sg/consumer/finance/paylater/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 4,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 8,
+          "interval": "sameDay"
+        },
+        {
+          "kind": "monthly",
+          "count": 12,
+          "interval": "sameDay"
+        }
+      ]
+    },
+    {
+      "country": "US",
+      "id": "affirm",
+      "name": "Affirm",
+      "sources": [
+        "https://helpcenter.affirm.com/s/article/payments-overview"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "monthly",
+          "count": 3,
+          "interval": "sameDay",
+          "first": "afterInterval"
+        },
+        {
+          "kind": "monthly",
+          "count": 6,
+          "interval": "sameDay",
+          "first": "afterInterval"
+        },
+        {
+          "kind": "monthly",
+          "count": 12,
+          "interval": "sameDay",
+          "first": "afterInterval"
+        }
+      ]
+    },
+    {
+      "country": "US",
+      "id": "afterpay",
+      "name": "Afterpay",
+      "sources": [
+        "https://www.afterpay.com/en-US/how-it-works"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    },
+    {
+      "country": "US",
+      "id": "klarna",
+      "name": "Klarna",
+      "sources": [
+        "https://www.klarna.com/us/payments/pay-in-4/",
+        "https://www.klarna.com/us/payments/pay-in-30-days/"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
+        }
+      ]
+    },
+    {
+      "country": "US",
+      "id": "paypal",
+      "name": "PayPal",
+      "sources": [
+        "https://www.paypal.com/us/cshelp/article/what-is-pay-in-4-help463"
+      ],
+      "checked": "2026-11-22",
+      "variants": [
+        {
+          "kind": "payIn4"
+        }
+      ]
+    }
+  ]
+}

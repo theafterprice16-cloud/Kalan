@@ -508,7 +508,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "de": [
@@ -1020,7 +1029,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "de_CH": [
@@ -1532,7 +1550,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "es": [
@@ -2044,7 +2071,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "es_419": [
@@ -2556,7 +2592,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "fr": [
@@ -3068,7 +3113,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "fr_CA": [
@@ -3580,7 +3634,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "id": [
@@ -4092,7 +4155,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "it": [
@@ -4604,7 +4676,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "ja": [
@@ -5116,7 +5197,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "nl": [
@@ -5628,7 +5718,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "pl": [
@@ -6140,7 +6239,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "pt": [
@@ -6652,7 +6760,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "pt_BR": [
@@ -7164,7 +7281,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "pt_PT": [
@@ -7676,7 +7802,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "ru": [
@@ -8188,7 +8323,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "sv": [
@@ -8700,7 +8844,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "vi": [
@@ -9212,7 +9365,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "zh": [
@@ -9724,7 +9886,16 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ],
 
   "zh_Hant": [
@@ -10236,6 +10407,15 @@
     "adjustFeesStay",
     "productPriceLabel",
     "productPriceHelper",
-    "priceDifferenceLabel"
+    "priceDifferenceLabel",
+    "providerStartTitle",
+    "providerStartHint",
+    "providerVariantSameDay",
+    "providerVariantEveryDays",
+    "providerVariantBiweekly",
+    "providerVariantPayLaterDays",
+    "providerVariantPayLaterNextMonth",
+    "providerVariantOptions",
+    "providerTemplateNote"
   ]
 }

@@ -2395,4 +2395,101 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get priceDifferenceLabel => 'Fark';
+
+  @override
+  String get providerStartTitle => 'Sağlayıcıdan başla';
+
+  @override
+  String get providerStartHint =>
+      'Ödeme sayısı ve tarihler dolu gelir; hepsini değiştirebilirsin.';
+
+  @override
+  String providerVariantSameDay(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit · aylık',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerVariantEveryDays(int count, int days) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$daysString günde bir',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String providerVariantBiweekly(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString taksit · iki haftada bir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerVariantPayLaterDays(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Tek ödeme · $daysString gün sonra',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerVariantPayLaterNextMonth(int day) {
+    return 'Tek ödeme · gelecek ayın $day. günü';
+  }
+
+  @override
+  String providerVariantOptions(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString seçenek',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerTemplateNote(String provider, String date) {
+    return '$provider için başlangıç değerleri · Son kontrol: $date. Koşulların farklıysa değiştir.';
+  }
 }

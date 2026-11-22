@@ -2394,6 +2394,109 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get priceDifferenceLabel => 'Difference';
+
+  @override
+  String get providerStartTitle => 'Start from a provider';
+
+  @override
+  String get providerStartHint =>
+      'Fills the number of payments and the dates; you can change all of them.';
+
+  @override
+  String providerVariantSameDay(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString payments · monthly',
+      one: '1 payment · monthly',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerVariantEveryDays(int count, int days) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString payments',
+      one: '1 payment',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'every $daysString days',
+      one: 'every day',
+    );
+    return '$_temp0 · $_temp1';
+  }
+
+  @override
+  String providerVariantBiweekly(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString payments · every 2 weeks',
+      one: '1 payment · every 2 weeks',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerVariantPayLaterDays(int days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'One payment · $daysString days later',
+      one: 'One payment · 1 day later',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerVariantPayLaterNextMonth(int day) {
+    return 'One payment · next month on day $day';
+  }
+
+  @override
+  String providerVariantOptions(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString options',
+      one: '1 option',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String providerTemplateNote(String provider, String date) {
+    return 'Starting values for $provider · Last checked: $date. Change them if your terms differ.';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
