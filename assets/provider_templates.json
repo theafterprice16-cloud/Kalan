@@ -89,20 +89,6 @@
       ]
     },
     {
-      "country": "CA",
-      "id": "sezzle",
-      "name": "Sezzle",
-      "sources": [
-        "https://sezzle.com/en-ca/how-it-works/"
-      ],
-      "checked": "2026-11-22",
-      "variants": [
-        {
-          "kind": "payIn4"
-        }
-      ]
-    },
-    {
       "country": "CH",
       "id": "klarna",
       "name": "Klarna",
@@ -637,6 +623,11 @@
           "kind": "payLater",
           "payLater": "days",
           "payLaterValue": 14
+        },
+        {
+          "kind": "payLater",
+          "payLater": "days",
+          "payLaterValue": 30
         }
       ]
     },

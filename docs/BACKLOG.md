@@ -58,3 +58,5 @@ Rakiplerde var, Kalan'da yok; eklenmez ve önerilmez:
 - Kredi ve kart teklifi (Credit Karma)
 - AI sohbet ve koç (StatementBear)
 - Bulut eşitleme ve ortak hane (ilk sürümde yok)
+
+- ~~**Sağlayıcı hazır şablonları**~~ Tamamlandı (22 Kasım 2026, yol haritası 25): plan eklemede plan türlerinin altında "Sağlayıcıdan başla"; cihaz bölgesine göre en çok 5 sağlayıcı, ada göre sıralı, düz metin ve harf rozeti; seçince tür, taksit sayısı, aralık, ilk ödeme günü ya da "sonra öde" kuralı ve kaynak dolu gelir, tutarı kullanıcı yazar; her alan değiştirilebilir; formun altında "başlangıç değerleri · son kontrol" notu; kaynak yalnızca kayıtta oluşur; şablonlar uygulamayla gelen dosyada (19 ülke, resmî kaynak linkli), 6 aydan eski şablona CI uyarısı. Ücretsiz. Kapsam dışı: ücret, faiz, gecikme kuralı, logo, internetten güncelleme.

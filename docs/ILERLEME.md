@@ -51,6 +51,7 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 23. Faizli planlarda toplam geri ödeme (21 Kasım 2026): aylık taksit, kart taksidi ve elle girişte "Ayrıntı ekle" / "Daha fazla seçenek" altında isteğe bağlı "Ürün fiyatı" ("Peşin alsaydın ödeyeceğin fiyat."); plan özetinde tek "Toplam geri ödeme" satırı (22'nin "Toplam"ı), altında "Ürün fiyatı" ve "Fark" yalnızca fark sıfırdan büyükken ve plan açıkken; önizlemede de; toplam bütün taksitler + taksit başı ücret, ek ücret hariç; yalnızca gösterim, kalan, dönem ve bildirim değişmez; para birimi değişince fiyat ölçeklenir; şema v18
 - 24. Diller ve yerel sürümler, altyapı (21 Kasım 2026): 22 yerel sürümün dil dosyaları boş açıldı (çeviri yok); hangi dilin açık olduğu tek listede (bugün yalnızca Türkçe ve English); çevrilmeyi bekleyen metinler `docs/ceviriler/cevrilecekler.json`'da kendiliğinden birikir (test ve CI denetler); telefon dili yalnızca gözden geçirilmiş dillerle eşleşir, dil seçicide dil adları kendi dillerinde, taslak dile "Taslak" notu; iOS ve Android dil listeleri aynı kaynaktan; sağdan sola düzen ("ar" testleri ve 93-94 golden'ları), Batı rakamları (Arapça tarihler dahil, Arapça klavyeyle tutar girişi), çoğul kategorisi testi, %40 uzun metin testi; çubuk altı tutar artık kelime ortasından bölünmez (sütun genişler, satır kayar); gecikme notu dar sütunda satır kırar. Çeviriler yol haritasının sonundaki toplu çeviride
+- 25. Sağlayıcı hazır şablonları (22 Kasım 2026): plan eklemede tür çiplerinin altında "Sağlayıcıdan başla"; telefonun bölgesine göre (uygulama dilinden bağımsız) en çok 5 sağlayıcı, ada göre sıralı, düz metin ve harf rozeti; tek kalıpta form hemen dolar, birden çokta kısa seçim sayfası; tür, taksit sayısı, aralık, ilk ödeme günü ya da "sonra öde" kuralı ve kaynak dolu gelir, tutar kullanıcıdan; her alan değiştirilebilir, alan sayısı aynı; formun altında "başlangıç değerleri · son kontrol" notu; aynı adlı sağlayıcı kaynağı varsa o, yoksa kaynak yalnızca kayıtta oluşur; şablonlar uygulamayla gelen dosyada (19 ülke, 46 şablon, resmî kaynak linkli, ücret/faiz yok); 6 aydan eski şablona CI uyarısı, yayın öncesi kontrol listesi (docs/YAYIN_KONTROL.md); şema değişmedi
 
 Ara işler:
 
@@ -58,7 +59,7 @@ Ara işler:
 
 ## Sıradaki
 
-- 25. maddeden devam (liste: `kalan_kaynak.py liste`); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
+- 26. maddeden devam (liste: `kalan_kaynak.py liste`); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
 
 ## Yarım kalan
 
