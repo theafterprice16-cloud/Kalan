@@ -19,6 +19,9 @@ import 'package:kalan/entitlement/pro_controller.dart';
 import 'package:kalan/entitlement/pro_rules.dart';
 import 'package:kalan/entitlement/pro_status_store.dart';
 import 'package:kalan/entitlement/store_gateway.dart';
+import 'package:kalan/features/lock/app_lock_controller.dart';
+import 'package:kalan/features/lock/app_lock_store.dart';
+import 'package:kalan/features/lock/device_lock_gateway.dart';
 import 'package:kalan/features/plans/provider_templates_ui.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
@@ -29,6 +32,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../helpers/app_harness.dart';
 import '../helpers/calendar_seed.dart';
 import '../helpers/charge_seed.dart';
+import '../helpers/fake_device_lock.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
 import '../helpers/fonts.dart';
@@ -174,6 +178,17 @@ Future<void> seedHoliday(AppDatabase db) async {
     origin: PlanOrigin.template,
     title: 'Telefon',
   );
+}
+
+/// Decodes the images on screen (the lock screen's mark) before a shot.
+Future<void> loadImages(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      final image = element.widget as Image;
+      await precacheImage(image.image, element);
+    }
+  });
+  await tester.pumpAndSettle();
 }
 
 Future<void> shoot(WidgetTester tester, String name) async {
@@ -1847,6 +1862,137 @@ void main() {
           await shoot(tester, '100-plan-detail-holiday-$lang-$theme');
         });
       }
+
+      // App lock (27): the lock screen, the app switcher cover and the
+      // Settings rows, in both languages.
+      for (final (lang, locale, settingsTab) in [
+        ('tr', const Locale('tr', 'TR'), 'Ayarlar'),
+        ('en', const Locale('en', 'US'), 'Settings'),
+      ]) {
+        Future<FakeDeviceLock> startLocked(
+          WidgetTester tester, {
+          bool enabled = true,
+          bool hold = false,
+          bool screenLock = true,
+          AppLockNotice? notice,
+        }) async {
+          final phone = FakeDeviceLock(hold: hold, screenLock: screenLock);
+          await start(
+            tester,
+            locale: locale,
+            extra: [
+              appLockStoreProvider.overrideWithValue(
+                MemoryAppLockStore(
+                  AppLockSettings(enabled: enabled, notice: notice),
+                ),
+              ),
+              deviceLockGatewayProvider.overrideWithValue(phone),
+              appIsActiveProvider.overrideWithValue(() => true),
+            ],
+          );
+          await loadImages(tester);
+          return phone;
+        }
+
+        Future<void> openLock(WidgetTester tester) async {
+          await openTab(tester, settingsTab);
+          const key = ValueKey('app-lock');
+          await scrollTo(tester, find.byKey(key));
+          final top = tester.getTopLeft(find.byKey(key)).dy;
+          await tester.drag(
+            find.byType(Scrollable).first,
+            Offset(0, 200 - top),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+        }
+
+        testWidgets('lock screen, $lang', (tester) async {
+          await startLocked(tester, hold: true);
+          await shoot(tester, '101-lock-screen-$lang-$theme');
+        });
+
+        testWidgets('settings, app lock off, $lang', (tester) async {
+          await startLocked(tester, enabled: false);
+          await openLock(tester);
+          await shoot(tester, '103-settings-app-lock-off-$lang-$theme');
+        });
+
+        testWidgets('settings, app lock on, amounts row, $lang', (
+          tester,
+        ) async {
+          await startLocked(tester);
+          await openLock(tester);
+          await shoot(tester, '104-settings-app-lock-on-$lang-$theme');
+        });
+
+        testWidgets('settings, needs a screen lock, $lang', (tester) async {
+          await startLocked(tester, enabled: false, screenLock: false);
+          await openLock(tester);
+          await tester.tap(find.byKey(const ValueKey('app-lock')));
+          await shoot(
+            tester,
+            '105-settings-app-lock-no-screen-lock-$lang-$theme',
+          );
+        });
+
+        testWidgets('settings, turned off once, $lang', (tester) async {
+          await startLocked(tester, screenLock: false);
+          await openLock(tester);
+          await shoot(tester, '106-settings-app-lock-turned-off-$lang-$theme');
+        });
+
+        testWidgets('lock again choice, $lang', (tester) async {
+          await startLocked(tester);
+          await openLock(tester);
+          await tester.tap(find.byKey(const ValueKey('app-lock-delay')));
+          await shoot(tester, '107-lock-again-choice-$lang-$theme');
+        });
+      }
+
+      testWidgets('app switcher cover', (tester) async {
+        await start(
+          tester,
+          extra: [
+            appLockStoreProvider.overrideWithValue(
+              MemoryAppLockStore(const AppLockSettings(enabled: true)),
+            ),
+            deviceLockGatewayProvider.overrideWithValue(FakeDeviceLock()),
+            appIsActiveProvider.overrideWithValue(() => true),
+          ],
+        );
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.inactive,
+        );
+        await tester.pump();
+        await loadImages(tester);
+        await shoot(tester, '102-app-switcher-cover-$theme');
+        tester.binding.handleAppLifecycleStateChanged(
+          AppLifecycleState.resumed,
+        );
+        // The time zone is read on resume (no platform answer in tests).
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('ios, app lock switch', variant: ios, (tester) async {
+        await start(
+          tester,
+          extra: [
+            appLockStoreProvider.overrideWithValue(
+              MemoryAppLockStore(const AppLockSettings(enabled: true)),
+            ),
+            deviceLockGatewayProvider.overrideWithValue(FakeDeviceLock()),
+            appIsActiveProvider.overrideWithValue(() => true),
+          ],
+        );
+        await openTab(tester, 'Ayarlar');
+        const key = ValueKey('app-lock');
+        await scrollTo(tester, find.byKey(key));
+        final top = tester.getTopLeft(find.byKey(key)).dy;
+        await tester.drag(find.byType(Scrollable).first, Offset(0, 200 - top));
+        await tester.pump(const Duration(milliseconds: 400));
+        await shoot(tester, '108-ios-app-lock-$theme');
+      });
 
       testWidgets('ios, change date', variant: ios, (tester) async {
         await start(
