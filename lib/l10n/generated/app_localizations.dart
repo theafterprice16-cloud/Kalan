@@ -3215,6 +3215,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Difference'**
   String get priceDifferenceLabel;
+
+  /// Plan ekleme: plan türlerinin altındaki bölümün başlığı; sağlayıcı adına dokununca form bilinen kalıpla dolar. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: heading of the section under the plan types; tapping a provider fills the form with its usual pattern. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'Start from a provider'**
+  String get providerStartTitle;
+
+  /// Plan ekleme: bölüm başlığının altındaki kısa not. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: short note under the section heading. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'Fills the payment count and interval; you can change all of them.'**
+  String get providerStartHint;
+
+  /// Sağlayıcı kalıbı: her ay aynı gün ödenen taksitler. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments on the same day every month. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment · monthly} other{{count} payments · monthly}}'**
+  String providerVariantSameDay(int count);
+
+  /// Sağlayıcı kalıbı: belli gün aralığıyla ödenen taksitler (ör. 30 günde bir). Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments a set number of days apart (e.g. every 30 days). Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment} other{{count} payments}} · {days, plural, =1{every day} other{every {days} days}}'**
+  String providerVariantEveryDays(int count, int days);
+
+  /// Sağlayıcı kalıbı: iki haftada bir ödenen taksitler. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments every two weeks. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment · every 2 weeks} other{{count} payments · every 2 weeks}}'**
+  String providerVariantBiweekly(int count);
+
+  /// Sağlayıcı kalıbı: alışverişten belli gün sonra tek ödeme. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: one payment a number of days after the purchase. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{One payment · 1 day later} other{One payment · {days} days later}}'**
+  String providerVariantPayLaterDays(int days);
+
+  /// Sağlayıcı kalıbı: alışverişten sonraki ayın belli gününde tek ödeme. {day} ayın günüdür (1-31), sayma değildir. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: one payment on a day of the month after the purchase. {day} is a day of the month (1-31), not a count. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'One payment · next month on day {day}'**
+  String providerVariantPayLaterNextMonth(int day);
+
+  /// Sağlayıcı satırı: birden çok kalıbı olan sağlayıcının altında; dokununca seçenekler açılır. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider row: under a provider with several patterns; tapping opens them. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 option} other{{count} options}}'**
+  String providerVariantOptions(int count);
+
+  /// Plan ekleme formunun altında, sağlayıcıdan başlanınca. {date} ay ve yıldır (ör. Kas 2026). Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Under the add plan form after starting from a provider. {date} is a month and year (e.g. Nov 2026). Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
+  ///
+  /// In en, this message translates to:
+  /// **'Starting values for {provider} · Last checked: {date}. Change them if your terms differ.'**
+  String providerTemplateNote(String provider, String date);
 }
 
 class _AppLocalizationsDelegate

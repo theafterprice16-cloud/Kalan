@@ -24,6 +24,7 @@ const notCounts = {
   'cardSummary', // statement and due days of the month
   'paySummaryMonthly', // day of the month
   'payLaterNextMonthDay', // day of the month
+  'providerVariantPayLaterNextMonth', // day of the month
   'planPaidOf', // "2/4 paid"
   'numberValue', // a bare number
   'previewSameMonthItem', // "August 2027 (2)"

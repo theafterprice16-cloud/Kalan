@@ -10,6 +10,7 @@ import '../../core/design/widgets.dart';
 import '../../core/engine/engine.dart';
 import '../../core/routing/routes.dart';
 import '../../core/routing/tab_messengers.dart';
+import '../../core/templates/provider_templates.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
@@ -21,6 +22,7 @@ import 'interval_field.dart';
 import 'pay_later_form.dart';
 import 'payment_method_ui.dart';
 import 'product_price_field.dart';
+import 'provider_templates_ui.dart';
 
 /// Ways to add a plan. The first three are templates: one screen, at most
 /// four fields. Any of them can be "already underway". "Pay later" is one
@@ -82,6 +84,12 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
   InstallmentFeeScope _feeScope = InstallmentFeeScope.everyPayment;
 
   AddMode _mode = AddMode.payIn4;
+
+  /// The provider template the form was filled from (25), and the source
+  /// name it wrote. Only starting values: every field stays editable and
+  /// the saved plan keeps no trace of it.
+  TemplateChoice? _template;
+  String? _templateSourceName;
 
   /// The amount typed for plans with several payments; it starts with the
   /// one used last (the total until a plan is saved).
@@ -161,6 +169,54 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     for (final c in _payLater.controllers) {
       c.addListener(_refresh);
     }
+  }
+
+  /// The mode a template variant fills.
+  static AddMode _modeOf(TemplateVariant v) => switch (v.kind) {
+    PlanKind.payIn4 => AddMode.payIn4,
+    PlanKind.payLater => AddMode.payLater,
+    _ => AddMode.monthly,
+  };
+
+  TextEditingController get _sourceInput =>
+      _mode == AddMode.payLater ? _payLater.source : _source;
+
+  /// The template while the form still shows its kind and its provider
+  /// as the source: another type, or another source typed, and the form
+  /// is no longer the template's (no note, no check).
+  ProviderTemplate? get _activeTemplate {
+    final t = _template;
+    final name = _templateSourceName;
+    if (t == null || name == null || _modeOf(t.variant) != _mode) return null;
+    if (foldName(_sourceInput.text) != foldName(name)) return null;
+    return t.template;
+  }
+
+  /// Fills the form from a template (25): the kind, the payment count,
+  /// the interval, the first date or the "Pay later" rule, and the
+  /// provider as the source. The amount, the plan name and everything
+  /// else stay as they are; no source is created until the plan is saved.
+  void _applyTemplate(TemplateChoice choice) {
+    final v = choice.variant;
+    final name =
+        matchProviderSource(_sources, choice.template.name)?.name ??
+        choice.template.name;
+    _template = choice;
+    _templateSourceName = name;
+    _mode = _modeOf(v);
+    switch (v.kind) {
+      case PlanKind.payLater:
+        _payLater.setRule(v.payLaterRule!);
+      case PlanKind.payIn4:
+        _payIn4Interval.set(v.interval!);
+        _firstDate = v.firstDate(_today);
+      case _:
+        _count.text = '${v.count}';
+        _monthlyInterval.set(v.interval!);
+        _firstDate = v.firstDate(_today);
+    }
+    _sourceInput.text = name;
+    setState(_suggestNextDate);
   }
 
   void _refresh() => setState(() {});
@@ -425,8 +481,18 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     final int? sourceId;
     final payLater = _mode == AddMode.payLater;
     final sourceName = payLater ? _payLater.source.text : _source.text;
+    final templateName = _activeTemplate == null ? null : _templateSourceName;
     if (_mode == AddMode.card) {
       sourceId = _cardId!;
+    } else if (templateName != null &&
+        foldName(sourceName) == foldName(templateName)) {
+      // A template's provider (25): the provider source with that name,
+      // or a new one, created only now that the plan is saved.
+      sourceId =
+          matchProviderSource(_sources, sourceName)?.id ??
+          await ref
+              .read(sourceRepositoryProvider)
+              .create(name: sourceName.trim(), kind: SourceKind.provider);
     } else if (payLater && sourceName.trim().isEmpty) {
       // A "Pay later" source is optional, for information only.
       sourceId = null;
@@ -592,6 +658,17 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                     ?.copyWith(color: context.colors.textMuted),
               ),
             ],
+            // Starting values from a provider (25): only where the device
+            // region has verified templates; otherwise nothing changes.
+            if (ref.watch(regionTemplatesProvider) case final templates
+                when templates.isNotEmpty) ...[
+              const SizedBox(height: KalanSpace.lg),
+              ProviderStartSection(
+                templates: templates,
+                selected: _activeTemplate == null ? null : _template,
+                onChosen: _applyTemplate,
+              ),
+            ],
             const SizedBox(height: KalanSpace.md),
             if (_mode == AddMode.payLater)
             // One payment: the due date line is the preview.
@@ -616,6 +693,10 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
               _details(context),
               const SizedBox(height: KalanSpace.xs),
               _Preview(draft: _buildDraft()),
+            ],
+            if (_activeTemplate case final template?) ...[
+              const SizedBox(height: KalanSpace.sm),
+              TemplateNote(template: template),
             ],
             const SizedBox(height: KalanSpace.md),
             FilledButton(

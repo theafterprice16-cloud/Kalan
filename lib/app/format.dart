@@ -65,6 +65,10 @@ extension L10nX on BuildContext {
   String monthYear(int year, int month) =>
       DateFormat.yMMMM(localeName).format(DateTime(year, month));
 
+  /// "Kas 2026" / "Nov 2026".
+  String shortMonthYear(LocalDate date) =>
+      DateFormat.yMMM(localeName).format(date.toDateTime());
+
   /// "14 Kasım Cumartesi" / "Saturday, November 14".
   String dayMonthWeekday(LocalDate date) =>
       DateFormat.MMMMEEEEd(localeName).format(date.toDateTime());

@@ -2618,5 +2618,90 @@
   "priceDifferenceLabel": "Difference",
   "@priceDifferenceLabel": {
     "description": "Toplam geri ödeme ile peşin fiyat arasındaki fark. 'Faiz' kelimesini kullanma; nötr bir kelime seç. Arapça gibi bazı pazarlarda 'faiz' hassas olabilir. (The difference between the total repaid and the cash price. Never use the word 'interest'; pick a neutral word. In some markets, such as Arabic ones, 'interest' can be sensitive.)"
+  },
+  "providerStartTitle": "Start from a provider",
+  "@providerStartTitle": {
+    "description": "Plan ekleme: plan türlerinin altındaki bölümün başlığı; sağlayıcı adına dokununca form bilinen kalıpla dolar. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: heading of the section under the plan types; tapping a provider fills the form with its usual pattern. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)"
+  },
+  "providerStartHint": "Fills the payment count and interval; you can change all of them.",
+  "@providerStartHint": {
+    "description": "Plan ekleme: bölüm başlığının altındaki kısa not. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: short note under the section heading. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)"
+  },
+  "providerVariantSameDay": "{count, plural, =1{1 payment · monthly} other{{count} payments · monthly}}",
+  "@providerVariantSameDay": {
+    "description": "Sağlayıcı kalıbı: her ay aynı gün ödenen taksitler. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments on the same day every month. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "providerVariantEveryDays": "{count, plural, =1{1 payment} other{{count} payments}} · {days, plural, =1{every day} other{every {days} days}}",
+  "@providerVariantEveryDays": {
+    "description": "Sağlayıcı kalıbı: belli gün aralığıyla ödenen taksitler (ör. 30 günde bir). Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments a set number of days apart (e.g. every 30 days). Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "days": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "providerVariantBiweekly": "{count, plural, =1{1 payment · every 2 weeks} other{{count} payments · every 2 weeks}}",
+  "@providerVariantBiweekly": {
+    "description": "Sağlayıcı kalıbı: iki haftada bir ödenen taksitler. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments every two weeks. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "providerVariantPayLaterDays": "{days, plural, =1{One payment · 1 day later} other{One payment · {days} days later}}",
+  "@providerVariantPayLaterDays": {
+    "description": "Sağlayıcı kalıbı: alışverişten belli gün sonra tek ödeme. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: one payment a number of days after the purchase. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "providerVariantPayLaterNextMonth": "One payment · next month on day {day}",
+  "@providerVariantPayLaterNextMonth": {
+    "description": "Sağlayıcı kalıbı: alışverişten sonraki ayın belli gününde tek ödeme. {day} ayın günüdür (1-31), sayma değildir. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: one payment on a day of the month after the purchase. {day} is a day of the month (1-31), not a count. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "providerVariantOptions": "{count, plural, =1{1 option} other{{count} options}}",
+  "@providerVariantOptions": {
+    "description": "Sağlayıcı satırı: birden çok kalıbı olan sağlayıcının altında; dokununca seçenekler açılır. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider row: under a provider with several patterns; tapping opens them. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "providerTemplateNote": "Starting values for {provider} · Last checked: {date}. Change them if your terms differ.",
+  "@providerTemplateNote": {
+    "description": "Plan ekleme formunun altında, sağlayıcıdan başlanınca. {date} ay ve yıldır (ör. Kas 2026). Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Under the add plan form after starting from a provider. {date} is a month and year (e.g. Nov 2026). Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)",
+    "placeholders": {
+      "provider": {
+        "type": "String",
+        "example": "Scalapay"
+      },
+      "date": {
+        "type": "String",
+        "example": "Nov 2026"
+      }
+    }
   }
 }
