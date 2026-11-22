@@ -525,5 +525,22 @@
   "settingsHolidayCountry": "Tatil ülkesi",
   "holidayCountryNone": "Yok",
   "holidayCountryNote": "Kart taksitlerinin son ödeme günü bu ülkenin hafta sonu ve resmî tatillerine göre kayar.",
-  "holidayCountryName": "{code, select, AR{Arjantin} BR{Brezilya} CA{Kanada} CH{İsviçre} CL{Şili} CN{Çin} CO{Kolombiya} DE{Almanya} ES{İspanya} FR{Fransa} GB{Birleşik Krallık} ID{Endonezya} IT{İtalya} JP{Japonya} MX{Meksika} NL{Hollanda} PL{Polonya} PT{Portekiz} RU{Rusya} SE{İsveç} TR{Türkiye} TW{Tayvan} US{ABD} VN{Vietnam} other{{code}}}"
+  "holidayCountryName": "{code, select, AR{Arjantin} BR{Brezilya} CA{Kanada} CH{İsviçre} CL{Şili} CN{Çin} CO{Kolombiya} DE{Almanya} ES{İspanya} FR{Fransa} GB{Birleşik Krallık} ID{Endonezya} IT{İtalya} JP{Japonya} MX{Meksika} NL{Hollanda} PL{Polonya} PT{Portekiz} RU{Rusya} SE{İsveç} TR{Türkiye} TW{Tayvan} US{ABD} VN{Vietnam} other{{code}}}",
+  "settingsPrivacySection": "Gizlilik",
+  "appLock": "Uygulama kilidi",
+  "appLockHint": "Kalan'ı açarken yüz tanıma, parmak izi ya da telefon şifresi sorulur.",
+  "appLockRelock": "Yeniden kilitle",
+  "appLockRelockHelp": "Kalan arka planda bu kadar kalınca yeniden kilitlenir.",
+  "appLockRelockImmediately": "Hemen",
+  "appLockAmountsVisible": "Bildirimlerde tutar görünüyor. Gizlemek için dokun.",
+  "appLockNeedsScreenLock": "Bunun için telefonunda ekran kilidi olmalı.",
+  "appLockTurnedOff": "Telefonunda ekran kilidi olmadığı için uygulama kilidi kapatıldı.",
+  "appLockUnlock": "Kilidi aç",
+  "appLockReason": "Kalan'ı açmak için kimliğini doğrula.",
+  "appLockEnableReason": "Uygulama kilidini açmak için kimliğini doğrula.",
+  "appLockPromptTitle": "Kalan'ın kilidini aç",
+  "appLockPromptHint": "Yüz tanıma, parmak izi ya da telefon şifresi",
+  "appLockFaceIdUsage": "Kalan'ı açarken kimliğini doğrulamak için. Yüz verisi telefonunda kalır, Kalan'a gelmez.",
+  "appLockRelockAfterMinutes": "{minutes, plural, =1{1 dakika sonra} other{{minutes} dakika sonra}}",
+  "appLockTurnedOffUnavailable": "Telefonun kimliğini şu an doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin."
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart' show PredictiveBackEvent;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,6 +12,8 @@ import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../entitlement/pro_controller.dart';
 import '../features/holidays/holiday_providers.dart';
+import '../features/lock/app_lock_controller.dart';
+import '../features/lock/lock_screen.dart';
 import '../features/plans/provider_templates_ui.dart';
 import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
@@ -35,7 +38,8 @@ class KalanApp extends ConsumerStatefulWidget {
   ConsumerState<KalanApp> createState() => _KalanAppState();
 }
 
-class _KalanAppState extends ConsumerState<KalanApp> {
+class _KalanAppState extends ConsumerState<KalanApp>
+    with WidgetsBindingObserver {
   late final AppLifecycleListener _lifecycle;
   StreamSubscription<NotificationResponse>? _taps;
 
@@ -44,7 +48,16 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     super.initState();
     // Before Flutter's own date formats load (Arabic: 0-9, not ٠-٩).
     useWesternDigits();
-    _lifecycle = AppLifecycleListener(onResume: _onResume);
+    // App lock (27): before the router's own back handling, so Android's
+    // back button does nothing to the hidden screens while locked.
+    WidgetsBinding.instance.addObserver(this);
+    final lock = ref.read(appLockProvider.notifier);
+    _lifecycle = AppLifecycleListener(
+      onResume: _onResume,
+      onInactive: lock.appInactive,
+      onHide: lock.appHidden,
+      onShow: lock.appShown,
+    );
     _taps = notificationTaps.stream.listen(_onTap);
     // Pro: the saved state at once, the store checked in the background,
     // and purchase updates heard from the start (before onboarding too).
@@ -59,6 +72,8 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(reminderSyncProvider).request();
+      // App lock (27): a locked cold start asks the phone once.
+      unawaited(ref.read(appLockProvider.notifier).start());
       // Launched by tapping a statement closing reminder: over home.
       _openCard(ref.read(launchPayloadProvider));
     });
@@ -66,6 +81,7 @@ class _KalanAppState extends ConsumerState<KalanApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _lifecycle.dispose();
     unawaited(_taps?.cancel());
     super.dispose();
@@ -74,6 +90,7 @@ class _KalanAppState extends ConsumerState<KalanApp> {
   /// Back in the foreground: the zone or the date may have changed, and
   /// the user may have changed notification permission.
   Future<void> _onResume() async {
+    unawaited(ref.read(appLockProvider.notifier).appResumed());
     if (ref.read(notificationGatewayProvider).supported) {
       await refreshLocalTimeZone();
     }
@@ -90,6 +107,15 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     // Pro: a quiet store check (finishes an acknowledgement that failed).
     unawaited(ref.read(proControllerProvider.notifier).recheck());
   }
+
+  /// Android back while locked: kept by the lock screen (the screens
+  /// under it stay as they are).
+  @override
+  Future<bool> didPopRoute() async => ref.read(appLockProvider).locked;
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) =>
+      ref.read(appLockProvider).locked;
 
   /// A tapped reminder opens the home screen; a statement closing
   /// reminder opens its card's statements. A button, should the platform
@@ -153,6 +179,10 @@ class _KalanAppState extends ConsumerState<KalanApp> {
         ref.watch(appLocalizationsDelegateProvider),
         ...GlobalMaterialLocalizations.delegates,
       ],
+      // App lock (27): the lock screen and the app switcher cover sit
+      // over every screen; with the lock off this only passes through.
+      builder: (context, child) =>
+          AppLockGate(child: child ?? const SizedBox.shrink()),
       debugShowCheckedModeBanner: false,
     );
   }

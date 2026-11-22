@@ -8,6 +8,8 @@ import 'core/theme/theme_mode.dart';
 import 'entitlement/iap_store_gateway.dart';
 import 'entitlement/pro_controller.dart';
 import 'entitlement/pro_status_store.dart';
+import 'features/lock/app_lock_store.dart';
+import 'features/lock/device_lock_gateway.dart';
 import 'features/reminders/background.dart';
 import 'features/reminders/local_notifications.dart';
 import 'features/reminders/reminder_providers.dart';
@@ -22,13 +24,18 @@ Future<void> main() async {
     // The last known Pro state, read before the first frame: Pro works
     // offline and the store is checked in the background.
     proStatusStoreProvider.overrideWithValue(await PrefsProStatusStore.open()),
+    // App lock (27): read before the first frame, so a locked app never
+    // shows a frame of data.
+    appLockStoreProvider.overrideWithValue(await PrefsAppLockStore.open()),
   ];
   final phone =
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.iOS ||
           defaultTargetPlatform == TargetPlatform.android);
   if (phone) {
-    overrides.add(storeGatewayProvider.overrideWithValue(IapStoreGateway()));
+    overrides
+      ..add(storeGatewayProvider.overrideWithValue(IapStoreGateway()))
+      ..add(deviceLockGatewayProvider.overrideWithValue(LocalAuthDeviceLock()));
   }
   if (!kIsWeb) {
     await refreshLocalTimeZone();

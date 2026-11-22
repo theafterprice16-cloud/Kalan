@@ -23,6 +23,7 @@ import '../../entitlement/pro_rules.dart';
 import '../currency/currency_picker.dart';
 import '../holidays/holiday_country_ui.dart';
 import '../holidays/holiday_providers.dart';
+import '../lock/app_lock_section.dart';
 import '../onboarding/pay_form.dart';
 import '../pro/pro_screen.dart';
 import '../reminders/reminders_section.dart';
@@ -215,6 +216,8 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           RemindersSection(settings: s),
+          // App lock (27): phones only; nothing here elsewhere.
+          AppLockSection(settings: s),
           const Divider(),
           ListTile(
             title: Text(l10n.settingsCurrency),

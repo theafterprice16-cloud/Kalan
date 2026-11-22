@@ -3317,6 +3317,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{code, select, AR{Argentina} BR{Brazil} CA{Canada} CH{Switzerland} CL{Chile} CN{China} CO{Colombia} DE{Germany} ES{Spain} FR{France} GB{United Kingdom} ID{Indonesia} IT{Italy} JP{Japan} MX{Mexico} NL{Netherlands} PL{Poland} PT{Portugal} RU{Russia} SE{Sweden} TR{Türkiye} TW{Taiwan} US{United States} VN{Vietnam} other{{code}}}'**
   String holidayCountryName(String code);
+
+  /// Settings section title for the app lock rows. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get settingsPrivacySection;
+
+  /// Settings switch that locks Kalan with the phone's face, fingerprint or passcode check. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLock;
+
+  /// Subtitle of the app lock switch. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan asks for your face, fingerprint or phone passcode when it opens.'**
+  String get appLockHint;
+
+  /// Settings row and dialog title: how long Kalan may stay in the background before it locks again. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock again'**
+  String get appLockRelock;
+
+  /// Note in the 'Lock again' dialog. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan locks again once it has been in the background this long.'**
+  String get appLockRelockHelp;
+
+  /// 'Lock again' choice: every time Kalan comes back from the background. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediately'**
+  String get appLockRelockImmediately;
+
+  /// Row under the app lock switch while reminders show amounts; a tap turns amounts off in notifications. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts show in notifications. Tap to hide them.'**
+  String get appLockAmountsVisible;
+
+  /// Note when app lock cannot be turned on because the phone has no passcode, PIN or pattern. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs a screen lock on your phone.'**
+  String get appLockNeedsScreenLock;
+
+  /// One-time note in Settings after Kalan turned its lock off by itself (the phone's screen lock was removed). Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock was turned off because your phone has no screen lock.'**
+  String get appLockTurnedOff;
+
+  /// Primary button on the lock screen; asks the phone's face, fingerprint or passcode check again. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get appLockUnlock;
+
+  /// Lock screen line and the reason shown in the phone's own check dialog. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you to open Kalan.'**
+  String get appLockReason;
+
+  /// Reason shown in the phone's own check dialog when the app lock is turned on. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you to turn on app lock.'**
+  String get appLockEnableReason;
+
+  /// Title of the Android system check dialog. At most 60 characters. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Kalan'**
+  String get appLockPromptTitle;
+
+  /// Subtitle of the Android system check dialog. At most 60 characters. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Face, fingerprint or phone passcode'**
+  String get appLockPromptHint;
+
+  /// iOS Face ID permission text (NSFaceIDUsageDescription, InfoPlist.strings). Keep it in step with ios/Runner/<locale>.lproj/InfoPlist.strings. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'To confirm it\'s you when Kalan opens. Your face data stays on your phone; Kalan never sees it.'**
+  String get appLockFaceIdUsage;
+
+  /// 'Lock again' choice and value: after 1 or 5 minutes in the background. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{After 1 minute} other{After {minutes} minutes}}'**
+  String appLockRelockAfterMinutes(int minutes);
+
+  /// One-time note in Settings after Kalan turned its lock off by itself because the phone could not show its face, fingerprint or passcode check. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock was turned off because your phone couldn\'t check it\'s you just now. You can turn it on again.'**
+  String get appLockTurnedOffUnavailable;
 }
 
 class _AppLocalizationsDelegate

@@ -3,28 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/lock/app_lock_machine.dart';
 
-/// A clock the test moves by hand. [sleep] moves only the wall clock
-/// (a sleeping phone's monotonic clock may stand still); [setBack] moves
-/// the wall clock back.
-class FakeLockClock implements LockClock {
-  DateTime _wall = DateTime(2026, 11, 22, 9);
-  Duration _monotonic = Duration.zero;
-
-  void pass(Duration d) {
-    _wall = _wall.add(d);
-    _monotonic += d;
-  }
-
-  void sleep(Duration d) => _wall = _wall.add(d);
-
-  void setBack(Duration d) => _wall = _wall.subtract(d);
-
-  @override
-  DateTime wall() => _wall;
-
-  @override
-  Duration monotonic() => _monotonic;
-}
+import '../../helpers/fake_device_lock.dart';
 
 void main() {
   late FakeLockClock clock;
@@ -93,12 +72,12 @@ void main() {
       (
         RelockDelay.oneMinute,
         const Duration(seconds: 59),
-        Duration(minutes: 1),
+        const Duration(minutes: 1),
       ),
       (
         RelockDelay.fiveMinutes,
         const Duration(minutes: 4, seconds: 59),
-        Duration(minutes: 5),
+        const Duration(minutes: 5),
       ),
     ]) {
       test(delay.name, () {

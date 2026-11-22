@@ -56,17 +56,14 @@ class SystemLockClock implements LockClock {
 /// - with the lock off nothing ever locks.
 class AppLockMachine {
   AppLockMachine({
-    required LockClock clock,
+    required this._clock,
     bool enabled = false,
-    RelockDelay delay = RelockDelay.standard,
-  }) : _clock = clock,
-       _enabled = enabled,
-       _delay = delay,
+    this.delay = RelockDelay.standard,
+  }) : _enabled = enabled,
        _locked = enabled;
 
   final LockClock _clock;
   bool _enabled;
-  RelockDelay _delay;
   bool _locked;
   bool _authenticating = false;
   bool _hiddenDuringAuth = false;
@@ -75,14 +72,16 @@ class AppLockMachine {
   Duration? _hiddenMonotonic;
 
   bool get enabled => _enabled;
-  RelockDelay get delay => _delay;
+
+  /// "Lock again"; a change applies from the next return.
+  RelockDelay delay;
   bool get locked => _locked;
   bool get authenticating => _authenticating;
 
   /// Turned on after a successful authentication: open now.
   void enable(RelockDelay delay) {
     _enabled = true;
-    _delay = delay;
+    this.delay = delay;
     _locked = false;
     _clearHidden();
   }
@@ -94,8 +93,6 @@ class AppLockMachine {
     _locked = false;
     _clearHidden();
   }
-
-  set delay(RelockDelay value) => _delay = value;
 
   /// The phone's authentication dialog is about to show.
   void beginAuth() => _authenticating = true;
@@ -144,7 +141,7 @@ class AppLockMachine {
     if (wallAt == null || monotonicAt == null) return false;
     final wall = _clock.wall().difference(wallAt);
     final monotonic = _clock.monotonic() - monotonicAt;
-    final limit = _delay.duration;
+    final limit = delay.duration;
     if (wall.isNegative || wall >= limit || monotonic >= limit) {
       _locked = true;
       return true;
