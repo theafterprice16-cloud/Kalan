@@ -86,9 +86,10 @@ final _sideArgument = RegExp(
 );
 
 /// The arguments of the call whose "(" is at [open], split at its own
-/// commas (not those of nested calls or collections).
-List<String> _argumentsAt(String source, int open) {
-  final args = <String>[];
+/// commas (not those of nested calls or collections), each with the
+/// offset where it ends.
+List<(String, int)> _argumentsAt(String source, int open) {
+  final args = <(String, int)>[];
   var depth = 0;
   var start = open + 1;
   for (var i = open; i < source.length; i++) {
@@ -96,19 +97,22 @@ List<String> _argumentsAt(String source, int open) {
     if ('([{'.contains(c)) depth++;
     if (')]}'.contains(c)) depth--;
     if (depth == 0) {
-      args.add(source.substring(start, i));
+      args.add((source.substring(start, i), i));
       break;
     }
     if (depth == 1 && c == ',') {
-      args.add(source.substring(start, i));
+      args.add((source.substring(start, i), i));
       start = i + 1;
     }
   }
   return [
-    for (final a in args)
-      if (a.trim().isNotEmpty) a.trim(),
+    for (final (a, end) in args)
+      if (a.trim().isNotEmpty) (a.trim(), end),
   ];
 }
+
+/// Whether [text] is the number [value] ("0", "0.0", "-0", ".5", "0.50").
+bool _isNumber(String text, double value) => double.tryParse(text) == value;
 
 /// The index of the ")" closing the call whose "(" is at [open].
 int _callEnd(String source, int open) {
@@ -125,8 +129,9 @@ List<String> directionalOffendersIn(String path, String source) {
   final lines = source.split('\n');
   int lineOf(int offset) =>
       '\n'.allMatches(source.substring(0, offset)).length + 1;
-  // The opt-out may sit on any line of the match (the formatter splits
-  // long calls).
+  // The opt-out may sit on any line from the match to the end of the
+  // argument at fault (the formatter splits long calls), not further: a
+  // child's opt-out does not cover its parent.
   void report(int start, String what, [int? end]) {
     final first = lineOf(start);
     final last = lineOf(end ?? start);
@@ -136,43 +141,54 @@ List<String> directionalOffendersIn(String path, String source) {
     out.add('$path:$first ($what)');
   }
 
+  /// [source] up to the end of the line holding [offset].
+  int lineEnd(int offset) {
+    final next = source.indexOf('\n', offset);
+    return next < 0 ? source.length : next;
+  }
+
   for (final MapEntry(:key, :value) in directionalPatterns.entries) {
     for (final m in value.allMatches(source)) {
-      report(m.start, key, m.end);
+      report(m.start, key, lineEnd(m.end));
     }
   }
   for (final MapEntry(:key, :value) in directionalCalls.entries) {
     for (final m in value.allMatches(source)) {
       final args = _argumentsAt(source, m.end - 1);
-      if (key == 'left/right rect' || args.any(_sideArgument.hasMatch)) {
-        report(m.start, key, _callEnd(source, m.end - 1));
+      if (key == 'left/right rect') {
+        // A rect from start and end is fine.
+        if (args.any((a) => a.$1.contains('fromDirectional'))) continue;
+        report(m.start, key, lineEnd(m.end));
+        continue;
+      }
+      for (final (arg, end) in args) {
+        if (_sideArgument.hasMatch(arg)) {
+          report(m.start, key, lineEnd(end));
+          break;
+        }
       }
     }
   }
   // Alignment(x, y) with an x other than 0; FractionalOffset(x, y) with
   // an x other than 0.5.
   for (final (pattern, centre) in [
-    (RegExp(r'\bAlignment\('), {'0', '0.0'}),
-    (RegExp(r'\bFractionalOffset\('), {'0.5'}),
+    (RegExp(r'\bAlignment\('), 0.0),
+    (RegExp(r'\bFractionalOffset\('), 0.5),
   ]) {
     for (final m in pattern.allMatches(source)) {
       final args = _argumentsAt(source, m.end - 1);
-      if (args.isNotEmpty && !centre.contains(args.first)) {
-        report(
-          m.start,
-          'left/right alignment value',
-          _callEnd(source, m.end - 1),
-        );
+      if (args.isNotEmpty && !_isNumber(args.first.$1, centre)) {
+        report(m.start, 'left/right alignment value', lineEnd(args.first.$2));
       }
     }
   }
   // fromLTRB with different left and right, or arguments it cannot read.
   for (final m in RegExp(r'\bEdgeInsets\.fromLTRB\(').allMatches(source)) {
     final args = _argumentsAt(source, m.end - 1);
-    final end = _callEnd(source, m.end - 1);
+    final end = lineEnd(_callEnd(source, m.end - 1));
     if (args.length != 4) {
       report(m.start, 'unreadable fromLTRB', end);
-    } else if (args[0] != args[2]) {
+    } else if (args[0].$1 != args[2].$1) {
       report(m.start, 'uneven fromLTRB', end);
     }
   }
@@ -223,6 +239,8 @@ void main() {
       'Alignment(f(x), 0)',
       'FractionalOffset(0, 0.5)',
       'Positioned.fromRect(rect: r, child: x)',
+      // A child's opt-out does not cover the parent's left.
+      'Positioned(\n  left: 0,\n  child: Text(\n    a,\n    textDirection: TextDirection.ltr, // rtl-ok: a code\n  ),\n)',
     ];
     for (final sample in samples) {
       expect(
@@ -252,6 +270,10 @@ void main() {
       'Alignment(0.0, 1)',
       'EdgeInsets.fromLTRB(f(a, b), 0, f(a, b), 0)',
       'FractionalOffset(0.5, 1)',
+      'FractionalOffset(.5, 0)',
+      'Alignment(-0, 1)',
+      'Alignment(0.00, 1)',
+      'Positioned.fromRelativeRect(\n  rect: RelativeRect.fromDirectional(\n    textDirection: d,\n    start: 0,\n    top: 0,\n    end: 0,\n    bottom: 0,\n  ),\n  child: x,\n)',
       'Text(\n  a,\n  textDirection:\n      TextDirection.ltr, // rtl-ok: a code\n)',
       'EdgeInsets.only(\n  left: 4, // rtl-ok: a ruler\n)',
     ];
