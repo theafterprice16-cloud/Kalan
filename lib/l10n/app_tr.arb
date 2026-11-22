@@ -525,5 +525,5 @@
   "settingsHolidayCountry": "Tatil ülkesi",
   "holidayCountryNone": "Yok",
   "holidayCountryNote": "Kart taksitlerinin son ödeme günü bu ülkenin hafta sonu ve resmî tatillerine göre kayar.",
-  "holidayCountryName": "{code, select, AR{Arjantin} BR{Brezilya} CA{Kanada} CH{İsviçre} CL{Şili} CN{Çin} CO{Kolombiya} DE{Almanya} ES{İspanya} FR{Fransa} GB{Birleşik Krallık} ID{Endonezya} IT{İtalya} JP{Japonya} MX{Meksika} NL{Hollanda} PL{Polonya} PT{Portekiz} RU{Rusya} SE{İsveç} TR{Türkiye} US{ABD} other{{code}}}"
+  "holidayCountryName": "{code, select, AR{Arjantin} BR{Brezilya} CA{Kanada} CH{İsviçre} CL{Şili} CN{Çin} CO{Kolombiya} DE{Almanya} ES{İspanya} FR{Fransa} GB{Birleşik Krallık} ID{Endonezya} IT{İtalya} JP{Japonya} MX{Meksika} NL{Hollanda} PL{Polonya} PT{Portekiz} RU{Rusya} SE{İsveç} TR{Türkiye} TW{Tayvan} US{ABD} VN{Vietnam} other{{code}}}"
 }

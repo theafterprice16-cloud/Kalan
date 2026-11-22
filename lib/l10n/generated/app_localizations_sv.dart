@@ -2547,7 +2547,9 @@ class AppLocalizationsSv extends AppLocalizations {
       'RU': 'Russia',
       'SE': 'Sweden',
       'TR': 'Türkiye',
+      'TW': 'Taiwan',
       'US': 'United States',
+      'VN': 'Vietnam',
       'other': '$code',
     });
     return '$_temp0';
