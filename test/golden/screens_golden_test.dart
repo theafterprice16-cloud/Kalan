@@ -19,6 +19,7 @@ import 'package:kalan/entitlement/pro_controller.dart';
 import 'package:kalan/entitlement/pro_rules.dart';
 import 'package:kalan/entitlement/pro_status_store.dart';
 import 'package:kalan/entitlement/store_gateway.dart';
+import 'package:kalan/features/plans/provider_templates_ui.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -179,6 +180,7 @@ void main() {
       bool underway = false,
       Future<void> Function(AppDatabase db)? seed,
       LocalDate? today,
+      bool templates = false,
     }) async {
       tester.view.physicalSize = const Size(780, 1688);
       tester.view.devicePixelRatio = 2;
@@ -202,6 +204,9 @@ void main() {
           ),
           clockProvider.overrideWithValue(() => DateTime.utc(2026, 11, 20, 5)),
           if (route != null) initialRouteProvider.overrideWithValue(route),
+          // Provider templates (25) only where a shot is about them: the
+          // other add plan shots stay as they were in any region.
+          if (!templates) regionTemplatesProvider.overrideWithValue(const []),
           ...extra,
         ],
       );
@@ -1722,6 +1727,50 @@ void main() {
           await openTab(tester, plansTab);
           await tester.tap(find.text('Telefon'));
           await shoot(tester, '92-plan-detail-price-fee-$lang-$theme');
+        });
+      }
+
+      // Provider templates (25): region Italy, the shipped file.
+      for (final (lang, locale, addPlan) in [
+        ('tr', const Locale('tr', 'IT'), 'Plan ekle'),
+        ('en', const Locale('en', 'IT'), 'Add plan'),
+      ]) {
+        Future<void> openTemplates(WidgetTester tester) async {
+          await start(
+            tester,
+            locale: locale,
+            templates: true,
+            seed: (db) =>
+                seedSettings(db, currency: 'EUR', incomeMinor: 180000),
+          );
+          await tester.tap(find.text(addPlan));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('add plan, start from a provider, $lang', (tester) async {
+          await openTemplates(tester);
+          await shoot(tester, '95-add-plan-provider-start-$lang-$theme');
+        });
+
+        testWidgets('template variant sheet, $lang', (tester) async {
+          await openTemplates(tester);
+          await tester.tap(find.byKey(const ValueKey('provider-scalapay')));
+          await tester.pumpAndSettle();
+          await shoot(tester, '96-template-variant-sheet-$lang-$theme');
+        });
+
+        testWidgets('add plan filled from a template, $lang', (tester) async {
+          await openTemplates(tester);
+          await tester.tap(find.byKey(const ValueKey('provider-scalapay')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const ValueKey('template-variant-0')));
+          await tester.pumpAndSettle();
+          await scrollTo(tester, find.byKey(const ValueKey('total')));
+          await tester.enterText(find.byKey(const ValueKey('total')), '300');
+          await tester.pumpAndSettle();
+          FocusManager.instance.primaryFocus?.unfocus();
+          await scrollTo(tester, find.byKey(const ValueKey('template-note')));
+          await shoot(tester, '97-add-plan-template-filled-$lang-$theme');
         });
       }
 

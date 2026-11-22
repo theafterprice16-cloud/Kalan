@@ -120,7 +120,7 @@ Future<void> save(WidgetTester tester) async {
 }
 
 const note =
-    'Starting values for Scalapay · Last checked: Nov 2026. '
+    'Starting values for Scalapay · Last checked: Nov\u00A02026. '
     'Change them if your terms differ.';
 
 void main() {
@@ -202,7 +202,7 @@ void main() {
     await scrollTo(tester, find.byKey(const ValueKey('template-note')));
     expect(
       find.text(
-        'Scalapay için başlangıç değerleri · Son kontrol: Kas 2026. '
+        'Scalapay için başlangıç değerleri · Son kontrol: Kas\u00A02026. '
         'Koşulların farklıysa değiştir.',
       ),
       findsOneWidget,
