@@ -4,6 +4,7 @@ import '../../app/providers.dart';
 import '../../core/engine/engine.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
+import '../holidays/holiday_providers.dart';
 
 /// A card's coming statements from the engine ([cardStatements]), with the
 /// plans their installments belong to.
@@ -42,8 +43,9 @@ CardStatementsView? cardStatementsOf({
   required SourceRow card,
   required Iterable<PlanWithPayments> plans,
   required LocalDate today,
+  required HolidayCalendar? holidays,
 }) {
-  final terms = card.cardTerms;
+  final terms = card.cardTermsIn(holidays);
   if (terms == null) return null;
   final own = {
     for (final p in plans)
@@ -86,6 +88,7 @@ final cardStatementsProvider = Provider.family<CardStatementsView?, int>((
         card: s,
         plans: plans,
         today: ref.watch(todayProvider),
+        holidays: ref.watch(appliedHolidaysProvider),
       );
     }
   }

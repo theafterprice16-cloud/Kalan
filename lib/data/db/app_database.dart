@@ -54,7 +54,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Bump together with `dart run drift_dev make-migrations` and add a step.
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -233,6 +233,19 @@ class AppDatabase extends _$AppDatabase {
       // existing plan; no date, amount or period changes.
       from17To18: (m, schema) async {
         await m.addColumn(schema.plans, schema.plans.productPriceMinor);
+      },
+      // v19: public holidays (26). Every card moves for holidays; the
+      // country is suggested and the dates moved on first start.
+      from18To19: (m, schema) async {
+        await m.addColumn(schema.sources, schema.sources.shiftDueForHolidays);
+        await m.addColumn(
+          schema.appSettings,
+          schema.appSettings.holidayCountry,
+        );
+        await m.addColumn(
+          schema.appSettings,
+          schema.appSettings.appliedHolidays,
+        );
       },
     ),
     beforeOpen: (details) async {

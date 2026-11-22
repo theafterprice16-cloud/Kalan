@@ -5,6 +5,7 @@ import '../../app/format.dart' show planNameIn;
 import '../../app/locale.dart' show loadLocaleData;
 import '../../app/providers.dart' show payScheduleOf;
 import '../../core/date/local_date.dart';
+import '../../core/holidays/holidays.dart';
 import '../../core/money/currency.dart';
 import '../../core/reminders/reminder_models.dart';
 import '../../core/reminders/reminder_planner.dart';
@@ -212,6 +213,7 @@ class ReminderScheduler {
     final plans = await PlanRepository(db).all();
     final recurring = await RecurringRepository(db).all();
     final sources = await db.select(db.sources).get();
+    final holidays = CountryHolidays.fromSnapshot(settings.appliedHolidays);
     // Bank accounts automatic payments are taken from (18), by id.
     final accounts = {
       for (final s in sources)
@@ -284,7 +286,9 @@ class ReminderScheduler {
       cards: [
         for (final source in sources)
           if (source.statementReminderEnabled)
-            if (source.cardTerms case final terms?)
+            // Statement dates never move for a weekend or a holiday;
+            // the applied calendar keeps the terms the same as on screen.
+            if (source.cardTermsIn(holidays) case final terms?)
               StatementCard(
                 id: source.id,
                 name: source.name,

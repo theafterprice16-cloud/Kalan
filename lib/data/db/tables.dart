@@ -38,6 +38,12 @@ class Sources extends Table {
   )();
   BoolColumn get shiftDueToBusinessDay =>
       boolean().withDefault(const Constant(true))();
+
+  /// "Move for public holidays" (schema v19, Roadmap 26): on by default,
+  /// existing cards included. The holidays are the holiday country's
+  /// ([AppSettings.holidayCountry]).
+  BoolColumn get shiftDueForHolidays =>
+      boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   /// Statement closing reminder (schema v13): off by default, only for
@@ -303,6 +309,18 @@ class AppSettings extends Table {
   /// turned off, existing users included.
   BoolColumn get paydaySummaryEnabled =>
       boolean().withDefault(const Constant(true))();
+
+  /// Holiday country (schema v19, Roadmap 26), one for every card: ISO
+  /// 3166-1 alpha-2, '' for "None", null until Kalan suggests one (the
+  /// device region, else the currency's country) on first start.
+  TextColumn get holidayCountry =>
+      text().nullable().withLength(min: 0, max: 2)();
+
+  /// The weekend and holidays the stored card dates were computed with
+  /// (`CountryHolidays.toSnapshot`); null: "None". Compared with the
+  /// shipped file on every start, so a new list or another country moves
+  /// the dates once.
+  TextColumn get appliedHolidays => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

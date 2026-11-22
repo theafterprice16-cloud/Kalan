@@ -15,6 +15,7 @@ import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
+import '../holidays/holiday_note.dart';
 import '../home/past_due.dart';
 import '../onboarding/pay_form.dart';
 import '../reminders/reminder_choice_tile.dart';
@@ -504,6 +505,8 @@ class _PaymentRow extends ConsumerWidget {
                     ],
                   ),
                   MoveNoteText(payment: payment),
+                  // Public holidays (26): only where the date is shown.
+                  HolidayMovedNote(plan: plan, payment: payment),
                   // The amount on the right includes the fee per payment
                   // (22); this says which part it is.
                   if (payment.installmentFeeMinor case final planFee?)

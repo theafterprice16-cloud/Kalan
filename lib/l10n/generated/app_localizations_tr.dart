@@ -2492,4 +2492,59 @@ class AppLocalizationsTr extends AppLocalizations {
   String providerTemplateNote(String provider, String date) {
     return '$provider için başlangıç değerleri · Son kontrol: $date. Koşulların farklıysa değiştir.';
   }
+
+  @override
+  String get fieldShiftHolidays => 'Resmî tatilde kaydır';
+
+  @override
+  String holidayListUntil(int year) {
+    return 'Tatil listesi $year sonuna kadar. Uygulama güncellemesiyle yenilenir.';
+  }
+
+  @override
+  String get holidayNoCountry =>
+      'Tatil ülkesi seçili değil. Ayarlar\'dan seçebilirsin.';
+
+  @override
+  String get holidayMovedNote => 'Resmî tatil nedeniyle kaydırıldı';
+
+  @override
+  String get settingsHolidayCountry => 'Tatil ülkesi';
+
+  @override
+  String get holidayCountryNone => 'Yok';
+
+  @override
+  String get holidayCountryNote =>
+      'Kart taksitlerinin son ödeme günü bu ülkenin hafta sonu ve resmî tatillerine göre kayar.';
+
+  @override
+  String holidayCountryName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'AR': 'Arjantin',
+      'BR': 'Brezilya',
+      'CA': 'Kanada',
+      'CH': 'İsviçre',
+      'CL': 'Şili',
+      'CN': 'Çin',
+      'CO': 'Kolombiya',
+      'DE': 'Almanya',
+      'ES': 'İspanya',
+      'FR': 'Fransa',
+      'GB': 'Birleşik Krallık',
+      'ID': 'Endonezya',
+      'IT': 'İtalya',
+      'JP': 'Japonya',
+      'MX': 'Meksika',
+      'NL': 'Hollanda',
+      'PL': 'Polonya',
+      'PT': 'Portekiz',
+      'RU': 'Rusya',
+      'SE': 'İsveç',
+      'TR': 'Türkiye',
+      'US': 'ABD',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
 }

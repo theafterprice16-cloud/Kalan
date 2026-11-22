@@ -15,6 +15,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
 import '../../entitlement/entitlement.dart';
+import '../holidays/holiday_providers.dart';
 import '../pro/pro_limit_sheet.dart';
 import '../reminders/reminder_prompt.dart';
 import 'installment_fee_fields.dart';
@@ -357,11 +358,13 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   List<SourceRow> get _cards => [
     for (final s in ref.watch(sourcesProvider).value ?? const <SourceRow>[])
-      if (s.cardTerms != null) s,
+      if (s.hasCardDays) s,
   ];
 
-  CardTerms? get _cardTerms =>
-      _sources.where((s) => s.id == _cardId).firstOrNull?.cardTerms;
+  CardTerms? get _cardTerms => _sources
+      .where((s) => s.id == _cardId)
+      .firstOrNull
+      ?.cardTermsIn(ref.read(appliedHolidaysProvider));
 
   /// The card's next due date after today: the suggested next payment date.
   void _suggestNextDate() {
@@ -486,6 +489,9 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    // The card terms (with the holiday calendar, 26) the draft is built
+    // with; saving checks them against the stored calendar.
+    final cardTerms = _mode == AddMode.card ? _cardTerms : null;
     final draft = _buildDraft();
     if (draft == null) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -536,6 +542,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
             _chargeSourceId ?? _ownCardId,
             _ownCardId,
           ),
+          cardTerms: cardTerms == null ? null : (terms: cardTerms),
         );
     KalanHaptics.success();
     final settings = ref.read(settingsRepositoryProvider);

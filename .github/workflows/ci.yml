@@ -27,6 +27,10 @@ jobs:
         # Roadmap 25: a template older than six months is a warning only;
         # re-check it on its source links (docs/YAYIN_KONTROL.md).
         run: dart run tool/check_provider_templates.dart
+      - name: Holiday lists still cover next year
+        # Roadmap 26: a list ending this year or earlier is a warning only;
+        # renew it from its official sources (docs/YAYIN_KONTROL.md).
+        run: dart run tool/check_holidays.dart
       - name: Format
         run: dart format --output=none --set-exit-if-changed lib test
       - name: Analyze

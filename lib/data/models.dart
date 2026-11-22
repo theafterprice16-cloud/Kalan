@@ -4,12 +4,19 @@ import 'db/app_database.dart';
 extension SourceRowX on SourceRow {
   bool get isCard => kind == SourceKind.card;
 
-  /// Card terms, or null for providers and incomplete cards.
-  CardTerms? get cardTerms => isCard && statementDay != null && dueDay != null
+  /// A card with its statement and due days: one that has [cardTermsIn].
+  bool get hasCardDays => isCard && statementDay != null && dueDay != null;
+
+  /// Card terms, or null for providers and incomplete cards. [holidays]
+  /// is the calendar the stored card dates were computed with (the
+  /// settings' applied holidays, Roadmap 26); null: "None".
+  CardTerms? cardTermsIn(HolidayCalendar? holidays) => hasCardDays
       ? CardTerms(
           statementDay: statementDay!,
           dueDay: dueDay!,
           shiftDueToBusinessDay: shiftDueToBusinessDay,
+          shiftDueForHolidays: shiftDueForHolidays,
+          holidays: holidays,
         )
       : null;
 }

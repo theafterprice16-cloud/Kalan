@@ -228,7 +228,7 @@ void main() {
       statementDay: 14,
       dueDay: 24,
     );
-    final terms = (await sources.byId(card))!.cardTerms!;
+    final terms = (await sources.byId(card))!.cardTermsIn(null)!;
     final id = await plans.saveDraft(
       PlanCalculator.card(
         purchaseDate: d('2026-11-01'),
@@ -246,6 +246,7 @@ void main() {
       card: cardRow,
       plans: await plans.all(),
       today: today,
+      holidays: null,
     )!.statements.map((s) => s.totalMinor).toList();
     final periodBefore = await summaryOf(first.date.toString());
 
@@ -255,6 +256,7 @@ void main() {
       card: cardRow,
       plans: await plans.all(),
       today: today,
+      holidays: null,
     )!.statements.map((s) => s.totalMinor).toList();
     expect(statementAfter, statementBefore);
     expect(

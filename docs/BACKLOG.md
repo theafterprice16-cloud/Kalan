@@ -11,7 +11,7 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 7. **Ekran görüntüsünden ve yapıştırılan metinden plan ekleme** (Pro; PayDown). Bulut AI + küçük ara sunucu, açık rıza ve onay ekranı. `PlanDraft` → onay → kayıt yolunu kullanır.
 8. ~~**Pro satın alma**~~ Tamamlandı (18 Kasım 2026, yol haritası 11): yalnızca ömür boyu tek ürün (Karar 2); aylık ve yıllık yok. `Entitlement` arkasında, resmi `in_app_purchase` ile.
 9. **Ana ekran widget'ı**, iOS ve Android (Subby).
-10. **Türkiye resmi tatil kaydırması**; mağaza hazırlığı.
+10. ~~**Türkiye resmi tatil kaydırması**~~ Tamamlandı (22 Kasım 2026, yol haritası 26: 22 ülke, kart taksitleri); mağaza hazırlığı.
 11. **8 dili ekle** (docs/ceviriler-beklemede/ dosyalarından başla): İspanyolca, Fransızca, Almanca, Portekizce-Brezilya, Rusça, Çince Basitleştirilmiş, İtalyanca, Endonezce. Yol haritası 24 (22 yerel sürüm): **altyapı tamam (21 Kasım 2026); çeviriler toplu çeviride** (yol haritasının sonu, `docs/ceviriler/`).
 
 ## Tamamlananlar
@@ -40,6 +40,8 @@ Sıra önemlidir. Parantez içindekiler özelliğin görüldüğü rakip uygulam
 - ~~**Taksit başı ücret**~~ Tamamlandı (20 Kasım 2026, yol haritası 22): planın her taksitte (ya da yalnızca ilk taksitte) aldığı sabit ücret; plan ekleme ve düzenlemede kapalı bölümde, varsayılan boş; kart taksitlerinde yok; ücret yalnızca ödenmemiş taksitlere yazılır, ödenmişler kendi ücretini korur; taksit satırında ücret dahil tutar ve "taksit ücreti dahil" notu; plan özetinde "Plan tutarı / Taksit ücretleri / Toplam"; ücret dönem toplamına, kalana ve hatırlatma tutarına girer. Ücretsiz. Kapsam dışı: yüzdeli ücret ve faiz (23).
 
 - ~~**Faizli planlarda toplam geri ödeme**~~ Tamamlandı (21 Kasım 2026, yol haritası 23): aylık taksit, kart taksidi ve elle girişte isteğe bağlı "Ürün fiyatı" (kapalı bölümde); plan özetinde tek "Toplam geri ödeme" satırı, altında "Ürün fiyatı" ve "Fark" (yalnızca fark sıfırdan büyükken, açık planda); taslak önizlemesinde de; yalnızca gösterim, kalan, dönem ve bildirim değişmez; faiz oranı sorulmaz. Ücretsiz.
+
+- ~~**Resmî tatil kaydırması**~~ Tamamlandı (22 Kasım 2026, yol haritası 26): kart taksitlerinin son ödeme günü tatil ülkesinin hafta sonu ve ülke geneli resmî tatillerine göre sonraki iş gününe kayar; kart ayarlarında "Resmî tatilde kaydır" (varsayılan açık) ve liste süresi notu; Ayarlar'da "Tatil ülkesi" (cihaz bölgesinden, yoksa para biriminden önerilir; "Yok" eski cumartesi-pazar kuralı); plan ayrıntısında "Resmî tatil nedeniyle kaydırıldı"; liste uygulamayla gelir (22 ülke, 2026-2028, resmî kaynaklı), CI eski liste için uyarır. Ücretsiz. Kapsam dışı: bölgesel tatil, yarım gün, telafi iş günü, bankaların özel uygulamaları, diğer plan türleri.
 
 ## Notlar
 

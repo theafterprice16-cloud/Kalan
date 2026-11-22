@@ -10,6 +10,7 @@ import '../core/routing/routes.dart';
 import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../entitlement/pro_controller.dart';
+import '../features/holidays/holiday_providers.dart';
 import '../features/plans/provider_templates_ui.dart';
 import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
@@ -51,6 +52,9 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     // Provider templates (25) read from the app's own file now, so the
     // add plan screen opens with its section already in place.
     ref.read(providerTemplatesSourceProvider);
+    // Public holidays (26): the stored card dates follow the shipped list
+    // and the holiday country, now and whenever either changes.
+    ref.listenManual(holidaySyncProvider, (_, _) {}, fireImmediately: true);
     // App start: schedule from the stored data right away.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

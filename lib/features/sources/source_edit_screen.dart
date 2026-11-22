@@ -13,6 +13,7 @@ import '../../core/reminders/reminder_models.dart'
 import '../../core/routing/tab_messengers.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
+import '../holidays/holiday_providers.dart';
 
 /// Create or edit a provider or card. Pops with the source id on save.
 class SourceEditScreen extends ConsumerStatefulWidget {
@@ -32,6 +33,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
   int? _statementDay;
   int? _dueDay;
   bool _shift = true;
+  bool _holidayShift = true;
   bool _closingReminder = false;
   int _closingDays = initialStatementLeadDays;
   SourceRow? _existing;
@@ -58,6 +60,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
       _statementDay = s.statementDay;
       _dueDay = s.dueDay;
       _shift = s.shiftDueToBusinessDay;
+      _holidayShift = s.shiftDueForHolidays;
       _closingReminder = s.statementReminderEnabled;
       _closingDays = s.statementReminderDays;
       _loaded = true;
@@ -90,6 +93,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
         statementDay: _statementDay,
         dueDay: _dueDay,
         shiftDueToBusinessDay: _shift,
+        shiftDueForHolidays: _holidayShift,
         statementReminderEnabled: _closingReminder,
         statementReminderDays: _closingDays,
       );
@@ -102,6 +106,7 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
           statementDay: Value(_statementDay),
           dueDay: Value(_dueDay),
           shiftDueToBusinessDay: _shift,
+          shiftDueForHolidays: _holidayShift,
           statementReminderEnabled: _closingReminder && _hasCardDays,
           statementReminderDays: _closingDays,
         ),
@@ -220,6 +225,35 @@ class _SourceEditScreenState extends ConsumerState<SourceEditScreen> {
                       title: Text(l10n.fieldShiftWeekend),
                       value: _shift,
                       onChanged: (v) => setState(() => _shift = v),
+                    ),
+                    // Public holidays (26): right under the weekend switch,
+                    // the same switch; the note says how far the list goes.
+                    SwitchListTile.adaptive(
+                      key: const ValueKey('holiday-shift'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.fieldShiftHolidays),
+                      subtitle: switch ((
+                        ref.watch(appliedHolidaysProvider),
+                        ref.watch(holidayCountriesProvider),
+                      )) {
+                        (final calendar?, _) => Text(
+                          l10n.holidayListUntil(calendar.lastYear),
+                          key: const ValueKey('holiday-list-note'),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.colors.textMuted),
+                        ),
+                        // "None": Settings has the choice. Without a list
+                        // (it did not read) Settings has no row: no note.
+                        (null, _?) => Text(
+                          l10n.holidayNoCountry,
+                          key: const ValueKey('holiday-list-note'),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.colors.textMuted),
+                        ),
+                        (null, null) => null,
+                      },
+                      value: _holidayShift,
+                      onChanged: (v) => setState(() => _holidayShift = v),
                     ),
                     if (_existing != null)
                       Text(

@@ -28,6 +28,7 @@ const notCounts = {
   'planPaidOf', // "2/4 paid"
   'numberValue', // a bare number
   'previewSameMonthItem', // "August 2027 (2)"
+  'holidayListUntil', // a calendar year ("2028")
 };
 
 /// Categories CLDR has for a language that read the same in it, so a

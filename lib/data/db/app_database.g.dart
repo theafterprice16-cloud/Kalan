@@ -83,6 +83,20 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
         ),
         defaultValue: const Constant(true),
       );
+  static const VerificationMeta _shiftDueForHolidaysMeta =
+      const VerificationMeta('shiftDueForHolidays');
+  @override
+  late final GeneratedColumn<bool> shiftDueForHolidays = GeneratedColumn<bool>(
+    'shift_due_for_holidays',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("shift_due_for_holidays" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -130,6 +144,7 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
     statementDay,
     dueDay,
     shiftDueToBusinessDay,
+    shiftDueForHolidays,
     createdAt,
     statementReminderEnabled,
     statementReminderDays,
@@ -178,6 +193,15 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
         shiftDueToBusinessDay.isAcceptableOrUnknown(
           data['shift_due_to_business_day']!,
           _shiftDueToBusinessDayMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shift_due_for_holidays')) {
+      context.handle(
+        _shiftDueForHolidaysMeta,
+        shiftDueForHolidays.isAcceptableOrUnknown(
+          data['shift_due_for_holidays']!,
+          _shiftDueForHolidaysMeta,
         ),
       );
     }
@@ -240,6 +264,10 @@ class $SourcesTable extends Sources with TableInfo<$SourcesTable, SourceRow> {
         DriftSqlType.bool,
         data['${effectivePrefix}shift_due_to_business_day'],
       )!,
+      shiftDueForHolidays: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}shift_due_for_holidays'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -271,6 +299,11 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
   final int? statementDay;
   final int? dueDay;
   final bool shiftDueToBusinessDay;
+
+  /// "Move for public holidays" (schema v19, Roadmap 26): on by default,
+  /// existing cards included. The holidays are the holiday country's
+  /// ([AppSettings.holidayCountry]).
+  final bool shiftDueForHolidays;
   final DateTime createdAt;
 
   /// Statement closing reminder (schema v13): off by default, only for
@@ -286,6 +319,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     this.statementDay,
     this.dueDay,
     required this.shiftDueToBusinessDay,
+    required this.shiftDueForHolidays,
     required this.createdAt,
     required this.statementReminderEnabled,
     required this.statementReminderDays,
@@ -305,6 +339,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
       map['due_day'] = Variable<int>(dueDay);
     }
     map['shift_due_to_business_day'] = Variable<bool>(shiftDueToBusinessDay);
+    map['shift_due_for_holidays'] = Variable<bool>(shiftDueForHolidays);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['statement_reminder_enabled'] = Variable<bool>(
       statementReminderEnabled,
@@ -325,6 +360,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           ? const Value.absent()
           : Value(dueDay),
       shiftDueToBusinessDay: Value(shiftDueToBusinessDay),
+      shiftDueForHolidays: Value(shiftDueForHolidays),
       createdAt: Value(createdAt),
       statementReminderEnabled: Value(statementReminderEnabled),
       statementReminderDays: Value(statementReminderDays),
@@ -347,6 +383,9 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
       shiftDueToBusinessDay: serializer.fromJson<bool>(
         json['shiftDueToBusinessDay'],
       ),
+      shiftDueForHolidays: serializer.fromJson<bool>(
+        json['shiftDueForHolidays'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       statementReminderEnabled: serializer.fromJson<bool>(
         json['statementReminderEnabled'],
@@ -368,6 +407,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
       'statementDay': serializer.toJson<int?>(statementDay),
       'dueDay': serializer.toJson<int?>(dueDay),
       'shiftDueToBusinessDay': serializer.toJson<bool>(shiftDueToBusinessDay),
+      'shiftDueForHolidays': serializer.toJson<bool>(shiftDueForHolidays),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'statementReminderEnabled': serializer.toJson<bool>(
         statementReminderEnabled,
@@ -383,6 +423,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     Value<int?> statementDay = const Value.absent(),
     Value<int?> dueDay = const Value.absent(),
     bool? shiftDueToBusinessDay,
+    bool? shiftDueForHolidays,
     DateTime? createdAt,
     bool? statementReminderEnabled,
     int? statementReminderDays,
@@ -393,6 +434,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     statementDay: statementDay.present ? statementDay.value : this.statementDay,
     dueDay: dueDay.present ? dueDay.value : this.dueDay,
     shiftDueToBusinessDay: shiftDueToBusinessDay ?? this.shiftDueToBusinessDay,
+    shiftDueForHolidays: shiftDueForHolidays ?? this.shiftDueForHolidays,
     createdAt: createdAt ?? this.createdAt,
     statementReminderEnabled:
         statementReminderEnabled ?? this.statementReminderEnabled,
@@ -410,6 +452,9 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
       shiftDueToBusinessDay: data.shiftDueToBusinessDay.present
           ? data.shiftDueToBusinessDay.value
           : this.shiftDueToBusinessDay,
+      shiftDueForHolidays: data.shiftDueForHolidays.present
+          ? data.shiftDueForHolidays.value
+          : this.shiftDueForHolidays,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       statementReminderEnabled: data.statementReminderEnabled.present
           ? data.statementReminderEnabled.value
@@ -429,6 +474,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           ..write('statementDay: $statementDay, ')
           ..write('dueDay: $dueDay, ')
           ..write('shiftDueToBusinessDay: $shiftDueToBusinessDay, ')
+          ..write('shiftDueForHolidays: $shiftDueForHolidays, ')
           ..write('createdAt: $createdAt, ')
           ..write('statementReminderEnabled: $statementReminderEnabled, ')
           ..write('statementReminderDays: $statementReminderDays')
@@ -444,6 +490,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
     statementDay,
     dueDay,
     shiftDueToBusinessDay,
+    shiftDueForHolidays,
     createdAt,
     statementReminderEnabled,
     statementReminderDays,
@@ -458,6 +505,7 @@ class SourceRow extends DataClass implements Insertable<SourceRow> {
           other.statementDay == this.statementDay &&
           other.dueDay == this.dueDay &&
           other.shiftDueToBusinessDay == this.shiftDueToBusinessDay &&
+          other.shiftDueForHolidays == this.shiftDueForHolidays &&
           other.createdAt == this.createdAt &&
           other.statementReminderEnabled == this.statementReminderEnabled &&
           other.statementReminderDays == this.statementReminderDays);
@@ -470,6 +518,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
   final Value<int?> statementDay;
   final Value<int?> dueDay;
   final Value<bool> shiftDueToBusinessDay;
+  final Value<bool> shiftDueForHolidays;
   final Value<DateTime> createdAt;
   final Value<bool> statementReminderEnabled;
   final Value<int> statementReminderDays;
@@ -480,6 +529,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     this.statementDay = const Value.absent(),
     this.dueDay = const Value.absent(),
     this.shiftDueToBusinessDay = const Value.absent(),
+    this.shiftDueForHolidays = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.statementReminderEnabled = const Value.absent(),
     this.statementReminderDays = const Value.absent(),
@@ -491,6 +541,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     this.statementDay = const Value.absent(),
     this.dueDay = const Value.absent(),
     this.shiftDueToBusinessDay = const Value.absent(),
+    this.shiftDueForHolidays = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.statementReminderEnabled = const Value.absent(),
     this.statementReminderDays = const Value.absent(),
@@ -503,6 +554,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     Expression<int>? statementDay,
     Expression<int>? dueDay,
     Expression<bool>? shiftDueToBusinessDay,
+    Expression<bool>? shiftDueForHolidays,
     Expression<DateTime>? createdAt,
     Expression<bool>? statementReminderEnabled,
     Expression<int>? statementReminderDays,
@@ -515,6 +567,8 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
       if (dueDay != null) 'due_day': dueDay,
       if (shiftDueToBusinessDay != null)
         'shift_due_to_business_day': shiftDueToBusinessDay,
+      if (shiftDueForHolidays != null)
+        'shift_due_for_holidays': shiftDueForHolidays,
       if (createdAt != null) 'created_at': createdAt,
       if (statementReminderEnabled != null)
         'statement_reminder_enabled': statementReminderEnabled,
@@ -530,6 +584,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
     Value<int?>? statementDay,
     Value<int?>? dueDay,
     Value<bool>? shiftDueToBusinessDay,
+    Value<bool>? shiftDueForHolidays,
     Value<DateTime>? createdAt,
     Value<bool>? statementReminderEnabled,
     Value<int>? statementReminderDays,
@@ -542,6 +597,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
       dueDay: dueDay ?? this.dueDay,
       shiftDueToBusinessDay:
           shiftDueToBusinessDay ?? this.shiftDueToBusinessDay,
+      shiftDueForHolidays: shiftDueForHolidays ?? this.shiftDueForHolidays,
       createdAt: createdAt ?? this.createdAt,
       statementReminderEnabled:
           statementReminderEnabled ?? this.statementReminderEnabled,
@@ -575,6 +631,9 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
         shiftDueToBusinessDay.value,
       );
     }
+    if (shiftDueForHolidays.present) {
+      map['shift_due_for_holidays'] = Variable<bool>(shiftDueForHolidays.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -600,6 +659,7 @@ class SourcesCompanion extends UpdateCompanion<SourceRow> {
           ..write('statementDay: $statementDay, ')
           ..write('dueDay: $dueDay, ')
           ..write('shiftDueToBusinessDay: $shiftDueToBusinessDay, ')
+          ..write('shiftDueForHolidays: $shiftDueForHolidays, ')
           ..write('createdAt: $createdAt, ')
           ..write('statementReminderEnabled: $statementReminderEnabled, ')
           ..write('statementReminderDays: $statementReminderDays')
@@ -1377,7 +1437,7 @@ class PlanRow extends DataClass implements Insertable<PlanRow> {
   /// The product's cash price as typed (schema v18, 23): what the user
   /// would have paid up front. Display only, never part of any total,
   /// period or reminder. Empty when not entered; only on monthly, card and
-  /// manual plans ([canHaveProductPrice]).
+  /// manual plans (`canHaveProductPrice`).
   final int? productPriceMinor;
   const PlanRow({
     required this.id,
@@ -4227,6 +4287,32 @@ class $AppSettingsTable extends AppSettings
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _holidayCountryMeta = const VerificationMeta(
+    'holidayCountry',
+  );
+  @override
+  late final GeneratedColumn<String> holidayCountry = GeneratedColumn<String>(
+    'holiday_country',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 2,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _appliedHolidaysMeta = const VerificationMeta(
+    'appliedHolidays',
+  );
+  @override
+  late final GeneratedColumn<String> appliedHolidays = GeneratedColumn<String>(
+    'applied_holidays',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4248,6 +4334,8 @@ class $AppSettingsTable extends AppSettings
     lastPayLaterValue,
     lastAmountEntry,
     paydaySummaryEnabled,
+    holidayCountry,
+    appliedHolidays,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4383,6 +4471,24 @@ class $AppSettingsTable extends AppSettings
         ),
       );
     }
+    if (data.containsKey('holiday_country')) {
+      context.handle(
+        _holidayCountryMeta,
+        holidayCountry.isAcceptableOrUnknown(
+          data['holiday_country']!,
+          _holidayCountryMeta,
+        ),
+      );
+    }
+    if (data.containsKey('applied_holidays')) {
+      context.handle(
+        _appliedHolidaysMeta,
+        appliedHolidays.isAcceptableOrUnknown(
+          data['applied_holidays']!,
+          _appliedHolidaysMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4476,6 +4582,14 @@ class $AppSettingsTable extends AppSettings
         DriftSqlType.bool,
         data['${effectivePrefix}payday_summary_enabled'],
       )!,
+      holidayCountry: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}holiday_country'],
+      ),
+      appliedHolidays: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}applied_holidays'],
+      ),
     );
   }
 
@@ -4556,6 +4670,17 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
   /// Payday summary notification (schema v12): on for everyone until
   /// turned off, existing users included.
   final bool paydaySummaryEnabled;
+
+  /// Holiday country (schema v19, Roadmap 26), one for every card: ISO
+  /// 3166-1 alpha-2, '' for "None", null until Kalan suggests one (the
+  /// device region, else the currency's country) on first start.
+  final String? holidayCountry;
+
+  /// The weekend and holidays the stored card dates were computed with
+  /// (`CountryHolidays.toSnapshot`); null: "None". Compared with the
+  /// shipped file on every start, so a new list or another country moves
+  /// the dates once.
+  final String? appliedHolidays;
   const SettingsRow({
     required this.id,
     required this.currencyCode,
@@ -4576,6 +4701,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     this.lastPayLaterValue,
     this.lastAmountEntry,
     required this.paydaySummaryEnabled,
+    this.holidayCountry,
+    this.appliedHolidays,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4629,6 +4756,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       );
     }
     map['payday_summary_enabled'] = Variable<bool>(paydaySummaryEnabled);
+    if (!nullToAbsent || holidayCountry != null) {
+      map['holiday_country'] = Variable<String>(holidayCountry);
+    }
+    if (!nullToAbsent || appliedHolidays != null) {
+      map['applied_holidays'] = Variable<String>(appliedHolidays);
+    }
     return map;
   }
 
@@ -4669,6 +4802,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ? const Value.absent()
           : Value(lastAmountEntry),
       paydaySummaryEnabled: Value(paydaySummaryEnabled),
+      holidayCountry: holidayCountry == null && nullToAbsent
+          ? const Value.absent()
+          : Value(holidayCountry),
+      appliedHolidays: appliedHolidays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(appliedHolidays),
     );
   }
 
@@ -4713,6 +4852,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       paydaySummaryEnabled: serializer.fromJson<bool>(
         json['paydaySummaryEnabled'],
       ),
+      holidayCountry: serializer.fromJson<String?>(json['holidayCountry']),
+      appliedHolidays: serializer.fromJson<String?>(json['appliedHolidays']),
     );
   }
   @override
@@ -4748,6 +4889,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         $AppSettingsTable.$converterlastAmountEntryn.toJson(lastAmountEntry),
       ),
       'paydaySummaryEnabled': serializer.toJson<bool>(paydaySummaryEnabled),
+      'holidayCountry': serializer.toJson<String?>(holidayCountry),
+      'appliedHolidays': serializer.toJson<String?>(appliedHolidays),
     };
   }
 
@@ -4771,6 +4914,8 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     Value<int?> lastPayLaterValue = const Value.absent(),
     Value<AmountEntry?> lastAmountEntry = const Value.absent(),
     bool? paydaySummaryEnabled,
+    Value<String?> holidayCountry = const Value.absent(),
+    Value<String?> appliedHolidays = const Value.absent(),
   }) => SettingsRow(
     id: id ?? this.id,
     currencyCode: currencyCode ?? this.currencyCode,
@@ -4802,6 +4947,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
         ? lastAmountEntry.value
         : this.lastAmountEntry,
     paydaySummaryEnabled: paydaySummaryEnabled ?? this.paydaySummaryEnabled,
+    holidayCountry: holidayCountry.present
+        ? holidayCountry.value
+        : this.holidayCountry,
+    appliedHolidays: appliedHolidays.present
+        ? appliedHolidays.value
+        : this.appliedHolidays,
   );
   SettingsRow copyWithCompanion(AppSettingsCompanion data) {
     return SettingsRow(
@@ -4856,6 +5007,12 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
       paydaySummaryEnabled: data.paydaySummaryEnabled.present
           ? data.paydaySummaryEnabled.value
           : this.paydaySummaryEnabled,
+      holidayCountry: data.holidayCountry.present
+          ? data.holidayCountry.value
+          : this.holidayCountry,
+      appliedHolidays: data.appliedHolidays.present
+          ? data.appliedHolidays.value
+          : this.appliedHolidays,
     );
   }
 
@@ -4880,13 +5037,15 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           ..write('lastPayLaterRule: $lastPayLaterRule, ')
           ..write('lastPayLaterValue: $lastPayLaterValue, ')
           ..write('lastAmountEntry: $lastAmountEntry, ')
-          ..write('paydaySummaryEnabled: $paydaySummaryEnabled')
+          ..write('paydaySummaryEnabled: $paydaySummaryEnabled, ')
+          ..write('holidayCountry: $holidayCountry, ')
+          ..write('appliedHolidays: $appliedHolidays')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     currencyCode,
     localeCode,
@@ -4906,7 +5065,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
     lastPayLaterValue,
     lastAmountEntry,
     paydaySummaryEnabled,
-  );
+    holidayCountry,
+    appliedHolidays,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4929,7 +5090,9 @@ class SettingsRow extends DataClass implements Insertable<SettingsRow> {
           other.lastPayLaterRule == this.lastPayLaterRule &&
           other.lastPayLaterValue == this.lastPayLaterValue &&
           other.lastAmountEntry == this.lastAmountEntry &&
-          other.paydaySummaryEnabled == this.paydaySummaryEnabled);
+          other.paydaySummaryEnabled == this.paydaySummaryEnabled &&
+          other.holidayCountry == this.holidayCountry &&
+          other.appliedHolidays == this.appliedHolidays);
 }
 
 class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
@@ -4952,6 +5115,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
   final Value<int?> lastPayLaterValue;
   final Value<AmountEntry?> lastAmountEntry;
   final Value<bool> paydaySummaryEnabled;
+  final Value<String?> holidayCountry;
+  final Value<String?> appliedHolidays;
   const AppSettingsCompanion({
     this.id = const Value.absent(),
     this.currencyCode = const Value.absent(),
@@ -4972,6 +5137,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.lastPayLaterValue = const Value.absent(),
     this.lastAmountEntry = const Value.absent(),
     this.paydaySummaryEnabled = const Value.absent(),
+    this.holidayCountry = const Value.absent(),
+    this.appliedHolidays = const Value.absent(),
   });
   AppSettingsCompanion.insert({
     this.id = const Value.absent(),
@@ -4993,6 +5160,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     this.lastPayLaterValue = const Value.absent(),
     this.lastAmountEntry = const Value.absent(),
     this.paydaySummaryEnabled = const Value.absent(),
+    this.holidayCountry = const Value.absent(),
+    this.appliedHolidays = const Value.absent(),
   }) : currencyCode = Value(currencyCode),
        payFrequency = Value(payFrequency);
   static Insertable<SettingsRow> custom({
@@ -5015,6 +5184,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Expression<int>? lastPayLaterValue,
     Expression<String>? lastAmountEntry,
     Expression<bool>? paydaySummaryEnabled,
+    Expression<String>? holidayCountry,
+    Expression<String>? appliedHolidays,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -5040,6 +5211,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       if (lastAmountEntry != null) 'last_amount_entry': lastAmountEntry,
       if (paydaySummaryEnabled != null)
         'payday_summary_enabled': paydaySummaryEnabled,
+      if (holidayCountry != null) 'holiday_country': holidayCountry,
+      if (appliedHolidays != null) 'applied_holidays': appliedHolidays,
     });
   }
 
@@ -5063,6 +5236,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
     Value<int?>? lastPayLaterValue,
     Value<AmountEntry?>? lastAmountEntry,
     Value<bool>? paydaySummaryEnabled,
+    Value<String?>? holidayCountry,
+    Value<String?>? appliedHolidays,
   }) {
     return AppSettingsCompanion(
       id: id ?? this.id,
@@ -5085,6 +5260,8 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
       lastPayLaterValue: lastPayLaterValue ?? this.lastPayLaterValue,
       lastAmountEntry: lastAmountEntry ?? this.lastAmountEntry,
       paydaySummaryEnabled: paydaySummaryEnabled ?? this.paydaySummaryEnabled,
+      holidayCountry: holidayCountry ?? this.holidayCountry,
+      appliedHolidays: appliedHolidays ?? this.appliedHolidays,
     );
   }
 
@@ -5164,6 +5341,12 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
         paydaySummaryEnabled.value,
       );
     }
+    if (holidayCountry.present) {
+      map['holiday_country'] = Variable<String>(holidayCountry.value);
+    }
+    if (appliedHolidays.present) {
+      map['applied_holidays'] = Variable<String>(appliedHolidays.value);
+    }
     return map;
   }
 
@@ -5188,7 +5371,9 @@ class AppSettingsCompanion extends UpdateCompanion<SettingsRow> {
           ..write('lastPayLaterRule: $lastPayLaterRule, ')
           ..write('lastPayLaterValue: $lastPayLaterValue, ')
           ..write('lastAmountEntry: $lastAmountEntry, ')
-          ..write('paydaySummaryEnabled: $paydaySummaryEnabled')
+          ..write('paydaySummaryEnabled: $paydaySummaryEnabled, ')
+          ..write('holidayCountry: $holidayCountry, ')
+          ..write('appliedHolidays: $appliedHolidays')
           ..write(')'))
         .toString();
   }
@@ -5677,6 +5862,7 @@ typedef $$SourcesTableCreateCompanionBuilder = SourcesCompanion Function({
   Value<int?> statementDay,
   Value<int?> dueDay,
   Value<bool> shiftDueToBusinessDay,
+  Value<bool> shiftDueForHolidays,
   Value<DateTime> createdAt,
   Value<bool> statementReminderEnabled,
   Value<int> statementReminderDays,
@@ -5688,6 +5874,7 @@ typedef $$SourcesTableUpdateCompanionBuilder = SourcesCompanion Function({
   Value<int?> statementDay,
   Value<int?> dueDay,
   Value<bool> shiftDueToBusinessDay,
+  Value<bool> shiftDueForHolidays,
   Value<DateTime> createdAt,
   Value<bool> statementReminderEnabled,
   Value<int> statementReminderDays,
@@ -5730,6 +5917,11 @@ class $$SourcesTableFilterComposer
 
   ColumnFilters<bool> get shiftDueToBusinessDay => $composableBuilder(
     column: $table.shiftDueToBusinessDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get shiftDueForHolidays => $composableBuilder(
+    column: $table.shiftDueForHolidays,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5788,6 +5980,11 @@ class $$SourcesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get shiftDueForHolidays => $composableBuilder(
+    column: $table.shiftDueForHolidays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -5832,6 +6029,11 @@ class $$SourcesTableAnnotationComposer
 
   GeneratedColumn<bool> get shiftDueToBusinessDay => $composableBuilder(
     column: $table.shiftDueToBusinessDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get shiftDueForHolidays => $composableBuilder(
+    column: $table.shiftDueForHolidays,
     builder: (column) => column,
   );
 
@@ -5883,6 +6085,7 @@ class $$SourcesTableTableManager
                 Value<int?> statementDay = const Value.absent(),
                 Value<int?> dueDay = const Value.absent(),
                 Value<bool> shiftDueToBusinessDay = const Value.absent(),
+                Value<bool> shiftDueForHolidays = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> statementReminderEnabled = const Value.absent(),
                 Value<int> statementReminderDays = const Value.absent(),
@@ -5893,6 +6096,7 @@ class $$SourcesTableTableManager
                 statementDay: statementDay,
                 dueDay: dueDay,
                 shiftDueToBusinessDay: shiftDueToBusinessDay,
+                shiftDueForHolidays: shiftDueForHolidays,
                 createdAt: createdAt,
                 statementReminderEnabled: statementReminderEnabled,
                 statementReminderDays: statementReminderDays,
@@ -5905,6 +6109,7 @@ class $$SourcesTableTableManager
                 Value<int?> statementDay = const Value.absent(),
                 Value<int?> dueDay = const Value.absent(),
                 Value<bool> shiftDueToBusinessDay = const Value.absent(),
+                Value<bool> shiftDueForHolidays = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<bool> statementReminderEnabled = const Value.absent(),
                 Value<int> statementReminderDays = const Value.absent(),
@@ -5915,6 +6120,7 @@ class $$SourcesTableTableManager
                 statementDay: statementDay,
                 dueDay: dueDay,
                 shiftDueToBusinessDay: shiftDueToBusinessDay,
+                shiftDueForHolidays: shiftDueForHolidays,
                 createdAt: createdAt,
                 statementReminderEnabled: statementReminderEnabled,
                 statementReminderDays: statementReminderDays,
@@ -8119,6 +8325,8 @@ typedef $$AppSettingsTableCreateCompanionBuilder =
       Value<int?> lastPayLaterValue,
       Value<AmountEntry?> lastAmountEntry,
       Value<bool> paydaySummaryEnabled,
+      Value<String?> holidayCountry,
+      Value<String?> appliedHolidays,
     });
 typedef $$AppSettingsTableUpdateCompanionBuilder =
     AppSettingsCompanion Function({
@@ -8141,6 +8349,8 @@ typedef $$AppSettingsTableUpdateCompanionBuilder =
       Value<int?> lastPayLaterValue,
       Value<AmountEntry?> lastAmountEntry,
       Value<bool> paydaySummaryEnabled,
+      Value<String?> holidayCountry,
+      Value<String?> appliedHolidays,
     });
 
 class $$AppSettingsTableFilterComposer
@@ -8250,6 +8460,16 @@ class $$AppSettingsTableFilterComposer
     column: $table.paydaySummaryEnabled,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get holidayCountry => $composableBuilder(
+    column: $table.holidayCountry,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appliedHolidays => $composableBuilder(
+    column: $table.appliedHolidays,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$AppSettingsTableOrderingComposer
@@ -8355,6 +8575,16 @@ class $$AppSettingsTableOrderingComposer
     column: $table.paydaySummaryEnabled,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get holidayCountry => $composableBuilder(
+    column: $table.holidayCountry,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get appliedHolidays => $composableBuilder(
+    column: $table.appliedHolidays,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AppSettingsTableAnnotationComposer
@@ -8458,6 +8688,16 @@ class $$AppSettingsTableAnnotationComposer
     column: $table.paydaySummaryEnabled,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get holidayCountry => $composableBuilder(
+    column: $table.holidayCountry,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appliedHolidays => $composableBuilder(
+    column: $table.appliedHolidays,
+    builder: (column) => column,
+  );
 }
 
 class $$AppSettingsTableTableManager
@@ -8511,6 +8751,8 @@ class $$AppSettingsTableTableManager
                 Value<int?> lastPayLaterValue = const Value.absent(),
                 Value<AmountEntry?> lastAmountEntry = const Value.absent(),
                 Value<bool> paydaySummaryEnabled = const Value.absent(),
+                Value<String?> holidayCountry = const Value.absent(),
+                Value<String?> appliedHolidays = const Value.absent(),
               }) => AppSettingsCompanion(
                 id: id,
                 currencyCode: currencyCode,
@@ -8531,6 +8773,8 @@ class $$AppSettingsTableTableManager
                 lastPayLaterValue: lastPayLaterValue,
                 lastAmountEntry: lastAmountEntry,
                 paydaySummaryEnabled: paydaySummaryEnabled,
+                holidayCountry: holidayCountry,
+                appliedHolidays: appliedHolidays,
               ),
           createCompanionCallback:
               ({
@@ -8554,6 +8798,8 @@ class $$AppSettingsTableTableManager
                 Value<int?> lastPayLaterValue = const Value.absent(),
                 Value<AmountEntry?> lastAmountEntry = const Value.absent(),
                 Value<bool> paydaySummaryEnabled = const Value.absent(),
+                Value<String?> holidayCountry = const Value.absent(),
+                Value<String?> appliedHolidays = const Value.absent(),
               }) => AppSettingsCompanion.insert(
                 id: id,
                 currencyCode: currencyCode,
@@ -8574,6 +8820,8 @@ class $$AppSettingsTableTableManager
                 lastPayLaterValue: lastPayLaterValue,
                 lastAmountEntry: lastAmountEntry,
                 paydaySummaryEnabled: paydaySummaryEnabled,
+                holidayCountry: holidayCountry,
+                appliedHolidays: appliedHolidays,
               ),
           withReferenceMapper: (p0) => p0
               .map(

@@ -786,6 +786,63 @@ void main() {
     },
   );
 
+  test(
+    'v18 -> current: cards move for holidays, no country yet, data kept',
+    () async {
+      final schema = await verifier.schemaAt(18);
+      seedCommon(schema);
+      schema.rawDatabase.execute(
+        'INSERT INTO sources (id, name, kind, statement_day, due_day, '
+        "shift_due_to_business_day) VALUES (2, 'Bonus', 'card', 19, 29, 0)",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO plans (id, source_id, kind, installment_count, origin) '
+        "VALUES (2, 2, 'card', 3, 'template')",
+      );
+      schema.rawDatabase.execute(
+        'INSERT INTO payments (plan_id, seq, due_day, amount_minor, '
+        'is_edited) VALUES (2, 1, 20755, 1000, 1)',
+      );
+      const sourceColumns =
+          'id, name, kind, statement_day, due_day, shift_due_to_business_day, '
+          'statement_reminder_enabled, statement_reminder_days';
+      const paymentColumns =
+          'plan_id, seq, due_day, amount_minor, paid_at, is_edited';
+      final sourcesBefore = schema.rawDatabase.select(
+        'SELECT $sourceColumns FROM sources ORDER BY id',
+      );
+      final paymentsBefore = schema.rawDatabase.select(
+        'SELECT $paymentColumns FROM payments ORDER BY plan_id, seq',
+      );
+      final db = AppDatabase(schema.newConnection());
+      await verifier.migrateAndValidate(db, db.schemaVersion);
+      final sourcesAfter = await db
+          .customSelect('SELECT $sourceColumns FROM sources ORDER BY id')
+          .get();
+      expect(
+        [for (final r in sourcesAfter) r.data],
+        [for (final r in sourcesBefore) Map<String, Object?>.of(r)],
+      );
+      final paymentsAfter = await db
+          .customSelect(
+            'SELECT $paymentColumns FROM payments ORDER BY plan_id, seq',
+          )
+          .get();
+      expect(
+        [for (final r in paymentsAfter) r.data],
+        [for (final r in paymentsBefore) Map<String, Object?>.of(r)],
+      );
+      final sources = await db.select(db.sources).get();
+      expect(sources.map((s) => s.shiftDueForHolidays), everyElement(isTrue));
+      final settings = await db.select(db.appSettings).getSingle();
+      // Suggested and applied on first start (HolidayRepository.sync).
+      expect(settings.holidayCountry, equals(null));
+      expect(settings.appliedHolidays, equals(null));
+      expect(settings.currencyCode, 'TRY');
+      await db.close();
+    },
+  );
+
   test('a product price below 1 is refused', () async {
     final db = AppDatabase(NativeDatabase.memory());
     final planId = await db

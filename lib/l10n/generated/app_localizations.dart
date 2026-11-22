@@ -3269,6 +3269,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Starting values for {provider} · Last checked: {date}. Change them if your terms differ.'**
   String providerTemplateNote(String provider, String date);
+
+  /// Card settings switch, right under the weekend switch: a due date on a public holiday of the holiday country moves to the next business day. Information only, not a warning. Do not name the holiday or its religion; say only public holiday.
+  ///
+  /// In en, this message translates to:
+  /// **'Move for public holidays'**
+  String get fieldShiftHolidays;
+
+  /// Muted note under the holiday switch in card settings: the shipped holiday list ends with this year; later dates move only for the weekend. Information only, not a warning. Do not name the holiday or its religion; say only public holiday. Year as digits, no grouping.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday list covers up to the end of {year}. App updates renew it.'**
+  String holidayListUntil(int year);
+
+  /// Muted note under the holiday switch in card settings when the holiday country is 'None'. Information only, not a warning. Do not name the holiday or its religion; say only public holiday.
+  ///
+  /// In en, this message translates to:
+  /// **'No holiday country chosen. You can pick one in Settings.'**
+  String get holidayNoCountry;
+
+  /// Small muted note with a calendar icon under a card installment's date when its due date was moved past a public holiday. Information only, not a warning. Do not name the holiday or its religion; say only public holiday.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved for a public holiday'**
+  String get holidayMovedNote;
+
+  /// Settings row and dialog title: the one country whose weekend and public holidays move card due dates. Information only, not a warning. Do not name the holiday or its religion; say only public holiday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday country'**
+  String get settingsHolidayCountry;
+
+  /// Holiday country option: no country (only Saturday and Sunday move a date). One word.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get holidayCountryNone;
+
+  /// Note at the top of the holiday country list. Information only, not a warning. Do not name the holiday or its religion; say only public holiday.
+  ///
+  /// In en, this message translates to:
+  /// **'Card installment due dates move for this country\'s weekend and public holidays.'**
+  String get holidayCountryNote;
+
+  /// Country name by ISO 3166-1 code in the holiday country list. Add a branch when adding a country to assets/holidays.json. Use the usual short name in your language.
+  ///
+  /// In en, this message translates to:
+  /// **'{code, select, AR{Argentina} BR{Brazil} CA{Canada} CH{Switzerland} CL{Chile} CN{China} CO{Colombia} DE{Germany} ES{Spain} FR{France} GB{United Kingdom} ID{Indonesia} IT{Italy} JP{Japan} MX{Mexico} NL{Netherlands} PL{Poland} PT{Portugal} RU{Russia} SE{Sweden} TR{Türkiye} US{United States} other{{code}}}'**
+  String holidayCountryName(String code);
 }
 
 class _AppLocalizationsDelegate

@@ -21,6 +21,8 @@ import '../../data/db/app_database.dart';
 import '../../entitlement/pro_controller.dart';
 import '../../entitlement/pro_rules.dart';
 import '../currency/currency_picker.dart';
+import '../holidays/holiday_country_ui.dart';
+import '../holidays/holiday_providers.dart';
 import '../onboarding/pay_form.dart';
 import '../pro/pro_screen.dart';
 import '../reminders/reminders_section.dart';
@@ -219,6 +221,18 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(currencyLabel, style: secondary),
             onTap: () => _pickCurrency(context, ref, s),
           ),
+          // Public holidays (26): one country for every card; not shown
+          // should the shipped list not read (nothing to choose from).
+          if (ref.watch(holidayCountriesProvider) != null)
+            ListTile(
+              key: const ValueKey('settings-holiday-country'),
+              title: Text(l10n.settingsHolidayCountry),
+              subtitle: Text(
+                holidayCountryLabel(context, s.holidayCountry),
+                style: secondary,
+              ),
+              onTap: () => pickHolidayCountry(context, ref),
+            ),
           ListTile(
             title: Text(l10n.settingsLanguage),
             subtitle: Text(languageLabel, style: secondary),
