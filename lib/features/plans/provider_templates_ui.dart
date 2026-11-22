@@ -103,7 +103,9 @@ class ProviderStartSection extends StatelessWidget {
             : null,
       ),
     );
-    if (variant != null) onChosen((template: t, variant: variant));
+    if (variant != null && context.mounted) {
+      onChosen((template: t, variant: variant));
+    }
   }
 
   @override

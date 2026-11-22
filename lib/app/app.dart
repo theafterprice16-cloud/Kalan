@@ -10,6 +10,7 @@ import '../core/routing/routes.dart';
 import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../entitlement/pro_controller.dart';
+import '../features/plans/provider_templates_ui.dart';
 import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
 import '../features/reminders/reminder_actions.dart';
@@ -47,6 +48,9 @@ class _KalanAppState extends ConsumerState<KalanApp> {
     // Pro: the saved state at once, the store checked in the background,
     // and purchase updates heard from the start (before onboarding too).
     ref.read(proControllerProvider);
+    // Provider templates (25) read from the app's own file now, so the
+    // add plan screen opens with its section already in place.
+    ref.read(providerTemplatesSourceProvider);
     // App start: schedule from the stored data right away.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

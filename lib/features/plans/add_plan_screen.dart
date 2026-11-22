@@ -169,6 +169,25 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
     for (final c in _payLater.controllers) {
       c.addListener(_refresh);
     }
+    _source.addListener(_dropTemplateIfRenamed);
+    _payLater.source.addListener(_dropTemplateIfRenamed);
+  }
+
+  /// Ends the link to a template: its note and check go; the values it
+  /// filled stay.
+  void _dropTemplate() {
+    _template = null;
+    _templateSourceName = null;
+  }
+
+  /// Another source typed after a template, even one later typed back:
+  /// the provider is no longer the template's.
+  void _dropTemplateIfRenamed() {
+    final name = _templateSourceName;
+    if (name == null || _activeTemplate != null) return;
+    final t = _template;
+    if (t == null || _modeOf(t.variant) != _mode) return;
+    setState(_dropTemplate);
   }
 
   /// The mode a template variant fills.
@@ -645,6 +664,10 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                 (AddMode.payLater, l10n.kindPayLater),
               ],
               onSelected: (m) => setState(() {
+                // Another type ends the link to a template (25).
+                if (_template case final t? when _modeOf(t.variant) != m) {
+                  _dropTemplate();
+                }
                 _mode = m;
                 _suggestNextDate();
               }),

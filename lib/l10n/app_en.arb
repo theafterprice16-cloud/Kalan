@@ -2623,7 +2623,7 @@
   "@providerStartTitle": {
     "description": "Plan ekleme: plan türlerinin altındaki bölümün başlığı; sağlayıcı adına dokununca form bilinen kalıpla dolar. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: heading of the section under the plan types; tapping a provider fills the form with its usual pattern. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)"
   },
-  "providerStartHint": "Fills the payment count and interval; you can change all of them.",
+  "providerStartHint": "Fills the number of payments and the dates; you can change all of them.",
   "@providerStartHint": {
     "description": "Plan ekleme: bölüm başlığının altındaki kısa not. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: short note under the section heading. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)"
   },

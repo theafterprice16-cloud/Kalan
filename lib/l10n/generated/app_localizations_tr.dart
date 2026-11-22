@@ -2401,7 +2401,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get providerStartHint =>
-      'Taksit sayısı ve aralık dolu gelir; hepsini değiştirebilirsin.';
+      'Ödeme sayısı ve tarihler dolu gelir; hepsini değiştirebilirsin.';
 
   @override
   String providerVariantSameDay(int count) {

@@ -26,12 +26,25 @@ void main(List<String> args) {
     exitCode = 1;
     return;
   }
-  final warnings = staleTemplateWarnings(templates, today);
-  for (final w in warnings) {
-    stdout.writeln('::warning file=$providerTemplatesAsset::$w');
+  final stale = staleTemplates(templates, today);
+  for (final t in stale) {
+    stdout.writeln(
+      '::warning file=$providerTemplatesAsset::${staleWarning(t)}',
+    );
+  }
+  for (final t in futureCheckedTemplates(templates, today)) {
+    stdout.writeln(
+      '::warning file=$providerTemplatesAsset::Şablon kontrol tarihi '
+      'gelecekte: ${t.name}, ${t.country} (${t.checked})',
+    );
   }
   stdout.writeln(
-    '${templates.length} templates, ${warnings.length} older than '
+    '${templates.length} templates, ${stale.length} older than '
     '$staleAfterMonths months.',
   );
 }
+
+/// "Şablon kontrol tarihi 6 aydan eski: Scalapay, IT".
+String staleWarning(ProviderTemplate t) =>
+    'Şablon kontrol tarihi $staleAfterMonths aydan eski: '
+    '${t.name}, ${t.country}';

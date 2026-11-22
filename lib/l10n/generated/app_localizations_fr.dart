@@ -2400,7 +2400,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get providerStartHint =>
-      'Fills the payment count and interval; you can change all of them.';
+      'Fills the number of payments and the dates; you can change all of them.';
 
   @override
   String providerVariantSameDay(int count) {

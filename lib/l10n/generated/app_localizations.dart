@@ -3225,7 +3225,7 @@ abstract class AppLocalizations {
   /// Plan ekleme: bölüm başlığının altındaki kısa not. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Add plan: short note under the section heading. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)
   ///
   /// In en, this message translates to:
-  /// **'Fills the payment count and interval; you can change all of them.'**
+  /// **'Fills the number of payments and the dates; you can change all of them.'**
   String get providerStartHint;
 
   /// Sağlayıcı kalıbı: her ay aynı gün ödenen taksitler. Sağlayıcı adını çevirme. Şablon bir öneri ya da taahhüt değil, yalnızca başlangıç değeridir; övgü ya da tavsiye içeren bir dil kullanma. (Provider pattern: payments on the same day every month. Do not translate the provider name. A template is not a suggestion or a promise, only a starting value; use no praising or advising language.)

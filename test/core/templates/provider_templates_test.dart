@@ -6,6 +6,8 @@ import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/templates/provider_templates.dart';
 import 'package:kalan/l10n/app_locales.dart';
 
+import '../../../tool/check_provider_templates.dart' show staleWarning;
+
 LocalDate d(int y, int m, int day) => LocalDate(y, m, day);
 
 final _file = File(providerTemplatesAsset).readAsStringSync();
@@ -238,6 +240,14 @@ void main() {
           'firstDay': 27,
         },
         {'kind': 'monthly', 'count': 3, 'interval': 'sameDay', 'first': 'eom'},
+        // Day 29-31 would move to a month end in short months.
+        {
+          'kind': 'monthly',
+          'count': 3,
+          'interval': 'sameDay',
+          'first': 'nextMonthDay',
+          'firstDay': 29,
+        },
         {'kind': 'payIn4', 'count': 3},
         {'kind': 'payLater', 'payLater': 'endOfMonth', 'payLaterValue': 1},
         {'kind': 'payLater', 'payLater': 'days', 'payLaterValue': 181},
@@ -392,16 +402,30 @@ void main() {
           _template(country: 'ES', extra: {'checked': '2026-06-22'}),
         ]),
       );
-      expect(staleTemplateWarnings(all, today), [
+      final stale = staleTemplates(all, today);
+      expect(stale.map((t) => t.country), ['IT']);
+      expect(
+        staleWarning(stale.single),
         'Şablon kontrol tarihi 6 aydan eski: Scalapay, IT',
-      ]);
+      );
     });
 
-    test('the shipped file is recent today', () {
-      expect(
-        staleTemplateWarnings(parseProviderTemplates(_file), today),
-        isEmpty,
+    test('a check date in the future is caught', () {
+      final all = parseProviderTemplates(
+        _wrap([
+          _template(extra: {'checked': '2062-11-22'}),
+        ]),
       );
+      expect(futureCheckedTemplates(all, today), hasLength(1));
+      expect(staleTemplates(all, today), isEmpty);
+    });
+
+    test('the shipped file: checked on or before today, none stale', () {
+      final now = DateTime.now();
+      final realToday = LocalDate(now.year, now.month, now.day);
+      final shipped = parseProviderTemplates(_file);
+      expect(futureCheckedTemplates(shipped, realToday), isEmpty);
+      expect(staleTemplates(shipped, today), isEmpty);
     });
   });
 

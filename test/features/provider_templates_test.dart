@@ -1,11 +1,15 @@
 import 'dart:convert';
 
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/app/locale.dart' show appLocalesProvider;
+import 'package:kalan/core/design/widgets.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
 import 'package:kalan/features/plans/provider_templates_ui.dart';
+import 'package:kalan/l10n/app_locales.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
@@ -59,6 +63,26 @@ final fixture = jsonEncode({
       ],
     },
     {
+      'country': 'CA',
+      'id': 'afterpay',
+      'name': 'Afterpay',
+      'sources': ['https://www.afterpay.com/en-CA/how-it-works'],
+      'checked': '2026-11-22',
+      'variants': [
+        {'kind': 'payIn4'},
+      ],
+    },
+    {
+      'country': 'ES',
+      'id': 'sequra',
+      'name': 'seQura',
+      'sources': ['https://www.sequra.com/es'],
+      'checked': '2026-11-22',
+      'variants': [
+        {'kind': 'payLater', 'payLater': 'days', 'payLaterValue': 7},
+      ],
+    },
+    {
       'country': 'JP',
       'id': 'paidy',
       'name': 'Paidy',
@@ -83,6 +107,8 @@ Future<AppDatabase> pumpRegion(
   Locale locale, {
   Future<void> Function(AppDatabase db)? seed,
   bool shippedFile = false,
+  String? appLanguage,
+  List<Override> extra = const [],
 }) {
   // A tall phone: the section, the form and its note fit without scrolling.
   tester.view.physicalSize = const Size(800, 1800);
@@ -92,12 +118,18 @@ Future<AppDatabase> pumpRegion(
     tester,
     locale: locale,
     seed: (db) async {
-      await seedSettings(db, currency: 'EUR', incomeMinor: 200000);
+      await seedSettings(
+        db,
+        currency: 'EUR',
+        incomeMinor: 200000,
+        localeCode: appLanguage,
+      );
       await seed?.call(db);
     },
     overrides: [
       if (!shippedFile)
         providerTemplatesSourceProvider.overrideWith((ref) async => fixture),
+      ...extra,
     ],
   );
 }
@@ -424,5 +456,118 @@ void main() {
       ),
       findsNothing,
     );
+    // Back to the template's type: the link stays dropped.
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Monthly installments'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('template-note')), findsNothing);
+  });
+
+  testWidgets('source cleared and the same name typed again: still dropped', (
+    tester,
+  ) async {
+    await pumpRegion(tester, const Locale('en', 'IT'));
+    await openAdd(tester);
+    await tester.tap(find.text('Scalapay'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('source')), '');
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('source')), 'Scalapay');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('template-note')), findsNothing);
+  });
+
+  testWidgets('the app language set in Settings does not change the list', (
+    tester,
+  ) async {
+    // Phone in Turkish, Italian region; Kalan set to English.
+    await pumpRegion(tester, const Locale('tr', 'IT'), appLanguage: 'en');
+    await openAdd(tester);
+    expect(find.text('Start from a provider'), findsOneWidget);
+    expect(find.text('Klarna'), findsOneWidget);
+    expect(find.text('Scalapay'), findsOneWidget);
+  });
+
+  testWidgets('Pay in 4 template: the type and every 2 weeks', (tester) async {
+    await pumpRegion(tester, const Locale('en', 'CA'));
+    await openAdd(tester);
+    // Start from another type: the template switches it.
+    await tester.tap(find.widgetWithText(ChoiceChip, 'Custom'));
+    await tester.pumpAndSettle();
+    expect(find.text('4 payments · every 2 weeks'), findsOneWidget);
+    await tester.tap(find.text('Afterpay'));
+    await tester.pumpAndSettle();
+    expect(chipSelected(tester, 'Pay in 4'), isTrue);
+    expect(chipSelected(tester, 'Every 2 weeks'), isTrue);
+    expect(fieldText(tester, 'source'), 'Afterpay');
+    expect(visibleInputCount(tester), 3);
+    expect(find.byKey(const ValueKey('template-note')), findsOneWidget);
+  });
+
+  testWidgets('Pay later in 7 days: the day count chip and its number', (
+    tester,
+  ) async {
+    await pumpRegion(tester, const Locale('en', 'ES'));
+    await openAdd(tester);
+    expect(find.text('One payment · 7 days later'), findsOneWidget);
+    await tester.tap(find.text('seQura'));
+    await tester.pumpAndSettle();
+    expect(chipSelected(tester, 'Pay later'), isTrue);
+    expect(chipSelected(tester, 'Number of days'), isTrue);
+    expect(
+      tester
+          .widget<TextField>(
+            find.descendant(
+              of: find.byKey(const ValueKey('pay-later-number')),
+              matching: find.byType(TextField),
+            ),
+          )
+          .controller!
+          .text,
+      '7',
+    );
+    expect(find.text('Due on Nov 27, 2026'), findsOneWidget);
+  });
+
+  testWidgets('rows and sheet meet the tap target guidelines', (tester) async {
+    final handle = tester.ensureSemantics();
+    await pumpRegion(tester, const Locale('en', 'ID'));
+    await openAdd(tester);
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await tester.tap(find.text('Kredivo'));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    handle.dispose();
+  });
+
+  testWidgets('right to left: the section and sheet in Arabic, UAE', (
+    tester,
+  ) async {
+    final arabicOpen = [
+      for (final l in appLocales)
+        l.code == 'ar' ? l.withStatus(LocaleStatus.reviewed) : l,
+    ];
+    await pumpRegion(
+      tester,
+      const Locale('ar', 'AE'),
+      shippedFile: true,
+      extra: [appLocalesProvider.overrideWithValue(arabicOpen)],
+    );
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    final row = find.byKey(const ValueKey('provider-tabby'));
+    expect(row, findsOneWidget);
+    expect(Directionality.of(tester.element(row)), TextDirection.rtl);
+    // The letter badge sits at the start: on the right.
+    final badge = find.descendant(of: row, matching: find.byType(LetterBadge));
+    expect(
+      tester.getCenter(badge).dx,
+      greaterThan(tester.getCenter(find.text('Tabby')).dx),
+    );
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('template-note')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

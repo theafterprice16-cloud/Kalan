@@ -359,7 +359,9 @@ TemplateVariant _variant(Object? value, String at) {
       };
       final int? firstDay;
       if (first == TemplateFirstPayment.nextMonthDay) {
-        firstDay = _int(m, 'firstDay', at, 1, 31);
+        // 1-28: every month has the day, so no payment moves to a month
+        // end (a provider moving day 29-31 to the 28th is not offered).
+        firstDay = _int(m, 'firstDay', at, 1, 28);
       } else {
         _absent(m, ['firstDay'], at);
         firstDay = null;
@@ -455,16 +457,24 @@ List<ProviderTemplate> templatesForRegion(
 bool isTemplateStale(LocalDate checked, LocalDate today) =>
     checked.addMonths(staleAfterMonths) < today;
 
-/// The CI warning for each stale template ("Şablon kontrol tarihi 6 aydan
-/// eski: Scalapay, IT"), in file order. Empty when all are recent.
-List<String> staleTemplateWarnings(
+/// The templates whose check date is more than [staleAfterMonths] months
+/// before [today], in file order (the CI check warns about each).
+List<ProviderTemplate> staleTemplates(
   List<ProviderTemplate> all,
   LocalDate today,
 ) => [
   for (final t in all)
-    if (isTemplateStale(t.checked, today))
-      'Şablon kontrol tarihi $staleAfterMonths aydan eski: '
-          '${t.name}, ${t.country}',
+    if (isTemplateStale(t.checked, today)) t,
+];
+
+/// The templates checked after [today]: a typo that would silence the
+/// six-month check.
+List<ProviderTemplate> futureCheckedTemplates(
+  List<ProviderTemplate> all,
+  LocalDate today,
+) => [
+  for (final t in all)
+    if (t.checked > today) t,
 ];
 
 // Names ----------------------------------------------------------------------

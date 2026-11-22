@@ -510,7 +510,7 @@
   "productPriceHelper": "Peşin alsaydın ödeyeceğin fiyat.",
   "priceDifferenceLabel": "Fark",
   "providerStartTitle": "Sağlayıcıdan başla",
-  "providerStartHint": "Taksit sayısı ve aralık dolu gelir; hepsini değiştirebilirsin.",
+  "providerStartHint": "Ödeme sayısı ve tarihler dolu gelir; hepsini değiştirebilirsin.",
   "providerVariantSameDay": "{count, plural, other{{count} taksit · aylık}}",
   "providerVariantEveryDays": "{count, plural, other{{count} taksit}} · {days, plural, other{{days} günde bir}}",
   "providerVariantBiweekly": "{count, plural, other{{count} taksit · iki haftada bir}}",
