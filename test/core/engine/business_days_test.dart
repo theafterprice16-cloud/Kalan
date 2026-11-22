@@ -232,7 +232,7 @@ void main() {
   });
 
   group('reshiftCardDue: only the dates the rule gave move', () {
-    final none = const CardTerms(statementDay: 19, dueDay: 29);
+    const none = CardTerms(statementDay: 19, dueDay: 29);
     final turkey = none.withHolidays(tr);
 
     test('example 7: 29 Oct 2026 moves to 30 Oct', () {

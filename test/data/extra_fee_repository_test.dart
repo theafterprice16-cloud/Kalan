@@ -228,7 +228,7 @@ void main() {
       statementDay: 14,
       dueDay: 24,
     );
-    final terms = (await sources.byId(card))!.cardTerms!;
+    final terms = (await sources.byId(card))!.cardTermsIn(null)!;
     final id = await plans.saveDraft(
       PlanCalculator.card(
         purchaseDate: d('2026-11-01'),

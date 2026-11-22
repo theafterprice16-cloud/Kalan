@@ -2497,4 +2497,59 @@ class AppLocalizationsJa extends AppLocalizations {
   String providerTemplateNote(String provider, String date) {
     return 'Starting values for $provider · Last checked: $date. Change them if your terms differ.';
   }
+
+  @override
+  String get fieldShiftHolidays => 'Move for public holidays';
+
+  @override
+  String holidayListUntil(int year) {
+    return 'Holiday list covers up to the end of $year. App updates renew it.';
+  }
+
+  @override
+  String get holidayNoCountry =>
+      'No holiday country chosen. You can pick one in Settings.';
+
+  @override
+  String get holidayMovedNote => 'Moved for a public holiday';
+
+  @override
+  String get settingsHolidayCountry => 'Holiday country';
+
+  @override
+  String get holidayCountryNone => 'None';
+
+  @override
+  String get holidayCountryNote =>
+      'Card installment due dates move for this country\'s weekend and public holidays.';
+
+  @override
+  String holidayCountryName(String code) {
+    String _temp0 = intl.Intl.selectLogic(code, {
+      'AR': 'Argentina',
+      'BR': 'Brazil',
+      'CA': 'Canada',
+      'CH': 'Switzerland',
+      'CL': 'Chile',
+      'CN': 'China',
+      'CO': 'Colombia',
+      'DE': 'Germany',
+      'ES': 'Spain',
+      'FR': 'France',
+      'GB': 'United Kingdom',
+      'ID': 'Indonesia',
+      'IT': 'Italy',
+      'JP': 'Japan',
+      'MX': 'Mexico',
+      'NL': 'Netherlands',
+      'PL': 'Poland',
+      'PT': 'Portugal',
+      'RU': 'Russia',
+      'SE': 'Sweden',
+      'TR': 'Türkiye',
+      'US': 'United States',
+      'other': '$code',
+    });
+    return '$_temp0';
+  }
 }

@@ -517,7 +517,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "de": [
@@ -1038,7 +1046,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "de_CH": [
@@ -1559,7 +1575,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "es": [
@@ -2080,7 +2104,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "es_419": [
@@ -2601,7 +2633,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "fr": [
@@ -3122,7 +3162,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "fr_CA": [
@@ -3643,7 +3691,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "id": [
@@ -4164,7 +4220,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "it": [
@@ -4685,7 +4749,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "ja": [
@@ -5206,7 +5278,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "nl": [
@@ -5727,7 +5807,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "pl": [
@@ -6248,7 +6336,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "pt": [
@@ -6769,7 +6865,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "pt_BR": [
@@ -7290,7 +7394,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "pt_PT": [
@@ -7811,7 +7923,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "ru": [
@@ -8332,7 +8452,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "sv": [
@@ -8853,7 +8981,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "vi": [
@@ -9374,7 +9510,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "zh": [
@@ -9895,7 +10039,15 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ],
 
   "zh_Hant": [
@@ -10416,6 +10568,14 @@
     "providerVariantPayLaterDays",
     "providerVariantPayLaterNextMonth",
     "providerVariantOptions",
-    "providerTemplateNote"
+    "providerTemplateNote",
+    "fieldShiftHolidays",
+    "holidayListUntil",
+    "holidayNoCountry",
+    "holidayMovedNote",
+    "settingsHolidayCountry",
+    "holidayCountryNone",
+    "holidayCountryNote",
+    "holidayCountryName"
   ]
 }

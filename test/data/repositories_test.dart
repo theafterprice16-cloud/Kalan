@@ -132,7 +132,7 @@ void main() {
         purchaseDate: d('2026-11-20'),
         totalMinor: 30000,
         count: 3,
-        terms: card.cardTerms!,
+        terms: card.cardTermsIn(null)!,
       ),
       sourceId: cardId,
       origin: PlanOrigin.template,
@@ -179,7 +179,7 @@ void main() {
     await sources.update(row.copyWith(kind: SourceKind.provider));
     final updated = (await sources.byId(id))!;
     expect(updated.statementDay, isNull);
-    expect(updated.cardTerms, isNull);
+    expect(updated.cardTermsIn(null), isNull);
   });
 
   test('recurring payments and paid marks', () async {

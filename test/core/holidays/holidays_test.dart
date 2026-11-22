@@ -118,6 +118,18 @@ void main() {
       }
     });
 
+    test('every country has a name in Turkish and English', () {
+      for (final arb in ['lib/l10n/app_tr.arb', 'lib/l10n/app_en.arb']) {
+        final names =
+            (jsonDecode(File(arb).readAsStringSync())
+                    as Map<String, Object?>)['holidayCountryName']!
+                as String;
+        for (final c in countries) {
+          expect(names, contains('${c.country}{'), reason: '$arb ${c.country}');
+        }
+      }
+    });
+
     test('the examples of the brief hold in the data', () {
       final tr = countries.firstWhere((c) => c.country == 'TR');
       expect(tr.isHoliday(LocalDate(2026, 10, 29)), isTrue);
@@ -230,7 +242,9 @@ void main() {
 
     test('another schema version', () {
       expect(
-        () => parseHolidays(jsonEncode({'schemaVersion': 2, 'countries': []})),
+        () => parseHolidays(
+          jsonEncode({'schemaVersion': 2, 'countries': <Object>[]}),
+        ),
         throwsA(isA<HolidayFormatException>()),
       );
     });

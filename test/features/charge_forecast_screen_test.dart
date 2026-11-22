@@ -313,6 +313,7 @@ void main() {
       name: name,
       kind: kind,
       shiftDueToBusinessDay: true,
+      shiftDueForHolidays: true,
       createdAt: DateTime(2026),
       statementReminderEnabled: false,
       statementReminderDays: 2,

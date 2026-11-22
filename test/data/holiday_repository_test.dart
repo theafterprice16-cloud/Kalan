@@ -11,8 +11,6 @@ import 'package:kalan/data/repositories/holiday_repository.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
 
-import '../helpers/app_harness.dart';
-
 final shipped = parseHolidays(File(holidaysAsset).readAsStringSync());
 
 LocalDate day(String iso) {

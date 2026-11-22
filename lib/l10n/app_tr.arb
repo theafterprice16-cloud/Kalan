@@ -517,5 +517,13 @@
   "providerVariantPayLaterDays": "{days, plural, other{Tek ödeme · {days} gün sonra}}",
   "providerVariantPayLaterNextMonth": "Tek ödeme · gelecek ayın {day}. günü",
   "providerVariantOptions": "{count, plural, other{{count} seçenek}}",
-  "providerTemplateNote": "{provider} için başlangıç değerleri · Son kontrol: {date}. Koşulların farklıysa değiştir."
+  "providerTemplateNote": "{provider} için başlangıç değerleri · Son kontrol: {date}. Koşulların farklıysa değiştir.",
+  "fieldShiftHolidays": "Resmî tatilde kaydır",
+  "holidayListUntil": "Tatil listesi {year} sonuna kadar. Uygulama güncellemesiyle yenilenir.",
+  "holidayNoCountry": "Tatil ülkesi seçili değil. Ayarlar'dan seçebilirsin.",
+  "holidayMovedNote": "Resmî tatil nedeniyle kaydırıldı",
+  "settingsHolidayCountry": "Tatil ülkesi",
+  "holidayCountryNone": "Yok",
+  "holidayCountryNote": "Kart taksitlerinin son ödeme günü bu ülkenin hafta sonu ve resmî tatillerine göre kayar.",
+  "holidayCountryName": "{code, select, AR{Arjantin} BR{Brezilya} CA{Kanada} CH{İsviçre} CL{Şili} CN{Çin} CO{Kolombiya} DE{Almanya} ES{İspanya} FR{Fransa} GB{Birleşik Krallık} ID{Endonezya} IT{İtalya} JP{Japonya} MX{Meksika} NL{Hollanda} PL{Polonya} PT{Portekiz} RU{Rusya} SE{İsveç} TR{Türkiye} US{ABD} other{{code}}}"
 }
