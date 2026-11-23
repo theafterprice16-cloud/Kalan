@@ -58,13 +58,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 28. Tutarları gizleme (23 Kasım 2026): ana ekranın üst çubuğunda göz ikonu (açık göz / üstü çizili göz, iki durumda soluk renk) ve Ayarlar > Gizlilik'te aynı değerde "Tutarları gizle" anahtarı (Gizlilik bölümü artık her telefonda ve platformda); açıkken bütün ekranlarda her tutar "•••" (sembol ve eksi işareti yok, düzen kaymaz, cümle içinde de "Bu dönem ••• eksik kalıyor."); plan adları, tarihler, "3/10", durumlar ve grafik çubukları görünür; tutar yazılan akış (plan ekleme ve önizlemesi, "Tutarı düzelt", "Ödemeyi düzelt") örtülmez; ekran okuyucu "Tutar gizli"; bildirimlerde tutar yalnızca "Bildirimde tutarı göster" açık ve "Tutarları gizle" kapalıyken (hatırlatmalar, birleşik ve ısrarlı, maaş günü özeti, "hesapta X bulunsun"), anahtar değişince bildirimler yeniden kurulur; tercih cihazda (veritabanında, dışa aktarmada, yedekte yok), uygulama son durumu hatırlar; herkese ücretsiz; şema değişmedi, yeni paket yok
 
+- 29. Dışa aktarma (23 Kasım 2026): Ayarlar'da yeni "Veri" bölümü ("Dışa aktar", "Son yedek", "Yedek hatırlatması"); dışa aktarma ekranında "Tablo (CSV)" ya da "Tam yedek"; tablo tek dosya, satır başına bir ödeme (plan ödemeleri ve sabit ödemelerin ödenmiş tekrarları), başlıklar uygulama dilinde, değerler her dilde aynı (2026-12-04, 1250.50, true/false, "COL$ · COP"), UTF-8 BOM, formül koruması; tam yedek sürüm numaralı JSON (biçim: `docs/YEDEK_BICIMI.md`), isteğe bağlı parola (iki kez, kural yok, göster/gizle; Argon2id 46 MiB/2 tur + AES-256-GCM, başlık da doğrulanır, değiştirilmiş dosya açılmaz), şifreleme ayrı isolate'ta ve ilerleme göstergesiyle; saf Dart okuyucu (30 için hazır, geri yükleme arayüzü yok); dosya sistem paylaşım sayfasıyla, geçici dosya silinir; son yedek tarihi yalnızca tam yedek kaydedilince ya da paylaşılınca; hatırlatma notu (yedek yoksa ilk plandan 30 gün, varsa son yedekten 90 gün sonra) ana ekranın altında ve Ayarlar'da, kapatılabilir, bildirim yok; "Tutarları gizle" açıkken de dosyada gerçek tutarlar; Pro, kilit, gizleme, tema, dil ve ertelemeler yedekte yok; herkese ücretsiz; şema değişmedi; yeni paketler share_plus ve cryptography (path_provider doğrudan)
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 29. maddeden devam (liste: `kalan_kaynak.py liste`); 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
+- 30. maddeden devam (geri yükleme; okuyucu `readBackup` ve biçim belgesi hazır; liste: `kalan_kaynak.py liste`); 29'un parola süresi telefonda ölçülmeli (hedef 1-2 sn); 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
 
 ## Yarım kalan
 

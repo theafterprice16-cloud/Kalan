@@ -26,6 +26,13 @@ enum CloseReason { refund, cancel }
 bool countsInTotals(PlanStatus status, {required bool isPaid}) =>
     isPaid || status == PlanStatus.open;
 
+/// Whether a plan is open: not closed and not every payment paid. A plan
+/// on hold stays open (it counts toward the free limit, Decision 1);
+/// otherwise the plan is in the archive. The one rule: the plan list and
+/// the exported spreadsheet (29) both read it.
+bool planIsOpen(PlanStatus status, {required bool anyUnpaid}) =>
+    status != PlanStatus.closed && anyUnpaid;
+
 /// The day of the hold on which the plan asks "Still waiting on the
 /// return?": the day it was put on hold is day 1.
 const holdCheckOnDay = 30;

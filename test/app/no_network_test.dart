@@ -74,12 +74,26 @@ void main() {
   });
 
   test('app code does not open sockets or HTTP clients', () {
+    // dart:io only where a file is written, and then only its file
+    // classes: the export file for the share sheet (Roadmap 29).
+    const fileOnly = {
+      'lib/features/export/export_service.dart':
+          "import 'dart:io' show Directory, File, FileSystemException;",
+    };
     final offenders = <String>[];
     for (final entity in Directory('lib').listSync(recursive: true)) {
       if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final path = entity.path.replaceAll(r'\', '/');
       final source = entity.readAsStringSync();
-      if (RegExp(r'HttpClient|Socket\.|WebSocket|dart:io').hasMatch(source)) {
-        offenders.add(entity.path);
+      if (RegExp(r'HttpClient|HttpServer|Socket|WebSocket').hasMatch(source)) {
+        offenders.add(path);
+      }
+      final io = RegExp(r'''import\s+['"]dart:io['"][^;]*;''')
+          .allMatches(source)
+          .map((m) => m[0])
+          .toList();
+      if (io.isNotEmpty && (io.length > 1 || io.single != fileOnly[path])) {
+        offenders.add('$path: ${io.join(' ')}');
       }
     }
     expect(offenders, isEmpty);

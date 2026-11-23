@@ -122,6 +122,22 @@ String formatMinorForInput(
       '${fraction.toString().padLeft(currency.decimals, '0')}';
 }
 
+/// An amount for files other programs read (the exported spreadsheet,
+/// Roadmap 29): the same in every language. A minus sign when negative,
+/// no grouping, a dot before exactly [Currency.decimals] minor digits.
+///
+/// EUR 125050 → 1250.50 · EUR 125000 → 1250.00 · KWD 12345 → 12.345 ·
+/// JPY 2500 → 2500 · COP 125000 → 125000.
+String formatMinorPlain(int minor, Currency currency) {
+  final factor = currency.minorPerMajor;
+  final abs = minor.abs();
+  final sign = minor < 0 ? '-' : '';
+  final whole = abs ~/ factor;
+  if (currency.decimals == 0) return '$sign$whole';
+  final fraction = (abs % factor).toString().padLeft(currency.decimals, '0');
+  return '$sign$whole.$fraction';
+}
+
 /// A sample input ("1250,50", "1250.50" or "1250") for hints and errors.
 String amountInputExample(Currency currency, {required String localeName}) =>
     formatMinorForInput(

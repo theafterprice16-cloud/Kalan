@@ -5,9 +5,15 @@ import 'package:flutter_test/flutter_test.dart';
 /// The engine, date and money code must stay plain Dart so it can be tested
 /// and reused without Flutter.
 void main() {
-  test('core engine, date and money do not import Flutter', () {
+  test('core engine, date, money and backup do not import Flutter', () {
     final offenders = <String>[];
-    for (final dir in ['lib/core/engine', 'lib/core/date', 'lib/core/money']) {
+    for (final dir in [
+      'lib/core/engine',
+      'lib/core/date',
+      'lib/core/money',
+      // The backup format and spreadsheet (29).
+      'lib/core/backup',
+    ]) {
       for (final entity in Directory(dir).listSync(recursive: true)) {
         if (entity is! File || !entity.path.endsWith('.dart')) continue;
         final source = entity.readAsStringSync();

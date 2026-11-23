@@ -4,6 +4,8 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/providers.dart';
 import '../../app/shell.dart';
+import '../../features/export/export_screen.dart';
+import '../../features/export/export_service.dart' show ExportKind;
 import '../../features/home/home_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
 import '../../features/periods/coming_periods_screen.dart';
@@ -144,6 +146,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: Routes.pay, builder: (_, _) => const PaySettingsScreen()),
+      GoRoute(
+        path: Routes.exportPath,
+        builder: (_, state) => ExportScreen(
+          initial: state.uri.queryParameters['kind'] == 'backup'
+              ? ExportKind.backup
+              : ExportKind.spreadsheet,
+        ),
+      ),
       GoRoute(path: Routes.roadmap, builder: (_, _) => const RoadmapScreen()),
       GoRoute(
         path: '/pro',

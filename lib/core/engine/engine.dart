@@ -18,6 +18,7 @@ export 'payment_move.dart';
 export 'period_summary.dart';
 export 'plan_calculator.dart';
 export 'plan_draft.dart';
+export 'plan_name.dart';
 export 'plan_resize.dart';
 export 'plan_status.dart';
 export 'product_price.dart';

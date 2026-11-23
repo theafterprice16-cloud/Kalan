@@ -7,6 +7,7 @@ import '../../core/design/widgets.dart';
 import '../../core/engine/period_summary.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
+import '../export/data_section.dart';
 import '../periods/coming_periods_strip.dart';
 import '../privacy/hide_amounts_ui.dart';
 import 'home_view.dart';
@@ -51,6 +52,8 @@ class HomeScreen extends ConsumerWidget {
             SectionTitle(l10n.homePaymentsTitle),
             for (final e in view.entries) PaymentTile(entry: e),
           ],
+          // "Last backup was 3 months ago." (29): one calm line, last.
+          const BackupNote(),
         ],
       ),
     );
