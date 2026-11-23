@@ -21,6 +21,7 @@ import '../../data/db/app_database.dart';
 import '../../entitlement/pro_controller.dart';
 import '../../entitlement/pro_rules.dart';
 import '../currency/currency_picker.dart';
+import '../export/data_section.dart';
 import '../holidays/holiday_country_ui.dart';
 import '../holidays/holiday_providers.dart';
 import '../lock/app_lock_section.dart';
@@ -286,6 +287,8 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(Routes.sources),
           ),
+          // Data (29): export, last backup and its calm reminder.
+          const DataSection(),
           if (kDebugMode)
             SwitchListTile.adaptive(
               key: const ValueKey('debug-pro'),

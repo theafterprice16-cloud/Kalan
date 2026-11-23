@@ -4,18 +4,26 @@ import '../../app/format.dart';
 import '../../core/engine/plan_draft.dart';
 import '../../core/engine/recurring.dart';
 import '../../data/db/app_database.dart';
+import '../../l10n/generated/app_localizations.dart';
 
-String planKindLabel(BuildContext context, PlanRow plan) {
-  final l10n = context.l10n;
-  if (plan.isCashAdvance) return l10n.kindCashAdvance;
-  return switch (plan.kind) {
-    PlanKind.payIn4 => l10n.kindPayIn4,
-    PlanKind.monthly => l10n.kindMonthly,
-    PlanKind.card => l10n.kindCard,
-    PlanKind.manual => l10n.kindManual,
-    PlanKind.payLater => l10n.kindPayLater,
-  };
-}
+String planKindLabel(BuildContext context, PlanRow plan) =>
+    planKindLabelIn(context.l10n, plan.kind, cashAdvance: plan.isCashAdvance);
+
+/// A plan's type in [l10n]'s language (also the exported spreadsheet's
+/// "Type", 29).
+String planKindLabelIn(
+  AppLocalizations l10n,
+  PlanKind kind, {
+  required bool cashAdvance,
+}) => cashAdvance
+    ? l10n.kindCashAdvance
+    : switch (kind) {
+        PlanKind.payIn4 => l10n.kindPayIn4,
+        PlanKind.monthly => l10n.kindMonthly,
+        PlanKind.card => l10n.kindCard,
+        PlanKind.manual => l10n.kindManual,
+        PlanKind.payLater => l10n.kindPayLater,
+      };
 
 String recurrenceLabel(BuildContext context, Recurrence r) {
   final l10n = context.l10n;

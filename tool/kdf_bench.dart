@@ -12,6 +12,7 @@ Future<void> main() async {
     (19456, 2),
     (12288, 3),
     (47104, 1),
+    (47104, 2),
     (65536, 3),
   ]) {
     final kdf = DartArgon2id(

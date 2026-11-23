@@ -2839,5 +2839,202 @@
   "amountHidden": "Amount hidden",
   "@amountHidden": {
     "description": "What a screen reader says in place of each hidden amount, also inside a sentence ('This period is Amount hidden short.'). Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something."
+  },
+  "settingsDataSection": "Data",
+  "@settingsDataSection": {
+    "description": "Settings section title for exporting data and backups (Roadmap 29)."
+  },
+  "exportTitle": "Export",
+  "@exportTitle": {
+    "description": "Settings row and screen title: save the data as a file (Roadmap 29). Free for everyone."
+  },
+  "settingsLastBackup": "Last backup",
+  "@settingsLastBackup": {
+    "description": "Settings row title; its value below is the date of the last full backup or \"No backup yet.\" (Roadmap 29)."
+  },
+  "lastBackupNone": "No backup yet.",
+  "@lastBackupNone": {
+    "description": "No full backup was made on this phone yet (Roadmap 29). Calm, no warning."
+  },
+  "lastBackupOn": "Last backup: {date}",
+  "@lastBackupOn": {
+    "description": "When the last full backup was made, shown on the export screen. {date} is a date such as \"Nov 19, 2026\" (Roadmap 29).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupNoteMonths": "{months, plural, one{Last backup was 1 month ago.} other{Last backup was {months} months ago.}}",
+  "@backupNoteMonths": {
+    "description": "Calm one-line reminder at the bottom of the home screen and in Settings; a tap opens the export screen (Roadmap 29). Never a warning; no blame.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "backupReminder": "Backup reminder",
+  "@backupReminder": {
+    "description": "Settings switch title: a calm note when the last full backup gets old (Roadmap 29). Not a notification."
+  },
+  "backupReminderHint": "{months, plural, one{A short note here and on the home screen 1 month after your last full backup.} other{A short note here and on the home screen {months} months after your last full backup.}}",
+  "@backupReminderHint": {
+    "description": "Explains the \"Backup reminder\" switch (Roadmap 29). Not a notification; calm.",
+    "placeholders": {
+      "months": {
+        "type": "int"
+      }
+    }
+  },
+  "exportSpreadsheet": "Spreadsheet (CSV)",
+  "@exportSpreadsheet": {
+    "description": "Export format option: a CSV file that opens in Excel, Numbers or Google Sheets (Roadmap 29). Keep \"CSV\"."
+  },
+  "exportSpreadsheetHint": "Opens in a spreadsheet app. One row per payment.",
+  "@exportSpreadsheetHint": {
+    "description": "Description under the spreadsheet export option (Roadmap 29)."
+  },
+  "exportBackup": "Full backup",
+  "@exportBackup": {
+    "description": "Export format option: one file with all plans, payments and settings (Roadmap 29)."
+  },
+  "exportBackupHint": "All your plans, payments and settings in one file.",
+  "@exportBackupHint": {
+    "description": "Description under the full backup option (Roadmap 29)."
+  },
+  "exportPassword": "Password (optional)",
+  "@exportPassword": {
+    "description": "Label of the optional backup password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+  },
+  "exportPasswordAgain": "Type the password again",
+  "@exportPasswordAgain": {
+    "description": "Label of the second password field, to check the first (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+  },
+  "exportPasswordNote": "If you forget the password, no one can open this backup.",
+  "@exportPasswordNote": {
+    "description": "Muted note under the password fields (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+  },
+  "exportNoPassword": "This backup has no password.",
+  "@exportNoPassword": {
+    "description": "Muted note above the save button when the password field is empty (Roadmap 29). Neutral, not a warning. Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+  },
+  "exportPasswordMismatch": "The passwords do not match.",
+  "@exportPasswordMismatch": {
+    "description": "Form error under the second password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+  },
+  "exportShowPassword": "Show password",
+  "@exportShowPassword": {
+    "description": "Screen-reader name of the eye button that shows the typed password (Roadmap 29)."
+  },
+  "exportHidePassword": "Hide password",
+  "@exportHidePassword": {
+    "description": "Screen-reader name of the eye button that hides the typed password again (Roadmap 29)."
+  },
+  "exportSave": "Save or share",
+  "@exportSave": {
+    "description": "Primary button: opens the phone's share sheet to save the file to Files or send it (Roadmap 29)."
+  },
+  "exportPreparing": "Preparing the file.",
+  "@exportPreparing": {
+    "description": "Shown next to a progress indicator while the file is written; a password takes about a second (Roadmap 29)."
+  },
+  "exportFailed": "The file could not be prepared. Try again.",
+  "@exportFailed": {
+    "description": "Short message when writing or sharing the file failed (Roadmap 29). Calm."
+  },
+  "exportWhere": "Kalan sends the file nowhere. You choose where it goes.",
+  "@exportWhere": {
+    "description": "Muted note at the bottom of the export screen: the app has no cloud and makes no network requests (Roadmap 29)."
+  },
+  "exportAmountsShown": "The file holds the real amounts, even with Hide amounts on.",
+  "@exportAmountsShown": {
+    "description": "Muted note on the export screen while \"Hide amounts\" is on (Roadmaps 28, 29). Neutral."
+  },
+  "exportFileBackup": "kalan-backup-{date}",
+  "@exportFileBackup": {
+    "description": "File name stem of an exported file (Roadmap 29), followed by .json or .csv. ASCII only: lowercase letters a-z, digits and hyphens; keep the \"kalan-\" start and the {date} placeholder (2026-11-19).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFileSpreadsheet": "kalan-spreadsheet-{date}",
+  "@exportFileSpreadsheet": {
+    "description": "File name stem of an exported file (Roadmap 29), followed by .json or .csv. ASCII only: lowercase letters a-z, digits and hyphens; keep the \"kalan-\" start and the {date} placeholder (2026-11-19).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "csvName": "Name",
+  "@csvName": {
+    "description": "Plan or recurring payment name. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvKind": "Type",
+  "@csvKind": {
+    "description": "Plan type or \"Recurring payment\". Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvStatus": "Status",
+  "@csvStatus": {
+    "description": "Open, on hold, closed or archived. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvSource": "Source",
+  "@csvSource": {
+    "description": "Provider or card name. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvSeq": "Payment no.",
+  "@csvSeq": {
+    "description": "The payment's number in its plan (3 of 10). Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvDueDate": "Due date",
+  "@csvDueDate": {
+    "description": "The payment's due date. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvAmount": "Amount",
+  "@csvAmount": {
+    "description": "The installment amount, without fees. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvExtraFee": "Extra fee",
+  "@csvExtraFee": {
+    "description": "A one-off fee the provider added to the payment. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvInstallmentFee": "Fee per payment",
+  "@csvInstallmentFee": {
+    "description": "The plan's fee taken with each payment. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvPaid": "Paid",
+  "@csvPaid": {
+    "description": "Whether the payment is paid (true/false). Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvPaidOn": "Paid on",
+  "@csvPaidOn": {
+    "description": "The day the payment was paid. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvCurrency": "Currency",
+  "@csvCurrency": {
+    "description": "The currency, such as \"COL$ · COP\". Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short."
+  },
+  "csvKindRecurring": "Recurring payment",
+  "@csvKindRecurring": {
+    "description": "Type of a recurring payment's row (rent, bills) in the exported CSV file (Roadmap 29)."
+  },
+  "csvStatusOpen": "open",
+  "@csvStatusOpen": {
+    "description": "Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut."
+  },
+  "csvStatusOnHold": "on hold",
+  "@csvStatusOnHold": {
+    "description": "Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut."
+  },
+  "csvStatusClosed": "closed",
+  "@csvStatusClosed": {
+    "description": "Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut."
+  },
+  "csvStatusArchived": "archived",
+  "@csvStatusArchived": {
+    "description": "Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut."
   }
 }

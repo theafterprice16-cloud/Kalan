@@ -1,13 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:material_ui/material_ui.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
 import 'core/theme/theme_mode.dart';
 import 'entitlement/iap_store_gateway.dart';
 import 'entitlement/pro_controller.dart';
 import 'entitlement/pro_status_store.dart';
+import 'features/export/backup_prefs.dart';
+import 'features/export/export_service.dart';
 import 'features/lock/app_lock_store.dart';
 import 'features/lock/device_lock_gateway.dart';
 import 'features/privacy/amounts_hidden.dart';
@@ -32,6 +37,10 @@ Future<void> main() async {
     // never flash on screen.
     amountsHiddenStoreProvider.overrideWithValue(
       await PrefsAmountsHiddenStore.open(),
+    ),
+    // Last full backup and its reminder switch (29): this device's own.
+    backupPrefsStoreProvider.overrideWithValue(
+      await SharedBackupPrefsStore.open(),
     ),
   ];
   final phone =
@@ -58,6 +67,8 @@ Future<void> main() async {
       );
   }
   runApp(ProviderScope(overrides: overrides, child: const KalanApp()));
+  // Nothing of an earlier export outlives a new start (29).
+  if (phone) unawaited(getTemporaryDirectory().then(cleanUpExportFiles));
 }
 
 /// Android: started by ReminderRescheduleReceiver after a reboot or a

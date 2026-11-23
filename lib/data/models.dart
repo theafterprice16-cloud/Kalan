@@ -209,7 +209,8 @@ class PlanWithPayments {
   /// A plan is open while any payment is unpaid; then it moves to the
   /// archive. A plan on hold stays open (it counts toward the free limit,
   /// Decision 1); a closed plan is in the archive.
-  bool get isOpen => !isClosed && allPayments.any((p) => !p.isPaid);
+  bool get isOpen =>
+      planIsOpen(status, anyUnpaid: allPayments.any((p) => !p.isPaid));
 
   int get totalMinor => allPayments.fold(0, (sum, p) => sum + p.amountMinor);
 

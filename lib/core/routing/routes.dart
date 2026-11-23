@@ -31,6 +31,11 @@ abstract final class Routes {
   static const newRecurring = '/recurring/new';
   static String recurring(int id) => '/recurring/$id';
   static const pay = '/pay';
+
+  /// "Export" (29); [backup] opens it with "Full backup" chosen.
+  static const exportPath = '/export';
+  static String export({bool backup = false}) =>
+      backup ? '$exportPath?kind=backup' : exportPath;
   static const roadmap = '/roadmap';
   static const remindersHelp = '/reminders-help';
 
