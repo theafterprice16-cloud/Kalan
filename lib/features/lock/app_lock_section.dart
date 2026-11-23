@@ -47,8 +47,10 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
   @override
   void initState() {
     super.initState();
+    // onShow, not onResume: the notification shade only makes Kalan
+    // inactive; the phone's settings hide it.
     _lifecycle = AppLifecycleListener(
-      onResume: () {
+      onShow: () {
         if (mounted && _needsScreenLock) {
           setState(() => _needsScreenLock = false);
         }

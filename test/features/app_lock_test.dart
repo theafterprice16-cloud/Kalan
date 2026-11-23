@@ -416,24 +416,34 @@ void main() {
       expect(find.text(note), findsNothing);
     });
 
-    testWidgets('landscape with large text: nothing overlaps or overflows', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(1688, 780);
-      tester.view.devicePixelRatio = 2;
-      addTearDown(tester.view.reset);
-      phone.hold = true;
-      await start(tester, lock: const AppLockSettings(enabled: true));
-      tester.platformDispatcher.textScaleFactorTestValue = 2;
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      final mark = tester.getRect(find.byType(Image));
-      final text = tester.getRect(
-        find.text("Kalan'ı açmak için kimliğini doğrula."),
-      );
-      expect(mark.bottom, lessThanOrEqualTo(text.top));
-    });
+    for (final (name, size, scale) in [
+      ('landscape, large text', const Size(1688, 780), 2.0),
+      ('small portrait phone, very large text', const Size(750, 1334), 3.0),
+      ('tall phone, large text', const Size(780, 1688), 2.0),
+    ]) {
+      testWidgets('$name: the mark never sits under the text', (tester) async {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 2;
+        addTearDown(tester.view.reset);
+        phone.hold = true;
+        await start(tester, lock: const AppLockSettings(enabled: true));
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        final mark = tester.getRect(find.byType(Image));
+        final text = tester.getRect(
+          find.text("Kalan'ı açmak için kimliğini doğrula."),
+        );
+        expect(mark.bottom, lessThanOrEqualTo(text.top));
+        expect(mark.height, greaterThan(0));
+        final screen = size / 2;
+        if (scale == 2.0 && size.height > size.width) {
+          // Room enough: exactly where the launch screen has it.
+          expect(mark.center.dy, screen.height / 2);
+        }
+      });
+    }
   });
 
   group('locking again (Example 3)', () {

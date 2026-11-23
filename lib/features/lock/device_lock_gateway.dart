@@ -99,8 +99,9 @@ class LocalAuthDeviceLock implements DeviceLockGateway {
     LocalAuthExceptionCode.temporaryLockout,
     LocalAuthExceptionCode.biometricLockout,
     LocalAuthExceptionCode.userRequestedFallback,
-    // A sensor busy for a moment: the passcode or a retry still works.
-    LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable,
+    // Not biometricHardwareTemporarilyUnavailable: some broken sensors
+    // report it every time, and without a passcode fallback "Unlock"
+    // would never work. Kalan opens and turns its lock off instead.
   };
 
   @override

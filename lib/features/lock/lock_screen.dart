@@ -93,38 +93,52 @@ class LockScreen extends ConsumerWidget {
     return Material(
       key: const ValueKey('lock-screen'),
       color: colors.bg,
-      child: LayoutBuilder(
-        builder: (context, constraints) =>
-            // Tall: the mark exactly where the launch screen and the
-            // cover have it. Short (landscape, large text): above the
-            // button, never under it.
-            constraints.maxHeight >= _tallHeight
-            ? Stack(
-                fit: StackFit.expand,
-                children: [
-                  const Center(child: KalanMark()),
-                  Align(alignment: Alignment.bottomCenter, child: bottom),
-                ],
-              )
-            : Column(
-                children: [
-                  const Expanded(
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: KalanMark(),
-                      ),
-                    ),
-                  ),
-                  bottom,
-                ],
-              ),
+      child: CustomMultiChildLayout(
+        delegate: _LockLayout(),
+        children: [
+          LayoutId(
+            id: _LockPart.mark,
+            child: const FittedBox(fit: BoxFit.scaleDown, child: KalanMark()),
+          ),
+          LayoutId(id: _LockPart.bottom, child: bottom),
+        ],
       ),
     );
   }
+}
 
-  /// Room for the centred mark above the text and the button.
-  static const double _tallHeight = 640;
+enum _LockPart { mark, bottom }
+
+/// The text and the button at the bottom; the mark exactly where the
+/// launch screen and the cover have it (the middle) when there is room,
+/// otherwise in the middle of the space above them, smaller if need be
+/// (landscape, small phones, large text). Never under the button.
+class _LockLayout extends MultiChildLayoutDelegate {
+  _LockLayout();
+
+  @override
+  void performLayout(Size size) {
+    final bottom = layoutChild(
+      _LockPart.bottom,
+      BoxConstraints.tightFor(width: size.width)
+          .loosen()
+          .copyWith(minWidth: size.width, maxHeight: size.height),
+    );
+    final top = size.height - bottom.height;
+    positionChild(_LockPart.bottom, Offset(0, top));
+    const mark = KalanMark.size;
+    final centred = size.height / 2 + mark / 2 <= top;
+    final side = centred ? mark : top.clamp(0.0, mark);
+    layoutChild(_LockPart.mark, BoxConstraints.tight(Size.square(side)));
+    final centreY = centred ? size.height / 2 : top / 2;
+    positionChild(
+      _LockPart.mark,
+      Offset((size.width - side) / 2, centreY - side / 2),
+    );
+  }
+
+  @override
+  bool shouldRelayout(_LockLayout oldDelegate) => false;
 }
 
 /// While Kalan is not in front and the lock is on: the ground and the
