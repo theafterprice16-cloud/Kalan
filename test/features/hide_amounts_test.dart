@@ -592,7 +592,14 @@ void main() {
         tester.widget<SwitchListTile>(hideSwitch).value;
 
     testWidgets('the switch and the eye share one value', (tester) async {
-      await start(tester);
+      await start(
+        tester,
+        extra: [
+          deviceLockGatewayProvider.overrideWithValue(
+            const UnsupportedDeviceLock(),
+          ),
+        ],
+      );
       await openPrivacy(tester);
       // The section title right above it.
       final title = find.text('Gizlilik', skipOffstage: false);
@@ -612,7 +619,8 @@ void main() {
         findsOneWidget,
       );
       expect(switchValue(tester), isFalse);
-      // Where the phone has no lock to offer (web, desktop): the section
+      // Where the phone has no lock to offer (web, desktop; the default
+      // gateway, also set below): the section
       // and "Hide amounts", without the app lock rows.
       expect(find.byKey(const ValueKey('app-lock')), findsNothing);
       await tester.tap(hideSwitch);
@@ -662,6 +670,40 @@ void main() {
     });
   });
 
+  testWidgets('a choice that could not be saved goes back on screen', (
+    tester,
+  ) async {
+    final failing = _FailingStore();
+    await pumpApp(
+      tester,
+      seed: seedAll,
+      overrides: [amountsHiddenStoreProvider.overrideWithValue(failing)],
+    );
+    await tester.tap(eye);
+    await tester.pumpAndSettle();
+    // Not stored: the screen shows what the reminders read.
+    expect(failing.read(), isFalse);
+    expect(homeNumber(tester), isNot(mask));
+    expect(find.byTooltip('Tutarları gizle'), findsOneWidget);
+  });
+
+  testWidgets('amounts shown: a name with dots reads as itself', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await start(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, incomeMinor: 1000000);
+        await seedPayIn4(db, title: 'Plan $mask');
+      },
+    );
+    expect(find.text('Plan $mask'), findsWidgets);
+    expect(spokenWith('Tutar gizli'), findsNothing);
+    expect(spokenWith('Plan $mask'), findsWidgets);
+    semantics.dispose();
+  });
+
   testWidgets('kept on this device only: not in the database', (tester) async {
     final db = await start(tester, hidden: true);
     final columns = db.appSettings.$columns.map((c) => c.name).toList();
@@ -679,4 +721,13 @@ void main() {
     expect(source, isNot(contains('.accent')));
     expect(source, contains('colors.textMuted'));
   });
+}
+
+/// Its writes fail; it keeps what it had.
+class _FailingStore implements AmountsHiddenStore {
+  @override
+  bool read() => false;
+
+  @override
+  Future<void> write(bool hidden) async => throw StateError('disk full');
 }

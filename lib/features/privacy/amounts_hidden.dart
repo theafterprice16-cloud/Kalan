@@ -33,7 +33,15 @@ class PrefsAmountsHiddenStore implements AmountsHiddenStore {
   bool read() => _prefs.getBool(amountsHiddenKey) ?? false;
 
   @override
-  Future<void> write(bool hidden) => _prefs.setBool(amountsHiddenKey, hidden);
+  Future<void> write(bool hidden) async {
+    try {
+      await _prefs.setBool(amountsHiddenKey, hidden);
+    } on Object {
+      // The cache took the new value first: back to what is stored.
+      await _prefs.reloadCache();
+      rethrow;
+    }
+  }
 }
 
 /// Used in tests and until the real store is provided: amounts show.
@@ -71,8 +79,9 @@ class AmountsHiddenController extends Notifier<bool> {
     try {
       await ref.read(privacySettingsProvider).setAmountsHidden(hidden);
     } on Object {
-      // Not saved: the screen goes back to what is stored.
-      if (ref.mounted) state = !hidden;
+      // Not saved: the screen goes back to what is stored, the one value
+      // the reminders and Settings read too.
+      if (ref.mounted) state = ref.read(privacySettingsProvider).amountsHidden;
     }
   }
 

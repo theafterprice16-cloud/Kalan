@@ -78,6 +78,11 @@ void main() {
     final format = RegExp(r'\bformatMoney(Short)?\(');
     final draft = RegExp(r'\bdraftMoney\(');
     final draftFlag = RegExp(r'\bdraft:\s*true\b');
+    // A value passed in would hide from the count above: only the add
+    // plan screen's own _Preview(draft: ...) takes one.
+    final draftValue = RegExp(
+      r'(?<!_Preview\()\bdraft:\s*(?!\s|true\b|false\b)',
+    );
     // An amount field's own text, the only place moneyInput may go.
     final input = RegExp(r'\bmoneyInput\(');
     final fieldText = RegExp(r'\.text\s*=\s*.*\bmoneyInput\(');
@@ -99,6 +104,7 @@ void main() {
       if (drafted > 0) seen[path] = drafted;
       final flags = draftFlag.allMatches(source).length;
       if (flags > 0) flagged[path] = flags;
+      if (draftValue.hasMatch(source)) offenders.add('$path: draft: value');
       final lines = entity.readAsLinesSync();
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i];
@@ -113,6 +119,8 @@ void main() {
     // format.dart: the definition itself.
     expect(seen, drafts);
     expect(flagged, draftSummaries);
+    expect(draftValue.hasMatch('Summary(draft: editing)'), isTrue);
+    expect(draftValue.hasMatch('_Preview(draft: _buildDraft())'), isFalse);
     expect(fieldText.hasMatch('_amount.text = ref.moneyInput(c, 1);'), isTrue);
     expect(fieldText.hasMatch('Text(ref.moneyInput(c, 1))'), isFalse);
     expect(format.hasMatch('formatMoneyShort(1, c, localeName: l)'), isTrue);
