@@ -1,0 +1,52 @@
+# TEMPORARY (Roadmap 29 branch only): the cloud session that wrote this
+# branch has no Flutter SDK. This job runs the generators it cannot run
+# (pub get, gen-l10n, dart format and, on request, golden updates) and
+# pushes their output back to the branch. Removed before the merge.
+name: tmp-remote-flutter
+
+on:
+  push:
+    branches: [feat/29-export]
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter gen-l10n
+      - run: dart format lib test tool
+      - name: KDF timing (AOT, this runner)
+        if: hashFiles('tool/kdf_bench.dart') != ''
+        run: |
+          dart compile exe tool/kdf_bench.dart -o /tmp/kdf_bench
+          /tmp/kdf_bench
+      - name: Update goldens
+        if: contains(github.event.head_commit.message, '[goldens]')
+        run: flutter test test/golden --update-goldens
+      - name: Push generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A pubspec.lock lib test tool docs/ceviriler screenshots
+          if git diff --cached --quiet; then
+            echo "Nothing generated."
+          else
+            git commit -m "Generated: pub get, gen-l10n, format, goldens"
+            git push
+          fi
+      - name: Analyze
+        run: flutter analyze --fatal-infos --fatal-warnings
+        continue-on-error: true
+      - name: Test
+        run: flutter test --reporter failures-only 2>&1 | tail -n 800
