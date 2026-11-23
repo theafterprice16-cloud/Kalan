@@ -2554,6 +2554,75 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get settingsPrivacySection => 'Privacy';
+
+  @override
+  String get appLock => 'App lock';
+
+  @override
+  String get appLockHint =>
+      'Kalan asks for your face, fingerprint or phone passcode when it opens.';
+
+  @override
+  String get appLockRelock => 'Lock again';
+
+  @override
+  String get appLockRelockHelp =>
+      'Kalan locks again once it has been in the background this long.';
+
+  @override
+  String get appLockRelockImmediately => 'Immediately';
+
+  @override
+  String get appLockAmountsVisible =>
+      'Amounts show in notifications. Tap to hide them.';
+
+  @override
+  String get appLockNeedsScreenLock =>
+      'This needs a screen lock on your phone.';
+
+  @override
+  String get appLockTurnedOff =>
+      'App lock was turned off because your phone has no screen lock.';
+
+  @override
+  String get appLockUnlock => 'Unlock';
+
+  @override
+  String get appLockReason => 'Confirm it\'s you to open Kalan.';
+
+  @override
+  String get appLockEnableReason => 'Confirm it\'s you to turn on app lock.';
+
+  @override
+  String get appLockPromptTitle => 'Unlock Kalan';
+
+  @override
+  String get appLockPromptHint => 'Face, fingerprint or phone passcode';
+
+  @override
+  String get appLockFaceIdUsage =>
+      'To confirm it\'s you when Kalan opens. Your face data stays on your phone; Kalan never sees it.';
+
+  @override
+  String appLockRelockAfterMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'After $minutes minutes',
+      one: 'After 1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get appLockTurnedOffUnavailable =>
+      'App lock was turned off because your phone couldn\'t check it\'s you just now. You can turn it on again.';
+
+  @override
+  String get appLockEnablePromptTitle => 'Turn on app lock';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

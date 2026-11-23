@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -81,5 +82,72 @@ void main() {
         'ActionBroadcastReceiver"',
       ),
     );
+  });
+
+  group('app lock (27)', () {
+    final activity = File(
+      'android/app/src/main/kotlin/app/kalan/mobile/MainActivity.kt',
+    ).readAsStringSync();
+    final delegate = File('ios/Runner/AppDelegate.swift').readAsStringSync();
+    final plist = File('ios/Runner/Info.plist').readAsStringSync();
+    final project = File('ios/Runner.xcodeproj/project.pbxproj')
+        .readAsStringSync();
+
+    test('Android hosts the system dialog (FragmentActivity, AppCompat)', () {
+      // local_auth needs a FragmentActivity: otherwise the check cannot
+      // show at all.
+      expect(
+        activity,
+        contains('class MainActivity : FlutterFragmentActivity'),
+      );
+      for (final night in ['', '-night']) {
+        final styles = File('android/app/src/main/res/values$night/styles.xml')
+            .readAsStringSync();
+        expect(
+          RegExp(r'parent="Theme\.AppCompat').allMatches(styles),
+          hasLength(2),
+          reason: 'values$night: both themes',
+        );
+        expect(styles, contains('@color/launch_background'));
+      }
+    });
+
+    test('app switcher: no recents screenshot, screenshots stay allowed', () {
+      expect(activity, contains('setRecentsScreenshotEnabled'));
+      expect(activity, contains('"setAppSwitcherCover"'));
+      expect(activity, isNot(contains('FLAG_SECURE')));
+      expect(delegate, contains('"setAppSwitcherCover"'));
+      expect(delegate, contains('addSceneDelegate'));
+      expect(delegate, contains('sceneDidEnterBackground'));
+      expect(delegate, contains('"LaunchScreen"'));
+      // Flutter's own scene delegate stays as it is.
+      final scene = File('ios/Runner/SceneDelegate.swift').readAsStringSync();
+      expect(scene, isNot(contains('override')));
+    });
+
+    test('iOS asks for Face ID with the ARB text, Turkish and English', () {
+      expect(plist, contains('<key>NSFaceIDUsageDescription</key>'));
+      for (final locale in ['en', 'tr']) {
+        final arb = jsonDecode(
+          File('lib/l10n/app_$locale.arb').readAsStringSync(),
+        ) as Map<String, Object?>;
+        final text = arb['appLockFaceIdUsage']! as String;
+        final strings = File('ios/Runner/$locale.lproj/InfoPlist.strings')
+            .readAsStringSync();
+        expect(
+          strings,
+          contains('"NSFaceIDUsageDescription" = "$text";'),
+          reason: locale,
+        );
+        expect(project, contains('path = $locale.lproj/InfoPlist.strings;'));
+      }
+      expect(
+        plist,
+        contains(
+          '<string>${(jsonDecode(File('lib/l10n/app_en.arb').readAsStringSync()) as Map)['appLockFaceIdUsage']}</string>',
+        ),
+      );
+      expect(project, contains('InfoPlist.strings in Resources'));
+    });
   });
 }

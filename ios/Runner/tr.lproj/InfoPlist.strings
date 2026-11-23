@@ -1,0 +1,2 @@
+/* Face ID permission (app lock, Roadmap 27); from appLockFaceIdUsage in lib/l10n/app_tr.arb. */
+"NSFaceIDUsageDescription" = "Kalan'ı açarken kimliğini doğrulamak için. Yüz verisi telefonunda kalır, Kalan'a gelmez.";

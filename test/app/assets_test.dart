@@ -20,6 +20,11 @@ void main() {
       'android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml',
       'android/app/src/main/res/drawable-xxxhdpi/ic_launcher_foreground.png',
       'android/app/src/main/res/drawable-nodpi/launch_mark.png',
+      // Lock screen and app switcher cover (27).
+      'assets/brand/mark/kalan_mark.png',
+      'assets/brand/mark/3.0x/kalan_mark.png',
+      'assets/brand/mark/kalan_mark_dark.png',
+      'assets/brand/mark/3.0x/kalan_mark_dark.png',
     ];
     for (final f in files) {
       expect(File(f).existsSync(), isTrue, reason: f);

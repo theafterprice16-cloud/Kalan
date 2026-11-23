@@ -13,6 +13,8 @@ Writes:
   assets/brand/icon_1024_dark.png       dark icon (iOS dark appearance)
   assets/brand/icon_foreground.png      Android adaptive foreground (safe zone)
   launch marks for iOS and Android      light and dark (night) variants
+  assets/brand/mark/ (1x, 2.0x, 3.0x)   in-app mark: lock screen and app
+                                        switcher cover (Roadmap 27)
   ic_stat_kalan (Android)               white notification icon
   docs/kimlik/ikon-60px-*.png           60 x 60 readability check
 
@@ -154,6 +156,14 @@ def save(img, path, opaque=False):
     (img.convert('RGB') if opaque else img).save(path, optimize=True)
 
 
+def write_app_marks():
+    """The mark Flutter draws (128 logical px, like the launch screen)."""
+    for theme, name in (('light', 'kalan_mark'), ('dark', 'kalan_mark_dark')):
+        for folder, px in (('', 128), ('2.0x/', 256), ('3.0x/', 384)):
+            save(render(px, theme, ground=False),
+                 f'assets/brand/mark/{folder}{name}.png')
+
+
 def main():
     for theme, suffix in (('light', ''), ('dark', '_dark')):
         write_svg(f'assets/brand/kalan_icon{suffix}.svg', theme, ground=True)
@@ -173,6 +183,8 @@ def main():
          'android/app/src/main/res/drawable-nodpi/launch_mark.png')
     save(render(384, 'dark', ground=False),
          'android/app/src/main/res/drawable-night-nodpi/launch_mark.png')
+
+    write_app_marks()
 
     # Notification icon (24 dp), referenced as ic_stat_kalan.
     for folder, px in {'mdpi': 24, 'hdpi': 36, 'xhdpi': 48,

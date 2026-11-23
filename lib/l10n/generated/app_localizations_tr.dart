@@ -2549,4 +2549,75 @@ class AppLocalizationsTr extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get settingsPrivacySection => 'Gizlilik';
+
+  @override
+  String get appLock => 'Uygulama kilidi';
+
+  @override
+  String get appLockHint =>
+      'Kalan\'ı açarken yüz tanıma, parmak izi ya da telefon şifresi sorulur.';
+
+  @override
+  String get appLockRelock => 'Yeniden kilitle';
+
+  @override
+  String get appLockRelockHelp =>
+      'Kalan arka planda bu kadar kalınca yeniden kilitlenir.';
+
+  @override
+  String get appLockRelockImmediately => 'Hemen';
+
+  @override
+  String get appLockAmountsVisible =>
+      'Bildirimlerde tutar görünüyor. Gizlemek için dokun.';
+
+  @override
+  String get appLockNeedsScreenLock =>
+      'Bunun için telefonunda ekran kilidi olmalı.';
+
+  @override
+  String get appLockTurnedOff =>
+      'Telefonunda ekran kilidi olmadığı için uygulama kilidi kapatıldı.';
+
+  @override
+  String get appLockUnlock => 'Kilidi aç';
+
+  @override
+  String get appLockReason => 'Kalan\'ı açmak için kimliğini doğrula.';
+
+  @override
+  String get appLockEnableReason =>
+      'Uygulama kilidini açmak için kimliğini doğrula.';
+
+  @override
+  String get appLockPromptTitle => 'Kalan\'ın kilidini aç';
+
+  @override
+  String get appLockPromptHint =>
+      'Yüz tanıma, parmak izi ya da telefon şifresi';
+
+  @override
+  String get appLockFaceIdUsage =>
+      'Kalan\'ı açarken kimliğini doğrulamak için. Yüz verisi telefonunda kalır, Kalan\'a gelmez.';
+
+  @override
+  String appLockRelockAfterMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes dakika sonra',
+      one: '1 dakika sonra',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get appLockTurnedOffUnavailable =>
+      'Telefon şu an kimliğini doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin.';
+
+  @override
+  String get appLockEnablePromptTitle => 'Uygulama kilidini aç';
 }
