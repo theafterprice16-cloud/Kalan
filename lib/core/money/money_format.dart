@@ -15,6 +15,11 @@ import 'currency.dart';
 /// ("$" for COP); the picker tells currencies apart. A right-to-left
 /// symbol (ر.س) is isolated so the digits keep their order.
 ///
+/// What every amount on screen shows while "Hide amounts" is on (Roadmap
+/// 28): the same three dots whatever the amount, its sign or the
+/// currency, so neither a symbol nor the length gives anything away.
+const amountMask = '•••';
+
 /// tr, TRY, 123456 → ₺1.234,56 · de, EUR → 1.234,56 € ·
 /// id, IDR, 1234567 → Rp1.234.567.
 String formatMoney(int minor, Currency currency, {required String localeName}) {

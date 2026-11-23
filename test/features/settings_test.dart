@@ -207,6 +207,8 @@ void main() {
   ) async {
     await pumpApp(tester, seed: (db) => seedSettings(db, incomeMinor: 5000000));
     await openTab(tester, 'Ayarlar');
+    // Below "Privacy" (28): scroll to it.
+    await scrollTo(tester, find.text('Para birimi'));
     expect(find.text('₺ · TRY · Türk lirası'), findsOneWidget);
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
@@ -241,6 +243,8 @@ void main() {
       },
     );
     await openTab(tester, 'Ayarlar');
+    // Below "Privacy" (28): scroll to it.
+    await scrollTo(tester, find.text('Para birimi'));
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -273,6 +277,8 @@ void main() {
   testWidgets('cancelling the change keeps the currency', (tester) async {
     final db = await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
+    // Below "Privacy" (28): scroll to it.
+    await scrollTo(tester, find.text('Para birimi'));
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(

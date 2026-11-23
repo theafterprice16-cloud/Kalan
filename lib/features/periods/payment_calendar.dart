@@ -665,7 +665,7 @@ class _DaySection extends ConsumerWidget {
                   else
                     Padding(
                       padding: const EdgeInsets.only(top: KalanSpace.xxs),
-                      child: Text(
+                      child: context.spokenText(
                         l10n.calendarDayTotal(
                           ref.money(context, day!.totalMinor),
                         ),

@@ -50,7 +50,8 @@ class BusyWeekNote extends ConsumerWidget {
           );
     return Semantics(
       container: true,
-      label: text,
+      // A hidden amount (28) reads as "Amount hidden".
+      label: context.spokenLabel(text),
       excludeSemantics: true,
       child: Container(
         key: const ValueKey('busy-week-note'),

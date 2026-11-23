@@ -543,7 +543,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "de": [
@@ -1090,7 +1094,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "de_CH": [
@@ -1637,7 +1645,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "es": [
@@ -2184,7 +2196,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "es_419": [
@@ -2731,7 +2747,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "fr": [
@@ -3278,7 +3298,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "fr_CA": [
@@ -3825,7 +3849,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "id": [
@@ -4372,7 +4400,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "it": [
@@ -4919,7 +4951,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "ja": [
@@ -5466,7 +5502,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "nl": [
@@ -6013,7 +6053,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "pl": [
@@ -6560,7 +6604,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "pt": [
@@ -7107,7 +7155,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "pt_BR": [
@@ -7654,7 +7706,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "pt_PT": [
@@ -8201,7 +8257,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "ru": [
@@ -8748,7 +8808,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "sv": [
@@ -9295,7 +9359,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "vi": [
@@ -9842,7 +9910,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "zh": [
@@ -10389,7 +10461,11 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ],
 
   "zh_Hant": [
@@ -10936,6 +11012,10 @@
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
     "appLockTurnedOffUnavailable",
-    "appLockEnablePromptTitle"
+    "appLockEnablePromptTitle",
+    "amountsHide",
+    "amountsShow",
+    "amountsHideHint",
+    "amountHidden"
   ]
 }

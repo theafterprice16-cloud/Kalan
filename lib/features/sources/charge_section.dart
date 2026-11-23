@@ -53,7 +53,7 @@ class _ChargeSectionState extends ConsumerState<ChargeSection> {
             style: muted,
           )
         else ...[
-          Text(
+          context.spokenText(
             l10n.chargeNext(
               context.shortDate(nextCharge.date),
               ref.money(context, nextCharge.amountMinor),
@@ -65,7 +65,7 @@ class _ChargeSectionState extends ConsumerState<ChargeSection> {
             ),
           ),
           const SizedBox(height: KalanSpace.xxs),
-          Text(
+          context.spokenText(
             l10n.chargeBy(
               context.shortDate(current.period.lastDay),
               ref.money(context, current.totalMinor),
@@ -402,7 +402,7 @@ class UnassignedChargesCard extends ConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.bodyLarge,
                               ),
-                              Text(
+                              context.spokenText(
                                 l10n.chargeUnassignedRow(
                                   context.shortDate(item.dueDate),
                                   ref.money(context, item.amountMinor),

@@ -87,6 +87,12 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
     final p = periods[index];
     final left = p.leftMinor;
     final total = ref.money(context, p.spokenForMinor);
+    final short = p.shortMinor;
+    final shortText = short == null
+        ? ''
+        : p.isCurrent
+        ? l10n.homeNegative(ref.money(context, short))
+        : l10n.comingPeriodsShortAhead(ref.money(context, short));
 
     return ListView(
       padding: const EdgeInsets.only(bottom: KalanSpace.xl),
@@ -133,7 +139,7 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
                 ),
               ),
               const SizedBox(height: KalanSpace.xxs),
-              Text(
+              context.spokenText(
                 left == null || p.isNegative
                     ? l10n.comingPeriodsSummaryNoLeft(
                         p.summary.itemCount,
@@ -149,16 +155,15 @@ class _ComingPeriodsScreenState extends ConsumerState<ComingPeriodsScreen> {
               // Short: the minus icon and "short" in words, never the
               // color alone. This period: the home screen's sentence; a
               // period still to come "looks short".
-              if (p.shortMinor case final short?) ...[
+              if (short != null) ...[
                 const SizedBox(height: KalanSpace.xs),
                 StatusNote(
                   key: const ValueKey('coming-period-short'),
                   icon: Icons.remove_circle_outline,
                   color: colors.negative,
                   textColor: colors.negativeText,
-                  text: p.isCurrent
-                      ? l10n.homeNegative(ref.money(context, short))
-                      : l10n.comingPeriodsShortAhead(ref.money(context, short)),
+                  text: shortText,
+                  semanticsLabel: context.spoken(shortText),
                 ),
               ],
               // Busy week: an observation in its own box, apart from the

@@ -543,5 +543,9 @@
   "appLockFaceIdUsage": "Kalan'ı açarken kimliğini doğrulamak için. Yüz verisi telefonunda kalır, Kalan'a gelmez.",
   "appLockRelockAfterMinutes": "{minutes, plural, =1{1 dakika sonra} other{{minutes} dakika sonra}}",
   "appLockTurnedOffUnavailable": "Telefon şu an kimliğini doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin.",
-  "appLockEnablePromptTitle": "Uygulama kilidini aç"
+  "appLockEnablePromptTitle": "Uygulama kilidini aç",
+  "amountsHide": "Tutarları gizle",
+  "amountsShow": "Tutarları göster",
+  "amountsHideHint": "Tutarlar ekranlarda ve bildirimlerde gizlenir; tutar yazarken görünür.",
+  "amountHidden": "Tutar gizli"
 }

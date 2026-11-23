@@ -202,7 +202,12 @@ class _Option extends StatelessWidget {
       title: Text(title),
       subtitle: hint == null
           ? null
-          : Text(hint!, style: TextStyle(color: colors.textMuted)),
+          : Text(
+              hint!,
+              style: TextStyle(color: colors.textMuted),
+              // A hidden fee (28) reads as "Amount hidden".
+              semanticsLabel: context.spoken(hint!),
+            ),
       onTap: () => Navigator.pop(context, choice),
     );
   }
@@ -366,7 +371,7 @@ class _ChangeDateScreenState extends ConsumerState<ChangeDateScreen> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            Text(
+            context.spokenText(
               [
                 if (!plan.isPayLater)
                   l10n.progressLabel(payment.seq, plan.plan.installmentCount),
@@ -550,7 +555,8 @@ class _PeriodRow extends ConsumerWidget {
     );
     return Semantics(
       container: true,
-      label: '$range, $semantics',
+      // A hidden amount (28) reads as "Amount hidden".
+      label: context.spokenLabel('$range, $semantics'),
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: KalanSpace.xxs),

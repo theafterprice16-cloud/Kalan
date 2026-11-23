@@ -10,6 +10,8 @@ void main() {
   ) async {
     await pumpApp(tester, seed: seedSettings);
     await openTab(tester, 'Ayarlar');
+    // Below "Privacy" (28): scroll to it.
+    await scrollTo(tester, find.text('Para birimi'));
     await tester.tap(find.text('Para birimi'));
     await tester.pumpAndSettle();
     // Suggested first: a Turkish phone gets the lira.

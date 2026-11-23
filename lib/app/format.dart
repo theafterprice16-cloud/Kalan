@@ -7,6 +7,7 @@ import '../core/date/local_date.dart';
 import '../core/money/currency.dart';
 import '../core/money/money_format.dart';
 import '../data/models.dart';
+import '../features/privacy/amounts_hidden.dart';
 import '../l10n/app_locales.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'providers.dart';
@@ -82,20 +83,66 @@ extension L10nX on BuildContext {
   /// "Cuma" / "Friday".
   String weekdayName(LocalDate date) =>
       DateFormat.EEEE(localeName).format(date.toDateTime());
+
+  /// What a screen reader says for [text] while amounts are hidden (28):
+  /// each masked amount as "Amount hidden", never the dots. Null when
+  /// [text] has no masked amount, so the text reads as itself (and an
+  /// app with amounts shown is exactly as before). For a `Text`'s or an
+  /// `AmountText`'s `semanticsLabel`.
+  String? spoken(String text) => text.contains(amountMask)
+      ? text.replaceAll(amountMask, l10n.amountHidden)
+      : null;
+
+  /// [spoken], or [text] itself: for labels that must be set.
+  String spokenLabel(String text) => spoken(text) ?? text;
+
+  /// A plain [Text] of [text] whose hidden amounts (28) a screen reader
+  /// says as "Amount hidden"; exactly `Text(text)` while amounts show.
+  Text spokenText(
+    String text, {
+    Key? key,
+    TextStyle? style,
+    TextAlign? textAlign,
+  }) => Text(
+    text,
+    key: key,
+    style: style,
+    textAlign: textAlign,
+    semanticsLabel: spoken(text),
+  );
 }
 
 /// Every screen formats, parses and edits amounts through these helpers,
 /// which all go through lib/core/money with the current currency.
+///
+/// "Hide amounts" (Roadmap 28) is applied here and nowhere else: while it
+/// is on, [money] and [moneyShort] give [amountMask] for every amount
+/// (no symbol, no sign, always the same length). Only the flow where the
+/// user types or edits an amount uses [draftMoney]
+/// (test/app/money_path_test.dart keeps that list).
 extension MoneyRefX on WidgetRef {
   Currency get currency => watch(currencyProvider);
 
-  /// Formats minor units in the user's currency and the app's language.
-  String money(BuildContext context, int minor) =>
-      formatMoney(minor, currency, localeName: context.localeName);
+  /// Whether amounts on screen are masked; follows the switch.
+  bool get amountsHidden => watch(amountsHiddenProvider);
+
+  /// Formats minor units in the user's currency and the app's language;
+  /// [amountMask] while amounts are hidden.
+  String money(BuildContext context, int minor) => amountsHidden
+      ? amountMask
+      : formatMoney(minor, currency, localeName: context.localeName);
 
   /// A short amount for narrow labels (12,4 B); see [formatMoneyShort].
-  String moneyShort(BuildContext context, int minor) =>
-      formatMoneyShort(minor, currency, localeName: context.localeName);
+  /// [amountMask] while amounts are hidden.
+  String moneyShort(BuildContext context, int minor) => amountsHidden
+      ? amountMask
+      : formatMoneyShort(minor, currency, localeName: context.localeName);
+
+  /// An amount in the flow where the user is typing or editing one right
+  /// now (the form and its draft preview): never masked, the user needs
+  /// to see what they enter. Anywhere else: [money].
+  String draftMoney(BuildContext context, int minor) =>
+      formatMoney(minor, currency, localeName: context.localeName);
 
   /// Parses typed text; null when invalid.
   int? parseMoney(BuildContext context, String text) =>

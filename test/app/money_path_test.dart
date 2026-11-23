@@ -50,4 +50,51 @@ void main() {
     expect(raw.hasMatch('DateFormat.E(l10n.localeName)'), isTrue);
     expect(raw.hasMatch('intlLocaleOf(l10n.localeName)'), isFalse);
   });
+
+  // Roadmap 28: "Hide amounts" is applied once, in the display path
+  // (MoneyRefX in lib/app/format.dart). Screens show amounts only through
+  // ref.money / ref.moneyShort; formatting directly would skip the mask.
+  test('hide amounts: no way around the mask', () {
+    // Where an amount is formatted directly, and why the mask does not
+    // apply there.
+    const direct = {
+      'lib/app/format.dart': 'the display path itself',
+      'lib/features/reminders/reminder_texts.dart':
+          'notifications: the planner decides (amountsInText)',
+      'lib/features/currency/currency_picker.dart':
+          "each currency's example amount, not the user's",
+    };
+    // The flow where the user types or edits an amount (fields and their
+    // draft preview): never masked. How many calls each file may have.
+    const drafts = {
+      'lib/app/format.dart': 1,
+      'lib/features/plans/add_plan_screen.dart': 8,
+      'lib/features/plans/adjust_amount_screen.dart': 6,
+      'lib/features/plans/installment_fee_fields.dart': 1,
+      'lib/features/plans/plan_detail_screen.dart': 1,
+    };
+    final format = RegExp(r'\bformatMoney(Short)?\(');
+    final draft = RegExp(r'\bdraftMoney\(');
+    final offenders = <String>[];
+    final seen = <String, int>{};
+    for (final entity in Directory('lib').listSync(recursive: true)) {
+      if (entity is! File || !entity.path.endsWith('.dart')) continue;
+      final path = entity.path.replaceAll(r'\', '/');
+      if (path.startsWith('lib/core/money/') ||
+          path.startsWith('lib/l10n/generated/')) {
+        continue;
+      }
+      final source = entity.readAsStringSync();
+      if (format.hasMatch(source) && !direct.containsKey(path)) {
+        offenders.add('$path: formatMoney');
+      }
+      final drafted = draft.allMatches(source).length;
+      if (drafted > 0) seen[path] = drafted;
+    }
+    expect(offenders, isEmpty);
+    // format.dart: the definition itself.
+    expect(seen, drafts);
+    expect(format.hasMatch('formatMoneyShort(1, c, localeName: l)'), isTrue);
+    expect(draft.hasMatch('ref.draftMoney(context, 1)'), isTrue);
+  });
 }

@@ -117,7 +117,7 @@ class CardStatementScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: KalanSpace.md),
-                Text(
+                context.spokenText(
                   statement.isEmpty
                       ? l10n.cardStatementEmpty
                       : l10n.cardStatementCountTotal(
@@ -243,7 +243,7 @@ class _PaidBeforeRow extends ConsumerWidget {
       plan: plan,
       name: context.planName(plan),
       details: [
-        Text(
+        context.spokenText(
           context.l10n.paidBeforeSummary(
             installments.length,
             ref.money(context, total),

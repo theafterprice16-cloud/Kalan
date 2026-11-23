@@ -23,6 +23,7 @@ import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
 import 'package:kalan/features/lock/device_lock_gateway.dart';
 import 'package:kalan/features/plans/provider_templates_ui.dart';
+import 'package:kalan/features/privacy/amounts_hidden.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
@@ -1946,6 +1947,58 @@ void main() {
           await openLock(tester);
           await tester.tap(find.byKey(const ValueKey('app-lock-delay')));
           await shoot(tester, '107-lock-again-choice-$lang-$theme');
+        });
+      }
+
+      // Hide amounts (28): every amount masked, names, dates, counts,
+      // bars and states as they were; the shown versions are the shots
+      // above (02, 03, 06, 52, 53 and the English ones). Settings with
+      // the switch on.
+      for (final (lang, locale, plansTab, settingsTab) in [
+        ('tr', const Locale('tr', 'TR'), 'Planlar', 'Ayarlar'),
+        ('en', const Locale('en', 'US'), 'Plans', 'Settings'),
+      ]) {
+        Future<void> startHidden(WidgetTester tester) => start(
+          tester,
+          locale: locale,
+          income: 1500000,
+          extra: [
+            amountsHiddenStoreProvider.overrideWithValue(
+              MemoryAmountsHiddenStore(true),
+            ),
+          ],
+        );
+
+        testWidgets('home, amounts hidden, $lang', (tester) async {
+          await startHidden(tester);
+          await shoot(tester, '109-home-hidden-$lang-$theme');
+        });
+
+        testWidgets('plan detail, amounts hidden, $lang', (tester) async {
+          await startHidden(tester);
+          await openTab(tester, plansTab);
+          await tester.tap(find.text('Telefon'));
+          await shoot(tester, '110-plan-detail-hidden-$lang-$theme');
+        });
+
+        testWidgets('coming periods, amounts hidden, $lang', (tester) async {
+          await startHidden(tester);
+          await tester.tap(find.byKey(const ValueKey('coming-periods-strip')));
+          await shoot(tester, '111-coming-periods-hidden-$lang-$theme');
+        });
+
+        testWidgets('settings, hide amounts on, $lang', (tester) async {
+          await startHidden(tester);
+          await openTab(tester, settingsTab);
+          const key = ValueKey('hide-amounts-switch');
+          await scrollTo(tester, find.byKey(key));
+          final top = tester.getTopLeft(find.byKey(key)).dy;
+          await tester.drag(
+            find.byType(Scrollable).first,
+            Offset(0, 200 - top),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          await shoot(tester, '112-settings-hide-amounts-$lang-$theme');
         });
       }
 

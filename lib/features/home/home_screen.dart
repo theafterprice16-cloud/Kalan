@@ -8,6 +8,7 @@ import '../../core/engine/period_summary.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../periods/coming_periods_strip.dart';
+import '../privacy/hide_amounts_ui.dart';
 import 'home_view.dart';
 import 'past_due.dart';
 import 'payment_tile.dart';
@@ -32,6 +33,7 @@ class HomeScreen extends ConsumerWidget {
             context.shortDate(period.lastDay),
           ),
         ),
+        actions: const [HideAmountsButton()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: null,
@@ -72,6 +74,18 @@ class _Header extends ConsumerWidget {
       color: colors.textMuted,
     );
 
+    final number = left == null ? spokenFor : ref.money(context, left);
+    // A hidden amount (28) reads as "Amount hidden".
+    Text spokenText(String text, TextStyle? style) =>
+        Text(text, style: style, semanticsLabel: context.spoken(text));
+
+    final tight = s.status == PeriodStatus.tight
+        ? l10n.homeTight(ref.money(context, view.tightThresholdMinor!))
+        : '';
+    final negative = s.status == PeriodStatus.negative
+        ? l10n.homeNegative(ref.money(context, -left!))
+        : '';
+
     final Color numberColor;
     if (left == null) {
       numberColor = theme.colorScheme.onSurface;
@@ -107,8 +121,9 @@ class _Header extends ConsumerWidget {
                     const SizedBox(height: KalanSpace.xxs),
                     AmountText(
                       key: const ValueKey('home-number'),
-                      left == null ? spokenFor : ref.money(context, left),
+                      number,
                       color: numberColor,
+                      semanticsLabel: context.spoken(number),
                     ),
                   ],
                 ),
@@ -118,9 +133,11 @@ class _Header extends ConsumerWidget {
                 PeriodBar(
                   spokenForMinor: s.spokenForMinor,
                   incomeMinor: s.incomeMinor!,
-                  semanticsLabel: l10n.homeBarLabel(
-                    spokenFor,
-                    ref.money(context, s.incomeMinor!),
+                  semanticsLabel: context.spokenLabel(
+                    l10n.homeBarLabel(
+                      spokenFor,
+                      ref.money(context, s.incomeMinor!),
+                    ),
                   ),
                 ),
                 const SizedBox(height: KalanSpace.sm),
@@ -128,21 +145,21 @@ class _Header extends ConsumerWidget {
                   spacing: KalanSpace.md,
                   runSpacing: KalanSpace.xxs,
                   children: [
-                    Text(
+                    spokenText(
                       '${l10n.homeSpokenForLabel} $spokenFor',
-                      style: secondary,
+                      secondary,
                     ),
-                    Text(
+                    spokenText(
                       '${l10n.homeIncomeLabel} ${ref.money(context, s.incomeMinor!)}',
-                      style: secondary,
+                      secondary,
                     ),
                   ],
                 ),
               ],
               const SizedBox(height: KalanSpace.sm),
-              Text(
+              spokenText(
                 l10n.homeSummary(s.itemCount, spokenFor),
-                style: theme.textTheme.bodyLarge,
+                theme.textTheme.bodyLarge,
               ),
               if (s.status == PeriodStatus.tight) ...[
                 const SizedBox(height: KalanSpace.sm),
@@ -150,9 +167,8 @@ class _Header extends ConsumerWidget {
                   key: const ValueKey('status-tight'),
                   icon: Icons.hourglass_bottom,
                   color: colors.text,
-                  text: l10n.homeTight(
-                    ref.money(context, view.tightThresholdMinor!),
-                  ),
+                  text: tight,
+                  semanticsLabel: context.spoken(tight),
                 ),
               ],
               if (s.status == PeriodStatus.negative) ...[
@@ -162,7 +178,8 @@ class _Header extends ConsumerWidget {
                   icon: Icons.remove_circle_outline,
                   color: colors.negative,
                   textColor: colors.negativeText,
-                  text: l10n.homeNegative(ref.money(context, -left!)),
+                  text: negative,
+                  semanticsLabel: context.spoken(negative),
                 ),
               ],
               if (s.status == PeriodStatus.noIncome) ...[

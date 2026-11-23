@@ -89,6 +89,14 @@ class PlanDetailScreen extends ConsumerWidget {
     final heroMinor = plan.isClosed
         ? plan.paidWithFeesMinor
         : plan.remainingWithFeesMinor;
+    final hero = ref.money(context, heroMinor);
+    // A hidden amount (28) reads as "Amount hidden".
+    Text spokenText(String text, [TextStyle? style, Key? key]) => Text(
+      text,
+      key: key,
+      style: style,
+      semanticsLabel: context.spoken(text),
+    );
     final fees = plan.installmentFeesMinor;
     // "Product price / Difference" (23): open plans only, above zero.
     final price = plan.priceDifference;
@@ -196,18 +204,19 @@ class PlanDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: KalanSpace.md),
                     AmountText(
-                      ref.money(context, heroMinor),
+                      hero,
+                      semanticsLabel: context.spoken(hero),
                       size: AmountSize.medium,
                       // Held or closed: not part of any total.
                       color: plan.status == PlanStatus.open
                           ? null
                           : context.colors.textMuted,
                     ),
-                    Text(
+                    spokenText(
                       plan.isClosed
-                          ? l10n.planPaidAmount(ref.money(context, heroMinor))
-                          : l10n.planToPay(ref.money(context, heroMinor)),
-                      style: secondary,
+                          ? l10n.planPaidAmount(hero)
+                          : l10n.planToPay(hero),
+                      secondary,
                     ),
                     if (plan.isOnHold && plan.setAside.isNotEmpty)
                       Text(
@@ -229,7 +238,7 @@ class PlanDetailScreen extends ConsumerWidget {
                         // With fees per payment (22) or a product price
                         // (23): the summary rows below.
                         if (!summary)
-                          Text(
+                          spokenText(
                             l10n.planTotal(ref.money(context, plan.totalMinor)),
                           ),
                         if (plan.plan.purchaseDay != null)
@@ -327,13 +336,13 @@ class PlanDetailScreen extends ConsumerWidget {
                 KalanSpace.md,
                 KalanSpace.xs,
               ),
-              child: Text(
+              child: spokenText(
                 l10n.paidBeforeSummary(
                   plan.paidBefore.length,
                   ref.money(context, plan.paidBeforeMinor),
                 ),
-                key: const ValueKey('paid-before-summary'),
-                style: secondary,
+                secondary,
+                const ValueKey('paid-before-summary'),
               ),
             ),
           for (final p in plan.listedPayments)
@@ -429,6 +438,14 @@ class _PaymentRow extends ConsumerWidget {
     // "Change date" (20), the edit and the extra fee (21): one sheet.
     final choices = paymentChoicesFor(plan, payment);
     final fee = payment.extraFeeMinor;
+    final amount = ref.money(context, payment.installmentMinor);
+    // A hidden amount (28) reads as "Amount hidden".
+    Text spokenText(String text, [TextStyle? style, Key? key]) => Text(
+      text,
+      key: key,
+      style: style,
+      semanticsLabel: context.spoken(text),
+    );
     Future<void> openFee() => openExtraFee(
       context,
       ref,
@@ -510,10 +527,10 @@ class _PaymentRow extends ConsumerWidget {
                   // The amount on the right includes the fee per payment
                   // (22); this says which part it is.
                   if (payment.installmentFeeMinor case final planFee?)
-                    Text(
+                    spokenText(
                       l10n.installmentFeeIncluded(ref.money(context, planFee)),
-                      key: ValueKey('installment-fee-${payment.id}'),
-                      style: secondary,
+                      secondary,
+                      ValueKey('installment-fee-${payment.id}'),
                     ),
                   // The extra fee and its note under the payment (21); the
                   // amount on the right is the installment, without it.
@@ -548,7 +565,8 @@ class _PaymentRow extends ConsumerWidget {
               ),
             ),
             AmountText(
-              ref.money(context, payment.installmentMinor),
+              amount,
+              semanticsLabel: context.spoken(amount),
               size: AmountSize.small,
               color: payment.isPaid || held ? colors.textMuted : null,
             ),
@@ -644,7 +662,8 @@ class _EditPaymentDialogState extends State<_EditPaymentDialog> {
               if (widget.payment.installmentFeeMinor case final fee?) ...[
                 const SizedBox(height: KalanSpace.xs),
                 Text(
-                  l10n.installmentFeeOnTop(widget.ref.money(context, fee)),
+                  // Editing this amount: the fee shows as is (28).
+                  l10n.installmentFeeOnTop(widget.ref.draftMoney(context, fee)),
                   key: const ValueKey('edit-amount-fee'),
                   style: Theme.of(context).textTheme.bodyMedium
                       ?.copyWith(color: context.colors.textMuted),
@@ -693,8 +712,11 @@ class ExtraFeeText extends StatelessWidget {
     final text = line(amount);
     final at = text.indexOf(amount);
     final muted = style?.copyWith(color: colors.textMuted);
-    if (at < 0) return Text(text, style: muted);
+    // A hidden amount (28) reads as "Amount hidden".
+    final spoken = context.spoken(text);
+    if (at < 0) return Text(text, style: muted, semanticsLabel: spoken);
     return Text.rich(
+      semanticsLabel: spoken,
       TextSpan(
         style: muted,
         children: [

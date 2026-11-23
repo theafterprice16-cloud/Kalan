@@ -260,14 +260,17 @@ class PastDueRow extends ConsumerWidget {
         Expanded(
           child: Semantics(
             button: true,
-            label: fee == null
-                ? l10n.pastDueRowSemantics(entry.label(l10n), amount, days)
-                : l10n.pastDueRowFeeSemantics(
-                    entry.label(l10n),
-                    amount,
-                    fee,
-                    days,
-                  ),
+            // A hidden amount (28) reads as "Amount hidden".
+            label: context.spokenLabel(
+              fee == null
+                  ? l10n.pastDueRowSemantics(entry.label(l10n), amount, days)
+                  : l10n.pastDueRowFeeSemantics(
+                      entry.label(l10n),
+                      amount,
+                      fee,
+                      days,
+                    ),
+            ),
             // The tap is read out with the label (the InkWell's own is
             // excluded), so screen readers can open the plan too.
             onTap: () => context.push(Routes.plan(entry.planId!)),

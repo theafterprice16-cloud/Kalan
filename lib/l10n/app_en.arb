@@ -2823,5 +2823,21 @@
   "appLockEnablePromptTitle": "Turn on app lock",
   "@appLockEnablePromptTitle": {
     "description": "Title of the Android system check dialog when the app lock is being turned on. At most 60 characters. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'."
+  },
+  "amountsHide": "Hide amounts",
+  "@amountsHide": {
+    "description": "Title of the switch in Settings > Privacy and the screen-reader name of the eye button on the home screen while amounts show. Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something."
+  },
+  "amountsShow": "Show amounts",
+  "@amountsShow": {
+    "description": "Screen-reader name of the eye button on the home screen while amounts are hidden; a tap shows them again. Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something."
+  },
+  "amountsHideHint": "Amounts are hidden on screens and in notifications, but not while you type one.",
+  "@amountsHideHint": {
+    "description": "Subtitle of the 'Hide amounts' switch. Amount fields keep showing what the user types. Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something."
+  },
+  "amountHidden": "Amount hidden",
+  "@amountHidden": {
+    "description": "What a screen reader says in place of each hidden amount, also inside a sentence ('This period is Amount hidden short.'). Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something."
   }
 }

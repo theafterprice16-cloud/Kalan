@@ -25,6 +25,7 @@ import '../holidays/holiday_country_ui.dart';
 import '../holidays/holiday_providers.dart';
 import '../lock/app_lock_section.dart';
 import '../onboarding/pay_form.dart';
+import '../privacy/hide_amounts_ui.dart';
 import '../pro/pro_screen.dart';
 import '../reminders/reminders_section.dart';
 
@@ -165,6 +166,9 @@ class SettingsScreen extends ConsumerWidget {
         ?.copyWith(color: context.colors.textMuted);
     String amountOrNot(int? minor) =>
         minor == null ? l10n.notSet : ref.money(context, minor);
+    // A hidden amount (28) reads as "Amount hidden".
+    Text spokenText(String text) =>
+        Text(text, style: secondary, semanticsLabel: context.spoken(text));
     final currency = Currency.fromCode(s.currencyCode);
     final currencyLabel =
         '${currency.pickerLabel} · ${currencyName(context, currency)}';
@@ -194,16 +198,15 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ListTile(
             title: Text(l10n.settingsNetIncome),
-            subtitle: Text(amountOrNot(s.netIncomeMinor), style: secondary),
+            subtitle: spokenText(amountOrNot(s.netIncomeMinor)),
             onTap: () => editNetIncome(context, ref),
           ),
           ListTile(
             title: Text(l10n.settingsTight),
-            subtitle: Text(
+            subtitle: spokenText(
               s.tightThresholdMinor == null
                   ? l10n.off
                   : ref.money(context, s.tightThresholdMinor!),
-              style: secondary,
             ),
             onTap: () => _editAmount(
               context,
@@ -216,7 +219,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           RemindersSection(settings: s),
-          // App lock (27): phones only; nothing here elsewhere.
+          // Privacy: "Hide amounts" (28) everywhere, the app lock (27) on
+          // phones only.
+          SectionTitle(l10n.settingsPrivacySection),
+          const HideAmountsTile(),
           AppLockSection(settings: s),
           const Divider(),
           ListTile(
