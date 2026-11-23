@@ -98,7 +98,8 @@ class BackupData {
       final at = 'sources[$i]';
       check(sourceIds.add(x.id), '$at.id');
       check(length(x.name, 1, 60), '$at.name');
-      check(day(x.statementDay) && day(x.dueDay), '$at.dueDay');
+      check(day(x.statementDay), '$at.statementDay');
+      check(day(x.dueDay), '$at.dueDay');
       check(const {1, 2}.contains(x.statementReminderDays), '$at.daysBefore');
     }
     final planIds = <int>{};
