@@ -6,9 +6,6 @@ import '../../data/repositories/settings_repository.dart';
 import '../privacy/amounts_hidden.dart';
 
 extension ReminderSettingsRowX on SettingsRow {
-  ReminderSettings get reminderSettings =>
-      reminderSettingsWith(hideAmounts: false);
-
   /// The settings the planner works with; [hideAmounts] is the app-wide
   /// "Hide amounts" (28), kept on the device, not in this row.
   ReminderSettings reminderSettingsWith({required bool hideAmounts}) =>

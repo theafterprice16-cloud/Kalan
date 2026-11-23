@@ -35,6 +35,7 @@ final privacySettingsProvider = Provider(
 );
 
 final reminderSchedulerProvider = Provider((ref) {
+  final privacy = ref.watch(privacySettingsProvider);
   return ReminderScheduler(
     db: ref.watch(databaseProvider),
     gateway: ref.watch(notificationGatewayProvider),
@@ -42,7 +43,7 @@ final reminderSchedulerProvider = Provider((ref) {
     now: ref.watch(clockProvider),
     localeFor: (s) => appLocale(s.localeCode, ref.watch(appLocalesProvider)),
     // "Hide amounts" (28): read at each run, as the switch stands then.
-    amountsHidden: () => ref.read(amountsHiddenProvider),
+    amountsHidden: () => privacy.amountsHidden,
   );
 });
 

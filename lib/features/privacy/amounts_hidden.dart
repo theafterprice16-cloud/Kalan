@@ -68,7 +68,12 @@ class AmountsHiddenController extends Notifier<bool> {
   Future<void> set(bool hidden) async {
     if (state == hidden) return;
     state = hidden;
-    await ref.read(privacySettingsProvider).setAmountsHidden(hidden);
+    try {
+      await ref.read(privacySettingsProvider).setAmountsHidden(hidden);
+    } on Object {
+      // Not saved: the screen goes back to what is stored.
+      if (ref.mounted) state = !hidden;
+    }
   }
 
   Future<void> toggle() => set(!state);

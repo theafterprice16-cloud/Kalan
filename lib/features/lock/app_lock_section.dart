@@ -119,14 +119,15 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
       if (notice != null) setState(() => _show(notice));
     });
     final privacy = ref.read(privacySettingsProvider);
+    // Rebuilds when the eye or the Settings switch changes (28).
+    ref.watch(amountsHiddenProvider);
     // The suggestion only where amounts really show: reminders on, amounts
     // on, "Hide amounts" (28) off. A tap hides them; the lock itself never
     // changes that setting.
     final amountsShow =
         ref.watch(notificationGatewayProvider).supported &&
         widget.settings.remindersEnabled &&
-        privacy.showAmountsInNotifications(widget.settings) &&
-        !ref.watch(amountsHiddenProvider);
+        privacy.notificationAmountsShown(widget.settings);
 
     Widget note(String text, Key key) => ListTile(
       key: key,

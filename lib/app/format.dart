@@ -89,7 +89,14 @@ extension L10nX on BuildContext {
   /// [text] has no masked amount, so the text reads as itself (and an
   /// app with amounts shown is exactly as before). For a `Text`'s or an
   /// `AmountText`'s `semanticsLabel`.
-  String? spoken(String text) => text.contains(amountMask)
+  String? spoken(String text) =>
+      text.contains(amountMask) &&
+          // A name the user typed with dots is never "hidden" while
+          // amounts show.
+          ProviderScope.containerOf(
+            this,
+            listen: false,
+          ).read(amountsHiddenProvider)
       ? text.replaceAll(amountMask, l10n.amountHidden)
       : null;
 

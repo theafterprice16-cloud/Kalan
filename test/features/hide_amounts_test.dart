@@ -22,6 +22,7 @@ import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
 import 'package:kalan/features/lock/device_lock_gateway.dart';
 import 'package:kalan/features/periods/period_chart.dart';
+import 'package:kalan/features/plans/installment_fee_fields.dart';
 import 'package:kalan/features/privacy/amounts_hidden.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:material_ui/material_ui.dart';
@@ -317,6 +318,126 @@ void main() {
     });
   });
 
+  group('more screens, hidden', () {
+    Future<void> open(WidgetTester tester, String route) async {
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(KalanApp)),
+      ).read(routerProvider);
+      unawaited(router.push(route));
+      await tester.pumpAndSettle();
+    }
+
+    void noAmount() {
+      expect(find.textContaining('₺'), findsNothing);
+      expect(find.textContaining(mask), findsWidgets);
+      expect(spokenWith('₺'), findsNothing);
+      expect(spokenWith('•'), findsNothing);
+      expect(spokenWith('Tutar gizli'), findsWidgets);
+    }
+
+    testWidgets('plans: recurring and finished tabs', (tester) async {
+      tallPhone(tester);
+      final semantics = tester.ensureSemantics();
+      await start(
+        tester,
+        hidden: true,
+        route: Routes.plans,
+        seed: (db) async {
+          telefon = await seedAll(db);
+          final plans = PlanRepository(db);
+          final saat = await plans.saveDraft(
+            PlanCalculator.monthly(
+              firstDate: LocalDate(2026, 10, 5),
+              totalMinor: 90000,
+              count: 1,
+            ),
+            sourceId: null,
+            origin: PlanOrigin.manual,
+            title: 'Saat',
+          );
+          final pay = await (db.select(
+            db.payments,
+          )..where((p) => p.planId.equals(saat))).getSingle();
+          await plans.setPaid(pay.id, paid: true);
+        },
+      );
+      noAmount();
+      await tester.tap(find.text('Sabit'));
+      await tester.pumpAndSettle();
+      expect(find.text('Kira'), findsOneWidget);
+      noAmount();
+      await tester.tap(find.text('Biten'));
+      await tester.pumpAndSettle();
+      expect(find.text('Saat'), findsOneWidget);
+      noAmount();
+      semantics.dispose();
+    });
+
+    testWidgets('change date: its lines, period rows and the fee option', (
+      tester,
+    ) async {
+      tallPhone(tester);
+      final semantics = tester.ensureSemantics();
+      await start(tester, hidden: true, route: Routes.home);
+      await open(tester, Routes.plan(telefon));
+      await tester.tap(find.text('10 Ara 2026'));
+      await tester.pumpAndSettle();
+      // The payment sheet: "Extra fee: •••" under its option.
+      expect(find.text('Ek ücret: $mask'), findsWidgets);
+      expect(spokenWith('₺'), findsNothing);
+      expect(spokenWith('•'), findsNothing);
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      // Into the next period: the period rows show what changes.
+      await open(
+        tester,
+        Routes.paymentDate(telefon, 1, LocalDate(2027, 1, 20)),
+      );
+      expect(find.text('1/12 · $mask'), findsOneWidget);
+      noAmount();
+      semantics.dispose();
+    });
+
+    testWidgets('the fee summary: masked on a plan, shown in a preview', (
+      tester,
+    ) async {
+      await pumpLocalized(
+        tester,
+        ProviderScope(
+          overrides: [
+            amountsHiddenStoreProvider.overrideWithValue(
+              MemoryAmountsHiddenStore(true),
+            ),
+            currencyProvider.overrideWithValue(Currency.fromCode('TRY')),
+          ],
+          child: const Column(
+            children: [
+              InstallmentFeeSummary(
+                key: ValueKey('plan'),
+                planMinor: 2400000,
+                feesMinor: 60000,
+              ),
+              InstallmentFeeSummary(
+                key: ValueKey('preview'),
+                planMinor: 2400000,
+                feesMinor: 60000,
+                draft: true,
+              ),
+            ],
+          ),
+        ),
+      );
+      Finder inside(String key, Finder f) =>
+          find.descendant(of: find.byKey(ValueKey(key)), matching: f);
+      expect(inside('plan', find.text(mask)), findsNWidgets(3));
+      expect(inside('plan', find.textContaining('₺')), findsNothing);
+      expect(inside('preview', find.text('₺24.600')), findsOneWidget);
+      expect(inside('preview', find.text(mask)), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(seconds: 1));
+    });
+  });
+
   testWidgets('Example 4: coming periods keep their bars, labels masked', (
     tester,
   ) async {
@@ -491,6 +612,9 @@ void main() {
         findsOneWidget,
       );
       expect(switchValue(tester), isFalse);
+      // Where the phone has no lock to offer (web, desktop): the section
+      // and "Hide amounts", without the app lock rows.
+      expect(find.byKey(const ValueKey('app-lock')), findsNothing);
       await tester.tap(hideSwitch);
       await tester.pumpAndSettle();
       expect(switchValue(tester), isTrue);

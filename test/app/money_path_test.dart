@@ -73,10 +73,17 @@ void main() {
       'lib/features/plans/installment_fee_fields.dart': 1,
       'lib/features/plans/plan_detail_screen.dart': 1,
     };
+    // The fee summary's preview flag: only the add plan screen's previews.
+    const draftSummaries = {'lib/features/plans/add_plan_screen.dart': 2};
     final format = RegExp(r'\bformatMoney(Short)?\(');
     final draft = RegExp(r'\bdraftMoney\(');
+    final draftFlag = RegExp(r'\bdraft:\s*true\b');
+    // An amount field's own text, the only place moneyInput may go.
+    final input = RegExp(r'\bmoneyInput\(');
+    final fieldText = RegExp(r'\.text\s*=\s*.*\bmoneyInput\(');
     final offenders = <String>[];
     final seen = <String, int>{};
+    final flagged = <String, int>{};
     for (final entity in Directory('lib').listSync(recursive: true)) {
       if (entity is! File || !entity.path.endsWith('.dart')) continue;
       final path = entity.path.replaceAll(r'\', '/');
@@ -90,10 +97,24 @@ void main() {
       }
       final drafted = draft.allMatches(source).length;
       if (drafted > 0) seen[path] = drafted;
+      final flags = draftFlag.allMatches(source).length;
+      if (flags > 0) flagged[path] = flags;
+      final lines = entity.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        final line = lines[i];
+        if (input.hasMatch(line) &&
+            !fieldText.hasMatch(line) &&
+            !line.contains('String moneyInput(')) {
+          offenders.add('$path:${i + 1}: moneyInput outside a field');
+        }
+      }
     }
     expect(offenders, isEmpty);
     // format.dart: the definition itself.
     expect(seen, drafts);
+    expect(flagged, draftSummaries);
+    expect(fieldText.hasMatch('_amount.text = ref.moneyInput(c, 1);'), isTrue);
+    expect(fieldText.hasMatch('Text(ref.moneyInput(c, 1))'), isFalse);
     expect(format.hasMatch('formatMoneyShort(1, c, localeName: l)'), isTrue);
     expect(draft.hasMatch('ref.draftMoney(context, 1)'), isTrue);
   });

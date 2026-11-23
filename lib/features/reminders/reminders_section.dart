@@ -13,6 +13,7 @@ import '../../core/reminders/reminder_models.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
+import '../privacy/amounts_hidden.dart';
 import 'local_notifications.dart';
 import 'reminder_providers.dart';
 import 'reminder_settings_store.dart';
@@ -98,7 +99,9 @@ class RemindersSection extends ConsumerWidget {
       );
     }
 
-    final reminders = settings.reminderSettings;
+    final reminders = settings.reminderSettingsWith(
+      hideAmounts: ref.watch(amountsHiddenProvider),
+    );
     final on = reminders.enabled;
     final permission = ref.watch(notificationPermissionProvider).value;
     final time = MaterialLocalizations.of(context).formatTimeOfDay(
