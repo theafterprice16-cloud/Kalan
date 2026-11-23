@@ -315,7 +315,7 @@ Yol Haritası 10. Açık sorular ürün sahibinin iş tanımında cevaplandı: v
 | Ne zaman | Her maaş döneminin motordaki ilk günü (aylıkta ay kısaysa son gün, iki haftada bir ve haftalıkta bilinen maaş gününden adımla), kullanıcının hatırlatma saatinde. Yalnızca sıradaki özet kurulur: bugün maaş günüyse ve saat geçmediyse bugünkü, yoksa bir sonraki dönemin (`nextPaydayPeriod`). |
 | İçerik | Ana ekranın o sabah göstereceği sayılar: aynı hesap (`periodSummaryOn`, `lib/data/period_totals.dart`; ana ekran da artık bunu kullanır), dönemin ilk günü "bugün" sayılarak. Böylece o güne kadar ödenmemiş kalan günü geçmiş ödemeler yeni dönemin toplamına girer (`countingDate`, ana ekranla aynı). Ödemeler değişince içerik yeniden kurulur. |
 | Metin | "Yeni dönem başladı. Bu dönem 6 ödeme, toplam 8.300 TL. Kalan 12.450 TL." Gelir yoksa kalan cümlesi yok. Eksi kalanda "Bu dönem 1.200 TL eksik görünüyor." (eksi işareti olmadan tutar). Ödeme yoksa "Bu dönem ödeme yok." Tavsiye, yorum, ünlem yok. EN: "A new pay period has started. 6 payments this period, ₺8,300 in total. ₺12,450 left." / "This period looks ₺1,200 short." |
-| Tutar gösterme | Mevcut "Bildirimde tutarı göster" anahtarı kapalıysa özet yalnızca ödeme sayısını söyler ("Bu dönem 6 ödeme var."); kilit ekranında tutar görünmesin diye. Uygulama genelindeki tutar gizleme (28. madde) yapılınca özet ona da uyacak; şimdi kod yok. |
+| Tutar gösterme | Mevcut "Bildirimde tutarı göster" anahtarı kapalıysa özet yalnızca ödeme sayısını söyler ("Bu dönem 6 ödeme var."); kilit ekranında tutar görünmesin diye. Uygulama genelindeki "Tutarları gizle" (28) açıkken de yalnızca ödeme sayısı (23 Kasım 2026'dan beri; kural planlayıcıda `ReminderSettings.amountsInText`). |
 | Ayrı bildirim | Ödeme bildirimleriyle birleştirilmez, düğmesi yok, dokununca ana ekran. Kendi kimlik aralığı (3 × 2^28 + gün). Ödeme bildirimlerinin listesi, zamanı ve metni değişmedi (testli). Özet planlayıcıda ayrı adımdır (`withPaydaySummary`); bildirim türü listesine yeni tür eklenmedi, böylece düğme ve erteleme kuralları hiç etkilenmez. |
 | 60 sınırı | Özet sınırın içinde sayılır; ödeme bildirimleri önceliklidir: liste 60 ödeme bildirimiyle doluysa özet o kurulumda eklenmez. |
 | Açma/kapama | Ayarlar > Hatırlatmalar'da "Israrlı hatırlatma"nın altında anahtar (mevcut anahtar stili; accent yok). Hatırlatmalar ana anahtarı kapalıyken özet de kurulmaz ve satır pasif görünür. Bildirim izni yoksa mevcut izin satırı geçerli; yeni izin isteği yok. Saklama: `app_settings.payday_summary_enabled` (şema v12, varsayılan açık; göçte mevcut satır açık gelir). |
@@ -865,3 +865,32 @@ Uygulama kararları:
 | Ayarlar yeri | Hatırlatmalar bölümünden sonra yeni "Gizlilik" bölümü: "Uygulama kilidi" anahtarı (adaptif, mürekkep), altında tutar satırı, "Yeniden kilitle" (seçili seçenek onay işaretli). Notlar textMuted ve bilgi ikonuyla; late yok. Bölüm yalnızca telefonlarda (web ve masaüstünde yok). |
 | Widget (Karar 15) | Ana ekran widget'ı yok; `docs/BACKLOG.md` widget maddesine not düşüldü. |
 | Ücret | Herkese ücretsiz; Pro ve 4 plan sınırı değişmedi. |
+
+## Tutarları gizleme (28) (23 Kasım 2026)
+
+Ürün sahibinin kararları (iş tanımıyla verildi, yeniden sorulmaz):
+
+| Soru | Karar |
+|---|---|
+| Açılışta | Uygulama son durumu hatırlar. |
+| Grafik çubukları | Görünür kalır; yalnızca tutar etiketleri örtülür. |
+| Hareketle gizleme | Yok; yalnızca göz ikonu (ve Ayarlar'daki anahtar). |
+
+İş tanımındaki uygulama kararları:
+
+| Konu | Karar |
+|---|---|
+| Tek nokta | Örtü yalnızca tek para yolunun gösterim katmanında: `MoneyRefX.money` ve `moneyShort` (`lib/app/format.dart`) gizliyken her tutar için `amountMask` (`lib/core/money/money_format.dart`) verir. Ekranlarda başka kod yok; `test/app/money_path_test.dart` doğrudan `formatMoney` çağrısını (izinli üç dosya dışında) ve izinli dosyalar dışında örtüsüz yolu yakalar. |
+| Örtü | Sabit "•••": sembol, eksi işareti ve uzunluk yok; cümle içinde de aynı ("Bu dönem ••• eksik kalıyor."). Normal renginde ve yerinde (büyük sayı aynı stil, düzen kaymaz). Sahte tutar yok. |
+| Örtülmeyenler | Tutar yazılan ya da düzenlenen akış (`ref.draftMoney`): plan ekleme ekranı ve önizlemesi, "Tutarı düzelt" ekranının tamamı (mevcut toplam ve ödenen olmadan yeni toplam yazılamaz), "Ödemeyi düzelt" penceresindeki taksit ücreti notu, tutar alanlarının içi. Plan adları, tarihler, ödeme sayıları, ilerleme, durum işaretleri ve renkleri, grafik çubukları, mağazadan gelen Pro fiyatı, para birimi seçicideki örnek tutarlar. |
+| Kapsam (main'e göre) | Ana ekran (büyük sayı, söz verilmiş, gelir, özet cümlesi, sıkışık ve eksi notu, satırlar, gecikenler, ek ücret ve taksit ücreti notları), plan listesi ve sabit ödemeler, plan ayrıntısı (kalan, ödenecek/ödenen, toplam, taksitler, ek ücret, taksit başı ücret, plan tutarı, toplam geri ödeme, ürün fiyatı, fark, "Kalan'dan önce ödendi"), tarih değiştirme ekranı ve işlem listesi, ileriki dönemler (çubuk etiketleri, dönem özeti, eksik notu), takvim gün toplamı, yoğun hafta, kaynaklar ve kartlar (ekstre toplamları, ekstre ayrıntısı, hazır tutulacak tutar ve ayrıntısı, kaynağı seçilmemiş otomatik ödemeler), Ayarlar'daki net tutar ve sıkışık dönem eşiği. |
+| Bildirimler | Tutar yalnızca "Bildirimde tutarı göster" açık ve "Tutarları gizle" kapalıyken (`ReminderSettings.amountsInText`, saf planlayıcıda, dört birleşim tablo testli). Ödeme hatırlatmaları, birleşik ve ısrarlı bildirimler, maaş günü özeti ve 18'deki "hesapta X bulunsun" aynı kuraldan geçer. Anahtar değişince `ReminderSync` yeniden kurar; arka plandaki yeniden kurma (açılış sonrası, saat değişimi, bildirim düğmesi) tercihi cihazdan okur, okuyamazsa tutarsız yazar. "Bildirimde tutarı göster"in değeri hiç değişmez. |
+| Kilit satırı (27) | "Bildirimlerde tutar görünüyor. Gizlemek için dokun." yalnızca tutarlar gerçekten görünürken: "Tutarları gizle" açıkken görünmez. |
+| Göz ikonu | Ana ekranın üst çubuğunda; görünürken açık göz, gizliyken üstü çizili göz; iki durumda `textMuted` (brifteki `accentText` düzeltildi: accent yalnızca "kalan"); 48x48 (Material ikon düğmesi). Ekran okuyucu ve uzun basış: "Tutarları gizle" / "Tutarları göster". |
+| Ayarlar | "Gizlilik" bölümü artık her platformda görünür; ilk satır "Tutarları gizle" (adaptif anahtar, altında "Tutarlar ekranlarda ve bildirimlerde gizlenir; tutar yazarken görünür."), altında telefonlarda uygulama kilidi satırları. Göz ikonuyla aynı değer. |
+| Ekran okuyucu | Her örtülü tutar "Tutar gizli" okunur (`context.spoken` / `spokenLabel` / `spokenText`); gerçek tutar hiçbir etikette kalmaz (testli: ana ekran, planlar, plan ayrıntısı, ileriki dönemler, kaynaklar, ekstre, hazır tutulacak tutar). Tutarlar görünürken etiketler birebir eskisi gibi. |
+| Saklama | `PrefsAmountsHiddenStore` (SharedPreferences, `privacy.hideAmounts`), `main()` içinde ilk kareden önce okunur; `PrivacySettings` üzerinden. Veritabanında sütun yok (testli), dışa aktarma ve yedeğe girmez. |
+| Widget | Ana ekran widget'ı yok; `docs/BACKLOG.md` widget maddesine "Tutarları gizle tercihine uymalı" notu. |
+| Metinler | Yalnızca TR ve EN ARB (`amountsHide`, `amountsShow`, `amountsHideHint`, `amountHidden`), çevirmen notu "Privacy preference. Neutral and short; do not make the user look as if they were hiding something."; örtü mevcut tutar yer tutucusunun yerine geçer, ayrı "gizli" cümlesi yok. Diğer 20 yerel sürüm `docs/ceviriler/cevrilecekler.json`'da. |
+| Ücret | Herkese ücretsiz; Pro ve 4 plan sınırı değişmedi. Şema değişmedi, yeni paket yok. |
+
