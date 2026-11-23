@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Directory, File, FileSystemException;
 import 'dart:ui' show Rect;
 
 import 'package:flutter/foundation.dart';

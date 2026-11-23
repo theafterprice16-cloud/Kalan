@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kalan/app/locale.dart';
 import 'package:kalan/app/providers.dart';
 import 'package:kalan/core/backup/backup_file.dart';
 import 'package:kalan/core/date/local_date.dart';
@@ -26,6 +27,8 @@ final en = lookupAppLocalizations(const Locale('en'));
 final today = LocalDate(2026, 11, 19);
 
 void main() {
+  setUpAll(loadLocaleData);
+
   group('export service', () {
     late AppDatabase db;
     late Directory temp;

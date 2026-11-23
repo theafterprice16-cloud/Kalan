@@ -19,6 +19,7 @@ import 'package:kalan/entitlement/pro_controller.dart';
 import 'package:kalan/entitlement/pro_rules.dart';
 import 'package:kalan/entitlement/pro_status_store.dart';
 import 'package:kalan/entitlement/store_gateway.dart';
+import 'package:kalan/features/export/backup_prefs.dart';
 import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
 import 'package:kalan/features/lock/device_lock_gateway.dart';
@@ -1999,6 +2000,55 @@ void main() {
           );
           await tester.pump(const Duration(milliseconds: 400));
           await shoot(tester, '112-settings-hide-amounts-$lang-$theme');
+        });
+      }
+
+      // Export (29): Settings > Data with the calm note (last backup 91
+      // days ago), the export screen with "Full backup" chosen and no
+      // password, and the note at the bottom of the home screen.
+      for (final (lang, locale, settingsTab) in [
+        ('tr', const Locale('tr', 'TR'), 'Ayarlar'),
+        ('en', const Locale('en', 'US'), 'Settings'),
+      ]) {
+        Future<void> startBackedUp(WidgetTester tester, {String? route}) =>
+            start(
+              tester,
+              locale: locale,
+              route: route,
+              extra: [
+                backupPrefsStoreProvider.overrideWithValue(
+                  MemoryBackupPrefsStore(
+                    BackupPrefs(lastFullBackup: testToday.addDays(-91)),
+                  ),
+                ),
+              ],
+            );
+
+        testWidgets('settings, data section, $lang', (tester) async {
+          await startBackedUp(tester);
+          await openTab(tester, settingsTab);
+          const key = ValueKey('settings-export');
+          await scrollTo(tester, find.byKey(key));
+          final top = tester.getTopLeft(find.byKey(key)).dy;
+          await tester.drag(
+            find.byType(Scrollable).first,
+            Offset(0, 300 - top),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          await shoot(tester, '113-settings-data-$lang-$theme');
+        });
+
+        testWidgets('export, full backup, $lang', (tester) async {
+          await startBackedUp(tester, route: Routes.export(backup: true));
+          await shoot(tester, '114-export-backup-$lang-$theme');
+        });
+
+        testWidgets('home, backup note, $lang', (tester) async {
+          await startBackedUp(tester);
+          await scrollTo(tester, find.byKey(const ValueKey('backup-note')));
+          await tester.drag(find.byType(Scrollable).first, const Offset(0, -400));
+          await tester.pump(const Duration(milliseconds: 400));
+          await shoot(tester, '115-home-backup-note-$lang-$theme');
         });
       }
 

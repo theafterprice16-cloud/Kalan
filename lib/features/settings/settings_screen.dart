@@ -225,6 +225,8 @@ class SettingsScreen extends ConsumerWidget {
           SectionTitle(l10n.settingsPrivacySection),
           const HideAmountsTile(),
           AppLockSection(settings: s),
+          // Data (29): export, last backup and its calm reminder.
+          const DataSection(),
           const Divider(),
           ListTile(
             title: Text(l10n.settingsCurrency),
@@ -287,8 +289,6 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(Routes.sources),
           ),
-          // Data (29): export, last backup and its calm reminder.
-          const DataSection(),
           if (kDebugMode)
             SwitchListTile.adaptive(
               key: const ValueKey('debug-pro'),

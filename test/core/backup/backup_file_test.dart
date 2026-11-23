@@ -100,7 +100,7 @@ Future<BackupReadError?> errorOf(String text, {String? password}) async {
 /// [json] (a file without a password) with its checksum written again
 /// for its current content, as a newer app would.
 String resummed(Map<String, Object?> json) {
-  final sum = DartSha256().hashSync(utf8.encode(jsonEncode(json['data'])));
+  final sum = const DartSha256().hashSync(utf8.encode(jsonEncode(json['data'])));
   json['dataSha256'] = [
     for (final b in sum.bytes) b.toRadixString(16).padLeft(2, '0'),
   ].join();
@@ -296,7 +296,7 @@ void main() {
     // RFC 9106, 5.3: the library's Argon2id gives the published tag.
     test('Argon2id known answer (RFC 9106)', () async {
       final key =
-          await DartArgon2id(
+          await const DartArgon2id(
             parallelism: 4,
             memory: 32,
             iterations: 3,

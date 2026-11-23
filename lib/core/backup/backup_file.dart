@@ -291,7 +291,7 @@ String _pretty(Map<String, Object?> json) =>
     '${const JsonEncoder.withIndent('  ').convert(json)}\n';
 
 String _sha256Hex(List<int> bytes) => [
-  for (final b in DartSha256().hashSync(bytes).bytes)
+  for (final b in const DartSha256().hashSync(bytes).bytes)
     b.toRadixString(16).padLeft(2, '0'),
 ].join();
 
