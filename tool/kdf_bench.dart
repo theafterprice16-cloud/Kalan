@@ -24,7 +24,9 @@ Future<void> main() async {
     await kdf.deriveKey(secretKey: password, nonce: salt); // warm up
     final watch = Stopwatch()..start();
     await kdf.deriveKey(secretKey: password, nonce: salt);
-    print('argon2id m=$memory KiB t=$iterations: ${watch.elapsedMilliseconds} ms');
+    print(
+      'argon2id m=$memory KiB t=$iterations: ${watch.elapsedMilliseconds} ms',
+    );
   }
   final pbkdf2 = DartPbkdf2(
     macAlgorithm: DartHmac.sha256(),
