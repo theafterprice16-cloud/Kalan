@@ -35,7 +35,10 @@ class ReminderScheduler {
     required this.location,
     required this.now,
     required this.localeFor,
+    this.amountsHidden = _amountsShown,
   });
+
+  static bool _amountsShown() => false;
 
   final AppDatabase db;
   final NotificationGateway gateway;
@@ -46,6 +49,10 @@ class ReminderScheduler {
 
   /// App language for notification text (settings override or device).
   final Locale Function(SettingsRow settings) localeFor;
+
+  /// "Hide amounts" (28) as it stands now: kept on the device, outside the
+  /// settings row. While on, no notification carries an amount.
+  final bool Function() amountsHidden;
 
   /// The payment reminders that would be scheduled right now (the payday
   /// summary: [buildPaydaySummary]).
@@ -273,7 +280,7 @@ class ReminderScheduler {
     );
 
     return (
-      settings: settings.reminderSettings,
+      settings: settings.reminderSettingsWith(hideAmounts: amountsHidden()),
       payday: PaydaySummary(
         date: period.start,
         paymentCount: summary.itemCount,

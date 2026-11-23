@@ -5,6 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/locale.dart';
 import '../../app/providers.dart';
+import '../privacy/amounts_hidden.dart';
 import 'notification_gateway.dart';
 import 'reminder_scheduler.dart';
 import 'reminder_settings_store.dart';
@@ -27,7 +28,10 @@ final reminderSettingsStoreProvider = Provider(
 );
 
 final privacySettingsProvider = Provider(
-  (ref) => PrivacySettings(ref.watch(settingsRepositoryProvider)),
+  (ref) => PrivacySettings(
+    ref.watch(settingsRepositoryProvider),
+    ref.watch(amountsHiddenStoreProvider),
+  ),
 );
 
 final reminderSchedulerProvider = Provider((ref) {
@@ -37,6 +41,8 @@ final reminderSchedulerProvider = Provider((ref) {
     location: () => tz.local,
     now: ref.watch(clockProvider),
     localeFor: (s) => appLocale(s.localeCode, ref.watch(appLocalesProvider)),
+    // "Hide amounts" (28): read at each run, as the switch stands then.
+    amountsHidden: () => ref.read(amountsHiddenProvider),
   );
 });
 
@@ -64,6 +70,8 @@ final reminderSyncProvider = Provider<ReminderSync>((ref) {
   // Card days and the statement closing reminder.
   ref.listen(sourcesProvider, (_, _) => sync.request());
   ref.listen(settingsProvider, (_, _) => sync.request());
+  // "Hide amounts" (28) lives outside the settings row.
+  ref.listen(amountsHiddenProvider, (_, _) => sync.request());
   ref.onDispose(sync.dispose);
   return sync;
 });
