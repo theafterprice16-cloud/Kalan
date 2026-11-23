@@ -3492,11 +3492,11 @@ abstract class AppLocalizations {
   /// **'Backup reminder'**
   String get backupReminder;
 
-  /// Explains the "Backup reminder" switch (Roadmap 29). Not a notification; calm.
+  /// Explains the "Backup reminder" switch (Roadmap 29): a note 3 months after the last full backup, or 30 days after the first plan when there is no backup. Not a notification; calm.
   ///
   /// In en, this message translates to:
-  /// **'{months, plural, one{A short note here and on the home screen 1 month after your last full backup.} other{A short note here and on the home screen {months} months after your last full backup.}}'**
-  String backupReminderHint(int months);
+  /// **'A short note here and on the home screen when your last full backup gets old, or when there is none yet.'**
+  String get backupReminderHint;
 
   /// Export format option: a CSV file that opens in Excel, Numbers or Google Sheets (Roadmap 29). Keep "CSV".
   ///
@@ -3522,13 +3522,13 @@ abstract class AppLocalizations {
   /// **'All your plans, payments and settings in one file.'**
   String get exportBackupHint;
 
-  /// Label of the optional backup password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  /// Label of the optional backup password field (Roadmap 29). Calm and neutral; no rules about length or characters.
   ///
   /// In en, this message translates to:
   /// **'Password (optional)'**
   String get exportPassword;
 
-  /// Label of the second password field, to check the first (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  /// Label of the second password field, to check the first (Roadmap 29). Calm and neutral.
   ///
   /// In en, this message translates to:
   /// **'Type the password again'**
@@ -3540,13 +3540,13 @@ abstract class AppLocalizations {
   /// **'If you forget the password, no one can open this backup.'**
   String get exportPasswordNote;
 
-  /// Muted note above the save button when the password field is empty (Roadmap 29). Neutral, not a warning. Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  /// Muted note above the save button when the password field is empty (Roadmap 29). Neutral information, not a warning.
   ///
   /// In en, this message translates to:
   /// **'This backup has no password.'**
   String get exportNoPassword;
 
-  /// Form error under the second password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  /// Form error under the second password field when the two differ (Roadmap 29). Calm; no blame.
   ///
   /// In en, this message translates to:
   /// **'The passwords do not match.'**

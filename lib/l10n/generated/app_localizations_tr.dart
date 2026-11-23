@@ -2666,16 +2666,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get backupReminder => 'Yedek hatırlatması';
 
   @override
-  String backupReminderHint(int months) {
-    String _temp0 = intl.Intl.pluralLogic(
-      months,
-      locale: localeName,
-      other:
-          'Son tam yedekten $months ay sonra burada ve ana ekranda kısa bir not çıkar.',
-      one: 'Son tam yedekten 1 ay sonra burada ve ana ekranda kısa bir not çıkar.',
-    );
-    return '$_temp0';
-  }
+  String get backupReminderHint =>
+      'Son tam yedek eskiyince ya da hiç yedek yokken burada ve ana ekranda kısa bir not çıkar.';
 
   @override
   String get exportSpreadsheet => 'Tablo (CSV)';

@@ -236,10 +236,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Dosya hazırlanamadı. Yeniden dene.'), findsOneWidget);
     expect(prefs.read().lastFullBackup, isNull);
-    expect(
-      temp.listSync(recursive: true).whereType<File>(),
-      isEmpty,
-    );
+    expect(temp.listSync(recursive: true).whereType<File>(), isEmpty);
   });
 
   testWidgets('only the second password typed: no file', (tester) async {
@@ -287,10 +284,10 @@ void main() {
       await seedSettings(db, incomeMinor: 4500000);
       final id = await seedPayIn4(db, title: 'Kulaklık');
       final saved = testToday.addDays(-daysAgo).toDateTime();
-      await db.customStatement(
-        'UPDATE plans SET created_at = ? WHERE id = ?',
-        [saved.millisecondsSinceEpoch ~/ 1000, id],
-      );
+      await db.customStatement('UPDATE plans SET created_at = ? WHERE id = ?', [
+        saved.millisecondsSinceEpoch ~/ 1000,
+        id,
+      ]);
     },
     overrides: [backupPrefsStoreProvider.overrideWithValue(prefs)],
   );

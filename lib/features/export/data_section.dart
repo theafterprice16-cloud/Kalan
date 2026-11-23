@@ -111,10 +111,7 @@ class DataSection extends ConsumerWidget {
         SwitchListTile.adaptive(
           key: const ValueKey('settings-backup-reminder'),
           title: Text(l10n.backupReminder),
-          subtitle: Text(
-            l10n.backupReminderHint,
-            style: muted,
-          ),
+          subtitle: Text(l10n.backupReminderHint, style: muted),
           value: prefs.reminderEnabled,
           onChanged: (v) =>
               unawaited(ref.read(backupPrefsProvider.notifier).setReminder(v)),

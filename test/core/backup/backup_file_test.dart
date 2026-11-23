@@ -372,30 +372,33 @@ void main() {
       }
     });
 
-    test('values out of range, broken links and duplicates are damage', () async {
-      for (final change in <void Function(Map<String, Object?> data)>[
-        (d) => (d['settings']! as Map)['currency'] = 'XXX',
-        (d) => (d['settings']! as Map)['payDay'] = 99,
-        (d) => ((d['settings']! as Map)['reminders']! as Map)['minuteOfDay'] =
-            5000,
-        (d) => ((d['plans']! as List).first as Map)['sourceId'] = 7,
-        (d) => ((d['plans']! as List).first as Map)['chargeSourceId'] = 7,
-        (d) =>
-            (((d['plans']! as List).first as Map)['payments']! as List).last
+    test(
+      'values out of range, broken links and duplicates are damage',
+      () async {
+        for (final change in <void Function(Map<String, Object?> data)>[
+          (d) => (d['settings']! as Map)['currency'] = 'XXX',
+          (d) => (d['settings']! as Map)['payDay'] = 99,
+          (d) => ((d['settings']! as Map)['reminders']! as Map)['minuteOfDay'] =
+              5000,
+          (d) => ((d['plans']! as List).first as Map)['sourceId'] = 7,
+          (d) => ((d['plans']! as List).first as Map)['chargeSourceId'] = 7,
+          (d) =>
+              (((d['plans']! as List).first as Map)['payments']! as List).last
                     as Map
                 ..['seq'] = 1,
-        (d) =>
-            (((d['plans']! as List).first as Map)['payments']! as List).first
+          (d) =>
+              (((d['plans']! as List).first as Map)['payments']! as List).first
                     as Map
                 ..['amount'] = -5,
-        (d) => ((d['sources']! as List).first as Map)['name'] = 'x' * 61,
-        (d) => (d['sources']! as List).add((d['sources']! as List).first),
-      ]) {
-        final json = decode(await write());
-        change(json['data']! as Map<String, Object?>);
-        expect(await errorOf(resummed(json)), BackupReadError.damaged);
-      }
-    });
+          (d) => ((d['sources']! as List).first as Map)['name'] = 'x' * 61,
+          (d) => (d['sources']! as List).add((d['sources']! as List).first),
+        ]) {
+          final json = decode(await write());
+          change(json['data']! as Map<String, Object?>);
+          expect(await errorOf(resummed(json)), BackupReadError.damaged);
+        }
+      },
+    );
 
     test('salt and nonce are authenticated as written', () async {
       // A salt with "+" or "/" (seeded, so the test is the same each run).
@@ -403,9 +406,8 @@ void main() {
       Map<String, Object?> json;
       do {
         json = decode(await write(password: 'p', random: Random(seed++)));
-      } while (!RegExp('[+/]').hasMatch(
-        (json['kdf']! as Map)['salt']! as String,
-      ));
+      } while (!RegExp('[+/]')
+          .hasMatch((json['kdf']! as Map)['salt']! as String));
       final kdf = json['kdf']! as Map<String, Object?>;
       // The same bytes in base64url: still a changed file.
       kdf['salt'] = (kdf['salt']! as String)

@@ -2669,16 +2669,8 @@ class AppLocalizationsNl extends AppLocalizations {
   String get backupReminder => 'Backup reminder';
 
   @override
-  String backupReminderHint(int months) {
-    String _temp0 = intl.Intl.pluralLogic(
-      months,
-      locale: localeName,
-      other:
-          'A short note here and on the home screen $months months after your last full backup.',
-      one: 'A short note here and on the home screen 1 month after your last full backup.',
-    );
-    return '$_temp0';
-  }
+  String get backupReminderHint =>
+      'A short note here and on the home screen when your last full backup gets old, or when there is none yet.';
 
   @override
   String get exportSpreadsheet => 'Spreadsheet (CSV)';

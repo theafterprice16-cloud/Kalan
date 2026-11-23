@@ -105,7 +105,10 @@ class BackupData {
     for (final (i, p) in plans.indexed) {
       final at = 'plans[$i]';
       check(planIds.add(p.id), '$at.id');
-      check(p.sourceId == null || sourceIds.contains(p.sourceId), '$at.sourceId');
+      check(
+        p.sourceId == null || sourceIds.contains(p.sourceId),
+        '$at.sourceId',
+      );
       check(
         p.chargeSourceId == null || sourceIds.contains(p.chargeSourceId),
         '$at.chargeSourceId',
