@@ -2046,7 +2046,10 @@ void main() {
         testWidgets('home, backup note, $lang', (tester) async {
           await startBackedUp(tester);
           await scrollTo(tester, find.byKey(const ValueKey('backup-note')));
-          await tester.drag(find.byType(Scrollable).first, const Offset(0, -400));
+          await tester.drag(
+            find.byType(Scrollable).first,
+            const Offset(0, -400),
+          );
           await tester.pump(const Duration(milliseconds: 400));
           await shoot(tester, '115-home-backup-note-$lang-$theme');
         });
