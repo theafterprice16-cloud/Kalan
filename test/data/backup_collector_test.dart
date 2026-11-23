@@ -353,7 +353,12 @@ void main() {
       'everyPayment',
       'firstPaymentOnly',
     ]);
-    expect(names(Recurrence.values), ['weekly', 'biweekly', 'monthly', 'yearly']);
+    expect(names(Recurrence.values), [
+      'weekly',
+      'biweekly',
+      'monthly',
+      'yearly',
+    ]);
     expect(names(SourceKind.values).toSet(), backupSourceKinds);
     expect(names(PlanOrigin.values).toSet(), backupPlanOrigins);
   });

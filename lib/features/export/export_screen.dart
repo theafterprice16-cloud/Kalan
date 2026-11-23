@@ -80,9 +80,8 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final muted = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(color: colors.textMuted);
+    final muted = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: colors.textMuted);
     final last = ref.watch(backupPrefsProvider).lastFullBackup;
     final backup = _kind == ExportKind.backup;
     const gap = SizedBox(height: KalanSpace.md);
@@ -95,9 +94,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
         minTileHeight: 48,
         title: Text(title),
         subtitle: Text(hint, style: muted),
-        trailing: _kind == kind
-            ? Icon(Icons.check, color: colors.text)
-            : null,
+        trailing: _kind == kind ? Icon(Icons.check, color: colors.text) : null,
         onTap: _busy ? null : () => setState(() => _kind = kind),
       ),
     );
@@ -115,7 +112,11 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                 l10n.exportSpreadsheet,
                 l10n.exportSpreadsheetHint,
               ),
-              option(ExportKind.backup, l10n.exportBackup, l10n.exportBackupHint),
+              option(
+                ExportKind.backup,
+                l10n.exportBackup,
+                l10n.exportBackupHint,
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   KalanSpace.md,

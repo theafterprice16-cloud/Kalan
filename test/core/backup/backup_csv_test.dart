@@ -174,7 +174,10 @@ void main() {
     expect(formatMinorPlain(125000, Currency.fromCode('EUR')), '1250.00');
     expect(formatMinorPlain(5, Currency.fromCode('KWD')), '0.005');
     expect(formatMinorPlain(-150, Currency.fromCode('TRY')), '-1.50');
-    expect(formatMinorPlain(123456789012, Currency.fromCode('IDR')), '123456789012');
+    expect(
+      formatMinorPlain(123456789012, Currency.fromCode('IDR')),
+      '123456789012',
+    );
   });
 
   test('every currency: dot and its own digits', () {
@@ -182,9 +185,7 @@ void main() {
       final text = formatMinorPlain(1234567 * c.minorPerMajor + 1, c);
       expect(
         text,
-        c.decimals == 0
-            ? '1234568'
-            : '1234567.${'1'.padLeft(c.decimals, '0')}',
+        c.decimals == 0 ? '1234568' : '1234567.${'1'.padLeft(c.decimals, '0')}',
         reason: c.code,
       );
     }
@@ -198,7 +199,9 @@ void main() {
     ]) {
       final rows = rowsOf(
         buildCsv(
-          data(code, [plan(1, [payment(1, '2026-12-04', amount)])]),
+          data(code, [
+            plan(1, [payment(1, '2026-12-04', amount)]),
+          ]),
           TrTexts(),
           today: today,
         ),
@@ -210,8 +213,9 @@ void main() {
   test('quoting (RFC 4180) and formula guard on text cells only', () {
     final csv = buildCsv(
       data('TRY', [
-        plan(1, [payment(1, '2026-12-04', 100, extraFee: 50, fee: 25)],
-            title: 'Kulaklık, "kablosuz"'),
+        plan(1, [
+          payment(1, '2026-12-04', 100, extraFee: 50, fee: 25),
+        ], title: 'Kulaklık, "kablosuz"'),
         plan(2, [payment(1, '2026-12-04', 100)], title: '+90 hat'),
         plan(3, [payment(1, '2026-12-04', 100)], title: '-indirim'),
         plan(4, [payment(1, '2026-12-04', 100)], title: '@ev'),
@@ -238,13 +242,28 @@ void main() {
           plan(2, [
             payment(1, '2026-12-04', 100, paidAt: '2026-11-02T10:00:00Z'),
           ], status: 'closed'),
-          plan(3, [
-            payment(1, '2026-12-14', 100, paidAt: '2026-09-01T00:00:00Z',
-                before: true),
-          ], kind: 'payLater', sourceId: null),
+          plan(
+            3,
+            [
+              payment(
+                1,
+                '2026-12-14',
+                100,
+                paidAt: '2026-09-01T00:00:00Z',
+                before: true,
+              ),
+            ],
+            kind: 'payLater',
+            sourceId: null,
+          ),
           plan(4, [
-            payment(1, '2026-11-01', 100,
-                paidAt: '2026-11-19T10:00:00Z', paidOn: '2026-11-01'),
+            payment(
+              1,
+              '2026-11-01',
+              100,
+              paidAt: '2026-11-19T10:00:00Z',
+              paidOn: '2026-11-01',
+            ),
           ], status: 'onHold'),
         ],
         recurring: [
@@ -270,8 +289,12 @@ void main() {
     expect(rows[1][2], 'beklemede');
     expect(rows[2][2], 'kapatıldı');
     // Paid before Kalan: paid, the day is not known.
-    expect(rows[3].sublist(0, 4), ['Sonra öde · 2026-12-14', 'payLater',
-        'arşivde', '']);
+    expect(rows[3].sublist(0, 4), [
+      'Sonra öde · 2026-12-14',
+      'payLater',
+      'arşivde',
+      '',
+    ]);
     expect(rows[3][9], 'true');
     expect(rows[3][10], '');
     // On hold but every payment paid: in the archive; "paid on" is the

@@ -2636,6 +2636,163 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get amountHidden => 'Amount hidden';
+
+  @override
+  String get settingsDataSection => 'Data';
+
+  @override
+  String get exportTitle => 'Export';
+
+  @override
+  String get settingsLastBackup => 'Last backup';
+
+  @override
+  String get lastBackupNone => 'No backup yet.';
+
+  @override
+  String lastBackupOn(String date) {
+    return 'Last backup: $date';
+  }
+
+  @override
+  String backupNoteMonths(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: 'Last backup was $months months ago.',
+      one: 'Last backup was 1 month ago.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupReminder => 'Backup reminder';
+
+  @override
+  String backupReminderHint(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other:
+          'A short note here and on the home screen $months months after your last full backup.',
+      one: 'A short note here and on the home screen 1 month after your last full backup.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportSpreadsheet => 'Spreadsheet (CSV)';
+
+  @override
+  String get exportSpreadsheetHint =>
+      'Opens in a spreadsheet app. One row per payment.';
+
+  @override
+  String get exportBackup => 'Full backup';
+
+  @override
+  String get exportBackupHint =>
+      'All your plans, payments and settings in one file.';
+
+  @override
+  String get exportPassword => 'Password (optional)';
+
+  @override
+  String get exportPasswordAgain => 'Type the password again';
+
+  @override
+  String get exportPasswordNote =>
+      'If you forget the password, no one can open this backup.';
+
+  @override
+  String get exportNoPassword => 'This backup has no password.';
+
+  @override
+  String get exportPasswordMismatch => 'The passwords do not match.';
+
+  @override
+  String get exportShowPassword => 'Show password';
+
+  @override
+  String get exportHidePassword => 'Hide password';
+
+  @override
+  String get exportSave => 'Save or share';
+
+  @override
+  String get exportPreparing => 'Preparing the file.';
+
+  @override
+  String get exportFailed => 'The file could not be prepared. Try again.';
+
+  @override
+  String get exportWhere =>
+      'Kalan sends the file nowhere. You choose where it goes.';
+
+  @override
+  String get exportAmountsShown =>
+      'The file holds the real amounts, even with Hide amounts on.';
+
+  @override
+  String exportFileBackup(String date) {
+    return 'kalan-backup-$date';
+  }
+
+  @override
+  String exportFileSpreadsheet(String date) {
+    return 'kalan-spreadsheet-$date';
+  }
+
+  @override
+  String get csvName => 'Name';
+
+  @override
+  String get csvKind => 'Type';
+
+  @override
+  String get csvStatus => 'Status';
+
+  @override
+  String get csvSource => 'Source';
+
+  @override
+  String get csvSeq => 'Payment no.';
+
+  @override
+  String get csvDueDate => 'Due date';
+
+  @override
+  String get csvAmount => 'Amount';
+
+  @override
+  String get csvExtraFee => 'Extra fee';
+
+  @override
+  String get csvInstallmentFee => 'Fee per payment';
+
+  @override
+  String get csvPaid => 'Paid';
+
+  @override
+  String get csvPaidOn => 'Paid on';
+
+  @override
+  String get csvCurrency => 'Currency';
+
+  @override
+  String get csvKindRecurring => 'Recurring payment';
+
+  @override
+  String get csvStatusOpen => 'open';
+
+  @override
+  String get csvStatusOnHold => 'on hold';
+
+  @override
+  String get csvStatusClosed => 'closed';
+
+  @override
+  String get csvStatusArchived => 'archived';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).

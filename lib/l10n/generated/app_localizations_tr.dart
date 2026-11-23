@@ -2633,4 +2633,160 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get amountHidden => 'Tutar gizli';
+
+  @override
+  String get settingsDataSection => 'Veri';
+
+  @override
+  String get exportTitle => 'Dışa aktar';
+
+  @override
+  String get settingsLastBackup => 'Son yedek';
+
+  @override
+  String get lastBackupNone => 'Henüz yedek yok.';
+
+  @override
+  String lastBackupOn(String date) {
+    return 'Son yedek: $date';
+  }
+
+  @override
+  String backupNoteMonths(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other: 'Son yedek $months ay önce.',
+      one: 'Son yedek 1 ay önce.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupReminder => 'Yedek hatırlatması';
+
+  @override
+  String backupReminderHint(int months) {
+    String _temp0 = intl.Intl.pluralLogic(
+      months,
+      locale: localeName,
+      other:
+          'Son tam yedekten $months ay sonra burada ve ana ekranda kısa bir not çıkar.',
+      one: 'Son tam yedekten 1 ay sonra burada ve ana ekranda kısa bir not çıkar.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportSpreadsheet => 'Tablo (CSV)';
+
+  @override
+  String get exportSpreadsheetHint =>
+      'Tablo programında açılır. Her satır bir ödeme.';
+
+  @override
+  String get exportBackup => 'Tam yedek';
+
+  @override
+  String get exportBackupHint =>
+      'Bütün planların, ödemelerin ve ayarların tek dosyada.';
+
+  @override
+  String get exportPassword => 'Parola (isteğe bağlı)';
+
+  @override
+  String get exportPasswordAgain => 'Parolayı yeniden yaz';
+
+  @override
+  String get exportPasswordNote => 'Parolayı unutursan bu yedeği kimse açamaz.';
+
+  @override
+  String get exportNoPassword => 'Bu yedek parolasız.';
+
+  @override
+  String get exportPasswordMismatch => 'Parolalar aynı değil.';
+
+  @override
+  String get exportShowPassword => 'Parolayı göster';
+
+  @override
+  String get exportHidePassword => 'Parolayı gizle';
+
+  @override
+  String get exportSave => 'Kaydet ya da paylaş';
+
+  @override
+  String get exportPreparing => 'Dosya hazırlanıyor.';
+
+  @override
+  String get exportFailed => 'Dosya hazırlanamadı. Yeniden dene.';
+
+  @override
+  String get exportWhere =>
+      'Kalan dosyayı hiçbir yere göndermez. Nereye gideceğini sen seçersin.';
+
+  @override
+  String get exportAmountsShown =>
+      'Tutarları gizle açık olsa da dosyada gerçek tutarlar yer alır.';
+
+  @override
+  String exportFileBackup(String date) {
+    return 'kalan-yedek-$date';
+  }
+
+  @override
+  String exportFileSpreadsheet(String date) {
+    return 'kalan-tablo-$date';
+  }
+
+  @override
+  String get csvName => 'Ad';
+
+  @override
+  String get csvKind => 'Tür';
+
+  @override
+  String get csvStatus => 'Durum';
+
+  @override
+  String get csvSource => 'Kaynak';
+
+  @override
+  String get csvSeq => 'Ödeme sırası';
+
+  @override
+  String get csvDueDate => 'Son ödeme günü';
+
+  @override
+  String get csvAmount => 'Tutar';
+
+  @override
+  String get csvExtraFee => 'Ek ücret';
+
+  @override
+  String get csvInstallmentFee => 'Taksit başı ücret';
+
+  @override
+  String get csvPaid => 'Ödendi';
+
+  @override
+  String get csvPaidOn => 'Ödeme günü';
+
+  @override
+  String get csvCurrency => 'Para birimi';
+
+  @override
+  String get csvKindRecurring => 'Sabit ödeme';
+
+  @override
+  String get csvStatusOpen => 'açık';
+
+  @override
+  String get csvStatusOnHold => 'beklemede';
+
+  @override
+  String get csvStatusClosed => 'kapatıldı';
+
+  @override
+  String get csvStatusArchived => 'arşivde';
 }

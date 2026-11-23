@@ -35,8 +35,11 @@ final backupNoteProvider = Provider<({LocalDate? lastBackup})?>((ref) {
 });
 
 /// "Last backup was 3 months ago." or "No backup yet."
-String backupNoteText(BuildContext context, LocalDate? lastBackup, LocalDate today) =>
-    lastBackup == null
+String backupNoteText(
+  BuildContext context,
+  LocalDate? lastBackup,
+  LocalDate today,
+) => lastBackup == null
     ? context.l10n.lastBackupNone
     : context.l10n.backupNoteMonths(monthsSince(lastBackup, today));
 
@@ -55,9 +58,8 @@ class BackupNote extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     final colors = context.colors;
-    final muted = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(color: colors.textMuted);
+    final muted = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: colors.textMuted);
     return ListTile(
       key: const ValueKey('backup-note'),
       leading: Icon(Icons.info_outline, color: colors.textMuted),
@@ -79,9 +81,8 @@ class DataSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colors;
-    final muted = Theme.of(
-      context,
-    ).textTheme.bodyMedium?.copyWith(color: colors.textMuted);
+    final muted = Theme.of(context).textTheme.bodyMedium
+        ?.copyWith(color: colors.textMuted);
     final prefs = ref.watch(backupPrefsProvider);
     final last = prefs.lastFullBackup;
     return Column(

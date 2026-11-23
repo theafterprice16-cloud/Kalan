@@ -128,12 +128,11 @@ class Pbkdf2Kdf extends BackupKdf {
   final int iterations;
 
   @override
-  Future<SecretKey> deriveKey(List<int> password, List<int> salt) =>
-      DartPbkdf2(
-        macAlgorithm: DartHmac.sha256(),
-        iterations: iterations,
-        bits: 256,
-      ).deriveKey(secretKey: SecretKey(password), nonce: salt);
+  Future<SecretKey> deriveKey(List<int> password, List<int> salt) => DartPbkdf2(
+    macAlgorithm: DartHmac.sha256(),
+    iterations: iterations,
+    bits: 256,
+  ).deriveKey(secretKey: SecretKey(password), nonce: salt);
 
   @override
   Map<String, Object?> paramsJson() => {

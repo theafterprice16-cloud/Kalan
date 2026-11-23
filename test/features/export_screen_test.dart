@@ -63,7 +63,10 @@ void main() {
       BackupPrefs(lastFullBackup: LocalDate(2026, 11, 19)),
     );
     await start(tester, route: Routes.settings);
-    await scrollTo(tester, find.byKey(const ValueKey('settings-backup-reminder')));
+    await scrollTo(
+      tester,
+      find.byKey(const ValueKey('settings-backup-reminder')),
+    );
     expect(find.text('Veri'), findsOneWidget);
     expect(find.text('Dışa aktar'), findsOneWidget);
     expect(find.text('Son yedek'), findsOneWidget);
@@ -191,7 +194,10 @@ void main() {
       BackupPrefs(lastFullBackup: testToday.addDays(-91)),
     );
     await start(tester, route: Routes.settings);
-    await scrollTo(tester, find.byKey(const ValueKey('settings-backup-reminder')));
+    await scrollTo(
+      tester,
+      find.byKey(const ValueKey('settings-backup-reminder')),
+    );
     expect(find.text('Son yedek 3 ay önce.'), findsOneWidget);
     await tester.tap(find.text('Yedek hatırlatması'));
     await tester.pumpAndSettle();

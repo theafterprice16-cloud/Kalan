@@ -21,19 +21,21 @@ Future<BackupData?> collectBackup(AppDatabase db) => db.transaction(() async {
   final plans = await (db.select(
     db.plans,
   )..orderBy([(p) => OrderingTerm.asc(p.id)])).get();
-  final payments = await (db.select(db.payments)..orderBy([
-        (p) => OrderingTerm.asc(p.planId),
-        (p) => OrderingTerm.asc(p.seq),
-      ]))
-      .get();
+  final payments =
+      await (db.select(db.payments)..orderBy([
+            (p) => OrderingTerm.asc(p.planId),
+            (p) => OrderingTerm.asc(p.seq),
+          ]))
+          .get();
   final recurring = await (db.select(
     db.recurringPayments,
   )..orderBy([(r) => OrderingTerm.asc(r.id)])).get();
-  final marks = await (db.select(db.recurringMarks)..orderBy([
-        (m) => OrderingTerm.asc(m.recurringId),
-        (m) => OrderingTerm.asc(m.occurrenceDay),
-      ]))
-      .get();
+  final marks =
+      await (db.select(db.recurringMarks)..orderBy([
+            (m) => OrderingTerm.asc(m.recurringId),
+            (m) => OrderingTerm.asc(m.occurrenceDay),
+          ]))
+          .get();
 
   final paymentsOf = <int, List<PaymentRow>>{};
   for (final p in payments) {

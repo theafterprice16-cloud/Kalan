@@ -187,33 +187,36 @@ void main() {
       expect(header.formatVersion, 1);
     });
 
-    test('one changed byte anywhere does not open, even with the password', () async {
-      final text = await write(password: 'p');
-      for (final path in [
-        ['ciphertext'],
-        ['cipher', 'nonce'],
-        ['kdf', 'salt'],
-      ]) {
-        expect(
-          await errorOf(flip(text, path), password: 'p'),
-          BackupReadError.wrongPasswordOrChanged,
-          reason: path.join('.'),
-        );
-      }
-      // The header is authenticated with the content.
-      for (final (from, to) in [
-        ('"currency": "COP"', '"currency": "USD"'),
-        ('2026-11-19T07:30:05Z', '2026-11-19T07:30:06Z'),
-        ('"appVersion": "1.0.0+1"', '"appVersion": "1.0.0+2"'),
-        ('"iterations": 1', '"iterations": 2'),
-      ]) {
-        expect(
-          await errorOf(text.replaceFirst(from, to), password: 'p'),
-          BackupReadError.wrongPasswordOrChanged,
-          reason: from,
-        );
-      }
-    });
+    test(
+      'one changed byte anywhere does not open, even with the password',
+      () async {
+        final text = await write(password: 'p');
+        for (final path in [
+          ['ciphertext'],
+          ['cipher', 'nonce'],
+          ['kdf', 'salt'],
+        ]) {
+          expect(
+            await errorOf(flip(text, path), password: 'p'),
+            BackupReadError.wrongPasswordOrChanged,
+            reason: path.join('.'),
+          );
+        }
+        // The header is authenticated with the content.
+        for (final (from, to) in [
+          ('"currency": "COP"', '"currency": "USD"'),
+          ('2026-11-19T07:30:05Z', '2026-11-19T07:30:06Z'),
+          ('"appVersion": "1.0.0+1"', '"appVersion": "1.0.0+2"'),
+          ('"iterations": 1', '"iterations": 2'),
+        ]) {
+          expect(
+            await errorOf(text.replaceFirst(from, to), password: 'p'),
+            BackupReadError.wrongPasswordOrChanged,
+            reason: from,
+          );
+        }
+      },
+    );
 
     test('a fresh salt and nonce every time', () async {
       final a = decode(await write(password: 'p'));
@@ -224,7 +227,10 @@ void main() {
         isNot((b['cipher']! as Map)['nonce']),
       );
       expect(a['ciphertext'], isNot(b['ciphertext']));
-      expect(base64.decode((a['kdf']! as Map)['salt']! as String), hasLength(16));
+      expect(
+        base64.decode((a['kdf']! as Map)['salt']! as String),
+        hasLength(16),
+      );
       expect(
         base64.decode((a['cipher']! as Map)['nonce']! as String),
         hasLength(12),
@@ -247,9 +253,14 @@ void main() {
         password: 'p',
         kdf: const Pbkdf2Kdf(iterations: 1000),
       );
-      expect(decode(text)['kdf'], containsPair('algorithm', 'pbkdf2-hmac-sha256'));
-      expect((await readBackup(text, password: 'p')).data.toJson(),
-          sample().toJson());
+      expect(
+        decode(text)['kdf'],
+        containsPair('algorithm', 'pbkdf2-hmac-sha256'),
+      );
+      expect(
+        (await readBackup(text, password: 'p')).data.toJson(),
+        sample().toJson(),
+      );
     });
 
     test('limits a changed file cannot get past', () async {
@@ -284,18 +295,19 @@ void main() {
 
     // RFC 9106, 5.3: the library's Argon2id gives the published tag.
     test('Argon2id known answer (RFC 9106)', () async {
-      final key = await DartArgon2id(
-        parallelism: 4,
-        memory: 32,
-        iterations: 3,
-        hashLength: 32,
-        maxIsolates: 0,
-      ).deriveKey(
-        secretKey: SecretKey(List.filled(32, 1)),
-        nonce: List.filled(16, 2),
-        optionalSecret: List.filled(8, 3),
-        associatedData: List.filled(12, 4),
-      );
+      final key =
+          await DartArgon2id(
+            parallelism: 4,
+            memory: 32,
+            iterations: 3,
+            hashLength: 32,
+            maxIsolates: 0,
+          ).deriveKey(
+            secretKey: SecretKey(List.filled(32, 1)),
+            nonce: List.filled(16, 2),
+            optionalSecret: List.filled(8, 3),
+            associatedData: List.filled(12, 4),
+          );
       final hex = [
         for (final b in await key.extractBytes())
           b.toRadixString(16).padLeft(2, '0'),

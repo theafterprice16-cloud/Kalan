@@ -82,7 +82,8 @@ final exportTempDirectoryProvider = Provider<Future<Directory> Function()>(
 /// second by design). Overridden in tests that need it on the spot.
 final backupWriterProvider =
     Provider<Future<String> Function(BackupWriteRequest)>(
-      (ref) => (request) => compute(writeBackupRequest, request),
+      (ref) =>
+          (request) => compute(writeBackupRequest, request),
     );
 
 /// What the background isolate needs to write a backup file.
@@ -113,11 +114,7 @@ const _folder = 'kalan-export';
 
 /// "kalan-yedek-2026-11-19.json": the app language's name, always ASCII
 /// (letters, digits and hyphens) and starting with "kalan-".
-String exportFileName(
-  AppLocalizations l10n,
-  ExportKind kind,
-  LocalDate day,
-) {
+String exportFileName(AppLocalizations l10n, ExportKind kind, LocalDate day) {
   final date = day.toString();
   final base = switch (kind) {
     ExportKind.spreadsheet => l10n.exportFileSpreadsheet(date),
@@ -167,9 +164,7 @@ class ExportService {
       );
       bytes = utf8.encode(text);
     }
-    final file = File(
-      '${directory.path}/${exportFileName(l10n, kind, today)}',
-    );
+    final file = File('${directory.path}/${exportFileName(l10n, kind, today)}');
     final ShareOutcome outcome;
     try {
       await file.writeAsBytes(bytes, flush: true);

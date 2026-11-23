@@ -149,7 +149,10 @@ void main() {
       container = make(hidden: true);
       await export(ExportKind.backup);
       await export(ExportKind.spreadsheet);
-      expect(utf8.decode(share.shared.first.bytes), contains('"amount": 333334'));
+      expect(
+        utf8.decode(share.shared.first.bytes),
+        contains('"amount": 333334'),
+      );
       expect(utf8.decode(share.shared.last.bytes), contains(',3333.34,'));
     });
 
@@ -191,16 +194,22 @@ void main() {
   });
 
   test('file names are ASCII, dated and start with "kalan-"', () {
-    expect(exportFileName(tr, ExportKind.backup, today),
-        'kalan-yedek-2026-11-19.json');
-    expect(exportFileName(tr, ExportKind.spreadsheet, today),
-        'kalan-tablo-2026-11-19.csv');
+    expect(
+      exportFileName(tr, ExportKind.backup, today),
+      'kalan-yedek-2026-11-19.json',
+    );
+    expect(
+      exportFileName(tr, ExportKind.spreadsheet, today),
+      'kalan-tablo-2026-11-19.csv',
+    );
     for (final code in AppLocalizations.supportedLocales) {
       final l10n = lookupAppLocalizations(code);
       for (final kind in ExportKind.values) {
         expect(
           exportFileName(l10n, kind, today),
-          matches(RegExp(r'^kalan-[a-z0-9-]*2026-11-19[a-z0-9-]*\.(json|csv)$')),
+          matches(
+            RegExp(r'^kalan-[a-z0-9-]*2026-11-19[a-z0-9-]*\.(json|csv)$'),
+          ),
           reason: '$code',
         );
       }

@@ -143,7 +143,6 @@ String _text(String value) => _cell(
 );
 
 /// RFC 4180 quoting.
-String _cell(String value) =>
-    value.contains(RegExp('[",\r\n]'))
+String _cell(String value) => value.contains(RegExp('[",\r\n]'))
     ? '"${value.replaceAll('"', '""')}"'
     : value;

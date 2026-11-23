@@ -3449,6 +3449,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount hidden'**
   String get amountHidden;
+
+  /// Settings section title for exporting data and backups (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get settingsDataSection;
+
+  /// Settings row and screen title: save the data as a file (Roadmap 29). Free for everyone.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get exportTitle;
+
+  /// Settings row title; its value below is the date of the last full backup or "No backup yet." (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup'**
+  String get settingsLastBackup;
+
+  /// No full backup was made on this phone yet (Roadmap 29). Calm, no warning.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup yet.'**
+  String get lastBackupNone;
+
+  /// When the last full backup was made, shown on the export screen. {date} is a date such as "Nov 19, 2026" (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date}'**
+  String lastBackupOn(String date);
+
+  /// Calm one-line reminder at the bottom of the home screen and in Settings; a tap opens the export screen (Roadmap 29). Never a warning; no blame.
+  ///
+  /// In en, this message translates to:
+  /// **'{months, plural, one{Last backup was 1 month ago.} other{Last backup was {months} months ago.}}'**
+  String backupNoteMonths(int months);
+
+  /// Settings switch title: a calm note when the last full backup gets old (Roadmap 29). Not a notification.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup reminder'**
+  String get backupReminder;
+
+  /// Explains the "Backup reminder" switch (Roadmap 29). Not a notification; calm.
+  ///
+  /// In en, this message translates to:
+  /// **'{months, plural, one{A short note here and on the home screen 1 month after your last full backup.} other{A short note here and on the home screen {months} months after your last full backup.}}'**
+  String backupReminderHint(int months);
+
+  /// Export format option: a CSV file that opens in Excel, Numbers or Google Sheets (Roadmap 29). Keep "CSV".
+  ///
+  /// In en, this message translates to:
+  /// **'Spreadsheet (CSV)'**
+  String get exportSpreadsheet;
+
+  /// Description under the spreadsheet export option (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Opens in a spreadsheet app. One row per payment.'**
+  String get exportSpreadsheetHint;
+
+  /// Export format option: one file with all plans, payments and settings (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Full backup'**
+  String get exportBackup;
+
+  /// Description under the full backup option (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'All your plans, payments and settings in one file.'**
+  String get exportBackupHint;
+
+  /// Label of the optional backup password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  ///
+  /// In en, this message translates to:
+  /// **'Password (optional)'**
+  String get exportPassword;
+
+  /// Label of the second password field, to check the first (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  ///
+  /// In en, this message translates to:
+  /// **'Type the password again'**
+  String get exportPasswordAgain;
+
+  /// Muted note under the password fields (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  ///
+  /// In en, this message translates to:
+  /// **'If you forget the password, no one can open this backup.'**
+  String get exportPasswordNote;
+
+  /// Muted note above the save button when the password field is empty (Roadmap 29). Neutral, not a warning. Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  ///
+  /// In en, this message translates to:
+  /// **'This backup has no password.'**
+  String get exportNoPassword;
+
+  /// Form error under the second password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get exportPasswordMismatch;
+
+  /// Screen-reader name of the eye button that shows the typed password (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get exportShowPassword;
+
+  /// Screen-reader name of the eye button that hides the typed password again (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get exportHidePassword;
+
+  /// Primary button: opens the phone's share sheet to save the file to Files or send it (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Save or share'**
+  String get exportSave;
+
+  /// Shown next to a progress indicator while the file is written; a password takes about a second (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the file.'**
+  String get exportPreparing;
+
+  /// Short message when writing or sharing the file failed (Roadmap 29). Calm.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be prepared. Try again.'**
+  String get exportFailed;
+
+  /// Muted note at the bottom of the export screen: the app has no cloud and makes no network requests (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan sends the file nowhere. You choose where it goes.'**
+  String get exportWhere;
+
+  /// Muted note on the export screen while "Hide amounts" is on (Roadmaps 28, 29). Neutral.
+  ///
+  /// In en, this message translates to:
+  /// **'The file holds the real amounts, even with Hide amounts on.'**
+  String get exportAmountsShown;
+
+  /// File name stem of an exported file (Roadmap 29), followed by .json or .csv. ASCII only: lowercase letters a-z, digits and hyphens; keep the "kalan-" start and the {date} placeholder (2026-11-19).
+  ///
+  /// In en, this message translates to:
+  /// **'kalan-backup-{date}'**
+  String exportFileBackup(String date);
+
+  /// File name stem of an exported file (Roadmap 29), followed by .json or .csv. ASCII only: lowercase letters a-z, digits and hyphens; keep the "kalan-" start and the {date} placeholder (2026-11-19).
+  ///
+  /// In en, this message translates to:
+  /// **'kalan-spreadsheet-{date}'**
+  String exportFileSpreadsheet(String date);
+
+  /// Plan or recurring payment name. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get csvName;
+
+  /// Plan type or "Recurring payment". Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get csvKind;
+
+  /// Open, on hold, closed or archived. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get csvStatus;
+
+  /// Provider or card name. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get csvSource;
+
+  /// The payment's number in its plan (3 of 10). Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment no.'**
+  String get csvSeq;
+
+  /// The payment's due date. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date'**
+  String get csvDueDate;
+
+  /// The installment amount, without fees. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get csvAmount;
+
+  /// A one-off fee the provider added to the payment. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra fee'**
+  String get csvExtraFee;
+
+  /// The plan's fee taken with each payment. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee per payment'**
+  String get csvInstallmentFee;
+
+  /// Whether the payment is paid (true/false). Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get csvPaid;
+
+  /// The day the payment was paid. Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid on'**
+  String get csvPaidOn;
+
+  /// The currency, such as "COL$ · COP". Spreadsheet column header in the exported CSV file (Roadmap 29). Tablo programında sütun başlığı; kısa tut. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get csvCurrency;
+
+  /// Type of a recurring payment's row (rent, bills) in the exported CSV file (Roadmap 29).
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring payment'**
+  String get csvKindRecurring;
+
+  /// Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut.
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get csvStatusOpen;
+
+  /// Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut.
+  ///
+  /// In en, this message translates to:
+  /// **'on hold'**
+  String get csvStatusOnHold;
+
+  /// Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut.
+  ///
+  /// In en, this message translates to:
+  /// **'closed'**
+  String get csvStatusClosed;
+
+  /// Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut.
+  ///
+  /// In en, this message translates to:
+  /// **'archived'**
+  String get csvStatusArchived;
 }
 
 class _AppLocalizationsDelegate

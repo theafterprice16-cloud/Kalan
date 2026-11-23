@@ -91,9 +91,10 @@ final backupPrefsStoreProvider = Provider<BackupPrefsStore>(
   (ref) => MemoryBackupPrefsStore(),
 );
 
-final backupPrefsProvider = NotifierProvider<BackupPrefsController, BackupPrefs>(
-  BackupPrefsController.new,
-);
+final backupPrefsProvider =
+    NotifierProvider<BackupPrefsController, BackupPrefs>(
+      BackupPrefsController.new,
+    );
 
 class BackupPrefsController extends Notifier<BackupPrefs> {
   @override
