@@ -30,8 +30,8 @@ Yol haritası 29 (dışa aktarma) bu dosyayı yazar; 30 (geri yükleme) okur. Ok
 | `data` | object | Yalnızca şifresizde: içerik (aşağıda). |
 | `kdf` | object | Yalnızca şifrelide: paroladan anahtar türetme ayarları. |
 | `kdf.algorithm` | string | `argon2id` (Kalan bunu yazar) ya da `pbkdf2-hmac-sha256` (okuyucu bunu da tanır; yedek yol). |
-| `kdf.memoryKiB` | int | Argon2id bellek miktarı, KiB. Kalan 47104 (46 MiB) yazar. Okuyucu 8 ile 1048576 arasını kabul eder. |
-| `kdf.iterations` | int | Tur sayısı. Kalan Argon2id'de 2 yazar. Okuyucu Argon2id'de 1-64, PBKDF2'de 1-10.000.000 kabul eder. |
+| `kdf.memoryKiB` | int | Argon2id bellek miktarı, KiB. Kalan 47104 (46 MiB) yazar. Okuyucu 8 ile 262144 (256 MiB) arasını kabul eder. |
+| `kdf.iterations` | int | Tur sayısı. Kalan Argon2id'de 2 yazar. Okuyucu Argon2id'de 1-64, PBKDF2'de 1-2.000.000 kabul eder. |
 | `kdf.parallelism` | int | Argon2id şerit sayısı; Kalan 1 yazar (1-16). PBKDF2'de yoktur. |
 | `kdf.salt` | string | Her dosyada yeniden üretilen rastgele tuz, base64 (16 bayt). |
 | `cipher` | object | Yalnızca şifrelide: şifreleme. |
@@ -42,7 +42,7 @@ Yol haritası 29 (dışa aktarma) bu dosyayı yazar; 30 (geri yükleme) okur. Ok
 ### Şifreleme
 
 1. Anahtar: parolanın UTF-8 baytları (olduğu gibi; kırpılmaz, Unicode normalleştirmesi yapılmaz), `kdf.salt` ile Argon2id (sürüm 0x13, 32 bayt çıktı). PBKDF2 yolunda HMAC-SHA256, 256 bit.
-2. Ek doğrulanan veri (AAD): şu dizinin boşluksuz JSON metni, UTF-8: `["kalan-backup", formatVersion, appVersion, createdAt, currency, true, kdf.algorithm, (argon2id ise) kdf.memoryKiB, kdf.iterations, kdf.parallelism | (pbkdf2 ise) kdf.iterations, kdf.salt, cipher.algorithm, cipher.nonce]`. Metin değerleri dosyada yazıldığı gibidir. Böylece başlıktaki tek bir bayt değişse de dosya açılmaz.
+2. Ek doğrulanan veri (AAD): şu dizinin boşluksuz JSON metni, UTF-8: `["kalan-backup", formatVersion, appVersion, createdAt, currency, true, kdf.algorithm, (argon2id ise) kdf.memoryKiB, kdf.iterations, kdf.parallelism | (pbkdf2 ise) kdf.iterations, kdf.salt, cipher.algorithm, cipher.nonce]`. Metin değerleri (oluşturma anı, tuz ve nonce dahil) dosyada yazıldığı gibidir; aynı baytların başka bir base64 yazımı da değişiklik sayılır. Böylece başlıktaki tek bir bayt değişse de dosya açılmaz.
 3. AES-256-GCM, `cipher.nonce` ile.
 
 Yanlış parola ile değiştirilmiş dosya birbirinden ayırt edilemez: ikisi de `wrongPasswordOrChanged`. Parola hiçbir yerde saklanmaz; unutulursa dosya açılamaz.
@@ -172,6 +172,10 @@ Yanlış parola ile değiştirilmiş dosya birbirinden ayırt edilemez: ikisi de
 | `data.recurringPayments[].paidOccurrences[].date` | string | Tekrarın günü. |
 | `data.recurringPayments[].paidOccurrences[].paidAt` | string | İşaretlendiği an. |
 
+## Anlamsal doğrulama
+
+Türler doğru olsa da şu durumlarda dosya `damaged` sayılır (`BackupData.validate`): bilinmeyen para birimi; ayın günü 1-31 dışında (maaş, ekstre, son ödeme); hatırlatma dakikası 0-1439 dışında; "kaç gün önce" 1, 2, 3, 5, 7 dışında; hesap kesim "kaç gün önce" 1 ya da 2 dışında; eksi gelir ya da eşik; 1'den küçük tutar, ek ücret, taksit başı ücret ya da ürün fiyatı; 1'den küçük taksit sayısı; eksi ertelenen ay; 1-365 dışında aralık; kaynak ya da sabit ödeme adı 1-60 karakter dışında, plan adı ya da ek ücret notu 80 karakterden uzun; tatil ülkesi 2 karakterden uzun; aynı numaralı iki kaynak, plan ya da sabit ödeme; bir planda aynı sıra numaralı iki ödeme; bir sabit ödemede aynı günlü iki tekrar; olmayan bir kaynağa bağlanan `sourceId` ya da `chargeSourceId`.
+
 ## Okuma hataları
 
 | Hata | Ne zaman |
@@ -180,7 +184,7 @@ Yanlış parola ile değiştirilmiş dosya birbirinden ayırt edilemez: ikisi de
 | `newerVersion` | `formatVersion` okuyucununkinden büyük. |
 | `passwordNeeded` | Şifreli ve parola verilmedi. |
 | `wrongPasswordOrChanged` | Şifreli; parola yanlış ya da dosyada bir bayt değişmiş. |
-| `damaged` | Eksik ya da yanlış türde alan, bilinmeyen seçenek değeri, geçersiz gün, sınır dışı şifreleme ayarı, bozuk base64, uymayan özet ya da para birimi. |
+| `damaged` | Eksik ya da yanlış türde alan, bilinmeyen seçenek değeri, geçersiz gün, sınır dışı şifreleme ayarı, bozuk base64, uymayan özet ya da para birimi, anlamsal doğrulamadan geçemeyen değer. |
 
 ## Sürüm değişikliği
 

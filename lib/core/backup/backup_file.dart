@@ -221,8 +221,8 @@ Future<String> writeBackup(
       createdAt: header['createdAt']! as String,
       currency: data.settings.currency,
       kdf: kdf,
-      salt: salt,
-      nonce: nonce,
+      salt: kdfJson['salt']! as String,
+      nonce: cipherJson['nonce']!,
     ),
   );
   return _pretty({
@@ -271,8 +271,8 @@ Future<BackupContents> readBackup(String text, {String? password}) async {
           createdAt: fields.string('createdAt'),
           currency: header.currency,
           kdf: kdf,
-          salt: salt,
-          nonce: nonce,
+          salt: fields.object('kdf').string('salt'),
+          nonce: fields.object('cipher').string('nonce'),
         ),
       );
     } on SecretBoxAuthenticationError {
@@ -280,7 +280,7 @@ Future<BackupContents> readBackup(String text, {String? password}) async {
     }
     dataJson = _guard(() => jsonDecode(utf8.decode(clear)));
   }
-  final data = _guard(() => BackupData.fromJson(dataJson));
+  final data = _guard(() => BackupData.fromJson(dataJson)..validate());
   if (data.settings.currency != header.currency) {
     throw const BackupReadException(BackupReadError.damaged);
   }
@@ -295,14 +295,15 @@ String _sha256Hex(List<int> bytes) => [
     b.toRadixString(16).padLeft(2, '0'),
 ].join();
 
-/// Everything in the envelope but the ciphertext, in a fixed order.
+/// Everything in the envelope but the ciphertext, in a fixed order; text
+/// values (salt and nonce included) exactly as written in the file.
 List<int> _aad({
   required String appVersion,
   required String createdAt,
   required String currency,
   required BackupKdf kdf,
-  required List<int> salt,
-  required List<int> nonce,
+  required String salt,
+  required String nonce,
 }) => utf8.encode(
   jsonEncode([
     backupFormatName,
@@ -312,9 +313,9 @@ List<int> _aad({
     currency,
     true,
     ...kdf.authenticated,
-    base64.encode(salt),
+    salt,
     _cipherName,
-    base64.encode(nonce),
+    nonce,
   ]),
 );
 
@@ -364,12 +365,12 @@ T _guard<T>(T Function() read) {
   final kdfFields = f.object('kdf');
   final BackupKdf kdf = switch (kdfFields.string('algorithm')) {
     Argon2idKdf.algorithm => Argon2idKdf(
-      memoryKiB: _within(kdfFields.integer('memoryKiB'), 8, 1024 * 1024),
+      memoryKiB: _within(kdfFields.integer('memoryKiB'), 8, 256 * 1024),
       iterations: _within(kdfFields.integer('iterations'), 1, 64),
       parallelism: _within(kdfFields.integer('parallelism'), 1, 16),
     ),
     Pbkdf2Kdf.algorithm => Pbkdf2Kdf(
-      iterations: _within(kdfFields.integer('iterations'), 1, 10000000),
+      iterations: _within(kdfFields.integer('iterations'), 1, 2000000),
     ),
     _ => throw const BackupReadException(BackupReadError.damaged),
   };

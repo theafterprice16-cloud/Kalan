@@ -555,7 +555,7 @@
   "lastBackupOn": "Son yedek: {date}",
   "backupNoteMonths": "{months, plural, one{Son yedek 1 ay önce.} other{Son yedek {months} ay önce.}}",
   "backupReminder": "Yedek hatırlatması",
-  "backupReminderHint": "{months, plural, one{Son tam yedekten 1 ay sonra burada ve ana ekranda kısa bir not çıkar.} other{Son tam yedekten {months} ay sonra burada ve ana ekranda kısa bir not çıkar.}}",
+  "backupReminderHint": "Son tam yedek eskiyince ya da hiç yedek yokken burada ve ana ekranda kısa bir not çıkar.",
   "exportSpreadsheet": "Tablo (CSV)",
   "exportSpreadsheetHint": "Tablo programında açılır. Her satır bir ödeme.",
   "exportBackup": "Tam yedek",

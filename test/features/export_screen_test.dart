@@ -221,4 +221,100 @@ void main() {
     await start(tester, locale: const Locale('en', 'US'));
     expect(find.text('Last backup was 4 months ago.'), findsOneWidget);
   });
+
+  testWidgets('an error: a calm message, no date, no file left', (
+    tester,
+  ) async {
+    tall(tester);
+    share.fail = true;
+    await start(tester, route: Routes.export(backup: true));
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Kaydet ya da paylaş'));
+      await share.called.future.timeout(const Duration(seconds: 10));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('Dosya hazırlanamadı. Yeniden dene.'), findsOneWidget);
+    expect(prefs.read().lastFullBackup, isNull);
+    expect(
+      temp.listSync(recursive: true).whereType<File>(),
+      isEmpty,
+    );
+  });
+
+  testWidgets('only the second password typed: no file', (tester) async {
+    tall(tester);
+    await start(tester, route: Routes.export(backup: true));
+    await tester.enterText(
+      find.byKey(const ValueKey('export-password-again')),
+      'gizli',
+    );
+    await tester.tap(find.text('Kaydet ya da paylaş'));
+    await tester.pumpAndSettle();
+    expect(find.text('Parolalar aynı değil.'), findsOneWidget);
+    expect(share.shared, isEmpty);
+    // Typing the same in the first field clears the message.
+    await tester.enterText(
+      find.byKey(const ValueKey('export-password')),
+      'gizli',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Parolalar aynı değil.'), findsNothing);
+  });
+
+  testWidgets('the same keyboard on every phone (any letter, ş or ğ too)', (
+    tester,
+  ) async {
+    tall(tester);
+    await start(tester, route: Routes.export(backup: true));
+    for (final key in ['export-password', 'export-password-again']) {
+      final field = tester.widget<EditableText>(
+        find.descendant(
+          of: find.byKey(ValueKey(key)),
+          matching: find.byType(EditableText),
+        ),
+      );
+      expect(field.keyboardType, TextInputType.text, reason: key);
+      expect(field.autocorrect, isFalse);
+      expect(field.enableSuggestions, isFalse);
+    }
+  });
+
+  /// A plan saved [daysAgo] days before today, no backup yet.
+  Future<void> startNoBackup(WidgetTester tester, int daysAgo) => pumpApp(
+    tester,
+    seed: (db) async {
+      await seedSettings(db, incomeMinor: 4500000);
+      final id = await seedPayIn4(db, title: 'Kulaklık');
+      final saved = testToday.addDays(-daysAgo).toDateTime();
+      await db.customStatement(
+        'UPDATE plans SET created_at = ? WHERE id = ?',
+        [saved.millisecondsSinceEpoch ~/ 1000, id],
+      );
+    },
+    overrides: [backupPrefsStoreProvider.overrideWithValue(prefs)],
+  );
+
+  testWidgets('no backup yet, 29 days after the first plan: no note', (
+    tester,
+  ) async {
+    tall(tester);
+    await startNoBackup(tester, 29);
+    expect(find.byKey(const ValueKey('backup-note')), findsNothing);
+  });
+
+  testWidgets('no backup yet, 30 days after the first plan: a note', (
+    tester,
+  ) async {
+    tall(tester);
+    await startNoBackup(tester, 30);
+    expect(find.text('Henüz yedek yok.'), findsOneWidget);
+    // Settings says it once, on the "Last backup" row.
+    await openTab(tester, 'Ayarlar');
+    await scrollTo(
+      tester,
+      find.byKey(const ValueKey('settings-backup-reminder')),
+    );
+    expect(find.text('Henüz yedek yok.'), findsOneWidget);
+  });
 }

@@ -2080,6 +2080,19 @@ void main() {
         await tester.pumpAndSettle();
       });
 
+      // Export (29) on an iPhone: the "Backup reminder" switch in the
+      // Apple style.
+      testWidgets('ios, data section', variant: ios, (tester) async {
+        await start(tester);
+        await openTab(tester, 'Ayarlar');
+        const key = ValueKey('settings-export');
+        await scrollTo(tester, find.byKey(key));
+        final top = tester.getTopLeft(find.byKey(key)).dy;
+        await tester.drag(find.byType(Scrollable).first, Offset(0, 300 - top));
+        await tester.pump(const Duration(milliseconds: 400));
+        await shoot(tester, '116-ios-settings-data-$theme');
+      });
+
       testWidgets('ios, app lock switch', variant: ios, (tester) async {
         await start(
           tester,

@@ -25,6 +25,7 @@ import '../engine/payment_method.dart';
 import '../engine/plan_draft.dart';
 import '../engine/plan_status.dart';
 import '../engine/recurring.dart';
+import '../money/currency.dart';
 import '../reminders/reminder_models.dart' show ReminderRepeat;
 import 'backup_json.dart';
 
@@ -61,6 +62,88 @@ class BackupData {
   /// By id, as the app lists them.
   final List<BackupPlan> plans;
   final List<BackupRecurring> recurringPayments;
+
+  /// Checks what types alone cannot: known currency, values in range,
+  /// unique numbers and links that point at something. A file that fails
+  /// is damaged ([BackupFormatException]); Roadmap 30 writes nothing from
+  /// it.
+  void validate() {
+    void check(bool ok, String at) {
+      if (!ok) throw BackupFormatException(at);
+    }
+
+    bool day(int? v) => v == null || (v >= 1 && v <= 31);
+    bool lead(int? v) => v == null || const {1, 2, 3, 5, 7}.contains(v);
+    bool positive(int? v) => v == null || v >= 1;
+    bool length(String? v, int min, int max) =>
+        v == null || (v.length >= min && v.length <= max);
+
+    final s = settings;
+    check(Currency.byCode(s.currency) != null, 'settings.currency');
+    check(day(s.payDay), 'settings.payDay');
+    check(s.netIncome == null || s.netIncome! >= 0, 'settings.netIncome');
+    check(
+      s.tightThreshold == null || s.tightThreshold! >= 0,
+      'settings.tightThreshold',
+    );
+    check(lead(s.reminderLeadDays), 'settings.reminders.leadDays');
+    check(
+      s.reminderMinuteOfDay >= 0 && s.reminderMinuteOfDay < 24 * 60,
+      'settings.reminders.minuteOfDay',
+    );
+    check(length(s.holidayCountry, 0, 2), 'settings.holidayCountry');
+
+    final sourceIds = <int>{};
+    for (final (i, x) in sources.indexed) {
+      final at = 'sources[$i]';
+      check(sourceIds.add(x.id), '$at.id');
+      check(length(x.name, 1, 60), '$at.name');
+      check(day(x.statementDay) && day(x.dueDay), '$at.dueDay');
+      check(const {1, 2}.contains(x.statementReminderDays), '$at.daysBefore');
+    }
+    final planIds = <int>{};
+    for (final (i, p) in plans.indexed) {
+      final at = 'plans[$i]';
+      check(planIds.add(p.id), '$at.id');
+      check(p.sourceId == null || sourceIds.contains(p.sourceId), '$at.sourceId');
+      check(
+        p.chargeSourceId == null || sourceIds.contains(p.chargeSourceId),
+        '$at.chargeSourceId',
+      );
+      check(length(p.title, 0, 80), '$at.title');
+      check(p.installmentCount >= 1, '$at.installmentCount');
+      check(p.deferMonths >= 0, '$at.deferMonths');
+      check(
+        p.intervalDays == null ||
+            (p.intervalDays! >= 1 && p.intervalDays! <= 365),
+        '$at.intervalDays',
+      );
+      check(lead(p.reminders.leadDays), '$at.reminders.leadDays');
+      check(positive(p.installmentFee), '$at.installmentFee');
+      check(positive(p.productPrice), '$at.productPrice');
+      final seqs = <int>{};
+      for (final (j, pay) in p.payments.indexed) {
+        final payAt = '$at.payments[$j]';
+        check(seqs.add(pay.seq), '$payAt.seq');
+        check(pay.amount >= 1, '$payAt.amount');
+        check(positive(pay.extraFee), '$payAt.extraFee');
+        check(positive(pay.installmentFee), '$payAt.installmentFee');
+        check(length(pay.extraFeeNote, 0, 80), '$payAt.extraFeeNote');
+      }
+    }
+    final recurringIds = <int>{};
+    for (final (i, r) in recurringPayments.indexed) {
+      final at = 'recurringPayments[$i]';
+      check(recurringIds.add(r.id), '$at.id');
+      check(length(r.name, 1, 60), '$at.name');
+      check(r.amount >= 1, '$at.amount');
+      check(lead(r.reminders.leadDays), '$at.reminders.leadDays');
+      final days = <LocalDate>{};
+      for (final (j, o) in r.paidOccurrences.indexed) {
+        check(days.add(o.date), '$at.paidOccurrences[$j].date');
+      }
+    }
+  }
 
   Map<String, Object?> toJson() => {
     'settings': settings.toJson(),

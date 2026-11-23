@@ -164,10 +164,12 @@ void main() {
       await export(ExportKind.backup, l10n: en);
       expect(share.shared.first.name, 'kalan-spreadsheet-2026-11-19.csv');
       expect(share.shared.last.name, 'kalan-backup-2026-11-19.json');
+      final bytes = share.shared.first.bytes;
+      expect(bytes.take(3), [0xEF, 0xBB, 0xBF]);
       expect(
-        utf8.decode(share.shared.first.bytes),
+        utf8.decode(bytes.sublist(3)),
         startsWith(
-          '﻿Name,Type,Status,Source,Payment no.,Due date,Amount,'
+          'Name,Type,Status,Source,Payment no.,Due date,Amount,'
           'Extra fee,Fee per payment,Paid,Paid on,Currency\r\n',
         ),
       );

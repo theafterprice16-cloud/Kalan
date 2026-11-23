@@ -31,6 +31,9 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   bool _obscured = true;
   bool _busy = false;
 
+  /// After the first try, a mismatch shows and clears as the user types.
+  bool _tried = false;
+
   @override
   void initState() {
     super.initState();
@@ -50,7 +53,10 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
   }
 
   Future<void> _export() async {
-    if (_kind == ExportKind.backup && !_form.currentState!.validate()) return;
+    if (_kind == ExportKind.backup && !_form.currentState!.validate()) {
+      setState(() => _tried = true);
+      return;
+    }
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -91,7 +97,7 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       inMutuallyExclusiveGroup: true,
       child: ListTile(
         key: ValueKey('export-${kind.name}'),
-        minTileHeight: 48,
+        minTileHeight: kMinInteractiveDimension,
         title: Text(title),
         subtitle: Text(hint, style: muted),
         trailing: _kind == kind ? Icon(Icons.check, color: colors.text) : null,
@@ -104,6 +110,9 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       body: SafeArea(
         child: Form(
           key: _form,
+          autovalidateMode: _tried
+              ? AutovalidateMode.onUserInteraction
+              : AutovalidateMode.disabled,
           child: ListView(
             padding: const EdgeInsets.only(bottom: KalanSpace.xl),
             children: [
@@ -143,7 +152,6 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         obscureText: _obscured,
                         autocorrect: false,
                         enableSuggestions: false,
-                        keyboardType: TextInputType.visiblePassword,
                         decoration: InputDecoration(
                           labelText: l10n.exportPassword,
                           suffixIcon: IconButton(
@@ -171,7 +179,6 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                         obscureText: _obscured,
                         autocorrect: false,
                         enableSuggestions: false,
-                        keyboardType: TextInputType.visiblePassword,
                         decoration: InputDecoration(
                           labelText: l10n.exportPasswordAgain,
                         ),

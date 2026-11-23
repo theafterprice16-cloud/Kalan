@@ -112,7 +112,7 @@ class DataSection extends ConsumerWidget {
           key: const ValueKey('settings-backup-reminder'),
           title: Text(l10n.backupReminder),
           subtitle: Text(
-            l10n.backupReminderHint(backupNoteAfterDays ~/ 30),
+            l10n.backupReminderHint,
             style: muted,
           ),
           value: prefs.reminderEnabled,

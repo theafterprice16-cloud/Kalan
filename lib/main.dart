@@ -68,7 +68,14 @@ Future<void> main() async {
   }
   runApp(ProviderScope(overrides: overrides, child: const KalanApp()));
   // Nothing of an earlier export outlives a new start (29).
-  if (phone) unawaited(getTemporaryDirectory().then(cleanUpExportFiles));
+  if (phone) {
+    unawaited(
+      getTemporaryDirectory()
+          .then(cleanUpExportFiles)
+          // Best effort: the next export cleans up again.
+          .catchError((Object _) {}),
+    );
+  }
 }
 
 /// Android: started by ReminderRescheduleReceiver after a reboot or a

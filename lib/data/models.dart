@@ -163,12 +163,11 @@ class PlanWithPayments {
   /// Null for an untitled "Pay later" plan: screens and notifications show
   /// a label in the app language instead ("Pay later · Dec 14", see
   /// `planNameIn`), so it follows a language change.
-  String? get ownName {
-    final title = plan.title?.trim();
-    if (title != null && title.isNotEmpty) return title;
-    if (isPayLater) return null;
-    return source?.name ?? '';
-  }
+  String? get ownName => planOwnName(
+    title: plan.title,
+    isPayLater: isPayLater,
+    sourceName: source?.name,
+  );
 
   /// [ownName], empty for an untitled "Pay later" plan. Screens and
   /// notifications use `planNameIn` / `context.planName` instead.

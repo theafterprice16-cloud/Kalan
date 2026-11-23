@@ -2878,14 +2878,9 @@
   "@backupReminder": {
     "description": "Settings switch title: a calm note when the last full backup gets old (Roadmap 29). Not a notification."
   },
-  "backupReminderHint": "{months, plural, one{A short note here and on the home screen 1 month after your last full backup.} other{A short note here and on the home screen {months} months after your last full backup.}}",
+  "backupReminderHint": "A short note here and on the home screen when your last full backup gets old, or when there is none yet.",
   "@backupReminderHint": {
-    "description": "Explains the \"Backup reminder\" switch (Roadmap 29). Not a notification; calm.",
-    "placeholders": {
-      "months": {
-        "type": "int"
-      }
-    }
+    "description": "Explains the \"Backup reminder\" switch (Roadmap 29): a note 3 months after the last full backup, or 30 days after the first plan when there is no backup. Not a notification; calm."
   },
   "exportSpreadsheet": "Spreadsheet (CSV)",
   "@exportSpreadsheet": {
@@ -2905,11 +2900,11 @@
   },
   "exportPassword": "Password (optional)",
   "@exportPassword": {
-    "description": "Label of the optional backup password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+    "description": "Label of the optional backup password field (Roadmap 29). Calm and neutral; no rules about length or characters."
   },
   "exportPasswordAgain": "Type the password again",
   "@exportPasswordAgain": {
-    "description": "Label of the second password field, to check the first (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+    "description": "Label of the second password field, to check the first (Roadmap 29). Calm and neutral."
   },
   "exportPasswordNote": "If you forget the password, no one can open this backup.",
   "@exportPasswordNote": {
@@ -2917,11 +2912,11 @@
   },
   "exportNoPassword": "This backup has no password.",
   "@exportNoPassword": {
-    "description": "Muted note above the save button when the password field is empty (Roadmap 29). Neutral, not a warning. Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+    "description": "Muted note above the save button when the password field is empty (Roadmap 29). Neutral information, not a warning."
   },
   "exportPasswordMismatch": "The passwords do not match.",
   "@exportPasswordMismatch": {
-    "description": "Form error under the second password field (Roadmap 29). Sakin ve açık; korkutma. Parolanın kurtarılamayacağını söyle. (Calm and clear; do not frighten. Say the password cannot be recovered.)"
+    "description": "Form error under the second password field when the two differ (Roadmap 29). Calm; no blame."
   },
   "exportShowPassword": "Show password",
   "@exportShowPassword": {

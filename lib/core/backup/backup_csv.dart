@@ -16,6 +16,7 @@ library;
 
 import '../date/local_date.dart';
 import '../engine/plan_draft.dart';
+import '../engine/plan_name.dart';
 import '../engine/plan_status.dart';
 import '../money/currency.dart';
 import '../money/money_format.dart';
@@ -74,12 +75,15 @@ String buildCsv(BackupData data, CsvTexts texts, {required LocalDate today}) {
 
   final lines = <String>[_line(texts.headers.map(_cell))];
   for (final plan in data.plans) {
-    final title = plan.title?.trim();
-    final name = title != null && title.isNotEmpty
-        ? title
-        : plan.kind == PlanKind.payLater && plan.payments.isNotEmpty
-        ? texts.payLaterName(plan.payments.first.dueDate)
-        : sources[plan.sourceId] ?? '';
+    final name =
+        planOwnName(
+          title: plan.title,
+          isPayLater: plan.kind == PlanKind.payLater,
+          sourceName: sources[plan.sourceId],
+        ) ??
+        (plan.payments.isEmpty
+            ? ''
+            : texts.payLaterName(plan.payments.first.dueDate));
     final kind = texts.planKind(plan.kind, cashAdvance: plan.isCashAdvance);
     final status = texts.status(planExportStatus(plan));
     final source = sources[plan.sourceId] ?? '';
@@ -132,7 +136,7 @@ String buildCsv(BackupData data, CsvTexts texts, {required LocalDate today}) {
       );
     }
   }
-  return '﻿${lines.join()}';
+  return '\uFEFF${lines.join()}';
 }
 
 String _line(Iterable<String> cells) => '${cells.join(',')}\r\n';
