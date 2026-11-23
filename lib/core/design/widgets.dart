@@ -191,10 +191,14 @@ class StatusNote extends StatelessWidget {
     required this.color,
     super.key,
     this.textColor,
+    this.semanticsLabel,
   });
 
   final IconData icon;
   final String text;
+
+  /// What a screen reader says in place of [text] (a hidden amount).
+  final String? semanticsLabel;
 
   /// Icon color.
   final Color color;
@@ -214,6 +218,7 @@ class StatusNote extends StatelessWidget {
             text,
             style: Theme.of(context).textTheme.bodyMedium
                 ?.copyWith(color: textColor),
+            semanticsLabel: semanticsLabel,
           ),
         ),
       ],

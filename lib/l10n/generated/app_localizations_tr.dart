@@ -2620,4 +2620,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get appLockEnablePromptTitle => 'Uygulama kilidini aç';
+
+  @override
+  String get amountsHide => 'Tutarları gizle';
+
+  @override
+  String get amountsShow => 'Tutarları göster';
+
+  @override
+  String get amountsHideHint =>
+      'Tutarlar ekranlarda ve bildirimlerde gizlenir; tutar yazarken görünür.';
+
+  @override
+  String get amountHidden => 'Tutar gizli';
 }

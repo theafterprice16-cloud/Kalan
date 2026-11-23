@@ -306,7 +306,7 @@ PlannedReminder paydayReminder(
   required ReminderTexts texts,
   tz.TZDateTime? fireAt,
 }) {
-  final text = texts.payday(summary, showAmounts: settings.showAmounts);
+  final text = texts.payday(summary, showAmounts: settings.amountsInText);
   return PlannedReminder(
     id: PlannedReminder.idForPayday(summary.date),
     kind: ReminderKind.onDay,
@@ -408,12 +408,12 @@ PlannedReminder buildReminder({
     kind: kind,
     payments: group,
     dueDates: dueDates,
-    showAmounts: settings.showAmounts,
+    showAmounts: settings.amountsInText,
     method: reminderMethodOf(kind, group),
     account: reminderAccountOf(
       kind,
       group,
-      showAmounts: settings.showAmounts,
+      showAmounts: settings.amountsInText,
     )?.name,
   );
   final repeating = group.any(

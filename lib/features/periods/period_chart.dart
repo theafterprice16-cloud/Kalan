@@ -388,7 +388,8 @@ class _ColumnState extends ConsumerState<_Column> {
     return Semantics(
       button: true,
       selected: widget.selected,
-      label: fullLabel,
+      // A hidden amount (28) reads as "Amount hidden"; the bar stays.
+      label: context.spokenLabel(fullLabel),
       // The tap is read out with the label (the InkWell's own is excluded).
       onTap: widget.onTap,
       excludeSemantics: true,

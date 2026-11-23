@@ -56,13 +56,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 27. Uygulama kilidi (22 Kasım 2026): Ayarlar'da yeni "Gizlilik" bölümü; "Uygulama kilidi" anahtarı yalnızca telefonun bir kez "evet" demesiyle açılır (yüz tanıma ya da parmak izi, olmazsa telefon şifresi; Kalan'a özel şifre yok); "Yeniden kilitle" Hemen / 1 dakika sonra (varsayılan) / 5 dakika sonra; soğuk açılışta ve arka planda süre dolunca kilit ekranı (zemin, ortada logo, "Kalan'ı açmak için kimliğini doğrula.", "Kilidi aç"), bir kez kendiliğinden sorar, vazgeçince ekranda kalır, deneme sayacı yok; bildirime dokununca önce kilit, sonra hedef; kilit açıkken uygulama değiştiricide yalnızca zemin ve logo (iOS anlık görüntüden önce, Android 13+ son uygulamalar görüntüsü yok; ekran görüntüsü serbest); bildirimlerde tutar görünüyorsa anahtarın altında "Gizlemek için dokun" satırı (ayar kendiliğinden değişmez); ekran kilidi yoksa açılmaz, sonradan kalkarsa ya da telefon doğrulamayı hiç gösteremezse kilit kendiliğinden kapanır ve Ayarlar bir kez söyler; bildirimden "Ödendi" uygulama kilidini sormaz (iOS telefon kilidini ister, Android eski davranış); ayarlar yalnızca cihazda, veritabanında değil; şema değişmedi; yeni paket local_auth
 
+- 28. Tutarları gizleme (23 Kasım 2026): ana ekranın üst çubuğunda göz ikonu (açık göz / üstü çizili göz, iki durumda soluk renk) ve Ayarlar > Gizlilik'te aynı değerde "Tutarları gizle" anahtarı (Gizlilik bölümü artık her telefonda ve platformda); açıkken bütün ekranlarda her tutar "•••" (sembol ve eksi işareti yok, düzen kaymaz, cümle içinde de "Bu dönem ••• eksik kalıyor."); plan adları, tarihler, "3/10", durumlar ve grafik çubukları görünür; tutar yazılan akış (plan ekleme ve önizlemesi, "Tutarı düzelt", "Ödemeyi düzelt") örtülmez; ekran okuyucu "Tutar gizli"; bildirimlerde tutar yalnızca "Bildirimde tutarı göster" açık ve "Tutarları gizle" kapalıyken (hatırlatmalar, birleşik ve ısrarlı, maaş günü özeti, "hesapta X bulunsun"), anahtar değişince bildirimler yeniden kurulur; tercih cihazda (veritabanında, dışa aktarmada, yedekte yok), uygulama son durumu hatırlar; herkese ücretsiz; şema değişmedi, yeni paket yok
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 28. maddeden devam (liste: `kalan_kaynak.py liste`); 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
+- 29. maddeden devam (liste: `kalan_kaynak.py liste`); 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
 
 ## Yarım kalan
 

@@ -5,10 +5,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../core/design/choice_dialog.dart';
-import '../../core/design/widgets.dart';
 import '../../core/lock/app_lock_machine.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
+import '../privacy/amounts_hidden.dart';
 import '../reminders/reminder_providers.dart';
 import 'app_lock_controller.dart';
 import 'app_lock_store.dart';
@@ -24,7 +24,8 @@ String relockDelayLabel(BuildContext context, RelockDelay delay) {
   };
 }
 
-/// Settings > Privacy: the app lock (Roadmap 27). Phones only.
+/// Settings > Privacy: the app lock (Roadmap 27), under "Hide amounts"
+/// (28). Phones only.
 class AppLockSection extends ConsumerStatefulWidget {
   const AppLockSection({required this.settings, super.key});
 
@@ -118,12 +119,15 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
       if (notice != null) setState(() => _show(notice));
     });
     final privacy = ref.read(privacySettingsProvider);
+    // Rebuilds when the eye or the Settings switch changes (28).
+    ref.watch(amountsHiddenProvider);
     // The suggestion only where amounts really show: reminders on, amounts
-    // on. A tap hides them; the lock itself never changes that setting.
+    // on, "Hide amounts" (28) off. A tap hides them; the lock itself never
+    // changes that setting.
     final amountsShow =
         ref.watch(notificationGatewayProvider).supported &&
         widget.settings.remindersEnabled &&
-        privacy.showAmountsInNotifications(widget.settings);
+        privacy.notificationAmountsShown(widget.settings);
 
     Widget note(String text, Key key) => ListTile(
       key: key,
@@ -134,7 +138,6 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SectionTitle(l10n.settingsPrivacySection),
         SwitchListTile.adaptive(
           key: const ValueKey('app-lock'),
           title: Text(l10n.appLock),

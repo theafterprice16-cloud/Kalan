@@ -11,6 +11,7 @@ import '../../app/locale.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../privacy/amounts_hidden.dart';
 import 'local_notifications.dart';
 import 'notification_gateway.dart';
 import 'reminder_actions.dart';
@@ -46,14 +47,29 @@ Future<void> _withDatabase(Future<void> Function(AppDatabase db) body) async {
   }
 }
 
-ReminderScheduler _schedulerFor(AppDatabase db, NotificationGateway gateway) =>
-    ReminderScheduler(
-      db: db,
-      gateway: gateway,
-      location: () => tz.local,
-      now: DateTime.now,
-      localeFor: (s) => appLocale(s.localeCode),
-    );
+ReminderScheduler _schedulerFor(
+  AppDatabase db,
+  NotificationGateway gateway, {
+  bool amountsHidden = false,
+}) => ReminderScheduler(
+  db: db,
+  gateway: gateway,
+  location: () => tz.local,
+  now: DateTime.now,
+  localeFor: (s) => appLocale(s.localeCode),
+  amountsHidden: () => amountsHidden,
+);
+
+/// "Hide amounts" (28) from the device's storage, as the app left it.
+/// Hidden when it cannot be read: a notification never shows an amount
+/// by mistake.
+Future<bool> _amountsHidden() async {
+  try {
+    return (await PrefsAmountsHiddenStore.open()).read();
+  } on Object {
+    return true;
+  }
+}
 
 /// The real notification service, in the app language.
 Future<NotificationGateway> _gatewayFor(AppDatabase db) async {
@@ -65,8 +81,15 @@ Future<NotificationGateway> _gatewayFor(AppDatabase db) async {
 /// Runs [body] with a scheduler on the shared database.
 Future<void> runReminderTask(
   Future<void> Function(ReminderScheduler scheduler) body,
-) =>
-    _withDatabase((db) async => body(_schedulerFor(db, await _gatewayFor(db))));
+) => _withDatabase(
+  (db) async => body(
+    _schedulerFor(
+      db,
+      await _gatewayFor(db),
+      amountsHidden: await _amountsHidden(),
+    ),
+  ),
+);
 
 /// Android: boot, clock or time zone change (ReminderRescheduleReceiver).
 Future<void> rescheduleRemindersInBackgroundTask() async {
@@ -102,7 +125,11 @@ Future<void> reminderActionInBackground(NotificationResponse response) async {
       if (result.outcome == ReminderActionOutcome.ignored) return;
       // Then the reminders. Should iOS stop Kalan before this, the next
       // app start or resume reschedules anyway.
-      await _schedulerFor(db, await _gatewayFor(db)).rescheduleAll();
+      await _schedulerFor(
+        db,
+        await _gatewayFor(db),
+        amountsHidden: await _amountsHidden(),
+      ).rescheduleAll();
     });
   } on Object {
     // Nothing to show from the background; the next reschedule (app

@@ -3,16 +3,21 @@ import 'package:drift/drift.dart' show Value;
 import '../../core/reminders/reminder_models.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../privacy/amounts_hidden.dart';
 
 extension ReminderSettingsRowX on SettingsRow {
-  ReminderSettings get reminderSettings => ReminderSettings(
-    enabled: remindersEnabled,
-    leadDays: reminderLeadDays,
-    minuteOfDay: reminderMinute,
-    showAmounts: !hideAmountsInNotifications,
-    repeatMode: repeatMode,
-    paydaySummary: paydaySummaryEnabled,
-  );
+  /// The settings the planner works with; [hideAmounts] is the app-wide
+  /// "Hide amounts" (28), kept on the device, not in this row.
+  ReminderSettings reminderSettingsWith({required bool hideAmounts}) =>
+      ReminderSettings(
+        enabled: remindersEnabled,
+        leadDays: reminderLeadDays,
+        minuteOfDay: reminderMinute,
+        showAmounts: !hideAmountsInNotifications,
+        hideAmounts: hideAmounts,
+        repeatMode: repeatMode,
+        paydaySummary: paydaySummaryEnabled,
+      );
 }
 
 /// A plan's or recurring payment's stored reminder choice: the on/off
@@ -60,17 +65,32 @@ class ReminderSettingsStore {
   );
 }
 
-/// The one place for "show amounts" choices. Notifications use it today;
-/// the app-wide "hide amounts" switch from the backlog will live here too.
+/// The one place for "show amounts" choices: "Show amount in
+/// notifications" (in the settings row) and the app-wide "Hide amounts"
+/// (Roadmap 28; on this device only, outside the database).
 class PrivacySettings {
-  PrivacySettings(this._settings);
+  PrivacySettings(this._settings, this._amounts);
 
   final SettingsRepository _settings;
+  final AmountsHiddenStore _amounts;
 
+  /// The "Show amount in notifications" switch itself. Whether a
+  /// notification really carries an amount: [notificationAmountsShown].
   bool showAmountsInNotifications(SettingsRow row) =>
       !row.hideAmountsInNotifications;
 
   Future<void> setShowAmountsInNotifications(bool show) => _settings.update(
     AppSettingsCompanion(hideAmountsInNotifications: Value(!show)),
   );
+
+  /// "Hide amounts": every amount on screen and in notifications masked.
+  bool get amountsHidden => _amounts.read();
+
+  /// Changes only this choice; "Show amount in notifications" keeps its
+  /// value (the planner combines the two: [ReminderSettings.amountsInText]).
+  Future<void> setAmountsHidden(bool hidden) => _amounts.write(hidden);
+
+  /// Amounts in notification text: only while both choices allow it.
+  bool notificationAmountsShown(SettingsRow row) =>
+      showAmountsInNotifications(row) && !amountsHidden;
 }

@@ -119,10 +119,10 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
     final rejection = result is AdjustRejected ? result.reason : _refused;
     final message = switch (rejection) {
       AdjustRejection.belowPaid => l10n.adjustBelowPaid(
-        ref.money(context, paid),
+        ref.draftMoney(context, paid),
       ),
       AdjustRejection.aboveTotal => l10n.adjustAboveTotal(
-        ref.money(context, plan.totalMinor),
+        ref.draftMoney(context, plan.totalMinor),
       ),
       AdjustRejection.unchanged => l10n.adjustUnchanged,
       AdjustRejection.cannotSplit => l10n.adjustCannotSplit(unpaidCount),
@@ -153,15 +153,18 @@ class _AdjustAmountScreenState extends ConsumerState<AdjustAmountScreen> {
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              l10n.adjustCurrentTotal(ref.money(context, plan.totalMinor)),
+              l10n.adjustCurrentTotal(ref.draftMoney(context, plan.totalMinor)),
               style: muted,
             ),
-            Text(l10n.adjustPaidSoFar(ref.money(context, paid)), style: muted),
+            Text(
+              l10n.adjustPaidSoFar(ref.draftMoney(context, paid)),
+              style: muted,
+            ),
             // The new total is the plan amount; fees per payment (22) stay.
             if (plan.installmentFeesMinor > 0)
               Text(
                 l10n.adjustFeesStay(
-                  ref.money(context, plan.installmentFeesMinor),
+                  ref.draftMoney(context, plan.installmentFeesMinor),
                 ),
                 key: const ValueKey('adjust-fees-stay'),
                 style: muted,
@@ -268,7 +271,7 @@ class _Preview extends ConsumerWidget {
                       Expanded(child: Text(context.longDate(p.date))),
                       // As on the plan: the installment with its fee (22).
                       AmountText(
-                        ref.money(
+                        ref.draftMoney(
                           context,
                           installmentAmount(
                             amountMinor: p.amountMinor,

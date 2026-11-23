@@ -346,7 +346,13 @@ class FittedAmount extends StatelessWidget {
     child: FittedBox(
       fit: BoxFit.scaleDown,
       alignment: AlignmentDirectional.centerEnd,
-      child: AmountText(text, size: AmountSize.small, color: color),
+      child: AmountText(
+        text,
+        size: AmountSize.small,
+        color: color,
+        // A hidden amount (28) reads as "Amount hidden".
+        semanticsLabel: context.spoken(text),
+      ),
     ),
   );
 }

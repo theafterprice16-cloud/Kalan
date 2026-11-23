@@ -73,6 +73,14 @@ class PaymentTile extends ConsumerWidget {
       color: colors.textMuted,
     );
 
+    // A hidden amount (28) reads as "Amount hidden".
+    Text feeNote(String text, Key key) => Text(
+      text,
+      key: key,
+      style: secondary,
+      semanticsLabel: context.spoken(text),
+    );
+
     final method = entry.paymentMethod;
     final details = <Widget>[
       // The payment method's icon before the date, read out as its word.
@@ -103,17 +111,15 @@ class PaymentTile extends ConsumerWidget {
       if (showDaysAgo && !entry.isPaid && days < 0) DaysAgoNote(days: -days),
       // The fee per payment inside the amount on the right (22).
       if (entry.installmentFeeMinor case final fee?)
-        Text(
+        feeNote(
           l10n.installmentFeeIncluded(ref.money(context, fee)),
-          key: ValueKey('installment-fee-note-${entry.paymentId}'),
-          style: secondary,
+          ValueKey('installment-fee-note-${entry.paymentId}'),
         ),
       // The fee on top of the amount on the right (21), never in it.
       if (entry.extraFeeMinor case final fee?)
-        Text(
+        feeNote(
           l10n.extraFeeRowNote(ref.money(context, fee)),
-          key: ValueKey('fee-note-${entry.paymentId}'),
-          style: secondary,
+          ValueKey('fee-note-${entry.paymentId}'),
         ),
       if (soon)
         Row(
@@ -190,6 +196,7 @@ class PaymentTile extends ConsumerWidget {
                           alignment: AlignmentDirectional.centerEnd,
                           child: AmountText(
                             amount,
+                            semanticsLabel: context.spoken(amount),
                             size: AmountSize.small,
                             color: entry.isPaid ? colors.textMuted : null,
                           ),

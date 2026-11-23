@@ -715,6 +715,7 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
                   key: const ValueKey('pay-later-fee-summary'),
                   planMinor: d.totalMinor,
                   feesMinor: d.installmentFeesMinor,
+                  draft: true,
                 ),
               ],
             ] else ...[
@@ -952,17 +953,19 @@ class _AddPlanScreenState extends ConsumerState<AddPlanScreen> {
         final split = _splitOf(_amount(_total), count);
         if (split == null) return null;
         return split.isEven
-            ? l10n.amountComputedInstallment(ref.money(context, split.first))
+            ? l10n.amountComputedInstallment(
+                ref.draftMoney(context, split.first),
+              )
             : l10n.amountComputedSplit(
                 split.othersCount,
-                ref.money(context, split.first),
-                ref.money(context, split.others),
+                ref.draftMoney(context, split.first),
+                ref.draftMoney(context, split.others),
               );
       case AmountEntry.installment:
         final total = _totalValue;
         return total == null
             ? null
-            : l10n.amountComputedTotal(ref.money(context, total));
+            : l10n.amountComputedTotal(ref.draftMoney(context, total));
     }
   }
 
@@ -1268,7 +1271,7 @@ class _Preview extends ConsumerWidget {
               Text(
                 l10n.previewSummary(
                   listed.length,
-                  ref.money(
+                  ref.draftMoney(
                     context,
                     [for (var i = 0; i < listed.length; i++) shown(i)]
                         .fold(0, (sum, v) => sum + v),
@@ -1283,7 +1286,7 @@ class _Preview extends ConsumerWidget {
                   child: Text(
                     l10n.paidBeforeSummary(
                       d.paidBeforeCount,
-                      ref.money(
+                      ref.draftMoney(
                         context,
                         d.payments
                             .take(d.paidBeforeCount)
@@ -1326,6 +1329,7 @@ class _Preview extends ConsumerWidget {
                   planMinor: d.totalMinor,
                   feesMinor: d.installmentFeesMinor,
                   price: d.priceDifference,
+                  draft: true,
                 ),
               ],
               const SizedBox(height: KalanSpace.xs),
@@ -1349,13 +1353,13 @@ class _Preview extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           AmountText(
-                            ref.money(context, shown(i)),
+                            ref.draftMoney(context, shown(i)),
                             size: AmountSize.small,
                           ),
                           if (feeOf(i) case final fee?)
                             Text(
                               l10n.installmentFeeIncluded(
-                                ref.money(context, fee),
+                                ref.draftMoney(context, fee),
                               ),
                               key: ValueKey('preview-fee-${p.seq}'),
                               style: theme.textTheme.bodySmall?.copyWith(

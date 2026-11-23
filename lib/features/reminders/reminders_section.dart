@@ -98,7 +98,9 @@ class RemindersSection extends ConsumerWidget {
       );
     }
 
-    final reminders = settings.reminderSettings;
+    // Only the schedule and its switches show here; "Hide amounts" (28)
+    // is the planner's to apply.
+    final reminders = settings.reminderSettingsWith(hideAmounts: false);
     final on = reminders.enabled;
     final permission = ref.watch(notificationPermissionProvider).value;
     final time = MaterialLocalizations.of(context).formatTimeOfDay(

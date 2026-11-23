@@ -3425,6 +3425,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Turn on app lock'**
   String get appLockEnablePromptTitle;
+
+  /// Title of the switch in Settings > Privacy and the screen-reader name of the eye button on the home screen while amounts show. Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide amounts'**
+  String get amountsHide;
+
+  /// Screen-reader name of the eye button on the home screen while amounts are hidden; a tap shows them again. Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something.
+  ///
+  /// In en, this message translates to:
+  /// **'Show amounts'**
+  String get amountsShow;
+
+  /// Subtitle of the 'Hide amounts' switch. Amount fields keep showing what the user types. Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something.
+  ///
+  /// In en, this message translates to:
+  /// **'Amounts are hidden on screens and in notifications, but not while you type one.'**
+  String get amountsHideHint;
+
+  /// What a screen reader says in place of each hidden amount, also inside a sentence ('This period is Amount hidden short.'). Privacy preference (Roadmap 28). Neutral and short; do not make the user look as if they were hiding something.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount hidden'**
+  String get amountHidden;
 }
 
 class _AppLocalizationsDelegate

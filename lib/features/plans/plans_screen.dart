@@ -185,11 +185,15 @@ class _PlanList extends ConsumerWidget {
                     ref.money(context, _amountOf(p)),
                     size: AmountSize.small,
                     color: p.isOnHold ? context.colors.textMuted : null,
-                    semanticsLabel: p.isOpen
-                        ? l10n.planToPay(ref.money(context, _amountOf(p)))
-                        : p.isClosed
-                        ? l10n.planPaidAmount(ref.money(context, _amountOf(p)))
-                        : l10n.planTotal(ref.money(context, _amountOf(p))),
+                    semanticsLabel: context.spokenLabel(
+                      p.isOpen
+                          ? l10n.planToPay(ref.money(context, _amountOf(p)))
+                          : p.isClosed
+                          ? l10n.planPaidAmount(
+                              ref.money(context, _amountOf(p)),
+                            )
+                          : l10n.planTotal(ref.money(context, _amountOf(p))),
+                    ),
                   ),
                 ],
               ),
@@ -232,6 +236,7 @@ class _RecurringList extends ConsumerWidget {
           Builder(
             builder: (context) {
               final next = r.occurrences(today, today.addDays(400)).firstOrNull;
+              final amount = ref.money(context, r.item.amountMinor);
               return InkWell(
                 onTap: () => context.push(Routes.recurring(r.item.id)),
                 child: Padding(
@@ -284,8 +289,9 @@ class _RecurringList extends ConsumerWidget {
                         ),
                       ),
                       AmountText(
-                        ref.money(context, r.item.amountMinor),
+                        amount,
                         size: AmountSize.small,
+                        semanticsLabel: context.spoken(amount),
                       ),
                     ],
                   ),

@@ -114,8 +114,13 @@ class InstallmentFeeSummary extends ConsumerWidget {
     required this.planMinor,
     required this.feesMinor,
     this.price,
+    this.draft = false,
     super.key,
   });
+
+  /// The preview of a plan being added (the flow where its amounts are
+  /// typed): amounts always shown, also while "Hide amounts" (28) is on.
+  final bool draft;
 
   final int planMinor;
   final int feesMinor;
@@ -128,24 +133,34 @@ class InstallmentFeeSummary extends ConsumerWidget {
     final l10n = context.l10n;
     final colors = context.colors;
     final style = Theme.of(context).textTheme.bodyMedium;
-    Widget row(String id, String label, int minor) => Padding(
-      padding: const EdgeInsets.only(top: KalanSpace.xxs),
-      child: Row(
-        key: ValueKey(id),
-        children: [
-          Expanded(
-            child: Text(label, style: style?.copyWith(color: colors.textMuted)),
-          ),
-          Text(
-            ref.money(context, minor),
-            style: style?.copyWith(
-              color: colors.text,
-              fontFeatures: AmountText.tabular,
+    Widget row(String id, String label, int minor) {
+      final amount = draft
+          ? ref.draftMoney(context, minor)
+          : ref.money(context, minor);
+      return Padding(
+        padding: const EdgeInsets.only(top: KalanSpace.xxs),
+        child: Row(
+          key: ValueKey(id),
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: style?.copyWith(color: colors.textMuted),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+            Text(
+              amount,
+              semanticsLabel: context.spoken(amount),
+              style: style?.copyWith(
+                color: colors.text,
+                fontFeatures: AmountText.tabular,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

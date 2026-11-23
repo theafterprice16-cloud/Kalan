@@ -218,6 +218,7 @@ class ReminderSettings {
     this.leadDays = initialLeadDays,
     this.minuteOfDay = 9 * 60,
     this.showAmounts = true,
+    this.hideAmounts = false,
     this.repeatMode = ReminderRepeat.off,
     this.paydaySummary = true,
   });
@@ -231,8 +232,18 @@ class ReminderSettings {
   /// Local wall-clock time, minutes after midnight (09:00 = 540).
   final int minuteOfDay;
 
-  /// Amounts in notification text (off for lock-screen privacy).
+  /// "Show amount in notifications" (off for lock-screen privacy).
   final bool showAmounts;
+
+  /// The app-wide "Hide amounts" (Roadmap 28). Never changes
+  /// [showAmounts]; the two meet only in [amountsInText].
+  final bool hideAmounts;
+
+  /// Whether notification text carries amounts: only when "Show amount in
+  /// notifications" is on and "Hide amounts" is off. The one rule every
+  /// reminder follows (payment reminders, combined and repeat ones, the
+  /// payday summary, the "keep it in the account" note).
+  bool get amountsInText => showAmounts && !hideAmounts;
 
   /// Global repeat mode; plans can choose their own.
   final ReminderRepeat repeatMode;

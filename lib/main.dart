@@ -10,6 +10,7 @@ import 'entitlement/pro_controller.dart';
 import 'entitlement/pro_status_store.dart';
 import 'features/lock/app_lock_store.dart';
 import 'features/lock/device_lock_gateway.dart';
+import 'features/privacy/amounts_hidden.dart';
 import 'features/reminders/background.dart';
 import 'features/reminders/local_notifications.dart';
 import 'features/reminders/reminder_providers.dart';
@@ -27,6 +28,11 @@ Future<void> main() async {
     // App lock (27): read before the first frame, so a locked app never
     // shows a frame of data.
     appLockStoreProvider.overrideWithValue(await PrefsAppLockStore.open()),
+    // "Hide amounts" (28): read before the first frame, so hidden amounts
+    // never flash on screen.
+    amountsHiddenStoreProvider.overrideWithValue(
+      await PrefsAmountsHiddenStore.open(),
+    ),
   ];
   final phone =
       !kIsWeb &&

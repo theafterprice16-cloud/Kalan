@@ -2623,6 +2623,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appLockEnablePromptTitle => 'Turn on app lock';
+
+  @override
+  String get amountsHide => 'Hide amounts';
+
+  @override
+  String get amountsShow => 'Show amounts';
+
+  @override
+  String get amountsHideHint =>
+      'Amounts are hidden on screens and in notifications, but not while you type one.';
+
+  @override
+  String get amountHidden => 'Amount hidden';
 }
 
 /// The translations for Spanish Castilian, as used in Latin America and the Caribbean (`es_419`).
