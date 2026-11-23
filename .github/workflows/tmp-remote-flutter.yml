@@ -28,6 +28,7 @@ jobs:
       - run: dart format lib test tool
       - name: KDF timing (AOT, this runner)
         if: hashFiles('tool/kdf_bench.dart') != ''
+        continue-on-error: true
         run: |
           dart compile exe tool/kdf_bench.dart -o /tmp/kdf_bench
           /tmp/kdf_bench

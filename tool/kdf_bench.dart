@@ -3,6 +3,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/dart.dart';
 
 Future<void> main() async {
   final password = SecretKey('correct horse battery staple'.codeUnits);
