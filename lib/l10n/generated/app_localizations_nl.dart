@@ -2620,4 +2620,7 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get appLockTurnedOffUnavailable =>
       'App lock was turned off because your phone couldn\'t check it\'s you just now. You can turn it on again.';
+
+  @override
+  String get appLockEnablePromptTitle => 'Turn on app lock';
 }

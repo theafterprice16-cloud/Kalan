@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -333,10 +334,105 @@ void main() {
       final handled = await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(handled, isTrue);
+      // Android's predictive back gesture too.
+      const codec = StandardMethodCodec();
+      for (final method in ['startBackGesture', 'commitBackGesture']) {
+        await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          SystemChannels.backGesture.name,
+          codec.encodeMethodCall(
+            MethodCall(
+              method,
+              method == 'startBackGesture'
+                  ? <String, Object?>{
+                      'touchOffset': <double>[0, 0],
+                      'progress': 0.0,
+                      'swipeEdge': 0,
+                    }
+                  : null,
+            ),
+          ),
+          (_) {},
+        );
+        await tester.pumpAndSettle();
+      }
+      expect(lockScreen, findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('lock-unlock')));
       await tester.pumpAndSettle();
       expect(lockScreen, findsNothing);
       expect(find.text('Kaynaklar ve kartlar'), findsWidgets);
+    });
+  });
+
+  group('review fixes', () {
+    testWidgets('turning on: the dialog says it turns the lock on', (
+      tester,
+    ) async {
+      await start(tester);
+      await openSettings(tester);
+      await tester.tap(lockSwitch);
+      await tester.pumpAndSettle();
+      expect(phone.asked.single.title, 'Uygulama kilidini aç');
+      expect(
+        phone.asked.single.reason,
+        'Uygulama kilidini açmak için kimliğini doğrula.',
+      );
+    });
+
+    testWidgets('turned off while Settings is open: the note shows there', (
+      tester,
+    ) async {
+      await start(tester, lock: const AppLockSettings(enabled: true));
+      await openSettings(tester);
+      expect(switchValue(tester), isTrue);
+      // The screen lock goes; Kalan locks again and opens by itself.
+      phone.screenLock = false;
+      await lifecycle(tester, leave);
+      clock.pass(const Duration(minutes: 2));
+      await lifecycle(tester, back);
+      expect(lockScreen, findsNothing);
+      expect(switchValue(tester), isFalse);
+      expect(
+        find.text(
+          'Telefonunda ekran kilidi olmadığı için uygulama kilidi kapatıldı.',
+        ),
+        findsOneWidget,
+      );
+      expect(store.read().notice, isNull);
+    });
+
+    testWidgets('the screen lock note goes when Kalan comes back', (
+      tester,
+    ) async {
+      phone.screenLock = false;
+      await start(tester);
+      await openSettings(tester);
+      await tester.tap(lockSwitch);
+      await tester.pumpAndSettle();
+      const note = 'Bunun için telefonunda ekran kilidi olmalı.';
+      expect(find.text(note), findsOneWidget);
+      // The user sets a screen lock in the phone's settings.
+      await lifecycle(tester, leave);
+      await lifecycle(tester, back);
+      expect(find.text(note), findsNothing);
+    });
+
+    testWidgets('landscape with large text: nothing overlaps or overflows', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1688, 780);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      phone.hold = true;
+      await start(tester, lock: const AppLockSettings(enabled: true));
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final mark = tester.getRect(find.byType(Image));
+      final text = tester.getRect(
+        find.text("Kalan'ı açmak için kimliğini doğrula."),
+      );
+      expect(mark.bottom, lessThanOrEqualTo(text.top));
     });
   });
 

@@ -278,15 +278,15 @@ class AppLockController extends Notifier<AppLockState> {
         ref.read(appLocalesProvider),
       ),
     );
-    DeviceAuthTexts texts(String reason) => DeviceAuthTexts(
+    DeviceAuthTexts texts(String reason, String title) => DeviceAuthTexts(
       reason: reason,
-      title: l10n.appLockPromptTitle,
+      title: title,
       hint: l10n.appLockPromptHint,
       cancel: l10n.actionCancel,
     );
     return (
-      unlock: texts(l10n.appLockReason),
-      enable: texts(l10n.appLockEnableReason),
+      unlock: texts(l10n.appLockReason, l10n.appLockPromptTitle),
+      enable: texts(l10n.appLockEnableReason, l10n.appLockEnablePromptTitle),
     );
   }
 }

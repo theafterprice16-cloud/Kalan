@@ -145,12 +145,29 @@ void main() {
 
   test('a cancelled dialog does not ask again by itself', () {
     final m = AppLockMachine(clock: clock, enabled: true);
+    // The dialog hides Kalan and is cancelled after Kalan is back.
+    m
+      ..beginAuth()
+      ..hidden();
+    expect(m.shown(), isFalse);
+    m.endAuth(success: false);
+    expect(m.locked, isTrue);
+    // A cancel without leaving: nothing asks again either.
+    m
+      ..beginAuth()
+      ..endAuth(success: false);
+    expect(m.shown(), isFalse);
+  });
+
+  test('left during the dialog, which then ended: back asks once', () {
+    final m = AppLockMachine(clock: clock, enabled: true);
     m
       ..beginAuth()
       ..hidden()
       ..endAuth(success: false);
-    expect(m.shown(), isFalse);
+    expect(m.shown(), isTrue);
     expect(m.locked, isTrue);
+    expect(m.shown(), isFalse);
   });
 
   test('back to a locked Kalan from the background asks again', () {

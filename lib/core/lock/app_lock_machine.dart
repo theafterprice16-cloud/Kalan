@@ -110,6 +110,9 @@ class AppLockMachine {
   void hidden() {
     if (_authenticating) {
       _hiddenDuringAuth = true;
+      // Left while the dialog was open (the Home button): if the dialog
+      // ends before Kalan is back, coming back asks again.
+      if (_locked) _hiddenWhileLocked = true;
       return;
     }
     if (!_enabled) return;
@@ -127,10 +130,19 @@ class AppLockMachine {
   /// comes back from the background. Never after the authentication
   /// dialog itself, so a cancelled dialog does not open again by itself.
   bool shown() {
-    if (_authenticating || _hiddenDuringAuth) {
-      // Hidden by the authentication dialog itself: not a new lock.
+    if (_authenticating) {
+      // Hidden by the authentication dialog itself (Android's passcode
+      // screen): not a new lock, and the dialog is still answering.
       _hiddenDuringAuth = false;
+      _hiddenWhileLocked = false;
       return false;
+    }
+    if (_hiddenDuringAuth) {
+      // The dialog ended while Kalan was away: still locked, ask once.
+      _hiddenDuringAuth = false;
+      final again = _locked && _hiddenWhileLocked;
+      _clearHidden();
+      return again;
     }
     final wallAt = _hiddenWall;
     final monotonicAt = _hiddenMonotonic;

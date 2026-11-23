@@ -542,5 +542,6 @@
   "appLockPromptHint": "Yüz tanıma, parmak izi ya da telefon şifresi",
   "appLockFaceIdUsage": "Kalan'ı açarken kimliğini doğrulamak için. Yüz verisi telefonunda kalır, Kalan'a gelmez.",
   "appLockRelockAfterMinutes": "{minutes, plural, =1{1 dakika sonra} other{{minutes} dakika sonra}}",
-  "appLockTurnedOffUnavailable": "Telefonun kimliğini şu an doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin."
+  "appLockTurnedOffUnavailable": "Telefon şu an kimliğini doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin.",
+  "appLockEnablePromptTitle": "Uygulama kilidini aç"
 }

@@ -69,42 +69,62 @@ class LockScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colors;
-    return Material(
-      key: const ValueKey('lock-screen'),
-      color: colors.bg,
-      child: Stack(
-        fit: StackFit.expand,
+    final bottom = SafeArea(
+      minimum: const EdgeInsets.all(KalanSpace.lg),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Center(child: KalanMark()),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: SafeArea(
-              minimum: const EdgeInsets.all(KalanSpace.lg),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l10n.appLockReason,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(color: colors.textMuted),
-                  ),
-                  const SizedBox(height: KalanSpace.md),
-                  FilledButton(
-                    key: const ValueKey('lock-unlock'),
-                    onPressed: () =>
-                        ref.read(appLockProvider.notifier).unlock(),
-                    child: Text(l10n.appLockUnlock),
-                  ),
-                ],
-              ),
-            ),
+          Text(
+            l10n.appLockReason,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: colors.textMuted),
+          ),
+          const SizedBox(height: KalanSpace.md),
+          FilledButton(
+            key: const ValueKey('lock-unlock'),
+            onPressed: () => ref.read(appLockProvider.notifier).unlock(),
+            child: Text(l10n.appLockUnlock),
           ),
         ],
       ),
     );
+    return Material(
+      key: const ValueKey('lock-screen'),
+      color: colors.bg,
+      child: LayoutBuilder(
+        builder: (context, constraints) =>
+            // Tall: the mark exactly where the launch screen and the
+            // cover have it. Short (landscape, large text): above the
+            // button, never under it.
+            constraints.maxHeight >= _tallHeight
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  const Center(child: KalanMark()),
+                  Align(alignment: Alignment.bottomCenter, child: bottom),
+                ],
+              )
+            : Column(
+                children: [
+                  const Expanded(
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: KalanMark(),
+                      ),
+                    ),
+                  ),
+                  bottom,
+                ],
+              ),
+      ),
+    );
   }
+
+  /// Room for the centred mark above the text and the button.
+  static const double _tallHeight = 640;
 }
 
 /// While Kalan is not in front and the lock is on: the ground and the

@@ -41,17 +41,36 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
   /// The last try to turn it on found no screen lock on the phone.
   bool _needsScreenLock = false;
 
+  /// Back from the phone's settings (a screen lock may be set now).
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
-    _notice = ref.read(appLockProvider).notice;
-    if (_notice != null) {
-      // Once: cleared after this frame, kept on screen until Settings
-      // closes.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.read(appLockProvider.notifier).takeNotice();
-      });
-    }
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        if (mounted && _needsScreenLock) {
+          setState(() => _needsScreenLock = false);
+        }
+      },
+    );
+    _show(ref.read(appLockProvider).notice);
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  /// Once: cleared from storage after this frame, kept on screen while
+  /// Settings stays open.
+  void _show(AppLockNotice? notice) {
+    if (notice == null) return;
+    _notice = notice;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(appLockProvider.notifier).takeNotice();
+    });
   }
 
   Future<void> _toggle(bool on) async {
@@ -92,6 +111,10 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
     final muted = Theme.of(context).textTheme.bodyMedium
         ?.copyWith(color: colors.textMuted);
     final lock = ref.watch(appLockProvider);
+    // Turned off while Settings was open (under the lock screen).
+    ref.listen(appLockProvider.select((s) => s.notice), (_, notice) {
+      if (notice != null) setState(() => _show(notice));
+    });
     final privacy = ref.read(privacySettingsProvider);
     // The suggestion only where amounts really show: reminders on, amounts
     // on. A tap hides them; the lock itself never changes that setting.

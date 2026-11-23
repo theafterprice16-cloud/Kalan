@@ -3419,6 +3419,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App lock was turned off because your phone couldn\'t check it\'s you just now. You can turn it on again.'**
   String get appLockTurnedOffUnavailable;
+
+  /// Title of the Android system check dialog when the app lock is being turned on. At most 60 characters. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on app lock'**
+  String get appLockEnablePromptTitle;
 }
 
 class _AppLocalizationsDelegate

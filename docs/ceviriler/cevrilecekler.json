@@ -542,7 +542,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "de": [
@@ -1088,7 +1089,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "de_CH": [
@@ -1634,7 +1636,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "es": [
@@ -2180,7 +2183,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "es_419": [
@@ -2726,7 +2730,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "fr": [
@@ -3272,7 +3277,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "fr_CA": [
@@ -3818,7 +3824,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "id": [
@@ -4364,7 +4371,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "it": [
@@ -4910,7 +4918,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "ja": [
@@ -5456,7 +5465,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "nl": [
@@ -6002,7 +6012,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "pl": [
@@ -6548,7 +6559,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "pt": [
@@ -7094,7 +7106,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "pt_BR": [
@@ -7640,7 +7653,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "pt_PT": [
@@ -8186,7 +8200,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "ru": [
@@ -8732,7 +8747,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "sv": [
@@ -9278,7 +9294,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "vi": [
@@ -9824,7 +9841,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "zh": [
@@ -10370,7 +10388,8 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ],
 
   "zh_Hant": [
@@ -10916,6 +10935,7 @@
     "appLockPromptHint",
     "appLockFaceIdUsage",
     "appLockRelockAfterMinutes",
-    "appLockTurnedOffUnavailable"
+    "appLockTurnedOffUnavailable",
+    "appLockEnablePromptTitle"
   ]
 }

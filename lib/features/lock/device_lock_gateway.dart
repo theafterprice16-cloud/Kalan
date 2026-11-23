@@ -99,6 +99,8 @@ class LocalAuthDeviceLock implements DeviceLockGateway {
     LocalAuthExceptionCode.temporaryLockout,
     LocalAuthExceptionCode.biometricLockout,
     LocalAuthExceptionCode.userRequestedFallback,
+    // A sensor busy for a moment: the passcode or a retry still works.
+    LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable,
   };
 
   @override

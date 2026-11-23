@@ -2819,5 +2819,9 @@
   "appLockTurnedOffUnavailable": "App lock was turned off because your phone couldn't check it's you just now. You can turn it on again.",
   "@appLockTurnedOffUnavailable": {
     "description": "One-time note in Settings after Kalan turned its lock off by itself because the phone could not show its face, fingerprint or passcode check. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'."
+  },
+  "appLockEnablePromptTitle": "Turn on app lock",
+  "@appLockEnablePromptTitle": {
+    "description": "Title of the Android system check dialog when the app lock is being turned on. At most 60 characters. Calm security text. Do not frighten or blame; avoid words like 'unauthorized' or 'breach'."
   }
 }

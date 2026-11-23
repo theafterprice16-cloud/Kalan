@@ -2616,5 +2616,8 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get appLockTurnedOffUnavailable =>
-      'Telefonun kimliğini şu an doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin.';
+      'Telefon şu an kimliğini doğrulayamadığı için uygulama kilidi kapatıldı. İstersen yeniden açabilirsin.';
+
+  @override
+  String get appLockEnablePromptTitle => 'Uygulama kilidini aç';
 }
