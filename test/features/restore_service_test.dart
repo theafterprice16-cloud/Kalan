@@ -120,7 +120,7 @@ void main() {
                   createdAt: ref.read(clockProvider)(),
                 ),
           ),
-        pickedCopyDirectoryProvider.overrideWithValue(() async => temp),
+        pickedCopyDirectoriesProvider.overrideWithValue(() async => [temp]),
         notificationGatewayProvider.overrideWithValue(notifications),
         reminderDebounceProvider.overrideWithValue(Duration.zero),
         storeGatewayProvider.overrideWithValue(store),
@@ -537,13 +537,89 @@ void main() {
       },
     );
 
-    test('a staged copy is never written over by the next restore', () async {
-      // This run's tidy is done; then a restore's rename failed and its
-      // staged copy stayed: the next restore does not start.
+    test(
+      'a backup with no rows went through: the staged copy is kept',
+      () async {
+        final store = c.read(undoCopyStoreProvider);
+        final staged = await copyOfNow();
+        await store.stage(staged);
+        // Only settings in the backup: no id counter moves, but every row
+        // on the phone went.
+        final json = fixtureData()
+          ..['sources'] = <Object?>[]
+          ..['plans'] = <Object?>[]
+          ..['recurringPayments'] = <Object?>[];
+        await restoreBackup(db, BackupData.fromJson(json));
+        await restart();
+        expect(await c.read(undoCopyStoreProvider).read(), staged);
+      },
+    );
+
+    test('a snooze from a notification does not count as a restore', () async {
+      final store = c.read(undoCopyStoreProvider);
+      await store.stage(await copyOfNow());
+      await store.commit();
+      final older = await store.read();
+      await store.stage(await copyOfNow());
+      await db
+          .into(db.reminderSnoozes)
+          .insert(
+            ReminderSnoozesCompanion.insert(
+              kind: 0,
+              fireDay: today.epochDay,
+              minuteOfDay: 600,
+              refs: 'p2',
+            ),
+          );
+      await restart();
+      expect(await c.read(undoCopyStoreProvider).read(), older);
+    });
+
+    test('counters that cannot be read decide nothing', () async {
+      final store = c.read(undoCopyStoreProvider);
+      final staged = await copyOfNow();
+      await store.stage(staged);
+      await expectLater(
+        store.tidy(
+          today: today,
+          sequences: () async => throw StateError('no counters'),
+          currentData: () async => null,
+        ),
+        throwsStateError,
+      );
+      expect(await store.hasStaged(), isTrue);
+      expect(
+        File('${dir.path}/kalan-restore/previous.next.json').readAsStringSync(),
+        staged,
+      );
+    });
+
+    test('a staged copy left in this run is tidied before the next '
+        'restore', () async {
       await c.read(undoTidyProvider.future);
       final store = c.read(undoCopyStoreProvider);
       final staged = await copyOfNow();
       await store.stage(staged);
+      // That restore went through, but its rename failed.
+      await restoreBackup(db, (await read(bytesOf(fixturePlain))).data);
+      final restored = (await collectBackup(db))!;
+      await service().restore(await read(bytesOf(fixturePlain)));
+      expect(await store.hasStaged(), isFalse);
+      // The copy is now of the data the next restore replaced.
+      final copy = await readBackup((await store.read())!);
+      expect(jsonEncode(copy.data.toJson()), jsonEncode(restored.toJson()));
+    });
+
+    test('a staged copy that cannot be tidied stops the next restore and '
+        'is never written over', () async {
+      await c.read(undoTidyProvider.future);
+      final store = c.read(undoCopyStoreProvider);
+      final staged = await copyOfNow();
+      await store.stage(staged);
+      await restoreBackup(db, (await read(bytesOf(fixturePlain))).data);
+      // previous.json is a folder: the staged copy cannot take its place.
+      Directory('${dir.path}/kalan-restore/previous.json')
+          .createSync(recursive: true);
       final before = await everything(db);
       await expectLater(
         service().restore(await read(bytesOf(fixturePlain))),
@@ -609,6 +685,13 @@ void main() {
     );
   });
 
+  test('go back: a copy the system cannot read says so', () async {
+    await seedOther(db);
+    Directory('${dir.path}/kalan-restore/previous.json')
+        .createSync(recursive: true);
+    await expectLater(service().goBack(), fails(RestoreFailure.unreadable));
+  });
+
   group('the picker', () {
     test('its copy in the temporary folder is deleted, nothing else', () async {
       final copy = File('${temp.path}/picked/backup.json')
@@ -622,6 +705,10 @@ void main() {
         ..writeAsBytesSync(bytesOf(fixturePlain));
       picker.file = XFile(own.path);
       expect(await service().pick(), isNotNull);
+      expect(own.existsSync(), isTrue);
+      // Nor through "..".
+      picker.file = XFile('${temp.path}/../${own.uri.pathSegments.last}');
+      await service().pick().catchError((Object _) => null);
       expect(own.existsSync(), isTrue);
     });
   });

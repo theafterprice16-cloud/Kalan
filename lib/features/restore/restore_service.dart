@@ -121,7 +121,11 @@ final undoTidyProvider = FutureProvider<void>((ref) async {
   try {
     await ref
         .read(undoCopyStoreProvider)
-        .tidy(today: ref.read(todayProvider), sequences: () => idSequences(db));
+        .tidy(
+          today: ref.read(todayProvider),
+          sequences: () => idSequences(db),
+          currentData: () async => (await collectBackup(db))?.toJson(),
+        );
   } on Object {
     // The next start tries again; nothing is offered meanwhile.
   }
@@ -130,16 +134,12 @@ final undoTidyProvider = FutureProvider<void>((ref) async {
 /// The database's AUTOINCREMENT counters (table → last id). A restore
 /// that went through counts them up (it never resets them), so the
 /// safety copy records them (see [UndoCopyStore.tidy]).
+/// Throws when they cannot be read (then nothing is decided from them).
 Future<Map<String, int>> idSequences(AppDatabase db) async {
-  try {
-    final rows = await db
-        .customSelect('SELECT name, seq FROM sqlite_sequence')
-        .get();
-    return {for (final r in rows) r.read<String>('name'): r.read<int>('seq')};
-  } on Object {
-    // No table has had a row yet.
-    return const {};
-  }
+  final rows = await db
+      .customSelect('SELECT name, seq FROM sqlite_sequence')
+      .get();
+  return {for (final r in rows) r.read<String>('name'): r.read<int>('seq')};
 }
 
 /// Writes a backup's data over the phone's in one transaction
@@ -183,7 +183,7 @@ class RestoreService {
         if (file.path.isNotEmpty) {
           await deletePickedCopy(
             file.path,
-            await _ref.read(pickedCopyDirectoryProvider)(),
+            await _ref.read(pickedCopyDirectoriesProvider)(),
           );
         }
       } on Object {
@@ -236,7 +236,12 @@ class RestoreService {
   /// start again). "Last backup" goes back to what it was then.
   Future<void> goBack() async {
     final store = _ref.read(undoCopyStoreProvider);
-    final text = await store.read();
+    final String? text;
+    try {
+      text = await store.read();
+    } on Object {
+      throw const RestoreException(RestoreFailure.unreadable);
+    }
     final copy = await store.info();
     if (text == null || copy == null) {
       throw const RestoreException(RestoreFailure.unreadable);
@@ -257,7 +262,12 @@ class RestoreService {
     // before), no restore starts over it.
     await _ref.read(undoTidyProvider.future);
     try {
-      if (await store.hasStaged()) throw StateError('staged copy');
+      if (await store.hasStaged()) {
+        // Tidy once more (it may have failed at the start), then ask again.
+        _ref.invalidate(undoTidyProvider);
+        await _ref.read(undoTidyProvider.future);
+        if (await store.hasStaged()) throw StateError('staged copy');
+      }
     } on Object {
       throw const RestoreException(RestoreFailure.copyFailed);
     }

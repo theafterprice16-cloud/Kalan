@@ -55,6 +55,8 @@ class _UndoCopyTileState extends ConsumerState<UndoCopyTile> {
       message = e.failure == RestoreFailure.copyFailed
           ? l10n.restoreErrorCopy
           : l10n.undoFailed;
+    } on Object {
+      message = l10n.undoFailed;
     } finally {
       if (mounted) setState(() => _busy = false);
     }

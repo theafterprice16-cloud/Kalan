@@ -126,12 +126,13 @@ class UndoCopyStore {
 
   /// Once per start, before the copy is offered or a restore starts:
   ///
-  /// - a staged copy left by a restore that stopped halfway: if the
-  ///   database's id counters ([sequences] now) went past those it
-  ///   recorded, the restore went through and it becomes the copy;
-  ///   otherwise the restore never happened and it goes. Should its
-  ///   record not read, it is kept (the safer side: it may be the only
-  ///   copy of the data from before);
+  /// - a staged copy left by a restore that stopped halfway goes only
+  ///   when the restore surely never happened: the id counters of the
+  ///   user's data ([sequences] now, see [restoreCountedTables]) are those
+  ///   it recorded AND the data on the phone ([currentData], the data
+  ///   object of a backup of it now) is what it copied. Otherwise it
+  ///   becomes the copy (the safer side: it may be the only copy of the
+  ///   data from before), also when its record does not read;
   /// - a copy older than [undoCopyDays] days on [today] is deleted, and
   ///   so is one whose content does not read.
   ///
@@ -140,19 +141,31 @@ class UndoCopyStore {
   Future<void> tidy({
     required LocalDate today,
     required Future<Map<String, int>> Function() sequences,
+    required Future<Object?> Function() currentData,
   }) async {
     await _delete(await _file(_partial));
     final staged = await _readText(_next);
     if (staged != null) {
       final recorded = _sequencesIn(staged);
       final now = await sequences();
-      final happened =
-          recorded == null ||
-          now.entries.any((e) => e.value > (recorded[e.key] ?? 0));
-      if (happened) {
-        await commit();
-      } else {
+      final countersSame =
+          recorded != null &&
+          restoreCountedTables.every(
+            (t) => (now[t] ?? 0) == (recorded[t] ?? 0),
+          );
+      var dataSame = false;
+      if (countersSame) {
+        final stagedData = (jsonDecode(staged) as Map<String, Object?>)['data'];
+        final current = await currentData();
+        dataSame =
+            stagedData != null &&
+            current != null &&
+            jsonEncode(stagedData) == jsonEncode(current);
+      }
+      if (countersSame && dataSame) {
         await discard();
+      } else {
+        await commit();
       }
     }
     final text = await read();
@@ -209,16 +222,31 @@ class UndoCopyStore {
   }
 }
 
-/// Deletes the copy of a picked file the system's picker left in the
-/// app's temporary folder [temp] (Android copies the file to the cache,
-/// iPhone to tmp): it may be a backup without a password. Files anywhere
-/// else are never touched.
-Future<void> deletePickedCopy(String path, Directory temp) async {
+/// The tables whose id counters tell that a restore wrote rows: the
+/// user's data only (a snooze from a notification counts up its own).
+const restoreCountedTables = {
+  'sources',
+  'plans',
+  'payments',
+  'recurring_payments',
+};
+
+/// Deletes the copy of a picked file the system's picker left in one of
+/// the app's temporary folders [roots] (Android copies the file to its
+/// cache, iPhone to tmp): it may be a backup without a password. Files
+/// anywhere else are never touched, nor a path with "..".
+Future<void> deletePickedCopy(String path, List<Directory> roots) async {
   if (path.isEmpty) return;
-  final root = temp.absolute.path;
   final file = File(path).absolute;
-  if (!file.path.startsWith(root.endsWith('/') ? root : '$root/')) return;
-  await UndoCopyStore._delete(file);
+  final segments = file.uri.pathSegments;
+  if (segments.contains('..') || segments.contains('.')) return;
+  for (final root in roots) {
+    final base = root.absolute.path;
+    if (file.path.startsWith(base.endsWith('/') ? base : '$base/')) {
+      await UndoCopyStore._delete(file);
+      return;
+    }
+  }
 }
 
 /// "2026-11-19"; null for anything else.
@@ -232,11 +260,14 @@ LocalDate? _parseDay(String text) {
   return LocalDate(y, mo, d);
 }
 
-/// Where a picker leaves its copy of the picked file (see
-/// [deletePickedCopy]). Overridden in tests.
-final pickedCopyDirectoryProvider = Provider<Future<Directory> Function()>(
-  (ref) => getTemporaryDirectory,
-);
+/// Where a picker may leave its copy of the picked file (see
+/// [deletePickedCopy]): the app's temporary folders (on iPhone the
+/// picker's tmp is not the one path_provider gives). Overridden in tests.
+final pickedCopyDirectoriesProvider =
+    Provider<Future<List<Directory>> Function()>(
+      (ref) =>
+          () async => [await getTemporaryDirectory(), Directory.systemTemp],
+    );
 
 final undoCopyStoreProvider = Provider(
   (ref) => UndoCopyStore(ref.watch(undoDirectoryProvider)),
