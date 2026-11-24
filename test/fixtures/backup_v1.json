@@ -1,0 +1,308 @@
+{
+  "format": "kalan-backup",
+  "formatVersion": 1,
+  "appVersion": "1.0.0+1",
+  "createdAt": "2026-11-19T07:30:05Z",
+  "currency": "TRY",
+  "encrypted": false,
+  "dataSha256": "7fbf6752c55474797f784b080e8a486464307ad556c58ebdcf891415020f34c3",
+  "data": {
+    "settings": {
+      "currency": "TRY",
+      "payFrequency": "biweekly",
+      "payDay": 15,
+      "payAnchorDate": "2026-11-06",
+      "netIncome": 4500000,
+      "tightThreshold": 500000,
+      "reminders": {
+        "enabled": false,
+        "leadDays": 5,
+        "minuteOfDay": 1230,
+        "showAmounts": false,
+        "repeatMode": "daily",
+        "paydaySummary": false
+      },
+      "lastPayLaterRule": {
+        "kind": "nextMonthDay",
+        "value": 10
+      },
+      "lastAmountEntry": "installment",
+      "holidayCountry": "TR",
+      "appliedHolidays": {
+        "country": "TR",
+        "weekendDays": [
+          6,
+          7
+        ],
+        "lastYear": 2028,
+        "days": [
+          "2026-10-29"
+        ]
+      }
+    },
+    "sources": [
+      {
+        "id": 1,
+        "name": "Bonus, \"Gold\"",
+        "kind": "card",
+        "statementDay": 25,
+        "dueDay": 5,
+        "moveDueToBusinessDay": false,
+        "moveDueForHolidays": false,
+        "statementReminder": {
+          "enabled": true,
+          "daysBefore": 1
+        },
+        "createdAt": "2026-01-02T03:04:05Z"
+      },
+      {
+        "id": 2,
+        "name": "Maaş hesabı",
+        "kind": "account",
+        "statementDay": null,
+        "dueDay": null,
+        "moveDueToBusinessDay": true,
+        "moveDueForHolidays": true,
+        "statementReminder": {
+          "enabled": false,
+          "daysBefore": 2
+        },
+        "createdAt": "2026-01-03T00:00:00Z"
+      },
+      {
+        "id": 3,
+        "name": "Klarna",
+        "kind": "provider",
+        "statementDay": null,
+        "dueDay": null,
+        "moveDueToBusinessDay": true,
+        "moveDueForHolidays": true,
+        "statementReminder": {
+          "enabled": false,
+          "daysBefore": 2
+        },
+        "createdAt": "2026-01-04T00:00:00Z"
+      }
+    ],
+    "plans": [
+      {
+        "id": 1,
+        "sourceId": 1,
+        "title": "=TOPLAM",
+        "kind": "card",
+        "installmentCount": 3,
+        "purchaseDate": "2026-10-10",
+        "deferMonths": 1,
+        "isCashAdvance": true,
+        "origin": "manual",
+        "createdAt": "2026-10-10T08:00:00Z",
+        "reminders": {
+          "enabled": false,
+          "leadDays": 7
+        },
+        "repeatMode": "evening",
+        "payLaterRule": null,
+        "intervalDays": 30,
+        "paymentMethod": "automatic",
+        "chargeSourceId": 2,
+        "status": "closed",
+        "closeReason": "refund",
+        "heldSince": "2026-11-01",
+        "holdCheckFrom": "2026-11-02",
+        "reopenedOn": "2026-11-03",
+        "closedOn": "2026-11-04",
+        "installmentFee": 1500,
+        "installmentFeeScope": "firstPaymentOnly",
+        "productPrice": 900000,
+        "payments": [
+          {
+            "seq": 2,
+            "dueDate": "2026-12-07",
+            "amount": 333334,
+            "paidAt": "2026-12-01T09:30:15Z",
+            "isEdited": true,
+            "paidBeforeKalan": false,
+            "paidOn": "2026-12-02",
+            "originalDueDate": "2026-12-05",
+            "extraFee": 600,
+            "extraFeeNote": "Gecikme, \"faiz\"",
+            "installmentFee": 1500
+          },
+          {
+            "seq": 3,
+            "dueDate": "2027-01-05",
+            "amount": 333333,
+            "paidAt": null,
+            "isEdited": false,
+            "paidBeforeKalan": false,
+            "paidOn": null,
+            "originalDueDate": null,
+            "extraFee": null,
+            "extraFeeNote": null,
+            "installmentFee": null
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "sourceId": null,
+        "title": null,
+        "kind": "payLater",
+        "installmentCount": 1,
+        "purchaseDate": null,
+        "deferMonths": 0,
+        "isCashAdvance": false,
+        "origin": "template",
+        "createdAt": "2026-09-01T00:00:00Z",
+        "reminders": {
+          "enabled": true,
+          "leadDays": null
+        },
+        "repeatMode": null,
+        "payLaterRule": {
+          "kind": "days",
+          "value": 30
+        },
+        "intervalDays": null,
+        "paymentMethod": null,
+        "chargeSourceId": null,
+        "status": "open",
+        "closeReason": null,
+        "heldSince": null,
+        "holdCheckFrom": null,
+        "reopenedOn": null,
+        "closedOn": null,
+        "installmentFee": null,
+        "installmentFeeScope": "everyPayment",
+        "productPrice": null,
+        "payments": [
+          {
+            "seq": 1,
+            "dueDate": "2026-12-14",
+            "amount": 125050,
+            "paidAt": "2026-09-01T00:00:00Z",
+            "isEdited": false,
+            "paidBeforeKalan": true,
+            "paidOn": null,
+            "originalDueDate": null,
+            "extraFee": null,
+            "extraFeeNote": null,
+            "installmentFee": null
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "sourceId": 3,
+        "title": null,
+        "kind": "payIn4",
+        "installmentCount": 1,
+        "purchaseDate": null,
+        "deferMonths": 0,
+        "isCashAdvance": false,
+        "origin": "template",
+        "createdAt": "2026-08-01T00:00:00Z",
+        "reminders": {
+          "enabled": true,
+          "leadDays": null
+        },
+        "repeatMode": null,
+        "payLaterRule": null,
+        "intervalDays": null,
+        "paymentMethod": null,
+        "chargeSourceId": null,
+        "status": "onHold",
+        "closeReason": null,
+        "heldSince": "2026-11-10",
+        "holdCheckFrom": null,
+        "reopenedOn": null,
+        "closedOn": null,
+        "installmentFee": null,
+        "installmentFeeScope": "everyPayment",
+        "productPrice": null,
+        "payments": [
+          {
+            "seq": 1,
+            "dueDate": "2026-12-01",
+            "amount": 10000,
+            "paidAt": null,
+            "isEdited": false,
+            "paidBeforeKalan": false,
+            "paidOn": null,
+            "originalDueDate": null,
+            "extraFee": null,
+            "extraFeeNote": null,
+            "installmentFee": null
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "sourceId": 3,
+        "title": "Mont",
+        "kind": "monthly",
+        "installmentCount": 1,
+        "purchaseDate": null,
+        "deferMonths": 0,
+        "isCashAdvance": false,
+        "origin": "template",
+        "createdAt": "2026-07-01T00:00:00Z",
+        "reminders": {
+          "enabled": true,
+          "leadDays": null
+        },
+        "repeatMode": null,
+        "payLaterRule": null,
+        "intervalDays": null,
+        "paymentMethod": null,
+        "chargeSourceId": null,
+        "status": "open",
+        "closeReason": null,
+        "heldSince": null,
+        "holdCheckFrom": null,
+        "reopenedOn": null,
+        "closedOn": null,
+        "installmentFee": null,
+        "installmentFeeScope": "everyPayment",
+        "productPrice": null,
+        "payments": [
+          {
+            "seq": 1,
+            "dueDate": "2026-08-01",
+            "amount": 50000,
+            "paidAt": "2026-08-01T12:00:00Z",
+            "isEdited": false,
+            "paidBeforeKalan": false,
+            "paidOn": null,
+            "originalDueDate": null,
+            "extraFee": null,
+            "extraFeeNote": null,
+            "installmentFee": null
+          }
+        ]
+      }
+    ],
+    "recurringPayments": [
+      {
+        "id": 1,
+        "name": "Kira",
+        "amount": 1500000,
+        "recurrence": "monthly",
+        "startDate": "2026-01-01",
+        "endDate": "2027-12-01",
+        "createdAt": "2026-01-01T10:00:00Z",
+        "reminders": {
+          "enabled": false,
+          "leadDays": 3
+        },
+        "repeatMode": "daily",
+        "paidOccurrences": [
+          {
+            "date": "2026-11-01",
+            "paidAt": "2026-11-01T18:00:00Z"
+          }
+        ]
+      }
+    ]
+  }
+}
