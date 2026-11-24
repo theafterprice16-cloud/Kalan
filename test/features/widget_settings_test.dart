@@ -203,7 +203,10 @@ void main() {
     // Again: not a second Pro screen; one back goes home.
     gateway.tap(WidgetTap.pro);
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('pro-screen'), skipOffstage: false),
+      findsOneWidget,
+    );
     router.pop();
     await tester.pumpAndSettle();
     expect(router.state.uri.toString(), Routes.home);

@@ -339,8 +339,9 @@ struct KalanLockScreenView: View {
         content
             .environment(\.layoutDirection, entry.rtl ? .rightToLeft : .leftToRight)
             .widgetURL(gated ? KalanWidgetConfig.proURL : KalanWidgetConfig.tapURL)
-            // Larger text up to where "Left …" still fits on one line.
-            .dynamicTypeSize(...DynamicTypeSize.xxLarge)
+            // Larger text up to where "Left …" still fits on one line of
+            // the narrowest rectangular widget (iPhone mini and SE).
+            .dynamicTypeSize(...DynamicTypeSize.xLarge)
             .lockScreenBackground(circular: family == .accessoryCircular)
     }
 
