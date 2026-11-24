@@ -12,6 +12,7 @@ import '../../core/backup/backup_summary.dart';
 import '../../core/date/local_date.dart';
 import '../../data/backup/backup_collector.dart';
 import '../../data/backup/backup_restorer.dart';
+import '../../data/db/app_database.dart';
 import '../export/backup_prefs.dart';
 import '../reminders/reminder_providers.dart';
 import 'restore_undo.dart';
@@ -113,20 +114,40 @@ final undoCopyProvider = FutureProvider<UndoCopy?>((ref) async {
 });
 
 /// Once per start: finishes a restore that stopped halfway and deletes a
-/// copy older than 30 days (decision 1). Best effort.
+/// copy older than 30 days (decision 1). Best effort: should it fail, a
+/// staged copy stays and no restore starts until a later start tidies it.
 final undoTidyProvider = FutureProvider<void>((ref) async {
   final db = ref.watch(databaseProvider);
   try {
     await ref
         .read(undoCopyStoreProvider)
-        .tidy(
-          today: ref.read(todayProvider),
-          currentData: () async => (await collectBackup(db))?.toJson(),
-        );
+        .tidy(today: ref.read(todayProvider), sequences: () => idSequences(db));
   } on Object {
     // The next start tries again; nothing is offered meanwhile.
   }
 });
+
+/// The database's AUTOINCREMENT counters (table → last id). A restore
+/// that went through counts them up (it never resets them), so the
+/// safety copy records them (see [UndoCopyStore.tidy]).
+Future<Map<String, int>> idSequences(AppDatabase db) async {
+  try {
+    final rows = await db
+        .customSelect('SELECT name, seq FROM sqlite_sequence')
+        .get();
+    return {for (final r in rows) r.read<String>('name'): r.read<int>('seq')};
+  } on Object {
+    // No table has had a row yet.
+    return const {};
+  }
+}
+
+/// Writes a backup's data over the phone's in one transaction
+/// ([restoreBackup]). Overridden in tests that force a failure halfway.
+final restoreWriterProvider =
+    Provider<Future<void> Function(AppDatabase, BackupData)>(
+      (ref) => restoreBackup,
+    );
 
 /// Picks, reads and restores a backup (Roadmap 30), and goes back to the
 /// data from before it.
@@ -135,8 +156,11 @@ class RestoreService {
 
   final Ref _ref;
 
-  /// The picked file's bytes, or null when the picker was closed. More
-  /// than 50 MB is refused before it is read.
+  /// The picked file's bytes, or null when the picker was closed (on
+  /// iPhone also for a file the system could not hand over, which the
+  /// picker does not tell apart). More than 50 MB is refused before Kalan
+  /// reads it (on Android the system picker has already copied it by
+  /// then). The copy the picker leaves in the temporary folder is deleted.
   Future<Uint8List?> pick() async {
     final XFile? file;
     try {
@@ -154,6 +178,17 @@ class RestoreService {
       rethrow;
     } on Object {
       throw const RestoreException(RestoreFailure.unreadable);
+    } finally {
+      try {
+        if (file.path.isNotEmpty) {
+          await deletePickedCopy(
+            file.path,
+            await _ref.read(pickedCopyDirectoryProvider)(),
+          );
+        }
+      } on Object {
+        // The system clears its cache too.
+      }
     }
   }
 
@@ -217,6 +252,15 @@ class RestoreService {
     final db = _ref.read(databaseProvider);
     final store = _ref.read(undoCopyStoreProvider);
     final prefs = _ref.read(backupPrefsProvider);
+    // A restore that stopped halfway is finished first; while its staged
+    // copy is still there (it may be the only copy of the data from
+    // before), no restore starts over it.
+    await _ref.read(undoTidyProvider.future);
+    try {
+      if (await store.hasStaged()) throw StateError('staged copy');
+    } on Object {
+      throw const RestoreException(RestoreFailure.copyFailed);
+    }
     var staged = false;
     try {
       // One transaction from the copy to the last row written, so a
@@ -224,18 +268,25 @@ class RestoreService {
       await db.transaction(() async {
         final current = await collectBackup(db);
         if (current != null) {
-          // The copy first, on disk in full; without it nothing goes on.
+          // The copy first, on disk in full and able to come back;
+          // without it nothing goes on.
           try {
+            current.validate();
+            final sequences = await idSequences(db);
             final text = await _ref.read(undoCopyWriterProvider)(current);
             await store.stage(
-              UndoCopyStore.withDevice(text, prefs.lastFullBackup),
+              UndoCopyStore.withDevice(
+                text,
+                prefs.lastFullBackup,
+                sequences: sequences,
+              ),
             );
             staged = true;
           } on Object {
             throw const RestoreException(RestoreFailure.copyFailed);
           }
         }
-        await restoreBackup(db, data);
+        await _ref.read(restoreWriterProvider)(db, data);
       });
     } on Object catch (e) {
       await _quietly(store.discard);

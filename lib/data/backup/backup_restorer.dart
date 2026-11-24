@@ -8,8 +8,8 @@ import '../db/app_database.dart';
 
 /// Puts a backup's data in place of everything the user has (Roadmap 30),
 /// in one transaction: should anything fail, nothing changes at all.
-/// The inverse of `collectBackup`; [data] must already be validated
-/// ([BackupData.validate], which `readBackup` does).
+/// The inverse of `collectBackup`. [data] is validated
+/// ([BackupData.validate]) before anything is touched.
 ///
 /// - Every row of user data goes: sources and cards, plans and their
 ///   payments, recurring payments and their paid occurrences, and the
@@ -35,6 +35,8 @@ Future<void> restoreBackup(
   BackupData data, {
   @visibleForTesting Future<void> Function()? debugBeforeCommit,
 }) => db.transaction(() async {
+  // Checked once more here, so nothing unchecked is ever written.
+  data.validate();
   final device = await db.select(db.appSettings).getSingleOrNull();
 
   // Children first: plans point at sources without a delete rule.

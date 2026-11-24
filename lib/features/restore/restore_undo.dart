@@ -49,7 +49,8 @@ final undoDirectoryProvider = Provider<Future<Directory> Function()>(
 ///    fail, [discard] deletes it and `previous.json` stays as it was.
 ///
 /// Should the app stop between 2 and 3, [tidy] on the next start finishes
-/// the job (see there).
+/// the job (see there). A staged copy still there blocks the next restore
+/// until then ([hasStaged]), so it is never written over.
 class UndoCopyStore {
   UndoCopyStore(this._directory);
 
@@ -67,12 +68,26 @@ class UndoCopyStore {
     return File('${dir.path}/$name');
   }
 
-  /// The copy's file text with this phone's [lastFullBackup] added.
-  static String withDevice(String backupText, LocalDate? lastFullBackup) {
+  /// The copy's file text with this phone's [lastFullBackup] added, and
+  /// the database's id counters ([sequences], table → last id) as they
+  /// were before the restore: a restore that went through always counts
+  /// them up, which is how [tidy] tells it happened.
+  static String withDevice(
+    String backupText,
+    LocalDate? lastFullBackup, {
+    Map<String, int> sequences = const {},
+  }) {
     final json = jsonDecode(backupText) as Map<String, Object?>;
-    json[_deviceField] = {'lastFullBackup': lastFullBackup?.toString()};
+    json[_deviceField] = {
+      'lastFullBackup': lastFullBackup?.toString(),
+      'sequences': sequences,
+    };
     return '${const JsonEncoder.withIndent('  ').convert(json)}\n';
   }
+
+  /// Whether a staged copy is waiting: a restore stopped halfway and is
+  /// not tidied yet. No new restore starts over it.
+  Future<bool> hasStaged() async => (await _file(_next)).existsSync();
 
   /// Writes [text] as the copy waiting for its restore. Throws when it
   /// cannot be written in full; then the restore must not go on.
@@ -95,49 +110,70 @@ class UndoCopyStore {
     await _delete(await _file(_partial));
   }
 
-  /// The copy's file text, or null when there is none.
+  /// The copy's file text, or null when there is none. Throws when the
+  /// file is there but cannot be read.
   Future<String?> read() => _readText(_current);
 
   /// What [read] holds, or null when there is none or it does not read.
   Future<UndoCopy?> info() async {
-    final text = await read();
-    return text == null ? null : _info(text);
+    try {
+      final text = await read();
+      return text == null ? null : _info(text);
+    } on Object {
+      return null;
+    }
   }
 
-  /// Once per start, before the copy is offered:
+  /// Once per start, before the copy is offered or a restore starts:
   ///
-  /// - a staged copy left by a restore that stopped halfway: if the data
-  ///   on the phone is still what it copied ([currentData], the data
-  ///   object of a backup of the phone now), the restore never happened
-  ///   and the staged copy goes; otherwise the restore went through and
-  ///   it becomes the copy;
+  /// - a staged copy left by a restore that stopped halfway: if the
+  ///   database's id counters ([sequences] now) went past those it
+  ///   recorded, the restore went through and it becomes the copy;
+  ///   otherwise the restore never happened and it goes. Should its
+  ///   record not read, it is kept (the safer side: it may be the only
+  ///   copy of the data from before);
   /// - a copy older than [undoCopyDays] days on [today] is deleted, and
-  ///   so is one that does not read.
+  ///   so is one whose content does not read.
+  ///
+  /// A file that cannot be read at all (an error from the system) is left
+  /// as it is and the error goes to the caller.
   Future<void> tidy({
     required LocalDate today,
-    required Future<Object?> Function() currentData,
+    required Future<Map<String, int>> Function() sequences,
   }) async {
     await _delete(await _file(_partial));
     final staged = await _readText(_next);
     if (staged != null) {
-      Object? stagedData;
-      try {
-        stagedData = (jsonDecode(staged) as Map<String, Object?>)['data'];
-      } on Object {
-        stagedData = null;
-      }
-      final now = await currentData();
-      if (stagedData != null &&
-          now != null &&
-          jsonEncode(stagedData) == jsonEncode(now)) {
-        await discard();
-      } else {
+      final recorded = _sequencesIn(staged);
+      final now = await sequences();
+      final happened =
+          recorded == null ||
+          now.entries.any((e) => e.value > (recorded[e.key] ?? 0));
+      if (happened) {
         await commit();
+      } else {
+        await discard();
       }
     }
-    final copy = await info();
+    final text = await read();
+    if (text == null) return;
+    final copy = _info(text);
     if (copy == null || !undoCopyKept(copiedOn: copy.copiedOn, today: today)) {
       await _delete(await _file(_current));
+    }
+  }
+
+  static Map<String, int>? _sequencesIn(String text) {
+    try {
+      final json = jsonDecode(text) as Map<String, Object?>;
+      final device = json[_deviceField]! as Map<String, Object?>;
+      return {
+        for (final MapEntry(:key, :value)
+            in (device['sequences']! as Map<String, Object?>).entries)
+          key: value! as int,
+      };
+    } on Object {
+      return null;
     }
   }
 
@@ -160,14 +196,8 @@ class UndoCopyStore {
 
   Future<String?> _readText(String name) async {
     final file = await _file(name);
-    try {
-      if (!file.existsSync()) return null;
-      return await file.readAsString();
-    } on FileSystemException {
-      return null;
-    } on FormatException {
-      return null;
-    }
+    if (!file.existsSync()) return null;
+    return file.readAsString();
   }
 
   static Future<void> _delete(File file) async {
@@ -177,6 +207,18 @@ class UndoCopyStore {
       // Gone already.
     }
   }
+}
+
+/// Deletes the copy of a picked file the system's picker left in the
+/// app's temporary folder [temp] (Android copies the file to the cache,
+/// iPhone to tmp): it may be a backup without a password. Files anywhere
+/// else are never touched.
+Future<void> deletePickedCopy(String path, Directory temp) async {
+  if (path.isEmpty) return;
+  final root = temp.absolute.path;
+  final file = File(path).absolute;
+  if (!file.path.startsWith(root.endsWith('/') ? root : '$root/')) return;
+  await UndoCopyStore._delete(file);
 }
 
 /// "2026-11-19"; null for anything else.
@@ -189,6 +231,12 @@ LocalDate? _parseDay(String text) {
   }
   return LocalDate(y, mo, d);
 }
+
+/// Where a picker leaves its copy of the picked file (see
+/// [deletePickedCopy]). Overridden in tests.
+final pickedCopyDirectoryProvider = Provider<Future<Directory> Function()>(
+  (ref) => getTemporaryDirectory,
+);
 
 final undoCopyStoreProvider = Provider(
   (ref) => UndoCopyStore(ref.watch(undoDirectoryProvider)),

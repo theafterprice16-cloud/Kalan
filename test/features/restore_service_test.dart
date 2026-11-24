@@ -14,8 +14,10 @@ import 'package:kalan/app/providers.dart';
 import 'package:kalan/core/backup/backup_data.dart';
 import 'package:kalan/core/backup/backup_file.dart';
 import 'package:kalan/core/date/local_date.dart';
+import 'package:kalan/core/engine/engine.dart' show PayFrequency;
 import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:kalan/data/backup/backup_collector.dart';
+import 'package:kalan/data/backup/backup_restorer.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/entitlement/pro_controller.dart';
 import 'package:kalan/entitlement/pro_rules.dart';
@@ -82,6 +84,7 @@ Map<String, Object?> fixtureData() =>
 void main() {
   late AppDatabase db;
   late Directory dir;
+  late Directory temp;
   late FakePicker picker;
   late MemoryBackupPrefsStore prefs;
   late FakeNotificationGateway notifications;
@@ -92,6 +95,7 @@ void main() {
   ProviderContainer make({
     Directory? undoDir,
     List<Override> extra = const [],
+    bool real = false,
   }) {
     final container = ProviderContainer(
       overrides: [
@@ -106,14 +110,17 @@ void main() {
         backupPrefsStoreProvider.overrideWithValue(prefs),
         // On the spot (the isolate is tested on its own below).
         backupReaderProvider.overrideWithValue(readBackupRequest),
-        undoCopyWriterProvider.overrideWith(
-          (ref) =>
-              (data) => writeBackup(
-                data,
-                appVersion: '1.0.0+1',
-                createdAt: ref.read(clockProvider)(),
-              ),
-        ),
+        // Real: in its own isolate, as in the app.
+        if (!real)
+          undoCopyWriterProvider.overrideWith(
+            (ref) =>
+                (data) => writeBackup(
+                  data,
+                  appVersion: '1.0.0+1',
+                  createdAt: ref.read(clockProvider)(),
+                ),
+          ),
+        pickedCopyDirectoryProvider.overrideWithValue(() async => temp),
         notificationGatewayProvider.overrideWithValue(notifications),
         reminderDebounceProvider.overrideWithValue(Duration.zero),
         storeGatewayProvider.overrideWithValue(store),
@@ -132,6 +139,7 @@ void main() {
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
     dir = Directory.systemTemp.createTempSync('kalan-restore-test');
+    temp = Directory.systemTemp.createTempSync('kalan-picked-test');
     picker = FakePicker();
     prefs = MemoryBackupPrefsStore();
     notifications = FakeNotificationGateway();
@@ -143,6 +151,7 @@ void main() {
   tearDown(() async {
     await db.close();
     dir.deleteSync(recursive: true);
+    temp.deleteSync(recursive: true);
   });
 
   RestoreService service() => c.read(restoreServiceProvider);
@@ -391,9 +400,30 @@ void main() {
       });
     }
 
-    test('example 6: writing fails halfway', () async {
+    test('example 6: writing fails halfway (forced)', () async {
+      c.dispose();
+      c = make(
+        extra: [
+          restoreWriterProvider.overrideWithValue(
+            (db, data) => restoreBackup(
+              db,
+              data,
+              debugBeforeCommit: () async => throw StateError('forced'),
+            ),
+          ),
+        ],
+      );
+      await expectLater(
+        service().restore(await read(bytesOf(fixturePlain))),
+        fails(RestoreFailure.unreadable),
+      );
+      await expectUnchanged();
+      expect(await c.read(undoCopyStoreProvider).hasStaged(), isFalse);
+    });
+
+    test('data that does not validate is not written', () async {
       final good = await read(bytesOf(fixturePlain));
-      // Past validation: a title the database refuses.
+      // A title over 80 characters, past the reader's check.
       final json = good.data.toJson();
       ((json['plans']! as List).last as Map)['title'] = 'x' * 81;
       final bad = BackupContents(
@@ -467,41 +497,132 @@ void main() {
         createdAt: DateTime(2026, 11, 23, 12),
       ),
       null,
+      sequences: await idSequences(db),
     );
 
-    test('before the database changed: the staged copy goes', () async {
-      final store = c.read(undoCopyStoreProvider);
-      // An older copy, then a staged one of the data as it still is.
-      await store.stage(await copyOfNow());
-      await store.commit();
-      await db
-          .into(db.sources)
-          .insert(
-            SourcesCompanion.insert(
-              name: 'Sonra eklendi',
-              kind: SourceKind.provider,
-              createdAt: Value(DateTime.utc(2026, 11, 22)),
-            ),
-          );
-      await store.stage(await copyOfNow());
-      final older = await store.read();
-      // The staged one is of the data now; the older copy is not.
+    Future<void> restart() async {
       c.dispose();
       c = make();
       await c.read(undoTidyProvider.future);
+    }
+
+    test('the restore never happened: the staged copy goes, the older '
+        'copy stays', () async {
+      final store = c.read(undoCopyStoreProvider);
+      await store.stage(await copyOfNow());
+      await store.commit();
+      final older = await store.read();
+      // A later restore staged its copy, then its transaction rolled back
+      // (no new ids); meanwhile the holiday sync changed a setting.
+      await store.stage(await copyOfNow());
+      await db
+          .update(db.appSettings)
+          .write(const AppSettingsCompanion(holidayCountry: Value('TR')));
+      await restart();
       expect(await c.read(undoCopyStoreProvider).read(), older);
+      expect(await c.read(undoCopyStoreProvider).hasStaged(), isFalse);
     });
 
-    test('after the database changed: the staged copy is kept', () async {
+    test(
+      'the restore went through: the staged copy becomes the copy',
+      () async {
+        final store = c.read(undoCopyStoreProvider);
+        final staged = await copyOfNow();
+        await store.stage(staged);
+        // The transaction wrote new rows (ids count up), then the app
+        // stopped before the rename.
+        await restoreBackup(db, (await read(bytesOf(fixturePlain))).data);
+        await restart();
+        expect(await c.read(undoCopyStoreProvider).read(), staged);
+      },
+    );
+
+    test('a staged copy is never written over by the next restore', () async {
+      // This run's tidy is done; then a restore's rename failed and its
+      // staged copy stayed: the next restore does not start.
+      await c.read(undoTidyProvider.future);
       final store = c.read(undoCopyStoreProvider);
       final staged = await copyOfNow();
       await store.stage(staged);
-      // The restore went through before the app stopped.
-      await db.delete(db.payments).go();
-      c.dispose();
-      c = make();
-      await c.read(undoTidyProvider.future);
-      expect(await c.read(undoCopyStoreProvider).read(), staged);
+      final before = await everything(db);
+      await expectLater(
+        service().restore(await read(bytesOf(fixturePlain))),
+        fails(RestoreFailure.copyFailed),
+      );
+      expect(await everything(db), before);
+      expect(
+        File('${dir.path}/kalan-restore/previous.next.json').readAsStringSync(),
+        staged,
+      );
+    });
+
+    test('a copy the system cannot read is left alone', () async {
+      // previous.json is a folder: reading it fails.
+      Directory('${dir.path}/kalan-restore/previous.json')
+          .createSync(recursive: true);
+      await restart();
+      expect(
+        Directory('${dir.path}/kalan-restore/previous.json').existsSync(),
+        isTrue,
+      );
+      expect(await c.read(undoCopyProvider.future), isNull);
+    });
+  });
+
+  group('the safety copy must be able to come back', () {
+    test(
+      'weekly pay without a known payday: the restore does not start',
+      () async {
+        await db
+            .into(db.appSettings)
+            .insert(
+              AppSettingsCompanion.insert(
+                currencyCode: 'EUR',
+                payFrequency: PayFrequency.weekly,
+              ),
+            );
+        final before = await everything(db);
+        await expectLater(
+          service().restore(await read(bytesOf(fixturePlain))),
+          fails(RestoreFailure.copyFailed),
+        );
+        expect(await everything(db), before);
+        expect(dir.listSync(recursive: true).whereType<File>(), isEmpty);
+      },
+    );
+
+    test(
+      'the real writer, in its own isolate, inside the transaction',
+      () async {
+        await seedOther(db);
+        c.dispose();
+        c = make(real: true);
+        await service().restore(await read(bytesOf(fixturePlain)));
+        expect((await collectBackup(db))!.settings.currency, 'TRY');
+        final copy = await readBackup(
+          (await c.read(undoCopyStoreProvider).read())!,
+        );
+        expect(copy.data.settings.currency, 'EUR');
+        await service().goBack();
+        expect((await collectBackup(db))!.settings.currency, 'EUR');
+      },
+    );
+  });
+
+  group('the picker', () {
+    test('its copy in the temporary folder is deleted, nothing else', () async {
+      final copy = File('${temp.path}/picked/backup.json')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(bytesOf(fixturePlain));
+      picker.file = XFile(copy.path);
+      expect(await service().pick(), isNotNull);
+      expect(copy.existsSync(), isFalse);
+      // A file elsewhere (the user's own) stays.
+      final own = File('${dir.path}/own.json')
+        ..writeAsBytesSync(bytesOf(fixturePlain));
+      picker.file = XFile(own.path);
+      expect(await service().pick(), isNotNull);
+      expect(own.existsSync(), isTrue);
     });
   });
 

@@ -63,6 +63,7 @@ List<Override> restoreOverrides(FakePicker picker, Directory undoDir) => [
   backupFilePickerProvider.overrideWithValue(picker),
   backupReaderProvider.overrideWithValue(fakeRead),
   undoDirectoryProvider.overrideWithValue(() async => undoDir),
+  pickedCopyDirectoryProvider.overrideWithValue(() async => undoDir),
   undoCopyWriterProvider.overrideWithValue(
     (data) => writeBackup(
       data,

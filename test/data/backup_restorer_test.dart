@@ -243,10 +243,9 @@ void main() {
       expect(await everything(target), before);
     });
 
-    test('a row the database refuses rolls everything back', () async {
+    test('data that does not validate is refused before any write', () async {
       final before = await everything(target);
-      // Past validation (a title over 80 characters): the database
-      // refuses it halfway through the writing.
+      // A title over 80 characters (also too long for the database).
       final json = backup.toJson();
       final plans = json['plans']! as List<Object?>;
       (plans.last! as Map<String, Object?>)['title'] = 'x' * 81;
