@@ -217,6 +217,12 @@ void main() {
     );
     expect(project, contains('com.apple.product-type.app-extension'));
     expect(project, contains('Embed Foundation Extensions'));
+    // The extension reads its App Group user defaults: declared (1C8F.1).
+    final privacy = read('ios/KalanWidget/PrivacyInfo.xcprivacy');
+    expect(privacy, contains('NSPrivacyAccessedAPICategoryUserDefaults'));
+    expect(privacy, contains('<string>1C8F.1</string>'));
+    expect(privacy, contains('<key>NSPrivacyTracking</key>\n\t<false/>'));
+    expect(project, contains('/* PrivacyInfo.xcprivacy in Resources */,'));
     // Embedded before the Flutter "Thin Binary" script (no build cycle).
     final runner = project.substring(
       project.indexOf('97C146ED1CF9000F007C117D /* Runner */ = {'),
@@ -277,6 +283,8 @@ void main() {
       ),
     );
     expect(manifest, contains('"flutter_deeplinking_enabled"'));
+    // Without it Android ignores the widget's right-to-left direction.
+    expect(manifest, contains('android:supportsRtl="true"'));
     expect(manifest, isNot(contains('SCHEDULE_EXACT_ALARM')));
     final info = read('$res/xml/kalan_widget_info.xml');
     expect(info, contains('android:resizeMode="horizontal|vertical"'));

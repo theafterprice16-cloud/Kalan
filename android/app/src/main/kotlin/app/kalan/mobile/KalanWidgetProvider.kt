@@ -80,8 +80,14 @@ class KalanWidgetProvider : AppWidgetProvider() {
         private const val SNAPSHOT_VERSION = 1
         private const val ACTION_MIDNIGHT = "app.kalan.mobile.WIDGET_MIDNIGHT"
 
-        /** At least this wide (dp) for the medium layout before Android 12. */
+        /** At least this wide (dp) for the medium layout. */
         private const val MEDIUM_MIN_WIDTH_DP = 250
+
+        /**
+         * At least this tall (dp) for three payment rows on the medium
+         * layout; lower, two rows show, never a cut one.
+         */
+        private const val THREE_ROWS_MIN_HEIGHT_DP = 140
 
         private fun updateAll(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
@@ -128,25 +134,32 @@ class KalanWidgetProvider : AppWidgetProvider() {
         ): RemoteViews {
             val today = todayRecord(snapshot)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // The launcher picks the layout that fits each size.
+                // The launcher picks the layout that fits each size: the
+                // medium one with as many rows as fit, never a cut row.
                 return RemoteViews(
                     mapOf(
                         SizeF(110f, 110f) to
-                            build(context, R.layout.kalan_widget_small, snapshot, today, rows = false),
-                        SizeF(250f, 110f) to
-                            build(context, R.layout.kalan_widget_medium, snapshot, today, rows = true),
+                            build(context, R.layout.kalan_widget_small, snapshot, today, rows = 0),
+                        SizeF(MEDIUM_MIN_WIDTH_DP.toFloat(), 110f) to
+                            build(context, R.layout.kalan_widget_medium, snapshot, today, rows = 2),
+                        SizeF(MEDIUM_MIN_WIDTH_DP.toFloat(), THREE_ROWS_MIN_HEIGHT_DP.toFloat()) to
+                            build(context, R.layout.kalan_widget_medium, snapshot, today, rows = 3),
                     ),
                 )
             }
-            val width = manager.getAppWidgetOptions(id)
-                .getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
-            val medium = width >= MEDIUM_MIN_WIDTH_DP
+            // Portrait: the smallest width and the largest height.
+            val options = manager.getAppWidgetOptions(id)
+            val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+            val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
+            if (width < MEDIUM_MIN_WIDTH_DP) {
+                return build(context, R.layout.kalan_widget_small, snapshot, today, rows = 0)
+            }
             return build(
                 context,
-                if (medium) R.layout.kalan_widget_medium else R.layout.kalan_widget_small,
+                R.layout.kalan_widget_medium,
                 snapshot,
                 today,
-                rows = medium,
+                rows = if (height >= THREE_ROWS_MIN_HEIGHT_DP) 3 else 2,
             )
         }
 
@@ -155,7 +168,7 @@ class KalanWidgetProvider : AppWidgetProvider() {
             layout: Int,
             snapshot: JSONObject?,
             today: JSONObject?,
-            rows: Boolean,
+            rows: Int,
         ): RemoteViews {
             val views = RemoteViews(context.packageName, layout)
             views.setOnClickPendingIntent(
@@ -214,12 +227,12 @@ class KalanWidgetProvider : AppWidgetProvider() {
             // (chosen by the app, see widgetSmallNumberMax).
             views.setTextViewText(
                 number,
-                day.optString(if (rows) "number" else "numberSmall"),
+                day.optString(if (rows > 0) "number" else "numberSmall"),
             )
 
-            if (rows) {
+            if (rows > 0) {
                 val list = day.optJSONArray("rows")
-                val count = list?.length() ?: 0
+                val count = minOf(list?.length() ?: 0, rows)
                 for ((i, row) in ROWS.withIndex()) {
                     val item = if (i < count) list?.optJSONObject(i) else null
                     if (item == null) {

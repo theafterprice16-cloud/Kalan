@@ -140,6 +140,8 @@ struct KalanWidgetView: View {
             // The app's language, not the phone's: Arabic mirrors (24).
             .environment(\.layoutDirection, entry.rtl ? .rightToLeft : .leftToRight)
             .widgetURL(KalanWidgetConfig.tapURL)
+            // Larger text up to where the rows still fit the medium size.
+            .dynamicTypeSize(...DynamicTypeSize.xxLarge)
             .kalanWidgetBackground()
     }
 

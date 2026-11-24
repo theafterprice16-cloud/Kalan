@@ -2,7 +2,7 @@ import 'package:home_widget/home_widget.dart';
 
 /// The iOS App Group the app and its widget extension share (Roadmap 31).
 /// The one Dart copy; the same text is in both entitlements files and in
-/// the extension (test/app/platform_setup_test.dart compares them). It
+/// the extension (test/app/widget_platform_test.dart compares them). It
 /// follows the temporary bundle id (Decision 1): change all of them
 /// together once the id is final.
 const widgetAppGroupId = 'group.app.kalan.mobile';

@@ -12,9 +12,9 @@
     android:layout_height="match_parent"
     android:background="@drawable/kalan_widget_background"
     android:paddingStart="@dimen/kalan_widget_padding"
-    android:paddingTop="12dp"
+    android:paddingTop="10dp"
     android:paddingEnd="@dimen/kalan_widget_padding"
-    android:paddingBottom="12dp">
+    android:paddingBottom="10dp">
 
     <LinearLayout
         android:id="@+id/widget_content"
@@ -55,7 +55,7 @@
         <TextView
             android:id="@+id/widget_number_left"
             android:layout_width="match_parent"
-            android:layout_height="34dp"
+            android:layout_height="32dp"
             android:autoSizeMaxTextSize="26sp"
             android:autoSizeMinTextSize="16sp"
             android:autoSizeStepGranularity="1sp"
@@ -73,7 +73,7 @@
         <TextView
             android:id="@+id/widget_number_negative"
             android:layout_width="match_parent"
-            android:layout_height="34dp"
+            android:layout_height="32dp"
             android:autoSizeMaxTextSize="26sp"
             android:autoSizeMinTextSize="16sp"
             android:autoSizeStepGranularity="1sp"
@@ -91,7 +91,7 @@
         <TextView
             android:id="@+id/widget_number_plain"
             android:layout_width="match_parent"
-            android:layout_height="34dp"
+            android:layout_height="32dp"
             android:autoSizeMaxTextSize="26sp"
             android:autoSizeMinTextSize="16sp"
             android:autoSizeStepGranularity="1sp"

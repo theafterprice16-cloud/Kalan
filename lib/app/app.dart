@@ -64,10 +64,7 @@ class _KalanAppState extends ConsumerState<KalanApp>
     _taps = notificationTaps.stream.listen(_onTap);
     // Home screen widget (31): a tap opens home; with the app lock on,
     // the lock screen covers it first (AppLockGate).
-    _widgetTaps = ref
-        .read(widgetGatewayProvider)
-        .taps
-        .listen((_) => ref.read(routerProvider).go(Routes.home));
+    _widgetTaps = ref.read(widgetGatewayProvider).taps.listen(_onWidgetTap);
     // Pro: the saved state at once, the store checked in the background,
     // and purchase updates heard from the start (before onboarding too).
     ref.read(proControllerProvider);
@@ -132,6 +129,15 @@ class _KalanAppState extends ConsumerState<KalanApp>
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) =>
       ref.read(appLockProvider).locked;
+
+  /// Home screen widget (31): home, once set up; during setup (and its
+  /// "I have a backup") the tap only brings Kalan forward, so nothing
+  /// typed there is lost.
+  void _onWidgetTap(void _) {
+    if (ref.read(settingsProvider).value == null) return;
+    final router = ref.read(routerProvider);
+    if (router.state.uri.path != Routes.home) router.go(Routes.home);
+  }
 
   /// A tapped reminder opens the home screen; a statement closing
   /// reminder opens its card's statements. A button, should the platform

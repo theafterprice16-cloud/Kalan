@@ -112,6 +112,22 @@ void main() {
     expect(find.byKey(const ValueKey('home-number')), findsOneWidget);
   });
 
+  testWidgets('during setup a tap keeps what was typed', (tester) async {
+    await pumpApp(
+      tester,
+      overrides: [widgetGatewayProvider.overrideWithValue(gateway)],
+    );
+    final router = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    ).read(routerProvider);
+    expect(router.state.uri.toString(), Routes.onboarding);
+    await tester.enterText(find.byType(TextField).first, '25000');
+    gateway.tap();
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), Routes.onboarding);
+    expect(find.text('25000'), findsOneWidget);
+  });
+
   testWidgets('with the app lock on, the lock screen comes first', (
     tester,
   ) async {

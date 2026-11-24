@@ -225,6 +225,25 @@ void main() {
     expect(today.number, _money(2435000 - 1190000 - 10000));
   });
 
+  test('an untitled "Pay later" plan reads as on the home screen', () async {
+    await seedSettings(db, incomeMinor: 2435000);
+    await PlanRepository(db).saveDraft(
+      PlanCalculator.payLater(
+        purchaseDate: LocalDate(2026, 11, 20),
+        rule: const PayLaterRule.days(24),
+        totalMinor: 50000,
+      ),
+      sourceId: null,
+      origin: PlanOrigin.manual,
+    );
+    final today = (await _publisher(
+      db,
+      FakeWidgetGateway(),
+    ).build()).days.first;
+    expect(today.rows.single.name, 'Sonra öde · 14 Ara');
+    expect(today.rows.single.date, '14 Ara');
+  });
+
   test('example 8: IDR, the small size gets the short form', () async {
     await seedSettings(db, currency: 'IDR', incomeMinor: 125450000);
     await _rent(db);

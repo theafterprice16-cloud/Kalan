@@ -23,6 +23,7 @@
 		31B0000F00000000000A11CE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31B0000A00000000000A11CE /* WidgetKit.framework */; };
 		31B0001000000000000A11CE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31B0000B00000000000A11CE /* SwiftUI.framework */; };
 		31B0001100000000000A11CE /* KalanWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 31B0000900000000000A11CE /* KalanWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		31B0FFFD00000000000A11CE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 31B0FFFE00000000000A11CE /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +97,7 @@
 		31B0000900000000000A11CE /* KalanWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KalanWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		31B0000A00000000000A11CE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		31B0000B00000000000A11CE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		31B0FFFE00000000000A11CE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +161,7 @@
 				31B0000600000000000A11CE /* Localizable.strings */,
 				31B0000300000000000A11CE /* Info.plist */,
 				31B0000400000000000A11CE /* KalanWidget.entitlements */,
+				31B0FFFE00000000000A11CE /* PrivacyInfo.xcprivacy */,
 			);
 			path = KalanWidget;
 			sourceTree = "<group>";
@@ -334,6 +337,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				31B0000E00000000000A11CE /* Localizable.strings in Resources */,
+				31B0FFFD00000000000A11CE /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -161,10 +161,6 @@ Future<void> reminderActionInBackground(NotificationResponse response) async {
             reschedule: false,
           );
       if (result.outcome == ReminderActionOutcome.ignored) return;
-      // A payment marked paid leaves the widget's next rows (31).
-      if (result.outcome == ReminderActionOutcome.markedPaid) {
-        await _refreshWidget(db);
-      }
       // Then the reminders. Should iOS stop Kalan before this, the next
       // app start or resume reschedules anyway.
       await _schedulerFor(
@@ -172,6 +168,11 @@ Future<void> reminderActionInBackground(NotificationResponse response) async {
         await _gatewayFor(db),
         amountsHidden: await _amountsHidden(),
       ).rescheduleAll();
+      // A payment marked paid leaves the widget's next rows (31). Last:
+      // iOS may stop Kalan early, and the reminders matter more.
+      if (result.outcome == ReminderActionOutcome.markedPaid) {
+        await _refreshWidget(db);
+      }
     });
   } on Object {
     // Nothing to show from the background; the next reschedule (app
