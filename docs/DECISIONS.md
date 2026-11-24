@@ -1015,3 +1015,11 @@ Uygulama kararları:
 | Golden istisnası | Yerel widget'lar (SwiftUI, RemoteViews) Flutter golden testiyle çizilemez. Yerine: anlık görüntü metinleri tablo testleriyle, renkler eşitlik testiyle, yerel kodda biçimlendirme olmadığı kaynak taramasıyla, okunan alanların yazılanlarla aynı olduğu testle denetlenir; widget'ın kendisi telefonda denenir. Ayarlar'daki yeni anahtarın golden'ı var (126, açık/koyu, TR/EN). |
 | Arka planda "Ödendi" | Widget yenilemesi hatırlatmaların yeniden kurulmasından sonra (iOS düğmeye yalnızca birkaç saniye verir; hatırlatma daha önemli; inceleme bulgusu). |
 | Bilinen sınırlar | Telefon saat dilimi değişince iOS zaman çizelgesindeki gece yarıları uygulama açılana kadar eski dilime göre kalır (birkaç saat). Sistem dilini izleyen kullanıcıda telefon dili değişince widget uygulama açılana kadar eski dilde kalır. "Tutarları gizle" açıldığı an ile yeni yazım arasında (kısa bekleme) depodaki eski kayıt durur; yazım başarısız olursa bir sonraki değişiklikte ya da öne gelişte yeniden denenir. iOS kısmı bulutta derlenemedi; Mac'te Xcode ile denenmeli. |
+
+## iOS gizlilik bildirimi (31 ardından) (24 Kasım 2026)
+
+| Konu | Karar |
+|---|---|
+| Neden | Apple, "gerekçe isteyen" API'leri kullanan her uygulama paketinden `PrivacyInfo.xcprivacy` ister (yükleme denetimi ITMS-91053). Uygulamanın ana paketinde yoktu (31'in incelemesinde bulundu; widget uzantısınınki 31'de eklendi). |
+| İçerik | `ios/Runner/PrivacyInfo.xcprivacy`: takip yok, takip alan adı yok, toplanan veri yok (veri yalnızca cihazda). Ayar deposu (UserDefaults): CA92.1 (uygulamanın kendi ayarları) ve 1C8F.1 (widget'la paylaşılan App Group); kendi bildirimi olmayan `home_widget` ve `flutter_local_notifications` bunları kullanır. Dosya zaman damgası: C617.1 (SQLite'ın uygulama kabındaki veritabanı dosyası). Kendi bildirimi olan eklentiler (shared_preferences, local_auth, file_selector, in_app_purchase, flutter_timezone) ve Flutter kendi beyanlarını taşır. |
+| Denetim | `test/app/ios_privacy_manifest_test.dart`: dosya Runner'ın kaynaklarında, takip ve toplama yok, beyan edilen gerekçeler. Yeni bir eklenti gerekçe isteyen bir API kullanır ve kendi bildirimini getirmezse bu dosyaya eklenir. Mac'te Xcode "Generate Privacy Report" ile kontrol edilmeli. |
