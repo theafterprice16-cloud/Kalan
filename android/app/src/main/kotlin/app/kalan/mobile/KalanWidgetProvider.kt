@@ -147,10 +147,11 @@ class KalanWidgetProvider : AppWidgetProvider() {
                     ),
                 )
             }
-            // Portrait: the smallest width and the largest height.
+            // The smallest width and height the widget gets (portrait width,
+            // landscape height): rows that fit in both.
             val options = manager.getAppWidgetOptions(id)
             val width = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
-            val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
+            val height = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
             if (width < MEDIUM_MIN_WIDTH_DP) {
                 return build(context, R.layout.kalan_widget_small, snapshot, today, rows = 0)
             }
