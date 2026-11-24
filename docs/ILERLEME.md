@@ -67,6 +67,7 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 - 31. Ana ekran widget'ı (24 Kasım 2026): iOS (küçük ve orta) ve Android (2x2'den 4x2'ye büyüyen) widget; küçükte "Kalan" / büyük sayı / "14 Ara tarihine kadar", ortada ayrıca sıradaki üç ödeme (ad, tarih, tutar); gelir yoksa "Bu dönem ödemeler"; eksi dönem koyu safran; plan yoksa "Henüz ödeme yok.", kurulum yoksa "Kurulumu bitirmek için Kalan'ı aç.", 7 günden eski veride "Güncel bilgi için Kalan'ı aç." (tutar yok); uygulama bugün ve sonraki 7 gün için hazır metin yazar, widget hesap yapmaz, gece yarısı yeni günün (maaş gününde yeni dönemin) kaydına geçer; "Tutarları gizle" ya da kilit açık + yeni "Widget'ta tutarı göster" kapalıyken tutarlar "•••" ve depoya hiç gerçek tutar gitmez; anahtar Ayarlar > Gizlilik'te yalnızca kilit açıkken, varsayılan kapalı, cihaza özel; dokununca ana ekran (kilit açıksa önce kilit); uzun sayılar küçükte kısa biçim; Arapçada aynalı; renkler token kopyası (testli); herkese ücretsiz; şema değişmedi; yeni paket home_widget. iOS kısmı bulutta derlenemedi
 
 - 31 ardından (24 Kasım 2026): uygulamanın kendi iOS gizlilik bildirimi (takip yok, veri toplama yok; ayar deposu ve veritabanı dosyası gerekçeleri); App Store yüklemesinde uyarı ya da ret riskini kaldırır
+- 32. Kilit ekranı widget'ı (24 Kasım 2026, Pro, yalnızca iPhone): ana ekran widget'ıyla aynı uzantıda satır içi, dikdörtgen ve dairesel boy (iOS 16+); "Bugün 2 ödeme" / "Günü geçen 1 ödeme" / "Yarın 1 ödeme" / "2 gün sonra 1 ödeme" / "Yaklaşan ödeme yok."; dairesel boyda gün sayısı ya da "Bugün" / "Geçti", altında ödeme sayısı, yoksa logo; ödeme tutarı hiçbir zaman yok; "Kalan sayısını göster" (Ayarlar > Gizlilik, iPhone + Pro, varsayılan kapalı) yalnızca tutarlar widget'ta örtülü değilken dikdörtgende "Kalan 12.450 ₺" ekler, aksi hâlde metin depoya hiç yazılmaz; Pro değilken "Kalan Pro ile" / "Kilit ekranı widget'ı Kalan Pro ile kullanılabilir." / logo, dokununca Pro ekranı; Pro ekranında iPhone'da yeni satır; Pro alınınca ya da iade olunca widget yenilenir; bayat veride "Kalan'ı aç". iOS kısmı bulutta derlenemedi, Mac'te denenmeli
 
 Ara işler:
 
@@ -74,7 +75,7 @@ Ara işler:
 
 ## Sıradaki
 
-- 32. maddeden devam (liste: `kalan_kaynak.py liste`); 31'in iOS widget'ı Mac'te Xcode ile derlenip simülatörde denenmeli (uzantı hedefi elle eklendi; App Group için Apple Developer hesabında kayıt gerekecek); 29'un parola süresi telefonda ölçülmeli (hedef 1-2 sn); 30'un dosya seçicisi iOS'ta tür kısıtı olmadan bütün dosyaları gösteriyor mu telefonda bakılmalı; 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
+- 33. maddeden devam (liste: `kalan_kaynak.py liste`); 32'nin kilit ekranı widget'ı Mac'te Xcode ile derlenip iPhone simülatöründe denenmeli (üç boy, Pro olmayan görünüm, dokununca Pro ekranı); 31'in iOS widget'ı Mac'te Xcode ile derlenip simülatörde denenmeli (uzantı hedefi elle eklendi; App Group için Apple Developer hesabında kayıt gerekecek); 29'un parola süresi telefonda ölçülmeli (hedef 1-2 sn); 30'un dosya seçicisi iOS'ta tür kısıtı olmadan bütün dosyaları gösteriyor mu telefonda bakılmalı; 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
 
 ## Yarım kalan
 
