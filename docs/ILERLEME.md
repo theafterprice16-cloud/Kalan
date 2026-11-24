@@ -64,13 +64,15 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 30 ardından (24 Kasım 2026): kural skill'leriyle (ürün, palet, yerelleştirme, iOS/Android) satır satır karşılaştırma; geri yükleme sürerken geri hareketi artık kapatılmıyor (kural: yalnızca kaydedilmemiş değişiklikte); yeni ekranlar büyük yazı ve %40 uzun metin taşma testinde ve Arapça (sağdan sola) düzen testinde; örnek 7 (geri yüklemeden sonra yeni plan → sınır sayfası) ve örnek 8 (kilit, koyu tema, dil, tutar gizleme değişmiyor) ekran testleri; İngilizce kurulum ekran görüntüsü
 
+- 31. Ana ekran widget'ı (24 Kasım 2026): iOS (küçük ve orta) ve Android (2x2'den 4x2'ye büyüyen) widget; küçükte "Kalan" / büyük sayı / "14 Ara tarihine kadar", ortada ayrıca sıradaki üç ödeme (ad, tarih, tutar); gelir yoksa "Bu dönem ödemeler"; eksi dönem koyu safran; plan yoksa "Henüz ödeme yok.", kurulum yoksa "Kurulumu bitirmek için Kalan'ı aç.", 7 günden eski veride "Güncel bilgi için Kalan'ı aç." (tutar yok); uygulama bugün ve sonraki 7 gün için hazır metin yazar, widget hesap yapmaz, gece yarısı yeni günün (maaş gününde yeni dönemin) kaydına geçer; "Tutarları gizle" ya da kilit açık + yeni "Widget'ta tutarı göster" kapalıyken tutarlar "•••" ve depoya hiç gerçek tutar gitmez; anahtar Ayarlar > Gizlilik'te yalnızca kilit açıkken, varsayılan kapalı, cihaza özel; dokununca ana ekran (kilit açıksa önce kilit); uzun sayılar küçükte kısa biçim; Arapçada aynalı; renkler token kopyası (testli); herkese ücretsiz; şema değişmedi; yeni paket home_widget. iOS kısmı bulutta derlenemedi
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
 
 ## Sıradaki
 
-- 31. maddeden devam (liste: `kalan_kaynak.py liste`); 29'un parola süresi telefonda ölçülmeli (hedef 1-2 sn); 30'un dosya seçicisi iOS'ta tür kısıtı olmadan bütün dosyaları gösteriyor mu telefonda bakılmalı; 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
+- 32. maddeden devam (liste: `kalan_kaynak.py liste`); 31'in iOS widget'ı Mac'te Xcode ile derlenip simülatörde denenmeli (uzantı hedefi elle eklendi; App Group için Apple Developer hesabında kayıt gerekecek); 29'un parola süresi telefonda ölçülmeli (hedef 1-2 sn); 30'un dosya seçicisi iOS'ta tür kısıtı olmadan bütün dosyaları gösteriyor mu telefonda bakılmalı; 27'nin iOS kısmı Mac'te denenmeli (bulutta Xcode yok); yeni metinler yalnızca TR ve EN, `docs/ceviriler/cevrilecekler.json` her işte commit
 
 ## Yarım kalan
 
