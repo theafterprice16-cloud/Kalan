@@ -2243,6 +2243,28 @@ void main() {
         await shoot(tester, '116-ios-settings-data-$theme');
       });
 
+      // Restore (30) on an iPhone: the confirm dialog in Apple's
+      // arrangement on Kalan's flat surface.
+      testWidgets('ios, restore confirm', variant: ios, (tester) async {
+        final picker = FakePicker()..pickPath(plainFixture);
+        final dir = Directory.systemTemp.createTempSync('kalan-golden');
+        addTearDown(() => dir.deleteSync(recursive: true));
+        await start(
+          tester,
+          route: Routes.restore,
+          seed: (db) async {
+            await seedSettings(db, currency: 'EUR');
+            await seedPayIn4(db, title: 'Kulaklık');
+          },
+          extra: restoreOverrides(picker, dir),
+        );
+        await tester.tap(find.byKey(const ValueKey('restore-pick')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('restore-button')));
+        await tester.pumpAndSettle();
+        await shoot(tester, '125-ios-restore-confirm-$theme');
+      });
+
       testWidgets('ios, app lock switch', variant: ios, (tester) async {
         await start(
           tester,
