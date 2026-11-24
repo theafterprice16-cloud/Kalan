@@ -81,6 +81,14 @@ class BackupData {
     final s = settings;
     check(Currency.byCode(s.currency) != null, 'settings.currency');
     check(day(s.payDay), 'settings.payDay');
+    // The pay schedule needs its day: monthly a day of the month, weekly
+    // and biweekly a known payday (onboarding always sets it; Roadmap 30).
+    check(
+      s.payFrequency == PayFrequency.monthly
+          ? s.payDay != null
+          : s.payAnchorDate != null,
+      'settings.payFrequency',
+    );
     check(s.netIncome == null || s.netIncome! >= 0, 'settings.netIncome');
     check(
       s.tightThreshold == null || s.tightThreshold! >= 0,
