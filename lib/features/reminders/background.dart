@@ -1,6 +1,5 @@
 import 'dart:ui' show DartPluginRegistrant;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,6 +8,7 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/locale.dart';
+import '../../app/phone_platform.dart';
 import '../../core/widget/widget_snapshot.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
@@ -97,33 +97,40 @@ Future<bool> _widgetMasked() async {
 }
 
 /// The Lock Screen widget's Pro state and "Show what's left" (32) from
-/// the device's storage, as the app left them; null when the Pro state
-/// cannot be read: then nothing is written and the widget keeps its last
-/// text (a Pro user never sees the Pro note by mistake). "Show what's
-/// left" unreadable counts as off: no amount by mistake.
-Future<({ProStatus status, bool showLeft})?> _lockScreenChoices() async {
-  final ProStatus status;
+/// the device's storage, as the app left them.
+Future<({ProStatus status, bool showLeft})?> _lockScreenChoices() =>
+    lockScreenChoicesFrom(
+      iOS: phoneHasLockScreenWidget,
+      proStatus: () async => (await PrefsProStatusStore.open()).read(),
+      showLeft: () async => lockScreenLeftShown(
+        showLeft: (await PrefsLockScreenLeftStore.open()).read(),
+        hideAmounts: (await PrefsAmountsHiddenStore.open()).read(),
+        appLock: (await PrefsAppLockStore.open()).read().enabled,
+        showInWidget: (await PrefsWidgetAmountsStore.open()).read(),
+      ),
+    );
+
+/// The background's Lock Screen choices (32). On an iPhone, null when the
+/// Pro state cannot be read: then nothing is written and the widget keeps
+/// its last text (a Pro user never sees the Pro note by mistake);
+/// elsewhere (no Lock Screen widget) such an error counts as not Pro, so
+/// the home screen widget is still redrawn. "Show what's left" unreadable
+/// counts as off, and it is off outside iPhones: no amount by mistake.
+@visibleForTesting
+Future<({ProStatus status, bool showLeft})?> lockScreenChoicesFrom({
+  required bool iOS,
+  required Future<ProStatus> Function() proStatus,
+  required Future<bool> Function() showLeft,
+}) async {
+  ProStatus status;
   try {
-    status = (await PrefsProStatusStore.open()).read();
+    status = await proStatus();
   } on Object {
-    return null;
+    if (iOS) return null;
+    status = ProStatus.notPro;
   }
   try {
-    final hideAmounts = (await PrefsAmountsHiddenStore.open()).read();
-    final appLock = (await PrefsAppLockStore.open()).read().enabled;
-    final showInWidget = (await PrefsWidgetAmountsStore.open()).read();
-    final showLeft = (await PrefsLockScreenLeftStore.open()).read();
-    return (
-      status: status,
-      showLeft:
-          defaultTargetPlatform == TargetPlatform.iOS &&
-          lockScreenLeftShown(
-            showLeft: showLeft,
-            hideAmounts: hideAmounts,
-            appLock: appLock,
-            showInWidget: showInWidget,
-          ),
-    );
+    return (status: status, showLeft: iOS && await showLeft());
   } on Object {
     return (status: status, showLeft: false);
   }
@@ -139,7 +146,7 @@ Future<void> _refreshWidget(AppDatabase db) async {
   try {
     await WidgetPublisher(
       db: db,
-      gateway: const HomeWidgetGateway(),
+      gateway: HomeWidgetGateway(lockScreen: phoneHasLockScreenWidget),
       now: DateTime.now,
       localeFor: (s) => appLocale(s?.localeCode),
       masked: () => masked,

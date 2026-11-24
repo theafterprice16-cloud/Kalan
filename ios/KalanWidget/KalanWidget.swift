@@ -331,12 +331,16 @@ struct KalanLockScreenView: View {
     @Environment(\.widgetFamily) private var family
     let entry: KalanEntry
 
-    private var gated: Bool { !(entry.lockText?.pro ?? false) }
+    /// Only a written "not Pro" opens the Pro screen: an older snapshot
+    /// without Lock Screen text opens home.
+    private var gated: Bool { entry.lockText?.pro == false }
 
     var body: some View {
         content
             .environment(\.layoutDirection, entry.rtl ? .rightToLeft : .leftToRight)
             .widgetURL(gated ? KalanWidgetConfig.proURL : KalanWidgetConfig.tapURL)
+            // Larger text up to where "Left …" still fits on one line.
+            .dynamicTypeSize(...DynamicTypeSize.xxLarge)
             .lockScreenBackground(circular: family == .accessoryCircular)
     }
 
@@ -357,7 +361,7 @@ struct KalanLockScreenView: View {
             case .accessoryInline:
                 Text(verbatim: lock.gateInline)
             default:
-                rectangular(title: lock.title, line: lock.gate, left: "")
+                noteText(lock.gate)
             }
         case (.stale, .some(let lock)):
             notice(lock: lock, inline: lock.open, text: lock.stale)
@@ -381,8 +385,17 @@ struct KalanLockScreenView: View {
         case .accessoryInline:
             Text(verbatim: inline)
         default:
-            rectangular(title: lock.title, line: text, left: "")
+            noteText(text)
         }
+    }
+
+    /// A whole sentence on the rectangular widget (the Pro note, stale,
+    /// setup): up to three lines, never cut.
+    private func noteText(_ text: String) -> some View {
+        Text(verbatim: text)
+            .font(.subheadline)
+            .lineLimit(3)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     @ViewBuilder
@@ -404,11 +417,11 @@ struct KalanLockScreenView: View {
                 .font(.headline)
                 .lineLimit(1)
             Text(verbatim: line)
-                .font(.body)
+                .font(.subheadline)
                 .lineLimit(left.isEmpty ? 2 : 1)
             if !left.isEmpty {
                 Text(verbatim: left)
-                    .font(.body)
+                    .font(.subheadline)
                     .lineLimit(1)
             }
         }
@@ -425,9 +438,7 @@ struct KalanLockScreenView: View {
         } else {
             VStack(spacing: 0) {
                 Text(verbatim: day.center)
-                    .font(day.centerKind == "number"
-                        ? .system(.title2, design: .rounded).weight(.semibold)
-                        : .system(.footnote).weight(.semibold))
+                    .font(centerFont(day))
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                 Text(verbatim: day.count)
@@ -441,10 +452,18 @@ struct KalanLockScreenView: View {
         }
     }
 
+    private func centerFont(_ day: LockDayText) -> Font {
+        day.centerKind == "number"
+            ? .system(.title2, design: .rounded, weight: .semibold)
+            : .system(.footnote, weight: .semibold)
+    }
+
     private var logo: some View {
         KalanMark()
             .aspectRatio(941.0 / 1023.0, contentMode: .fit)
             .padding(12)
+            // One element, so the label set by each caller is read.
+            .accessibilityElement(children: .ignore)
     }
 }
 

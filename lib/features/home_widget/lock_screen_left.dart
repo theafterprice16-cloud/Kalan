@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'widget_gateway.dart';
 import 'widget_sync.dart' show widgetGatewayProvider;
 
 /// Where "Show what's left" (Roadmap 32) is kept: on this device only,
@@ -65,12 +65,13 @@ final lockScreenLeftStoreProvider = Provider<LockScreenLeftStore>(
 );
 
 /// Whether this phone has Kalan's Lock Screen widget: iPhone only
-/// (product owner's decision 1, Roadmap 32).
-final lockScreenWidgetSupportedProvider = Provider<bool>(
-  (ref) =>
-      ref.watch(widgetGatewayProvider).supported &&
-      defaultTargetPlatform == TargetPlatform.iOS,
-);
+/// (product owner's decision 1, Roadmap 32), iOS 16 and later
+/// ([WidgetGateway.lockScreen]); elsewhere neither the Pro screen nor
+/// Settings mention it.
+final lockScreenWidgetSupportedProvider = Provider<bool>((ref) {
+  final gateway = ref.watch(widgetGatewayProvider);
+  return gateway.supported && gateway.lockScreen;
+});
 
 /// "Show what's left": what's left this period on the Lock Screen widget,
 /// when no amount is masked there ([lockScreenLeftShown]).

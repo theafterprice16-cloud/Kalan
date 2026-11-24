@@ -200,9 +200,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(router.state.uri.toString(), Routes.pro());
     expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
-    // Again: not a second Pro screen; back goes home.
+    // Again: not a second Pro screen; one back goes home.
     gateway.tap(WidgetTap.pro);
     await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
     router.pop();
     await tester.pumpAndSettle();
     expect(router.state.uri.toString(), Routes.home);
@@ -213,6 +214,21 @@ void main() {
     await start(tester);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
+  });
+
+  testWidgets('during setup the Pro note opens nothing', (tester) async {
+    gateway = FakeWidgetGateway(launchedBy: WidgetTap.pro);
+    await pumpApp(
+      tester,
+      overrides: [widgetGatewayProvider.overrideWithValue(gateway)],
+    );
+    final router = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    ).read(routerProvider);
+    gateway.tap(WidgetTap.pro);
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), Routes.onboarding);
+    expect(find.byKey(const ValueKey('pro-screen')), findsNothing);
   });
 
   testWidgets('with the app lock on, the lock screen covers Pro first', (

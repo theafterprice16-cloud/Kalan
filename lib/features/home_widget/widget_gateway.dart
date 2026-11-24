@@ -37,6 +37,10 @@ WidgetTap widgetTapOf(Uri? uri) =>
 abstract interface class WidgetGateway {
   bool get supported;
 
+  /// Whether this phone also has the Lock Screen widget (Roadmap 32):
+  /// an iPhone on iOS 16 or later.
+  bool get lockScreen;
+
   Future<void> publish(String snapshotJson);
 
   /// A tap on a widget while Kalan is running.
@@ -54,6 +58,9 @@ class NoopWidgetGateway implements WidgetGateway {
   bool get supported => false;
 
   @override
+  bool get lockScreen => false;
+
+  @override
   Future<void> publish(String snapshotJson) async {}
 
   @override
@@ -67,7 +74,11 @@ class NoopWidgetGateway implements WidgetGateway {
 /// plugin's shared preferences, an update broadcast to the provider),
 /// through home_widget.
 class HomeWidgetGateway implements WidgetGateway {
-  const HomeWidgetGateway();
+  const HomeWidgetGateway({required this.lockScreen});
+
+  /// From `phoneHasLockScreenWidget` (lib/app/phone_platform.dart).
+  @override
+  final bool lockScreen;
 
   /// Provided on phones only (main()); the background isolate that runs
   /// notification buttons exists only there too.

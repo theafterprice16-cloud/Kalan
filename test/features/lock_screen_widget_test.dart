@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/locale.dart';
+import 'package:kalan/app/phone_platform.dart';
 import 'package:kalan/app/providers.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
@@ -15,6 +16,7 @@ import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/recurring_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
 import 'package:kalan/entitlement/pro_controller.dart';
+import 'package:kalan/entitlement/pro_rules.dart';
 import 'package:kalan/entitlement/pro_status_store.dart';
 import 'package:kalan/features/home_widget/lock_screen_left.dart';
 import 'package:kalan/features/home_widget/widget_amounts.dart';
@@ -24,6 +26,7 @@ import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
 import 'package:kalan/features/lock/device_lock_gateway.dart';
 import 'package:kalan/features/privacy/amounts_hidden.dart';
+import 'package:kalan/features/reminders/background.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:material_ui/material_ui.dart' show Locale;
 
@@ -440,6 +443,72 @@ void main() {
     );
     addTearDown(android.dispose);
     expect(android.read(lockScreenOptionsProvider).showLeft, isFalse);
+  });
+
+  test('iOS 16 and later have the Lock Screen widget', () {
+    expect(lockScreenOsSupported('Version 17.2 (Build 21C62)'), isTrue);
+    expect(lockScreenOsSupported('16.0'), isTrue);
+    expect(lockScreenOsSupported('Version 15.8 (Build 19H370)'), isFalse);
+    expect(lockScreenOsSupported(''), isTrue);
+  });
+
+  test('the gateway decides: no Lock Screen widget, no switch, no line', () {
+    final c = ProviderContainer(
+      overrides: [widgetGatewayProvider.overrideWithValue(FakeWidgetGateway())],
+    );
+    addTearDown(c.dispose);
+    expect(c.read(lockScreenWidgetSupportedProvider), isFalse);
+    final iphone = ProviderContainer(
+      overrides: [
+        widgetGatewayProvider.overrideWithValue(
+          FakeWidgetGateway(lockScreen: true),
+        ),
+      ],
+    );
+    addTearDown(iphone.dispose);
+    expect(iphone.read(lockScreenWidgetSupportedProvider), isTrue);
+  });
+
+  group('the background (a notification button)', () {
+    Future<ProStatus> fails() async => throw StateError('unreadable');
+
+    test('Pro unreadable on an iPhone: nothing is written', () async {
+      expect(
+        await lockScreenChoicesFrom(
+          iOS: true,
+          proStatus: fails,
+          showLeft: () async => true,
+        ),
+        isNull,
+      );
+    });
+
+    test('elsewhere: not Pro, the home screen widget still redraws', () async {
+      final c = await lockScreenChoicesFrom(
+        iOS: false,
+        proStatus: fails,
+        showLeft: () async => true,
+      );
+      expect(c, (status: ProStatus.notPro, showLeft: false));
+    });
+
+    test('"Show what\'s left" unreadable: off', () async {
+      final c = await lockScreenChoicesFrom(
+        iOS: true,
+        proStatus: () async => ProStatus.pro,
+        showLeft: () async => throw StateError('unreadable'),
+      );
+      expect(c, (status: ProStatus.pro, showLeft: false));
+    });
+
+    test('readable: as stored', () async {
+      final c = await lockScreenChoicesFrom(
+        iOS: true,
+        proStatus: () async => ProStatus.pro,
+        showLeft: () async => true,
+      );
+      expect(c, (status: ProStatus.pro, showLeft: true));
+    });
   });
 
   test('a widget link: the Pro note opens Pro, anything else home', () {

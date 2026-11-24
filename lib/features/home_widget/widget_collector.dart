@@ -1,6 +1,7 @@
 import '../../app/format.dart' show planNameIn;
 import '../../app/providers.dart' show payScheduleOf;
 import '../../core/date/local_date.dart';
+import '../../core/engine/past_due.dart';
 import '../../core/widget/widget_snapshot.dart';
 import '../../data/db/app_database.dart';
 import '../../data/models.dart';
@@ -97,7 +98,9 @@ LockDayCounts lockDayCounts({
   final next = later.isEmpty ? null : later.reduce((a, b) => a < b ? a : b);
   return LockDayCounts(
     today: upcoming.where((d) => d == day).length,
-    pastDue: planDueDays.where((d) => d < day).length,
+    pastDue: planDueDays
+        .where((d) => isPastDue(dueDate: d, isPaid: false, today: day))
+        .length,
     nextDate: next,
     nextCount: next == null ? 0 : later.where((d) => d == next).length,
   );

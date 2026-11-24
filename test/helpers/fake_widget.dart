@@ -4,7 +4,7 @@ import 'package:kalan/features/home_widget/widget_gateway.dart';
 
 /// The home screen widget's storage (31), recorded by the test.
 class FakeWidgetGateway implements WidgetGateway {
-  FakeWidgetGateway({this.launchedBy});
+  FakeWidgetGateway({this.launchedBy, this.lockScreen = false});
 
   final published = <String>[];
   final tapController = StreamController<WidgetTap>.broadcast();
@@ -14,6 +14,10 @@ class FakeWidgetGateway implements WidgetGateway {
 
   @override
   bool get supported => true;
+
+  /// An iPhone with the Lock Screen widget (32).
+  @override
+  final bool lockScreen;
 
   @override
   Future<void> publish(String snapshotJson) async =>

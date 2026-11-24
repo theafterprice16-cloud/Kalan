@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'app/app.dart';
+import 'app/phone_platform.dart';
 import 'core/theme/theme_mode.dart';
 import 'entitlement/iap_store_gateway.dart';
 import 'entitlement/pro_controller.dart';
@@ -64,7 +65,11 @@ Future<void> main() async {
       ..add(storeGatewayProvider.overrideWithValue(IapStoreGateway()))
       ..add(deviceLockGatewayProvider.overrideWithValue(LocalAuthDeviceLock()))
       // Home screen widget (31).
-      ..add(widgetGatewayProvider.overrideWithValue(const HomeWidgetGateway()));
+      ..add(
+        widgetGatewayProvider.overrideWithValue(
+          HomeWidgetGateway(lockScreen: phoneHasLockScreenWidget),
+        ),
+      );
   }
   if (!kIsWeb) {
     await refreshLocalTimeZone();
