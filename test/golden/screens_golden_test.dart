@@ -265,6 +265,12 @@ void main() {
         await shoot(tester, '01-onboarding-$theme');
       });
 
+      // "I have a backup" (30) in English too.
+      testWidgets('onboarding, en', (tester) async {
+        await start(tester, onboarded: false, locale: const Locale('en', 'US'));
+        await shoot(tester, '01-onboarding-en-$theme');
+      });
+
       testWidgets('home, left positive', (tester) async {
         await start(tester);
         await shoot(tester, '02-home-positive-$theme');

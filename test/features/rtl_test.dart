@@ -1,6 +1,8 @@
 // Right to left (Roadmap 24, decision 10, Example 3): the app in Arabic,
 // opened here for the test only (no Arabic texts yet, so the words are
 // English, but the layout, dates and numbers are Arabic).
+import 'dart:io';
+
 import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/locale.dart';
@@ -8,11 +10,14 @@ import 'package:kalan/core/date/local_date.dart';
 import 'package:kalan/core/design/widgets.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
+import 'package:kalan/core/routing/router.dart';
+import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/features/periods/period_chart.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
+import '../helpers/restore_fakes.dart';
 
 /// The registry with Arabic open, as after the bulk translation.
 final arabicOpen = [
@@ -189,5 +194,46 @@ void main() {
       matching: find.byType(Icon),
     );
     expect(mirrored(tester, previous), isTrue);
+  });
+
+  testWidgets('restore (30): the note and the summary read from the right', (
+    tester,
+  ) async {
+    final picker = FakePicker();
+    final dir = Directory.systemTemp.createTempSync('kalan-rtl');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    await pumpApp(
+      tester,
+      locale: const Locale('ar', 'EG'),
+      seed: seedArabic,
+      overrides: [
+        appLocalesProvider.overrideWithValue(arabicOpen),
+        initialRouteProvider.overrideWithValue(Routes.restore),
+        ...restoreOverrides(picker, dir),
+      ],
+    );
+    // A calm note: its icon on the right, the sentence to its left.
+    picker.pickBytes([0x89, 0x50, 0x4E, 0x47]);
+    await tester.tap(find.byKey(const ValueKey('restore-pick')));
+    await tester.pumpAndSettle();
+    final note = find.byKey(const ValueKey('restore-error'));
+    final icon = tester.getRect(
+      find.descendant(of: note, matching: find.byIcon(Icons.info_outline)),
+    );
+    final sentence = tester.getRect(
+      find.descendant(of: note, matching: find.byType(Text)),
+    );
+    expect(icon.left, greaterThan(sentence.left));
+    // The summary card's lines are laid out right to left (a full-width
+    // line, so its text starts at the card's right edge).
+    picker.pickPath(plainFixture);
+    await tester.tap(find.byKey(const ValueKey('restore-pick')));
+    await tester.pumpAndSettle();
+    final currency = find.byKey(const ValueKey('restore-summary-currency'));
+    final line = tester.renderObject<RenderParagraph>(
+      find.descendant(of: currency, matching: find.byType(RichText)),
+    );
+    expect(line.textDirection, TextDirection.rtl);
+    expect(line.textAlign, TextAlign.start);
   });
 }
