@@ -2160,6 +2160,12 @@ abstract class AppLocalizations {
   /// **'Unlimited open plans'**
   String get proFeatureUnlimitedPlans;
 
+  /// One line in the list of what Pro adds (iPhone only). Use Apple's own name for the Lock Screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Screen widget'**
+  String get proFeatureLockScreenWidget;
+
   /// price comes from the store, already formatted.
   ///
   /// In en, this message translates to:
@@ -3995,6 +4001,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When off, the home screen widget shows ••• instead of amounts.'**
   String get widgetShowAmountsHint;
+
+  /// The app's name, shown above the line on the rectangular Lock Screen widget. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal. Keep the brand name as it is.
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan'**
+  String get lockScreenTitle;
+
+  /// How many unpaid payments are due today. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment today} other{{count} payments today}}'**
+  String lockScreenToday(int count);
+
+  /// How many unpaid payments are past their due date. Calm, no blame. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 past due} other{{count} past due}}'**
+  String lockScreenPastDue(int count);
+
+  /// How many payments are due tomorrow. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment tomorrow} other{{count} payments tomorrow}}'**
+  String lockScreenTomorrow(int count);
+
+  /// How many payments are due on the next payment day, {days} days from today (2 or more). Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment in {days, plural, =1{1 day} other{{days} days}}} other{{count} payments in {days, plural, =1{1 day} other{{days} days}}}}'**
+  String lockScreenInDays(int count, int days);
+
+  /// Shown when there is no unpaid payment ahead. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming payments.'**
+  String get lockScreenNoUpcoming;
+
+  /// Middle of the round Lock Screen widget when payments are due today; one short word. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get lockScreenTodayShort;
+
+  /// Middle of the round Lock Screen widget when payments are past due; one or two short words, calm, no blame. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Past due'**
+  String get lockScreenPastDueShort;
+
+  /// Small line under the number on the round Lock Screen widget. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 payment} other{{count} payments}}'**
+  String lockScreenCount(int count);
+
+  /// What's left this pay period, under the line on the rectangular Lock Screen widget; only when the user turned it on. {amount} is already formatted. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Left {amount}'**
+  String lockScreenLeft(String amount);
+
+  /// The Lock Screen widget in one line when Pro is not on. Calm: no selling, no 'locked'. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'With Kalan Pro'**
+  String get lockScreenGateInline;
+
+  /// The rectangular Lock Screen widget when Pro is not on. Calm: no selling, no 'locked', no exclamation. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'The Lock Screen widget comes with Kalan Pro.'**
+  String get lockScreenGate;
+
+  /// Inline Lock Screen widget when its information is out of date or setup is not finished. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Kalan'**
+  String get lockScreenOpen;
+
+  /// Settings > Privacy switch (iPhone, Pro): show what's left this pay period on the Lock Screen widget. Privacy preference. Neutral and short.
+  ///
+  /// In en, this message translates to:
+  /// **'Show what\'s left'**
+  String get lockScreenShowLeft;
+
+  /// Subtitle of the 'Show what's left' switch. Payment amounts are never on the Lock Screen; this adds only what's left. Neutral and short.
+  ///
+  /// In en, this message translates to:
+  /// **'The Lock Screen widget also shows what\'s left this period. Not while amounts are hidden.'**
+  String get lockScreenShowLeftHint;
 }
 
 class _AppLocalizationsDelegate

@@ -71,4 +71,47 @@ class L10nWidgetTexts implements WidgetTexts {
 
   @override
   bool get rightToLeft => Bidi.isRtlLanguage(_locale);
+
+  @override
+  String get lockTitle => l10n.lockScreenTitle;
+
+  @override
+  String lockToday(int count) => l10n.lockScreenToday(count);
+
+  @override
+  String lockPastDue(int count) => l10n.lockScreenPastDue(count);
+
+  @override
+  String lockTomorrow(int count) => l10n.lockScreenTomorrow(count);
+
+  @override
+  String lockInDays({required int count, required int days}) =>
+      l10n.lockScreenInDays(count, days);
+
+  @override
+  String get lockNoUpcoming => l10n.lockScreenNoUpcoming;
+
+  @override
+  String get lockTodayShort => l10n.lockScreenTodayShort;
+
+  @override
+  String get lockPastDueShort => l10n.lockScreenPastDueShort;
+
+  @override
+  String number(int value) => l10n.numberValue(value);
+
+  @override
+  String lockCount(int count) => l10n.lockScreenCount(count);
+
+  @override
+  String lockLeft(String amount) => l10n.lockScreenLeft(amount);
+
+  @override
+  String get lockGateInline => l10n.lockScreenGateInline;
+
+  @override
+  String get lockGate => l10n.lockScreenGate;
+
+  @override
+  String get lockOpen => l10n.lockScreenOpen;
 }

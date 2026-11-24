@@ -1,5 +1,6 @@
 import 'dart:ui' show DartPluginRegistrant;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,7 +12,11 @@ import '../../app/locale.dart';
 import '../../core/widget/widget_snapshot.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../entitlement/entitlement.dart';
+import '../../entitlement/pro_rules.dart';
+import '../../entitlement/pro_status_store.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../home_widget/lock_screen_left.dart';
 import '../home_widget/widget_amounts.dart';
 import '../home_widget/widget_gateway.dart';
 import '../home_widget/widget_sync.dart';
@@ -91,11 +96,46 @@ Future<bool> _widgetMasked() async {
   }
 }
 
-/// Redraws the home screen widget (31) after a notification button
-/// changed what it shows. Best effort: the next app start or resume
-/// redraws it anyway.
+/// The Lock Screen widget's Pro state and "Show what's left" (32) from
+/// the device's storage, as the app left them; null when the Pro state
+/// cannot be read: then nothing is written and the widget keeps its last
+/// text (a Pro user never sees the Pro note by mistake). "Show what's
+/// left" unreadable counts as off: no amount by mistake.
+Future<({ProStatus status, bool showLeft})?> _lockScreenChoices() async {
+  final ProStatus status;
+  try {
+    status = (await PrefsProStatusStore.open()).read();
+  } on Object {
+    return null;
+  }
+  try {
+    final hideAmounts = (await PrefsAmountsHiddenStore.open()).read();
+    final appLock = (await PrefsAppLockStore.open()).read().enabled;
+    final showInWidget = (await PrefsWidgetAmountsStore.open()).read();
+    final showLeft = (await PrefsLockScreenLeftStore.open()).read();
+    return (
+      status: status,
+      showLeft:
+          defaultTargetPlatform == TargetPlatform.iOS &&
+          lockScreenLeftShown(
+            showLeft: showLeft,
+            hideAmounts: hideAmounts,
+            appLock: appLock,
+            showInWidget: showInWidget,
+          ),
+    );
+  } on Object {
+    return (status: status, showLeft: false);
+  }
+}
+
+/// Redraws the home screen widget (31) and the Lock Screen widget (32)
+/// after a notification button changed what they show. Best effort: the
+/// next app start or resume redraws them anyway.
 Future<void> _refreshWidget(AppDatabase db) async {
   final masked = await _widgetMasked();
+  final lock = await _lockScreenChoices();
+  if (lock == null) return;
   try {
     await WidgetPublisher(
       db: db,
@@ -103,6 +143,14 @@ Future<void> _refreshWidget(AppDatabase db) async {
       now: DateTime.now,
       localeFor: (s) => appLocale(s?.localeCode),
       masked: () => masked,
+      lockScreen: (settings) => LockScreenOptions(
+        // The Settings test switch counts only in debug builds.
+        pro: KalanEntitlement(
+          status: lock.status,
+          debugProSwitch: settings?.debugPro ?? false,
+        ).isPro,
+        showLeft: lock.showLeft,
+      ),
     ).publish();
   } on Object {
     // The widget keeps its last text until the app runs.

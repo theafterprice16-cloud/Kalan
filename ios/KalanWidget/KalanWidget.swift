@@ -1,7 +1,10 @@
 import SwiftUI
 import WidgetKit
 
-/// Kalan's home screen widget (Roadmap 31), small and medium.
+/// Kalan's home screen widget (Roadmap 31), small and medium, and, on
+/// iOS 16 and later, its Lock Screen widget (Roadmap 32): inline,
+/// rectangular and circular, drawn by the system in one tint (no palette
+/// colour there), in the phone's own font.
 ///
 /// Shows only text the app wrote to the shared App Group storage
 /// (lib/core/widget/widget_snapshot.dart): one record per day for today
@@ -21,6 +24,32 @@ enum KalanWidgetConfig {
     /// A tap opens the app at home (home_widget reads the "homeWidget"
     /// mark); with the app lock on, the lock screen comes first.
     static let tapURL = URL(string: "kalan://widget?homeWidget")!
+
+    /// The Lock Screen widget without Pro opens the Pro screen (the app
+    /// reads the path; widgetProPath in the Dart gateway).
+    static let proURL = URL(string: "kalan://widget/pro?homeWidget")!
+}
+
+/// One day's Lock Screen text (Roadmap 32); only written with Pro. Never
+/// a payment amount; `left` is empty unless every privacy choice allows it.
+struct LockDayText: Decodable {
+    let line: String
+    let centerKind: String
+    let center: String
+    let count: String
+    let left: String
+}
+
+/// The Lock Screen widget's day-independent text (Roadmap 32).
+struct LockText: Decodable {
+    let pro: Bool
+    let title: String
+    let gateInline: String
+    let gate: String
+    let open: String
+    let stale: String
+    let message: String
+    let messageInline: String
 }
 
 struct WidgetRowText: Decodable {
@@ -41,6 +70,7 @@ struct WidgetDayText: Decodable {
     let rows: [WidgetRowText]
     let message: String
     let spoken: String
+    let lock: LockDayText?
 }
 
 struct WidgetSnapshot: Decodable {
@@ -50,6 +80,7 @@ struct WidgetSnapshot: Decodable {
     let rtl: Bool
     let stale: String
     let days: [WidgetDayText]
+    let lock: LockText?
 }
 
 enum KalanWidgetContent {
@@ -57,7 +88,10 @@ enum KalanWidgetContent {
     case blank
     /// The widget gallery: the widget's description, never an amount.
     case preview
+    /// Setup or "No payments yet.": the same on any date.
     case message(String)
+    /// No record for today: "Open Kalan for the latest."
+    case stale(String)
     case day(WidgetDayText)
 }
 
@@ -65,6 +99,8 @@ struct KalanEntry: TimelineEntry {
     let date: Date
     let content: KalanWidgetContent
     let rtl: Bool
+    /// The Lock Screen widget's own text (nil: nothing written yet).
+    var lockText: LockText? = nil
 }
 
 struct KalanWidgetProvider: TimelineProvider {
@@ -105,8 +141,9 @@ struct KalanWidgetProvider: TimelineProvider {
             return [KalanEntry(date: now, content: .blank, rtl: false)]
         }
         let rtl = snapshot.rtl
+        let lock = snapshot.lock
         if snapshot.mode != "days" {
-            return [KalanEntry(date: now, content: .message(snapshot.message), rtl: rtl)]
+            return [KalanEntry(date: now, content: .message(snapshot.message), rtl: rtl, lockText: lock)]
         }
         let calendar = Calendar.current
         var entries: [KalanEntry] = []
@@ -118,15 +155,15 @@ struct KalanWidgetProvider: TimelineProvider {
             else { continue }
             afterLast = end
             if end <= now { continue }
-            entries.append(KalanEntry(date: max(start, now), content: .day(day), rtl: rtl))
+            entries.append(KalanEntry(date: max(start, now), content: .day(day), rtl: rtl, lockText: lock))
         }
-        let stale = KalanEntry(date: max(afterLast ?? now, now), content: .message(snapshot.stale), rtl: rtl)
+        let stale = KalanEntry(date: max(afterLast ?? now, now), content: .stale(snapshot.stale), rtl: rtl, lockText: lock)
         if let first = entries.first, first.date <= now {
             entries.append(stale)
             return entries
         }
         // No record for today.
-        return [KalanEntry(date: now, content: .message(snapshot.stale), rtl: rtl)]
+        return [KalanEntry(date: now, content: .stale(snapshot.stale), rtl: rtl, lockText: lock)]
     }
 }
 
@@ -152,7 +189,7 @@ struct KalanWidgetView: View {
             Color.clear
         case .preview:
             message(Text("widget.description"))
-        case .message(let text):
+        case .message(let text), .stale(let text):
             message(Text(verbatim: text))
                 .accessibilityLabel(Text(verbatim: text))
         case .day(let day):
@@ -265,16 +302,258 @@ private extension View {
             padding(16).background(KalanWidgetColors.surface)
         }
     }
+
+    /// The Lock Screen draws no surface of its own: nothing behind the
+    /// inline and rectangular widgets, the system's round background
+    /// behind the circular one.
+    @available(iOSApplicationExtension 16.0, *)
+    @ViewBuilder
+    func lockScreenBackground(circular: Bool) -> some View {
+        if #available(iOSApplicationExtension 17.0, *) {
+            containerBackground(for: .widget) {
+                if circular {
+                    AccessoryWidgetBackground()
+                }
+            }
+        } else if circular {
+            background(AccessoryWidgetBackground())
+        } else {
+            self
+        }
+    }
+}
+
+/// What the Lock Screen widget shows (Roadmap 32), in this order: without
+/// Pro only the calm Pro note (whatever the date); then the stale or
+/// setup text; then the day's line. Every word comes from the app.
+@available(iOSApplicationExtension 16.0, *)
+struct KalanLockScreenView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: KalanEntry
+
+    private var gated: Bool { !(entry.lockText?.pro ?? false) }
+
+    var body: some View {
+        content
+            .environment(\.layoutDirection, entry.rtl ? .rightToLeft : .leftToRight)
+            .widgetURL(gated ? KalanWidgetConfig.proURL : KalanWidgetConfig.tapURL)
+            .lockScreenBackground(circular: family == .accessoryCircular)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch (entry.content, entry.lockText) {
+        case (.blank, _), (.preview, _), (_, nil):
+            // Nothing written yet, or the gallery: the name and the mark.
+            if family == .accessoryCircular {
+                logo.accessibilityLabel(Text("widget.name"))
+            } else {
+                Text("widget.name")
+            }
+        case (_, .some(let lock)) where !lock.pro:
+            switch family {
+            case .accessoryCircular:
+                logo.accessibilityLabel(Text(verbatim: lock.gate))
+            case .accessoryInline:
+                Text(verbatim: lock.gateInline)
+            default:
+                rectangular(title: lock.title, line: lock.gate, left: "")
+            }
+        case (.stale, .some(let lock)):
+            notice(lock: lock, inline: lock.open, text: lock.stale)
+        case (.message, .some(let lock)):
+            notice(lock: lock, inline: lock.messageInline, text: lock.message)
+        case (.day(let day), .some(let lock)):
+            if let text = day.lock {
+                dayView(lock: lock, day: text)
+            } else {
+                notice(lock: lock, inline: lock.open, text: lock.stale)
+            }
+        }
+    }
+
+    /// Stale, setup or no payments: the mark in the circle.
+    @ViewBuilder
+    private func notice(lock: LockText, inline: String, text: String) -> some View {
+        switch family {
+        case .accessoryCircular:
+            logo.accessibilityLabel(Text(verbatim: text))
+        case .accessoryInline:
+            Text(verbatim: inline)
+        default:
+            rectangular(title: lock.title, line: text, left: "")
+        }
+    }
+
+    @ViewBuilder
+    private func dayView(lock: LockText, day: LockDayText) -> some View {
+        switch family {
+        case .accessoryCircular:
+            circular(day)
+        case .accessoryInline:
+            Text(verbatim: day.line)
+        default:
+            rectangular(title: lock.title, line: day.line, left: day.left)
+        }
+    }
+
+    /// "Kalan", the line, and "Left …" only when the app wrote it.
+    private func rectangular(title: String, line: String, left: String) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(verbatim: title)
+                .font(.headline)
+                .lineLimit(1)
+            Text(verbatim: line)
+                .font(.body)
+                .lineLimit(left.isEmpty ? 2 : 1)
+            if !left.isEmpty {
+                Text(verbatim: left)
+                    .font(.body)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// The number of days or a short word, the count below; only here may
+    /// text shrink to fit. Read as the whole line.
+    @ViewBuilder
+    private func circular(_ day: LockDayText) -> some View {
+        if day.centerKind == "logo" {
+            logo.accessibilityLabel(Text(verbatim: day.line))
+        } else {
+            VStack(spacing: 0) {
+                Text(verbatim: day.center)
+                    .font(day.centerKind == "number"
+                        ? .system(.title2, design: .rounded).weight(.semibold)
+                        : .system(.footnote).weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                Text(verbatim: day.count)
+                    .font(.system(.caption2))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+            }
+            .padding(6)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: day.line))
+        }
+    }
+
+    private var logo: some View {
+        KalanMark()
+            .aspectRatio(941.0 / 1023.0, contentMode: .fit)
+            .padding(12)
+    }
+}
+
+/// The Kalan mark (assets/brand/kalan_mark.svg) as one shape, so the
+/// system tints it like any Lock Screen glyph; no image file and no colour.
+struct KalanMark: Shape {
+    func path(in rect: CGRect) -> Path {
+        // The mark's own box in the 2048-unit drawing.
+        let scale = min(rect.width / 941, rect.height / 1023)
+        let dx = rect.midX - 941 * scale / 2 - 553 * scale
+        let dy = rect.midY - 1023 * scale / 2 - 512 * scale
+        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: x * scale + dx, y: y * scale + dy)
+        }
+        var path = Path()
+        path.move(to: p(587, 512))
+        path.addLine(to: p(784, 512))
+        path.addQuadCurve(to: p(818, 546), control: p(818, 512))
+        path.addLine(to: p(818, 1501))
+        path.addQuadCurve(to: p(784, 1535), control: p(818, 1535))
+        path.addLine(to: p(587, 1535))
+        path.addQuadCurve(to: p(553, 1501), control: p(553, 1535))
+        path.addLine(to: p(553, 546))
+        path.addQuadCurve(to: p(587, 512), control: p(553, 512))
+        path.closeSubpath()
+        path.move(to: p(802.6, 953.6))
+        path.addLine(to: p(1172.4, 537.4))
+        path.addQuadCurve(to: p(1229, 512), control: p(1195, 512))
+        path.addLine(to: p(1459, 512))
+        path.addQuadCurve(to: p(1470.3, 537.3), control: p(1493, 512))
+        path.addLine(to: p(802.7, 1283.7))
+        path.addQuadCurve(to: p(780, 1275), control: p(780, 1309))
+        path.addLine(to: p(780, 1013))
+        path.addQuadCurve(to: p(802.6, 953.6), control: p(780, 979))
+        path.closeSubpath()
+        path.move(to: p(1140, 1059))
+        path.addLine(to: p(1178, 1104))
+        path.addQuadCurve(to: p(1176.6, 1154.7), control: p(1200, 1130))
+        path.addLine(to: p(1060.4, 1277.3))
+        path.addQuadCurve(to: p(1015, 1276), control: p(1037, 1302))
+        path.addLine(to: p(977, 1231))
+        path.addQuadCurve(to: p(978.4, 1180.3), control: p(955, 1205))
+        path.addLine(to: p(1094.6, 1057.7))
+        path.addQuadCurve(to: p(1140, 1059), control: p(1118, 1033))
+        path.closeSubpath()
+        path.move(to: p(1268, 1211))
+        path.addLine(to: p(1306, 1256))
+        path.addQuadCurve(to: p(1304.6, 1306.7), control: p(1328, 1282))
+        path.addLine(to: p(1188.4, 1429.3))
+        path.addQuadCurve(to: p(1143, 1428), control: p(1165, 1454))
+        path.addLine(to: p(1105, 1383))
+        path.addQuadCurve(to: p(1106.4, 1332.3), control: p(1083, 1357))
+        path.addLine(to: p(1222.6, 1209.7))
+        path.addQuadCurve(to: p(1268, 1211), control: p(1246, 1185))
+        path.closeSubpath()
+        path.move(to: p(1395, 1363))
+        path.addLine(to: p(1472, 1454))
+        path.addQuadCurve(to: p(1482, 1507.5), control: p(1494, 1480))
+        path.addLine(to: p(1482, 1507.5))
+        path.addQuadCurve(to: p(1436, 1535), control: p(1470, 1535))
+        path.addLine(to: p(1249, 1535))
+        path.addQuadCurve(to: p(1236.2, 1508.4), control: p(1215, 1535))
+        path.addLine(to: p(1351.8, 1363.6))
+        path.addQuadCurve(to: p(1395, 1363), control: p(1373, 1337))
+        path.closeSubpath()
+        return path
+    }
+}
+
+/// The home screen sizes, and the Lock Screen ones on iOS 16 and later.
+private var kalanFamilies: [WidgetFamily] {
+    if #available(iOSApplicationExtension 16.0, *) {
+        return [.systemSmall, .systemMedium, .accessoryInline, .accessoryRectangular, .accessoryCircular]
+    }
+    return [.systemSmall, .systemMedium]
+}
+
+/// One widget kind for both screens, so the app's one reload redraws them
+/// together; each family picks its own view.
+struct KalanEntryView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: KalanEntry
+
+    @available(iOSApplicationExtension 16.0, *)
+    private static var lockScreenFamilies: [WidgetFamily] {
+        [.accessoryInline, .accessoryRectangular, .accessoryCircular]
+    }
+
+    var body: some View {
+        if #available(iOSApplicationExtension 16.0, *) {
+            if Self.lockScreenFamilies.contains(family) {
+                KalanLockScreenView(entry: entry)
+            } else {
+                KalanWidgetView(entry: entry)
+            }
+        } else {
+            KalanWidgetView(entry: entry)
+        }
+    }
 }
 
 @main
 struct KalanWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: KalanWidgetConfig.kind, provider: KalanWidgetProvider()) { entry in
-            KalanWidgetView(entry: entry)
+            KalanEntryView(entry: entry)
         }
         .configurationDisplayName(Text("widget.name"))
         .description(Text("widget.description"))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies(kalanFamilies)
     }
 }

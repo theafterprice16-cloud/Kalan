@@ -14,6 +14,24 @@ const widgetSnapshotKey = 'kalan.widget.snapshot';
 const widgetIosKind = 'KalanWidget';
 const widgetAndroidProvider = 'app.kalan.mobile.KalanWidgetProvider';
 
+/// Where a tap on a widget leads.
+enum WidgetTap {
+  /// Home (the home screen widget; the Lock Screen widget with Pro).
+  home,
+
+  /// The Pro screen (the Lock Screen widget without Pro, Roadmap 32).
+  pro,
+}
+
+/// The path the Lock Screen widget's Pro note opens:
+/// `kalan://widget/pro?homeWidget` (ios/KalanWidget/KalanWidget.swift).
+const widgetProPath = '/pro';
+
+/// What a widget link asks for; anything else, an empty link (Android)
+/// included, opens home.
+WidgetTap widgetTapOf(Uri? uri) =>
+    uri?.path == widgetProPath ? WidgetTap.pro : WidgetTap.home;
+
 /// Hands the widget's text to the storage it shares with the native
 /// widget and asks the system to redraw it. No network.
 abstract interface class WidgetGateway {
@@ -21,9 +39,11 @@ abstract interface class WidgetGateway {
 
   Future<void> publish(String snapshotJson);
 
-  /// A tap on the widget while Kalan is running (a cold start from the
-  /// widget opens home anyway).
-  Stream<void> get taps;
+  /// A tap on a widget while Kalan is running.
+  Stream<WidgetTap> get taps;
+
+  /// The tap that started Kalan, if a widget did (null: something else).
+  Future<WidgetTap?> launchTap();
 }
 
 /// Web, desktop and tests: no home screen widget.
@@ -37,7 +57,10 @@ class NoopWidgetGateway implements WidgetGateway {
   Future<void> publish(String snapshotJson) async {}
 
   @override
-  Stream<void> get taps => const Stream.empty();
+  Stream<WidgetTap> get taps => const Stream.empty();
+
+  @override
+  Future<WidgetTap?> launchTap() async => null;
 }
 
 /// iOS (App Group user defaults, WidgetKit reload) and Android (the
@@ -65,5 +88,15 @@ class HomeWidgetGateway implements WidgetGateway {
   }
 
   @override
-  Stream<void> get taps => HomeWidget.widgetClicked;
+  Stream<WidgetTap> get taps => HomeWidget.widgetClicked.map(widgetTapOf);
+
+  @override
+  Future<WidgetTap?> launchTap() async {
+    try {
+      final uri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+      return uri == null ? null : widgetTapOf(uri);
+    } on Object {
+      return null;
+    }
+  }
 }

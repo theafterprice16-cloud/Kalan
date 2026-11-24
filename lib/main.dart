@@ -13,6 +13,7 @@ import 'entitlement/pro_controller.dart';
 import 'entitlement/pro_status_store.dart';
 import 'features/export/backup_prefs.dart';
 import 'features/export/export_service.dart';
+import 'features/home_widget/lock_screen_left.dart';
 import 'features/home_widget/widget_amounts.dart';
 import 'features/home_widget/widget_gateway.dart';
 import 'features/home_widget/widget_sync.dart';
@@ -44,6 +45,10 @@ Future<void> main() async {
     // "Show amounts in widget" (31): this device's own.
     widgetAmountsStoreProvider.overrideWithValue(
       await PrefsWidgetAmountsStore.open(),
+    ),
+    // "Show what's left" on the Lock Screen widget (32): this device's own.
+    lockScreenLeftStoreProvider.overrideWithValue(
+      await PrefsLockScreenLeftStore.open(),
     ),
     // Last full backup and its reminder switch (29): this device's own.
     backupPrefsStoreProvider.overrideWithValue(

@@ -4,8 +4,13 @@ import 'package:kalan/features/home_widget/widget_gateway.dart';
 
 /// The home screen widget's storage (31), recorded by the test.
 class FakeWidgetGateway implements WidgetGateway {
+  FakeWidgetGateway({this.launchedBy});
+
   final published = <String>[];
-  final tapController = StreamController<void>.broadcast();
+  final tapController = StreamController<WidgetTap>.broadcast();
+
+  /// The widget tap that started the app, if any.
+  final WidgetTap? launchedBy;
 
   @override
   bool get supported => true;
@@ -15,8 +20,12 @@ class FakeWidgetGateway implements WidgetGateway {
       published.add(snapshotJson);
 
   @override
-  Stream<void> get taps => tapController.stream;
+  Stream<WidgetTap> get taps => tapController.stream;
 
-  /// A tap on the widget while the app runs.
-  void tap() => tapController.add(null);
+  @override
+  Future<WidgetTap?> launchTap() async => launchedBy;
+
+  /// A tap on a widget while the app runs: home, or the Lock Screen
+  /// widget's Pro note (32).
+  void tap([WidgetTap to = WidgetTap.home]) => tapController.add(to);
 }

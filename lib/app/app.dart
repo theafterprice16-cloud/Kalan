@@ -12,6 +12,7 @@ import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../entitlement/pro_controller.dart';
 import '../features/holidays/holiday_providers.dart';
+import '../features/home_widget/widget_gateway.dart';
 import '../features/home_widget/widget_sync.dart';
 import '../features/lock/app_lock_controller.dart';
 import '../features/lock/lock_screen.dart';
@@ -62,8 +63,9 @@ class _KalanAppState extends ConsumerState<KalanApp>
       onShow: lock.appShown,
     );
     _taps = notificationTaps.stream.listen(_onTap);
-    // Home screen widget (31): a tap opens home; with the app lock on,
-    // the lock screen covers it first (AppLockGate).
+    // Home screen widget (31): a tap opens home; the Lock Screen widget
+    // (32) without Pro opens the Pro screen. With the app lock on, the
+    // lock screen covers it first (AppLockGate).
     _widgetTaps = ref.read(widgetGatewayProvider).taps.listen(_onWidgetTap);
     // Pro: the saved state at once, the store checked in the background,
     // and purchase updates heard from the start (before onboarding too).
@@ -86,6 +88,8 @@ class _KalanAppState extends ConsumerState<KalanApp>
       unawaited(ref.read(appLockProvider.notifier).start());
       // Launched by tapping a statement closing reminder: over home.
       _openCard(ref.read(launchPayloadProvider));
+      // Launched by the Lock Screen widget's Pro note (32): over home.
+      unawaited(_openLaunchTap());
     });
   }
 
@@ -133,10 +137,30 @@ class _KalanAppState extends ConsumerState<KalanApp>
   /// Home screen widget (31): home, once set up; during setup (and its
   /// "I have a backup") the tap only brings Kalan forward, so nothing
   /// typed there is lost.
-  void _onWidgetTap(void _) {
+  void _onWidgetTap(WidgetTap tap) {
     if (ref.read(settingsProvider).value == null) return;
     final router = ref.read(routerProvider);
+    if (tap == WidgetTap.pro) {
+      // Already there: not twice.
+      if (router.state.uri.path == Routes.pro()) return;
+      router.go(Routes.home);
+      unawaited(router.push<void>(Routes.pro()));
+      return;
+    }
     if (router.state.uri.path != Routes.home) router.go(Routes.home);
+  }
+
+  /// A cold start opens home anyway; only the Pro note needs a screen,
+  /// once setup is known to be finished.
+  Future<void> _openLaunchTap() async {
+    final tap = await ref.read(widgetGatewayProvider).launchTap();
+    if (tap != WidgetTap.pro || !mounted) return;
+    try {
+      await ref.read(settingsProvider.future);
+    } on Object {
+      return;
+    }
+    if (mounted) _onWidgetTap(WidgetTap.pro);
   }
 
   /// A tapped reminder opens the home screen; a statement closing

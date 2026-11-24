@@ -164,11 +164,19 @@ void main() {
         ]),
         masked: true,
         texts: const _NoTexts(),
+        // Pro: the Lock Screen's day text (32) is written too.
+        lock: const LockScreenOptions(pro: true),
       );
       final json = jsonDecode(jsonEncode(snapshot.toJson())) as Map;
       final day = (json['days'] as List).first as Map;
       final row = (day['rows'] as List).first as Map;
-      final written = {...json.keys, ...day.keys, ...row.keys};
+      final written = {
+        ...json.keys,
+        ...day.keys,
+        ...row.keys,
+        ...(json['lock'] as Map).keys,
+        ...(day['lock'] as Map).keys,
+      };
       final kotlinReads =
           RegExp(r'opt(?:String|Int|Boolean|JSONArray)\("(\w+)"\)')
               .allMatches(read(kotlin))
@@ -182,6 +190,7 @@ void main() {
             ).allMatches(read(swift)).map((m) => m[1]!).toSet()
             // The timeline entry's own fields, not the snapshot's.
             ..removeAll(['date', 'content', 'entry']);
+      expect(swiftReads, containsAll(['lock', 'line', 'left', 'gate', 'pro']));
       expect(written, containsAll(kotlinReads));
       expect(written, containsAll(swiftReads));
       expect(
@@ -298,6 +307,39 @@ void main() {
     expect(read(swift), contains('"kalan://widget?homeWidget"'));
   });
 
+  test('Lock Screen (32): the system draws it; no colour, no image', () {
+    final source = read(swift);
+    final lock = source.substring(
+      source.indexOf('func lockScreenBackground('),
+      source.indexOf('/// The home screen sizes, and the Lock Screen'),
+    );
+    for (final word in [
+      'KalanWidgetColors',
+      'foregroundColor',
+      'foregroundStyle',
+      'Color.',
+      'Image(',
+      'tint(',
+    ]) {
+      expect(lock, isNot(contains(word)), reason: word);
+    }
+    // Families on iOS 16 and later; one kind, so one reload redraws both.
+    expect(
+      source,
+      contains('.accessoryInline, .accessoryRectangular, .accessoryCircular'),
+    );
+    expect(source, contains('iOSApplicationExtension 16.0'));
+    expect(
+      'StaticConfiguration(kind: KalanWidgetConfig.kind'.allMatches(source),
+      hasLength(1),
+    );
+    // The Pro note opens the Pro screen through the path the app reads.
+    expect(
+      source,
+      contains('URL(string: "kalan://widget$widgetProPath?homeWidget")'),
+    );
+  });
+
   test('Android layouts: start and end, never left and right', () {
     for (final name in ['kalan_widget_small', 'kalan_widget_medium']) {
       final xml = read('$res/layout/$name.xml')
@@ -318,8 +360,17 @@ void main() {
         expect(min, greaterThanOrEqualTo((max * 0.6).floor()), reason: name);
       }
     }
-    expect(read(swift), contains('.minimumScaleFactor(0.6)'));
-    expect('.minimumScaleFactor('.allMatches(read(swift)), hasLength(1));
+    // The home screen's big number shrinks to 60 % at most; elsewhere only
+    // the Lock Screen's circular widget may shrink text (32, decision 9).
+    final source = read(swift);
+    final circular = source.substring(
+      source.indexOf('private func circular('),
+      source.indexOf('private var logo'),
+    );
+    final rest = source.replaceFirst(circular, '');
+    expect('.minimumScaleFactor(0.6)'.allMatches(rest), hasLength(1));
+    expect('.minimumScaleFactor('.allMatches(rest), hasLength(1));
+    expect('.minimumScaleFactor('.allMatches(circular), isNotEmpty);
   });
 }
 
@@ -361,4 +412,32 @@ class _NoTexts implements WidgetTexts {
   }) => '';
   @override
   bool get rightToLeft => false;
+  @override
+  String get lockTitle => '';
+  @override
+  String lockToday(int count) => '';
+  @override
+  String lockPastDue(int count) => '';
+  @override
+  String lockTomorrow(int count) => '';
+  @override
+  String lockInDays({required int count, required int days}) => '';
+  @override
+  String get lockNoUpcoming => '';
+  @override
+  String get lockTodayShort => '';
+  @override
+  String get lockPastDueShort => '';
+  @override
+  String number(int value) => '';
+  @override
+  String lockCount(int count) => '';
+  @override
+  String lockLeft(String amount) => '';
+  @override
+  String get lockGateInline => '';
+  @override
+  String get lockGate => '';
+  @override
+  String get lockOpen => '';
 }

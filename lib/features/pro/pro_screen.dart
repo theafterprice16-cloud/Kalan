@@ -12,6 +12,7 @@ import '../../entitlement/pro_controller.dart';
 import '../../entitlement/pro_rules.dart';
 import '../../entitlement/store_gateway.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../home_widget/lock_screen_left.dart';
 import 'pro_features.dart';
 
 /// The sentence for a purchase or restore outcome; null shows nothing.
@@ -115,7 +116,12 @@ class _ProScreenState extends ConsumerState<ProScreen> {
                   style: theme.textTheme.bodyLarge,
                 ),
                 const SizedBox(height: KalanSpace.sm),
-                for (final line in proFeatureLines(l10n))
+                for (final line in proFeatureLines(
+                  l10n,
+                  lockScreenWidget: ref.watch(
+                    lockScreenWidgetSupportedProvider,
+                  ),
+                ))
                   Padding(
                     padding: const EdgeInsets.only(bottom: KalanSpace.xs),
                     child: StatusNote(

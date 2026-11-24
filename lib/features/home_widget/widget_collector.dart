@@ -48,6 +48,11 @@ WidgetInput widgetInputOf({
   if (plans.isEmpty && recurring.isEmpty) return const WidgetNoPaymentsInput();
   final schedule = payScheduleOf(settings);
   final payments = _payments(plans, recurring, today, l10n);
+  final pastDueDays = [
+    for (final p in plans)
+      for (final pay in p.payments)
+        if (!pay.isPaid) LocalDate.fromEpochDay(pay.dueDay),
+  ];
   return WidgetDaysInput([
     for (var i = 0; i < widgetDayCount; i++)
       if (today.addDays(i) case final day)
@@ -64,8 +69,38 @@ WidgetInput widgetInputOf({
             for (final p in payments)
               if (p.date >= day) p,
           ].take(widgetMaxRows).toList(),
+          lock: lockDayCounts(
+            day: day,
+            upcoming: [for (final p in payments) p.date],
+            planDueDays: pastDueDays,
+          ),
         ),
   ]);
+}
+
+/// What the Lock Screen widget counts on [day] (Roadmap 32), as the app
+/// would see it then if nothing changes: [upcoming] holds the due dates of
+/// every unpaid payment due today or later, plan and recurring, sorted
+/// ([_payments]); [planDueDays] the due dates of every unpaid plan payment
+/// that counts (nothing on hold or closed), past ones included. A plan
+/// payment due before [day] is past due; a recurring one never is (the
+/// home screen's "Past due" list).
+LockDayCounts lockDayCounts({
+  required LocalDate day,
+  required List<LocalDate> upcoming,
+  required List<LocalDate> planDueDays,
+}) {
+  final later = [
+    for (final d in upcoming)
+      if (d > day) d,
+  ];
+  final next = later.isEmpty ? null : later.reduce((a, b) => a < b ? a : b);
+  return LockDayCounts(
+    today: upcoming.where((d) => d == day).length,
+    pastDue: planDueDays.where((d) => d < day).length,
+    nextDate: next,
+    nextCount: next == null ? 0 : later.where((d) => d == next).length,
+  );
 }
 
 /// Every unpaid payment due today or later, soonest first, then by name:

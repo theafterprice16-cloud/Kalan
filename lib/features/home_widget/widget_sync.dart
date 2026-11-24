@@ -15,6 +15,7 @@ import '../../l10n/generated/app_localizations.dart';
 import '../lock/app_lock_controller.dart';
 import '../privacy/amounts_hidden.dart';
 import '../reminders/reminder_providers.dart';
+import 'lock_screen_left.dart';
 import 'widget_amounts.dart';
 import 'widget_collector.dart';
 import 'widget_gateway.dart';
@@ -28,7 +29,11 @@ class WidgetPublisher {
     required this.now,
     required this.localeFor,
     required this.masked,
+    this.lockScreen = _noLockScreen,
   });
+
+  static LockScreenOptions _noLockScreen(SettingsRow? settings) =>
+      const LockScreenOptions();
 
   final AppDatabase db;
   final WidgetGateway gateway;
@@ -39,6 +44,11 @@ class WidgetPublisher {
 
   /// [widgetAmountsMasked] as the choices stand at each run.
   final bool Function() masked;
+
+  /// The Lock Screen widget's choices (Roadmap 32) as they stand at each
+  /// run: Pro (the Settings test switch is in [settings]) and whether
+  /// what's left shows.
+  final LockScreenOptions Function(SettingsRow? settings) lockScreen;
 
   /// The last JSON handed over, so an unchanged widget is not redrawn.
   String? _last;
@@ -56,6 +66,7 @@ class WidgetPublisher {
         l10n: l10n,
       ),
       masked: masked(),
+      lock: lockScreen(settings),
       texts: L10nWidgetTexts(
         l10n: l10n,
         currency: settings == null
@@ -88,6 +99,23 @@ final widgetMaskedProvider = Provider<bool>(
   ),
 );
 
+/// The Lock Screen widget's choices now (Roadmap 32): Pro, and what's
+/// left only on an iPhone, with "Show what's left" on and nothing masked
+/// (decision 3).
+final lockScreenOptionsProvider = Provider<LockScreenOptions>(
+  (ref) => LockScreenOptions(
+    pro: ref.watch(entitlementProvider.select((e) => e.isPro)),
+    showLeft:
+        ref.watch(lockScreenWidgetSupportedProvider) &&
+        lockScreenLeftShown(
+          showLeft: ref.watch(lockScreenLeftProvider),
+          hideAmounts: ref.watch(amountsHiddenProvider),
+          appLock: ref.watch(appLockProvider.select((s) => s.enabled)),
+          showInWidget: ref.watch(widgetAmountsProvider),
+        ),
+  ),
+);
+
 final widgetPublisherProvider = Provider((ref) {
   final appLocales = ref.watch(appLocalesProvider);
   return WidgetPublisher(
@@ -97,12 +125,14 @@ final widgetPublisherProvider = Provider((ref) {
     localeFor: (s) => appLocale(s?.localeCode, appLocales),
     // Read at each run, as the choices stand then.
     masked: () => ref.read(widgetMaskedProvider),
+    lockScreen: (_) => ref.read(lockScreenOptionsProvider),
   );
 });
 
 /// Redraws the widget whenever what it shows may change: plans and
 /// payments, recurring payments, sources (card dates), settings (language,
-/// currency, pay schedule, income) and the privacy choices. The app also
+/// currency, pay schedule, income), the privacy choices, Pro and "Show
+/// what's left" (Lock Screen, 32). The app also
 /// asks on start and when it comes back to the foreground (the date may
 /// have changed). The same listeners as [reminderSyncProvider], in one
 /// central place instead of calls from screens.
@@ -116,6 +146,10 @@ final widgetSyncProvider = Provider<WidgetSync>((ref) {
   ref.listen(sourcesProvider, (_, _) => sync.request());
   ref.listen(settingsProvider, (_, _) => sync.request());
   ref.listen(widgetMaskedProvider, (_, _) => sync.request());
+  // Lock Screen widget (32): Pro bought or refunded, "Show what's left".
+  ref.listen(lockScreenOptionsProvider, (a, b) {
+    if (a?.pro != b.pro || a?.showLeft != b.showLeft) sync.request();
+  });
   ref.onDispose(sync.dispose);
   return sync;
 });
