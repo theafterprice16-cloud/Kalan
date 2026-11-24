@@ -237,9 +237,10 @@ const restoreCountedTables = {
 /// anywhere else are never touched, nor a path with "..".
 Future<void> deletePickedCopy(String path, List<Directory> roots) async {
   if (path.isEmpty) return;
-  final file = File(path).absolute;
-  final segments = file.uri.pathSegments;
+  // On the path as given: File.uri would already have resolved "..".
+  final segments = path.split(RegExp(r'[/\\]'));
   if (segments.contains('..') || segments.contains('.')) return;
+  final file = File(path).absolute;
   for (final root in roots) {
     final base = root.absolute.path;
     if (file.path.startsWith(base.endsWith('/') ? base : '$base/')) {

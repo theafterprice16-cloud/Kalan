@@ -706,10 +706,19 @@ void main() {
       picker.file = XFile(own.path);
       expect(await service().pick(), isNotNull);
       expect(own.existsSync(), isTrue);
-      // Nor through "..".
-      picker.file = XFile('${temp.path}/../${own.uri.pathSegments.last}');
-      await service().pick().catchError((Object _) => null);
-      expect(own.existsSync(), isTrue);
+      // Nor through "..": this path is the user's file next to the
+      // temporary folder.
+      final beside = File(
+        '${temp.parent.path}/kalan-beside-${temp.hashCode}.json',
+      )..writeAsBytesSync(bytesOf(fixturePlain));
+      addTearDown(() {
+        if (beside.existsSync()) beside.deleteSync();
+      });
+      final sneaky = '${temp.path}/../${beside.uri.pathSegments.last}';
+      expect(File(sneaky).existsSync(), isTrue);
+      picker.file = XFile(sneaky);
+      expect(await service().pick(), isNotNull);
+      expect(beside.existsSync(), isTrue);
     });
   });
 

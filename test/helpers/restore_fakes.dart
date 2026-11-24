@@ -66,7 +66,7 @@ List<Override> restoreOverrides(FakePicker picker, Directory undoDir) => [
   // A folder of its own: deleting a picked copy can never reach the
   // safety copy.
   pickedCopyDirectoriesProvider.overrideWithValue(
-    () async => [Directory('${undoDir.path}/picked')],
+    () async => [Directory('${undoDir.path}-picked')],
   ),
   undoCopyWriterProvider.overrideWithValue(
     (data) => writeBackup(
