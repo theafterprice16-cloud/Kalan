@@ -6,13 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/locale.dart';
 import 'package:kalan/app/providers.dart';
-import 'package:kalan/core/date/local_date.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/money/currency.dart';
 import 'package:kalan/core/money/money_format.dart';
 import 'package:kalan/core/widget/widget_snapshot.dart';
 import 'package:kalan/data/db/app_database.dart';
-import 'package:kalan/data/db/tables.dart';
 import 'package:kalan/data/repositories/plan_repository.dart';
 import 'package:kalan/data/repositories/recurring_repository.dart';
 import 'package:kalan/data/repositories/source_repository.dart';
@@ -235,7 +233,7 @@ void main() {
       FakeWidgetGateway(),
     ).build()).days.first;
     // 125.450.000 − 9.000.000 "rent" in rupiah minor units (no decimals).
-    final left = 125450000 - 900000;
+    const left = 125450000 - 900000;
     final idr = Currency.fromCode('IDR');
     expect(today.number, formatMoney(left, idr, localeName: 'tr'));
     expect(today.number.length, greaterThan(widgetSmallNumberMax));
@@ -276,7 +274,7 @@ void main() {
       expect(json, isNot(contains(_money(amount))));
     }
     expect(json, isNot(contains('₺')));
-    final today = (jsonDecode(json) as Map)['days'][0] as Map;
+    final today = ((jsonDecode(json) as Map)['days'] as List)[0] as Map;
     expect(today['number'], amountMask);
     expect(today['numberSmall'], amountMask);
     expect(

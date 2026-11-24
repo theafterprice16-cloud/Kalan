@@ -13,8 +13,8 @@ void main() {
     // through home_widget, Roadmap 31).
     final asked = manifest.replaceAll(
       '<uses-permission\n'
-      '        android:name="android.permission.ACCESS_NETWORK_STATE"\n'
-      '        tools:node="remove" />',
+          '        android:name="android.permission.ACCESS_NETWORK_STATE"\n'
+          '        tools:node="remove" />',
       '',
     );
     expect(asked, isNot(contains('ACCESS_NETWORK_STATE')));

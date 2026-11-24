@@ -7,7 +7,7 @@ import 'package:kalan/core/engine/period_summary.dart';
 import 'package:kalan/core/money/money_format.dart' show amountMask;
 import 'package:kalan/core/widget/widget_snapshot.dart';
 
-/// Plain texts: amounts as "<minor>u", short ones as "<minor>s", so a
+/// Plain texts: amounts as `<minor>u`, short ones as `<minor>s`, so a
 /// test sees exactly which path made each string.
 class _Texts implements WidgetTexts {
   _Texts({this.failOnMoney = false});

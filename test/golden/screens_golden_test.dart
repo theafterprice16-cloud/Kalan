@@ -21,6 +21,7 @@ import 'package:kalan/entitlement/pro_rules.dart';
 import 'package:kalan/entitlement/pro_status_store.dart';
 import 'package:kalan/entitlement/store_gateway.dart';
 import 'package:kalan/features/export/backup_prefs.dart';
+import 'package:kalan/features/home_widget/widget_sync.dart';
 import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
 import 'package:kalan/features/lock/device_lock_gateway.dart';
@@ -41,6 +42,7 @@ import '../helpers/charge_seed.dart';
 import '../helpers/fake_device_lock.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
+import '../helpers/fake_widget.dart';
 import '../helpers/fonts.dart';
 import '../helpers/restore_fakes.dart';
 import '../helpers/statement_seed.dart';
@@ -1888,6 +1890,7 @@ void main() {
           bool hold = false,
           bool screenLock = true,
           AppLockNotice? notice,
+          bool widget = false,
         }) async {
           final phone = FakeDeviceLock(hold: hold, screenLock: screenLock);
           await start(
@@ -1901,6 +1904,9 @@ void main() {
               ),
               deviceLockGatewayProvider.overrideWithValue(phone),
               appIsActiveProvider.overrideWithValue(() => true),
+              // Home screen widget (31): a phone with the widget.
+              if (widget)
+                widgetGatewayProvider.overrideWithValue(FakeWidgetGateway()),
             ],
           );
           await loadImages(tester);
@@ -1959,6 +1965,15 @@ void main() {
           await openLock(tester);
           await tester.tap(find.byKey(const ValueKey('app-lock-delay')));
           await shoot(tester, '107-lock-again-choice-$lang-$theme');
+        });
+
+        // Home screen widget (31): "Show amounts in widget", only while
+        // the lock is on, off by default.
+        testWidgets('settings, widget amounts switch, $lang', (tester) async {
+          await startLocked(tester, widget: true);
+          await openLock(tester);
+          expect(find.byKey(const ValueKey('widget-amounts')), findsOneWidget);
+          await shoot(tester, '126-settings-widget-amounts-$lang-$theme');
         });
       }
 
