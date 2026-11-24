@@ -9,7 +9,15 @@ void main() {
     final manifest = File('android/app/src/main/AndroidManifest.xml')
         .readAsStringSync();
     expect(manifest, isNot(contains('android.permission.INTERNET')));
-    expect(manifest, isNot(contains('ACCESS_NETWORK_STATE')));
+    // Named only to take it out of what libraries merge in (WorkManager
+    // through home_widget, Roadmap 31).
+    final asked = manifest.replaceAll(
+      '<uses-permission\n'
+      '        android:name="android.permission.ACCESS_NETWORK_STATE"\n'
+      '        tools:node="remove" />',
+      '',
+    );
+    expect(asked, isNot(contains('ACCESS_NETWORK_STATE')));
   });
 
   test('no networking, analytics or crash reporting packages ship', () {
