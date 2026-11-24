@@ -17,6 +17,13 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		27A0C1E12F0B4A0000D1A002 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 27A0C1E12F0B4A0000D1A001 /* InfoPlist.strings */; };
+		31B0000C00000000000A11CE /* KalanWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B0000100000000000A11CE /* KalanWidget.swift */; };
+		31B0000D00000000000A11CE /* KalanWidgetColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31B0000200000000000A11CE /* KalanWidgetColors.swift */; };
+		31B0000E00000000000A11CE /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 31B0000600000000000A11CE /* Localizable.strings */; };
+		31B0000F00000000000A11CE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31B0000A00000000000A11CE /* WidgetKit.framework */; };
+		31B0001000000000000A11CE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 31B0000B00000000000A11CE /* SwiftUI.framework */; };
+		31B0001100000000000A11CE /* KalanWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 31B0000900000000000A11CE /* KalanWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		31B0FFFD00000000000A11CE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 31B0FFFE00000000000A11CE /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,6 +33,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		31B0001C00000000000A11CE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 31B0001700000000000A11CE;
+			remoteInfo = KalanWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -38,6 +52,17 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		31B0001600000000000A11CE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				31B0001100000000000A11CE /* KalanWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -62,6 +87,17 @@
 		27A0C1E12F0B4A0000D1A003 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		27A0C1E12F0B4A0000D1A004 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		31B0000100000000000A11CE /* KalanWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalanWidget.swift; sourceTree = "<group>"; };
+		31B0000200000000000A11CE /* KalanWidgetColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KalanWidgetColors.swift; sourceTree = "<group>"; };
+		31B0000300000000000A11CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		31B0000400000000000A11CE /* KalanWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KalanWidget.entitlements; sourceTree = "<group>"; };
+		31B0000500000000000A11CE /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		31B0000700000000000A11CE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		31B0000800000000000A11CE /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		31B0000900000000000A11CE /* KalanWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KalanWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		31B0000A00000000000A11CE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		31B0000B00000000000A11CE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		31B0FFFE00000000000A11CE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +106,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		31B0001400000000000A11CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31B0000F00000000000A11CE /* WidgetKit.framework in Frameworks */,
+				31B0001000000000000A11CE /* SwiftUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,7 +148,22 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
+				31B0001200000000000A11CE /* KalanWidget */,
+				31B0FFFF00000000000A11CE /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		31B0001200000000000A11CE /* KalanWidget */ = {
+			isa = PBXGroup;
+			children = (
+				31B0000100000000000A11CE /* KalanWidget.swift */,
+				31B0000200000000000A11CE /* KalanWidgetColors.swift */,
+				31B0000600000000000A11CE /* Localizable.strings */,
+				31B0000300000000000A11CE /* Info.plist */,
+				31B0000400000000000A11CE /* KalanWidget.entitlements */,
+				31B0FFFE00000000000A11CE /* PrivacyInfo.xcprivacy */,
+			);
+			path = KalanWidget;
 			sourceTree = "<group>";
 		};
 		97C146EF1CF9000F007C117D /* Products */ = {
@@ -111,6 +171,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				31B0000900000000000A11CE /* KalanWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -123,6 +184,7 @@
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				27A0C1E12F0B4A0000D1A001 /* InfoPlist.strings */,
 				97C147021CF9000F007C117D /* Info.plist */,
+				31B0000500000000000A11CE /* Runner.entitlements */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
@@ -130,6 +192,15 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		31B0FFFF00000000000A11CE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				31B0000A00000000000A11CE /* WidgetKit.framework */,
+				31B0000B00000000000A11CE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -161,11 +232,13 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				31B0001600000000000A11CE /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				31B0001D00000000000A11CE /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -174,6 +247,23 @@
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		31B0001700000000000A11CE /* KalanWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 31B0001800000000000A11CE /* Build configuration list for PBXNativeTarget "KalanWidgetExtension" */;
+			buildPhases = (
+				31B0001300000000000A11CE /* Sources */,
+				31B0001400000000000A11CE /* Frameworks */,
+				31B0001500000000000A11CE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KalanWidgetExtension;
+			productName = KalanWidgetExtension;
+			productReference = 31B0000900000000000A11CE /* KalanWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -192,6 +282,9 @@
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
+					};
+					31B0001700000000000A11CE = {
+						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
@@ -214,6 +307,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				31B0001700000000000A11CE /* KalanWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -235,6 +329,15 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		31B0001500000000000A11CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31B0000E00000000000A11CE /* Localizable.strings in Resources */,
+				31B0FFFD00000000000A11CE /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,6 +396,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		31B0001300000000000A11CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31B0000C00000000000A11CE /* KalanWidget.swift in Sources */,
+				31B0000D00000000000A11CE /* KalanWidgetColors.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -300,6 +412,11 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		31B0001D00000000000A11CE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 31B0001700000000000A11CE /* KalanWidgetExtension */;
+			targetProxy = 31B0001C00000000000A11CE /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -327,6 +444,15 @@
 				27A0C1E12F0B4A0000D1A004 /* tr */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		31B0000600000000000A11CE /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				31B0000700000000000A11CE /* en */,
+				31B0000800000000000A11CE /* tr */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -393,6 +519,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -574,6 +701,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -596,6 +724,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				ENABLE_BITCODE = NO;
+				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -608,6 +737,89 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
+		};
+		31B0001900000000000A11CE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = KalanWidget/KalanWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KalanWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = app.kalan.mobile.KalanWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		31B0001A00000000000A11CE /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = KalanWidget/KalanWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KalanWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = app.kalan.mobile.KalanWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		31B0001B00000000000A11CE /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = KalanWidget/KalanWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = KalanWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = app.kalan.mobile.KalanWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
 		};
 /* End XCBuildConfiguration section */
 
@@ -638,6 +850,16 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		31B0001800000000000A11CE /* Build configuration list for PBXNativeTarget "KalanWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				31B0001900000000000A11CE /* Debug */,
+				31B0001A00000000000A11CE /* Release */,
+				31B0001B00000000000A11CE /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

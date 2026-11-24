@@ -3917,6 +3917,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In this backup'**
   String get restoreSummaryLabel;
+
+  /// Label above the big number on the home screen widget: what is left of the income this pay period. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get widgetLeft;
+
+  /// Label above the big number on the home screen widget when no income is entered: the total of this pay period's payments. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments this period'**
+  String get widgetPaymentsThisPeriod;
+
+  /// Under the big number on the home screen widget: the last day of the current pay period. {date} is a short date such as 'Dec 14'. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String widgetUntil(String date);
+
+  /// Home screen widget when the user has entered no plan and no recurring payment. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'No payments yet.'**
+  String get widgetNoPayments;
+
+  /// Medium home screen widget, in place of the payment rows, when nothing unpaid is due from today on. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming payments.'**
+  String get widgetNoUpcoming;
+
+  /// Home screen widget before the first setup is finished. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Kalan to finish setup.'**
+  String get widgetSetup;
+
+  /// Home screen widget when the app has not been opened for more than a week, so its figures may be out of date; no amount is shown. Calm, no warning tone. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Kalan for the latest.'**
+  String get widgetStale;
+
+  /// What a screen reader says for the home screen widget's top part. {title} is 'Left' or 'Payments this period', {amount} the amount (or 'Amount hidden'), {date} a short date such as 'Dec 14'. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} {amount}, until {date}.'**
+  String widgetSpokenSummary(String title, String amount, String date);
+
+  /// What a screen reader says for one payment row on the medium home screen widget. {name} is the plan name, {date} a short date, {amount} the amount (or 'Amount hidden'). Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, {date}, {amount}.'**
+  String widgetSpokenPayment(String name, String date, String amount);
+
+  /// Name of the widget in the phone's widget picker (iOS widget gallery, Android widget list). The app's name; usually not translated. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'Kalan'**
+  String get widgetPickerName;
+
+  /// Description of the widget in the phone's widget picker (iOS widget gallery, Android widget list). Home screen widget (Roadmap 31); keep it very short, it must fit a small space.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s left this period and upcoming payments.'**
+  String get widgetPickerDescription;
+
+  /// Title of a switch in Settings > Privacy, shown only while app lock is on. When on, the home screen widget shows amounts even though the app is locked. Privacy preference (Roadmap 31). Neutral and short; do not make the user look as if they were hiding something.
+  ///
+  /// In en, this message translates to:
+  /// **'Show amounts in widget'**
+  String get widgetShowAmounts;
+
+  /// Subtitle of the 'Show amounts in widget' switch. ••• is the same three dots that replace hidden amounts in the app. Privacy preference (Roadmap 31). Neutral and short.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, the home screen widget shows ••• instead of amounts.'**
+  String get widgetShowAmountsHint;
 }
 
 class _AppLocalizationsDelegate

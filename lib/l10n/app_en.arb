@@ -3239,5 +3239,91 @@
   "restoreSummaryLabel": "In this backup",
   "@restoreSummaryLabel": {
     "description": "Restore from a backup file (Roadmap 30). Small muted label above the summary card's lines."
+  },
+  "widgetLeft": "Left",
+  "@widgetLeft": {
+    "description": "Label above the big number on the home screen widget: what is left of the income this pay period. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetPaymentsThisPeriod": "Payments this period",
+  "@widgetPaymentsThisPeriod": {
+    "description": "Label above the big number on the home screen widget when no income is entered: the total of this pay period's payments. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetUntil": "Until {date}",
+  "@widgetUntil": {
+    "description": "Under the big number on the home screen widget: the last day of the current pay period. {date} is a short date such as 'Dec 14'. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Dec 14"
+      }
+    }
+  },
+  "widgetNoPayments": "No payments yet.",
+  "@widgetNoPayments": {
+    "description": "Home screen widget when the user has entered no plan and no recurring payment. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetNoUpcoming": "No upcoming payments.",
+  "@widgetNoUpcoming": {
+    "description": "Medium home screen widget, in place of the payment rows, when nothing unpaid is due from today on. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetSetup": "Open Kalan to finish setup.",
+  "@widgetSetup": {
+    "description": "Home screen widget before the first setup is finished. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetStale": "Open Kalan for the latest.",
+  "@widgetStale": {
+    "description": "Home screen widget when the app has not been opened for more than a week, so its figures may be out of date; no amount is shown. Calm, no warning tone. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetSpokenSummary": "{title} {amount}, until {date}.",
+  "@widgetSpokenSummary": {
+    "description": "What a screen reader says for the home screen widget's top part. {title} is 'Left' or 'Payments this period', {amount} the amount (or 'Amount hidden'), {date} a short date such as 'Dec 14'. Home screen widget (Roadmap 31); keep it very short, it must fit a small space.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Left"
+      },
+      "amount": {
+        "type": "String",
+        "example": "$1,250"
+      },
+      "date": {
+        "type": "String",
+        "example": "Dec 14"
+      }
+    }
+  },
+  "widgetSpokenPayment": "{name}, {date}, {amount}.",
+  "@widgetSpokenPayment": {
+    "description": "What a screen reader says for one payment row on the medium home screen widget. {name} is the plan name, {date} a short date, {amount} the amount (or 'Amount hidden'). Home screen widget (Roadmap 31); keep it very short, it must fit a small space.",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Phone"
+      },
+      "date": {
+        "type": "String",
+        "example": "Nov 22"
+      },
+      "amount": {
+        "type": "String",
+        "example": "$140"
+      }
+    }
+  },
+  "widgetPickerName": "Kalan",
+  "@widgetPickerName": {
+    "description": "Name of the widget in the phone's widget picker (iOS widget gallery, Android widget list). The app's name; usually not translated. Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetPickerDescription": "What's left this period and upcoming payments.",
+  "@widgetPickerDescription": {
+    "description": "Description of the widget in the phone's widget picker (iOS widget gallery, Android widget list). Home screen widget (Roadmap 31); keep it very short, it must fit a small space."
+  },
+  "widgetShowAmounts": "Show amounts in widget",
+  "@widgetShowAmounts": {
+    "description": "Title of a switch in Settings > Privacy, shown only while app lock is on. When on, the home screen widget shows amounts even though the app is locked. Privacy preference (Roadmap 31). Neutral and short; do not make the user look as if they were hiding something."
+  },
+  "widgetShowAmountsHint": "When off, the home screen widget shows ••• instead of amounts.",
+  "@widgetShowAmountsHint": {
+    "description": "Subtitle of the 'Show amounts in widget' switch. ••• is the same three dots that replace hidden amounts in the app. Privacy preference (Roadmap 31). Neutral and short."
   }
 }

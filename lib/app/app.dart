@@ -12,6 +12,7 @@ import '../core/theme/kalan_theme.dart';
 import '../core/theme/theme_mode.dart';
 import '../entitlement/pro_controller.dart';
 import '../features/holidays/holiday_providers.dart';
+import '../features/home_widget/widget_sync.dart';
 import '../features/lock/app_lock_controller.dart';
 import '../features/lock/lock_screen.dart';
 import '../features/plans/provider_templates_ui.dart';
@@ -43,6 +44,7 @@ class _KalanAppState extends ConsumerState<KalanApp>
     with WidgetsBindingObserver {
   late final AppLifecycleListener _lifecycle;
   StreamSubscription<NotificationResponse>? _taps;
+  StreamSubscription<void>? _widgetTaps;
 
   @override
   void initState() {
@@ -60,6 +62,9 @@ class _KalanAppState extends ConsumerState<KalanApp>
       onShow: lock.appShown,
     );
     _taps = notificationTaps.stream.listen(_onTap);
+    // Home screen widget (31): a tap opens home; with the app lock on,
+    // the lock screen covers it first (AppLockGate).
+    _widgetTaps = ref.read(widgetGatewayProvider).taps.listen(_onWidgetTap);
     // Pro: the saved state at once, the store checked in the background,
     // and purchase updates heard from the start (before onboarding too).
     ref.read(proControllerProvider);
@@ -73,6 +78,7 @@ class _KalanAppState extends ConsumerState<KalanApp>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(reminderSyncProvider).request();
+      ref.read(widgetSyncProvider).request();
       // Restore (30): a copy older than 30 days goes; a restore stopped
       // halfway is finished.
       unawaited(ref.read(undoTidyProvider.future));
@@ -88,6 +94,7 @@ class _KalanAppState extends ConsumerState<KalanApp>
     WidgetsBinding.instance.removeObserver(this);
     _lifecycle.dispose();
     unawaited(_taps?.cancel());
+    unawaited(_widgetTaps?.cancel());
     super.dispose();
   }
 
@@ -108,6 +115,8 @@ class _KalanAppState extends ConsumerState<KalanApp>
     ref.invalidate(plansProvider);
     ref.invalidate(recurringProvider);
     ref.read(reminderSyncProvider).request();
+    // The widget's eight days start again from today.
+    ref.read(widgetSyncProvider).request();
     // Pro: a quiet store check (finishes an acknowledgement that failed).
     unawaited(ref.read(proControllerProvider.notifier).recheck());
   }
@@ -120,6 +129,15 @@ class _KalanAppState extends ConsumerState<KalanApp>
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) =>
       ref.read(appLockProvider).locked;
+
+  /// Home screen widget (31): home, once set up; during setup (and its
+  /// "I have a backup") the tap only brings Kalan forward, so nothing
+  /// typed there is lost.
+  void _onWidgetTap(void _) {
+    if (ref.read(settingsProvider).value == null) return;
+    final router = ref.read(routerProvider);
+    if (router.state.uri.path != Routes.home) router.go(Routes.home);
+  }
 
   /// A tapped reminder opens the home screen; a statement closing
   /// reminder opens its card's statements. A button, should the platform
@@ -154,6 +172,8 @@ class _KalanAppState extends ConsumerState<KalanApp>
   Widget build(BuildContext context) {
     // Keeps reminders in step with every change to payments or settings.
     ref.watch(reminderSyncProvider);
+    // And the home screen widget (31).
+    ref.watch(widgetSyncProvider);
     final router = ref.watch(routerProvider);
     final localeCode = ref.watch(
       settingsProvider.select((s) => s.value?.localeCode),

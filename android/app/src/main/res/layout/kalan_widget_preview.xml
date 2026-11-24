@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the phone's widget list shows before the widget is added: the
+     widget's description, no amount (never a made-up figure). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/kalan_widget_background"
+    android:padding="@dimen/kalan_widget_padding">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/kalan_widget_description"
+        android:textAlignment="center"
+        android:textColor="@color/kalan_widget_text"
+        android:textSize="15sp" />
+</FrameLayout>

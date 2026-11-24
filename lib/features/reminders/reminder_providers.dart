@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../../app/debounced_task.dart';
 import '../../app/locale.dart';
 import '../../app/providers.dart';
 import '../privacy/amounts_hidden.dart';
@@ -79,61 +78,7 @@ final reminderSyncProvider = Provider<ReminderSync>((ref) {
 
 /// Debounces requests and runs at most one reschedule at a time, in the
 /// background (the work is asynchronous; the UI never waits for it).
-class ReminderSync {
-  ReminderSync(this._scheduler, {required this.debounce});
-
-  final ReminderScheduler _scheduler;
-  final Duration debounce;
-  Timer? _timer;
-  Future<void>? _running;
-  bool _again = false;
-  bool _disposed = false;
-  Completer<void>? _idle;
-
-  /// Completes when no reschedule is waiting or running.
-  Future<void> get idle => _idle?.future ?? Future.value();
-
-  void request() {
-    if (_disposed) return;
-    _idle ??= Completer<void>();
-    _timer?.cancel();
-    _timer = Timer(debounce, _start);
-  }
-
-  void _start() {
-    _timer = null;
-    if (_running != null) {
-      _again = true;
-      return;
-    }
-    _running = _run();
-  }
-
-  Future<void> _run() async {
-    do {
-      _again = false;
-      try {
-        await _scheduler.rescheduleAll();
-      } on Object {
-        // A failed run (e.g. the database closing) must not break the app;
-        // the next change or resume tries again.
-        if (_disposed) break;
-      }
-    } while (_again && !_disposed);
-    _running = null;
-    if (_timer == null) _finish();
-  }
-
-  void _finish() {
-    final idle = _idle;
-    _idle = null;
-    if (idle != null && !idle.isCompleted) idle.complete();
-  }
-
-  void dispose() {
-    _disposed = true;
-    _timer?.cancel();
-    _timer = null;
-    _finish();
-  }
+class ReminderSync extends DebouncedTask {
+  ReminderSync(ReminderScheduler scheduler, {required super.debounce})
+    : super(scheduler.rescheduleAll);
 }

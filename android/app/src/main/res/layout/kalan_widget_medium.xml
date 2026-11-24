@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widget (Roadmap 31), medium (about 4x2). Text only from the app's
+     snapshot; colours only the widget tokens (surface, text, textMuted,
+     accent for "left", negative for a negative period); start and end,
+     never left and right (Arabic mirrors). The big number may shrink to
+     60 % of its size (autosize, Android 8 and later); nothing else does:
+     names end with an ellipsis, amounts never shrink or cut. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/kalan_widget_background"
+    android:paddingStart="@dimen/kalan_widget_padding"
+    android:paddingTop="10dp"
+    android:paddingEnd="@dimen/kalan_widget_padding"
+    android:paddingBottom="10dp">
+
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="noHideDescendants"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAlignment="viewStart"
+                android:textColor="@color/kalan_widget_text_muted"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/widget_until"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAlignment="viewStart"
+                android:textColor="@color/kalan_widget_text_muted"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_number_left"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:autoSizeMaxTextSize="26sp"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif"
+            android:gravity="center_vertical|start"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_accent"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:targetApi="o" />
+
+        <TextView
+            android:id="@+id/widget_number_negative"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:autoSizeMaxTextSize="26sp"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif"
+            android:gravity="center_vertical|start"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_negative"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:targetApi="o" />
+
+        <TextView
+            android:id="@+id/widget_number_plain"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:autoSizeMaxTextSize="26sp"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif"
+            android:gravity="center_vertical|start"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_text"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:targetApi="o" />
+
+        <TextView
+            android:id="@+id/widget_rows_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:maxLines="2"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_text_muted"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/widget_row_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/widget_row_1_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAlignment="viewStart"
+                android:textColor="@color/kalan_widget_text"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_row_1_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/kalan_widget_text_muted"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_row_1_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/kalan_widget_text"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_row_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/widget_row_2_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAlignment="viewStart"
+                android:textColor="@color/kalan_widget_text"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_row_2_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/kalan_widget_text_muted"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_row_2_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/kalan_widget_text"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_row_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/widget_row_3_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAlignment="viewStart"
+                android:textColor="@color/kalan_widget_text"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_row_3_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/kalan_widget_text_muted"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/widget_row_3_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:maxLines="1"
+                android:textColor="@color/kalan_widget_text"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Setup, no payments yet, or the stale text: the only text then. -->
+    <TextView
+        android:id="@+id/widget_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/kalan_widget_text"
+        android:textSize="15sp"
+        android:visibility="gone" />
+</FrameLayout>

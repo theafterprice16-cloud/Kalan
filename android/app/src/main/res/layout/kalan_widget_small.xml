@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widget (Roadmap 31), small (about 2x2). Text only from the app's
+     snapshot; colours only the widget tokens (surface, text, textMuted,
+     accent for "left", negative for a negative period); start and end,
+     never left and right (Arabic mirrors). The big number may shrink to
+     60 % of its size (autosize, Android 8 and later); nothing else does:
+     names end with an ellipsis, amounts never shrink or cut. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/kalan_widget_background"
+    android:paddingStart="@dimen/kalan_widget_padding"
+    android:paddingTop="@dimen/kalan_widget_padding"
+    android:paddingEnd="@dimen/kalan_widget_padding"
+    android:paddingBottom="@dimen/kalan_widget_padding">
+
+    <!-- The snapshot's screen reader text is on the root: the parts are
+         read once, as one sentence. -->
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:importantForAccessibility="noHideDescendants"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_text_muted"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/widget_number_left"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif"
+            android:gravity="center_vertical|start"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_accent"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:targetApi="o" />
+
+        <TextView
+            android:id="@+id/widget_number_negative"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif"
+            android:gravity="center_vertical|start"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_negative"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:targetApi="o" />
+
+        <TextView
+            android:id="@+id/widget_number_plain"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:autoSizeMaxTextSize="30sp"
+            android:autoSizeMinTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif"
+            android:gravity="center_vertical|start"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_text"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:targetApi="o" />
+
+        <TextView
+            android:id="@+id/widget_until"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAlignment="viewStart"
+            android:textColor="@color/kalan_widget_text_muted"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Setup, no payments yet, or the stale text: the only text then. -->
+    <TextView
+        android:id="@+id/widget_message"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/kalan_widget_text"
+        android:textSize="15sp"
+        android:visibility="gone" />
+</FrameLayout>

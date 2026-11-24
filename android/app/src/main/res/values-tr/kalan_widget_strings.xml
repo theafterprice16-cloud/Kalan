@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Turkish copy of widgetPickerName and widgetPickerDescription
+     (lib/l10n/app_tr.arb). -->
+<resources>
+    <string name="kalan_widget_name">Kalan</string>
+    <string name="kalan_widget_description">Bu dönem kalan ve sıradaki ödemeler.</string>
+</resources>
