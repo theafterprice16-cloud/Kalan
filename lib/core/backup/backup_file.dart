@@ -1,6 +1,7 @@
 /// The full backup file (Roadmap 29): a small JSON envelope around
 /// [BackupData], optionally encrypted with a password. Writer and reader
-/// both live here; restoring is Roadmap 30. Format: docs/YEDEK_BICIMI.md.
+/// both live here; restoring (Roadmap 30) reads with [readBackupBytes].
+/// Format: docs/YEDEK_BICIMI.md.
 ///
 /// Encryption: the password is stretched into a 256-bit key with Argon2id
 /// (fresh random salt per file) and the content is sealed with
@@ -25,12 +26,19 @@ import 'package:cryptography/dart.dart';
 
 import 'backup_data.dart';
 import 'backup_json.dart';
+import 'backup_upgrade.dart';
 
 /// The file's format name.
 const backupFormatName = 'kalan-backup';
 
-/// The format version this app writes, and the newest it reads.
+/// The format version this app writes, and the newest it reads. Older
+/// versions are brought up to it by [upgradeBackupContent].
 const backupFormatVersion = 1;
+
+/// The largest file Kalan opens (Roadmap 30): 50 MB, far above any real
+/// backup (a few hundred plans are well under 1 MB). Anything larger is
+/// not read at all.
+const backupMaxBytes = 50 * 1024 * 1024;
 
 /// Why a file could not be read. Never carries the password or content.
 enum BackupReadError {
@@ -217,6 +225,7 @@ Future<String> writeBackup(
     secretKey: key,
     nonce: nonce,
     aad: _aad(
+      formatVersion: backupFormatVersion,
       appVersion: appVersion,
       createdAt: header['createdAt']! as String,
       currency: data.settings.currency,
@@ -236,13 +245,43 @@ Future<String> writeBackup(
 
 /// The header of a backup file, without opening its content (Roadmap 30
 /// shows it before asking for a password).
-BackupHeader readBackupHeader(String text) => _parse(text).header;
+BackupHeader readBackupHeader(String text) =>
+    _parse(text, backupFormatVersion).header;
+
+/// [readBackup] on a file's bytes, as picked (Roadmap 30): more than
+/// [backupMaxBytes] or text that is not UTF-8 (a photo, a PDF) is never
+/// parsed. Run away from the UI isolate.
+Future<BackupContents> readBackupBytes(
+  List<int> bytes, {
+  String? password,
+}) async {
+  if (bytes.length > backupMaxBytes) {
+    throw const BackupReadException(BackupReadError.damaged);
+  }
+  final String text;
+  try {
+    text = utf8.decode(bytes);
+  } on FormatException {
+    throw const BackupReadException(BackupReadError.notABackup);
+  }
+  return readBackup(text, password: password);
+}
 
 /// Reads a backup file written by [writeBackup] (any format version up to
-/// [backupFormatVersion]). Unknown fields are ignored; anything else
-/// unexpected is a [BackupReadException].
-Future<BackupContents> readBackup(String text, {String? password}) async {
-  final (:header, :fields) = _parse(text);
+/// [backupFormatVersion]; older content goes through [upgradeBackupContent]
+/// first). Unknown fields are ignored; anything else unexpected is a
+/// [BackupReadException]. The content is fully checked
+/// ([BackupData.validate]) before it is returned, so nothing is written
+/// from a file that fails.
+///
+/// [currentVersion] and [steps] are for tests of the upgrade chain only.
+Future<BackupContents> readBackup(
+  String text, {
+  String? password,
+  int currentVersion = backupFormatVersion,
+  Map<int, BackupUpgradeStep> steps = backupUpgradeSteps,
+}) async {
+  final (:header, :fields) = _parse(text, currentVersion);
   final Object? dataJson;
   if (!header.encrypted) {
     dataJson = _guard(() => fields.object('data').raw);
@@ -266,6 +305,8 @@ Future<BackupContents> readBackup(String text, {String? password}) async {
         ),
         secretKey: key,
         aad: _aad(
+          // The file's own version: an older file was sealed with it.
+          formatVersion: header.formatVersion,
           appVersion: header.appVersion,
           // As written: the text is what was authenticated.
           createdAt: fields.string('createdAt'),
@@ -280,7 +321,16 @@ Future<BackupContents> readBackup(String text, {String? password}) async {
     }
     dataJson = _guard(() => jsonDecode(utf8.decode(clear)));
   }
-  final data = _guard(() => BackupData.fromJson(dataJson)..validate());
+  final data = _guard(
+    () => BackupData.fromJson(
+      upgradeBackupContent(
+        dataJson,
+        from: header.formatVersion,
+        to: currentVersion,
+        steps: steps,
+      ),
+    )..validate(),
+  );
   if (data.settings.currency != header.currency) {
     throw const BackupReadException(BackupReadError.damaged);
   }
@@ -298,6 +348,7 @@ String _sha256Hex(List<int> bytes) => [
 /// Everything in the envelope but the ciphertext, in a fixed order; text
 /// values (salt and nonce included) exactly as written in the file.
 List<int> _aad({
+  required int formatVersion,
   required String appVersion,
   required String createdAt,
   required String currency,
@@ -307,7 +358,7 @@ List<int> _aad({
 }) => utf8.encode(
   jsonEncode([
     backupFormatName,
-    backupFormatVersion,
+    formatVersion,
     appVersion,
     createdAt,
     currency,
@@ -329,7 +380,10 @@ T _guard<T>(T Function() read) {
   }
 }
 
-({BackupHeader header, JsonFields fields}) _parse(String text) {
+({BackupHeader header, JsonFields fields}) _parse(
+  String text,
+  int currentVersion,
+) {
   final Object? json;
   try {
     json = jsonDecode(text);
@@ -343,7 +397,7 @@ T _guard<T>(T Function() read) {
   if (version is! int || version < 1) {
     throw const BackupReadException(BackupReadError.damaged);
   }
-  if (version > backupFormatVersion) {
+  if (version > currentVersion) {
     throw const BackupReadException(BackupReadError.newerVersion);
   }
   final fields = JsonFields(json, '');

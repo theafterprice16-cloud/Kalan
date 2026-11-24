@@ -36,6 +36,9 @@ abstract final class Routes {
   static const exportPath = '/export';
   static String export({bool backup = false}) =>
       backup ? '$exportPath?kind=backup' : exportPath;
+
+  /// "Restore from backup" (30): from setup and from Settings > Data.
+  static const restore = '/restore';
   static const roadmap = '/roadmap';
   static const remindersHelp = '/reminders-help';
 

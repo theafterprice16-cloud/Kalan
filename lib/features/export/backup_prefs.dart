@@ -114,6 +114,12 @@ class BackupPrefsController extends Notifier<BackupPrefs> {
     BackupPrefs(lastFullBackup: day, reminderEnabled: state.reminderEnabled),
   );
 
+  /// "Go back to previous data" (Roadmap 30): the "Last backup" day the
+  /// phone showed before the restore, [day] null for none.
+  Future<void> putBackLastBackup(LocalDate? day) => _save(
+    BackupPrefs(lastFullBackup: day, reminderEnabled: state.reminderEnabled),
+  );
+
   Future<void> setReminder(bool enabled) => _save(
     BackupPrefs(lastFullBackup: state.lastFullBackup, reminderEnabled: enabled),
   );

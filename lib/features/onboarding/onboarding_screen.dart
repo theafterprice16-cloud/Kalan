@@ -1,11 +1,13 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/format.dart';
 import '../../app/providers.dart';
 import '../../core/money/currency.dart';
 import '../../core/money/money_format.dart';
+import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
 import '../currency/currency_picker.dart';
@@ -109,6 +111,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               FilledButton(
                 onPressed: _saving ? null : _save,
                 child: Text(l10n.onboardingStart),
+              ),
+              const SizedBox(height: KalanSpace.xs),
+              // A new phone with a backup (30): restored, setup is skipped.
+              TextButton(
+                key: const ValueKey('onboarding-restore'),
+                onPressed: _saving ? null : () => context.push(Routes.restore),
+                child: Text(l10n.restoreHaveBackup),
               ),
             ],
           ),

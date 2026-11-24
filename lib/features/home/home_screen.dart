@@ -10,6 +10,7 @@ import '../../core/theme/kalan_theme.dart';
 import '../export/data_section.dart';
 import '../periods/coming_periods_strip.dart';
 import '../privacy/hide_amounts_ui.dart';
+import '../restore/restore_notice.dart';
 import 'home_view.dart';
 import 'past_due.dart';
 import 'payment_tile.dart';
@@ -46,6 +47,8 @@ class HomeScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(bottom: KalanSpace.fabClearance),
         children: [
           _Header(view: view),
+          // Once after a restore (30): a short message, or the Pro line.
+          const RestoreNotice(),
           const ComingPeriodsStrip(),
           PastDueSection(view: view),
           if (view.entries.isNotEmpty) ...[

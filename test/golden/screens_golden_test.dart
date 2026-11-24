@@ -7,6 +7,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/app.dart';
+import 'package:kalan/core/backup/backup_summary.dart';
 import 'package:kalan/core/engine/engine.dart';
 import 'package:kalan/core/reminders/reminder_models.dart' show ReminderRepeat;
 import 'package:kalan/core/routing/router.dart';
@@ -26,6 +27,9 @@ import 'package:kalan/features/lock/device_lock_gateway.dart';
 import 'package:kalan/features/plans/provider_templates_ui.dart';
 import 'package:kalan/features/privacy/amounts_hidden.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
+import 'package:kalan/features/restore/restore_notice.dart';
+import 'package:kalan/features/restore/restore_service.dart';
+import 'package:kalan/features/restore/restore_undo.dart';
 import 'package:kalan/features/roadmap/roadmap.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -38,6 +42,7 @@ import '../helpers/fake_device_lock.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
 import '../helpers/fonts.dart';
+import '../helpers/restore_fakes.dart';
 import '../helpers/statement_seed.dart';
 
 /// A plan with a past unpaid payment (overdue), a card plan, rent.
@@ -2055,6 +2060,151 @@ void main() {
         });
       }
 
+      // Restore (30): the password step, the summary on a new phone and
+      // over data in another currency, a calm error, the go-back row in
+      // Settings > Data and the Pro line on the home screen.
+      for (final (lang, locale, settingsTab) in [
+        ('tr', const Locale('tr', 'TR'), 'Ayarlar'),
+        ('en', const Locale('en', 'US'), 'Settings'),
+      ]) {
+        Future<FakePicker> startRestore(
+          WidgetTester tester, {
+          bool data = false,
+        }) async {
+          final picker = FakePicker();
+          final dir = Directory.systemTemp.createTempSync('kalan-golden');
+          addTearDown(() => dir.deleteSync(recursive: true));
+          await start(
+            tester,
+            locale: locale,
+            route: Routes.restore,
+            onboarded: data,
+            seed: data
+                ? (db) async {
+                    await seedSettings(db, currency: 'EUR');
+                    await seedPayIn4(db, title: 'Kulaklık');
+                  }
+                : null,
+            extra: restoreOverrides(picker, dir),
+          );
+          return picker;
+        }
+
+        Future<void> pick(WidgetTester tester) async {
+          await tester.tap(find.byKey(const ValueKey('restore-pick')));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('restore, password, $lang', (tester) async {
+          final picker = await startRestore(tester);
+          picker.pickPath(encryptedFixture);
+          await pick(tester);
+          await shoot(tester, '117-restore-password-$lang-$theme');
+          await tester.enterText(
+            find.byKey(const ValueKey('restore-password')),
+            'yanlış',
+          );
+          await tester.pump();
+          await tester.tap(find.byKey(const ValueKey('restore-open')));
+          await tester.pumpAndSettle();
+          await shoot(tester, '118-restore-wrong-password-$lang-$theme');
+        });
+
+        testWidgets('restore, summary on a new phone, $lang', (tester) async {
+          final picker = await startRestore(tester);
+          picker.pickPath(plainFixture);
+          await pick(tester);
+          await shoot(tester, '119-restore-summary-new-$lang-$theme');
+        });
+
+        testWidgets('restore, summary over data, $lang', (tester) async {
+          final picker = await startRestore(tester, data: true);
+          picker.pickPath(plainFixture);
+          await pick(tester);
+          await shoot(tester, '120-restore-summary-data-$lang-$theme');
+          await tester.tap(find.byKey(const ValueKey('restore-button')));
+          await tester.pumpAndSettle();
+          await shoot(tester, '121-restore-confirm-$lang-$theme');
+        });
+
+        testWidgets('restore, not a backup, $lang', (tester) async {
+          final picker = await startRestore(tester);
+          picker.pickBytes([0x89, 0x50, 0x4E, 0x47, 0xFF, 0xD8]);
+          await pick(tester);
+          await shoot(tester, '122-restore-not-a-backup-$lang-$theme');
+        });
+
+        testWidgets('settings, go back to previous data, $lang', (
+          tester,
+        ) async {
+          await start(
+            tester,
+            locale: locale,
+            extra: [
+              undoCopyProvider.overrideWith(
+                (ref) async => UndoCopy(
+                  copiedOn: LocalDate(2026, 11, 19),
+                  lastFullBackup: null,
+                ),
+              ),
+            ],
+          );
+          await openTab(tester, settingsTab);
+          const key = ValueKey('settings-export');
+          await scrollTo(tester, find.byKey(key));
+          final top = tester.getTopLeft(find.byKey(key)).dy;
+          await tester.drag(
+            find.byType(Scrollable).first,
+            Offset(0, 300 - top),
+          );
+          await tester.pump(const Duration(milliseconds: 400));
+          await shoot(tester, '123-settings-undo-copy-$lang-$theme');
+        });
+
+        testWidgets('home, restored with six open plans, $lang', (
+          tester,
+        ) async {
+          await start(
+            tester,
+            locale: locale,
+            seed: (db) async {
+              await seedSettings(db, incomeMinor: 4500000);
+              for (final (i, name) in [
+                'Kulaklık',
+                'Mont',
+                'Telefon',
+                'Bisiklet',
+                'Koltuk',
+                'Tatil',
+              ].indexed) {
+                await seedPayIn4(
+                  db,
+                  title: name,
+                  first: testToday.addDays(i * 3),
+                  totalMinor: 40000 + i * 10000,
+                );
+              }
+            },
+            extra: [
+              restoreNoticeProvider.overrideWith(
+                () => _RestoredNotice(
+                  const BackupSummary(
+                    plans: 6,
+                    open: 6,
+                    onHold: 0,
+                    archived: 0,
+                    recurring: 0,
+                    sources: 1,
+                    cards: 0,
+                  ),
+                ),
+              ),
+            ],
+          );
+          await shoot(tester, '124-home-restore-pro-line-$lang-$theme');
+        });
+      }
+
       testWidgets('app switcher cover', (tester) async {
         await start(
           tester,
@@ -2091,6 +2241,28 @@ void main() {
         await tester.drag(find.byType(Scrollable).first, Offset(0, 300 - top));
         await tester.pump(const Duration(milliseconds: 400));
         await shoot(tester, '116-ios-settings-data-$theme');
+      });
+
+      // Restore (30) on an iPhone: the confirm dialog in Apple's
+      // arrangement on Kalan's flat surface.
+      testWidgets('ios, restore confirm', variant: ios, (tester) async {
+        final picker = FakePicker()..pickPath(plainFixture);
+        final dir = Directory.systemTemp.createTempSync('kalan-golden');
+        addTearDown(() => dir.deleteSync(recursive: true));
+        await start(
+          tester,
+          route: Routes.restore,
+          seed: (db) async {
+            await seedSettings(db, currency: 'EUR');
+            await seedPayIn4(db, title: 'Kulaklık');
+          },
+          extra: restoreOverrides(picker, dir),
+        );
+        await tester.tap(find.byKey(const ValueKey('restore-pick')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('restore-button')));
+        await tester.pumpAndSettle();
+        await shoot(tester, '125-ios-restore-confirm-$theme');
       });
 
       testWidgets('ios, app lock switch', variant: ios, (tester) async {
@@ -2148,4 +2320,14 @@ void main() {
       });
     });
   }
+}
+
+/// A restore just happened, its short message already shown.
+class _RestoredNotice extends RestoreNoticeController {
+  _RestoredNotice(this.summary);
+
+  final BackupSummary summary;
+
+  @override
+  RestoreNoticeState? build() => RestoreNoticeState(summary, shown: true);
 }

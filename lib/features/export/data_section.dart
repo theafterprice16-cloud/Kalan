@@ -11,6 +11,7 @@ import '../../core/date/local_date.dart';
 import '../../core/design/widgets.dart';
 import '../../core/routing/routes.dart';
 import '../../core/theme/kalan_theme.dart';
+import '../restore/undo_copy_tile.dart';
 import 'backup_prefs.dart';
 
 /// The calm backup note (Roadmap 29), or null when it does not show:
@@ -95,6 +96,14 @@ class DataSection extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => unawaited(context.push(Routes.export())),
         ),
+        ListTile(
+          key: const ValueKey('settings-restore-backup'),
+          title: Text(l10n.restoreFromBackup),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => unawaited(context.push(Routes.restore)),
+        ),
+        // For 30 days after a restore (30): the data from before it.
+        const UndoCopyTile(),
         ListTile(
           key: const ValueKey('settings-last-backup'),
           title: Text(l10n.settingsLastBackup),

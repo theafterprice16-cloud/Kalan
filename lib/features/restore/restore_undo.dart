@@ -1,0 +1,275 @@
+import 'dart:convert';
+import 'dart:io' show Directory, File, FileSystemException;
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../../core/backup/backup_file.dart';
+import '../../core/date/local_date.dart';
+
+/// How long "Go back to previous data" stays (Roadmap 30, decision 1).
+const undoCopyDays = 30;
+
+/// Whether a safety copy made on [copiedOn] is still offered on [today]:
+/// on the day it was made and the 29 days after; gone from the 30th day
+/// on. Calendar days, so the clock and summer time play no part; a copy
+/// dated in the future (the phone's clock moved back) stays.
+bool undoCopyKept({required LocalDate copiedOn, required LocalDate today}) =>
+    copiedOn.daysUntil(today) < undoCopyDays;
+
+/// The one safety copy: when it was made and the "Last backup" day the
+/// phone showed then (put back when the user goes back to it).
+class UndoCopy {
+  const UndoCopy({required this.copiedOn, required this.lastFullBackup});
+
+  /// The local day it was made: its file's `createdAt`.
+  final LocalDate copiedOn;
+  final LocalDate? lastFullBackup;
+}
+
+/// Where the safety copy lives: the app's own support folder (Library/
+/// Application Support on iPhone, the app's private files on Android),
+/// never shown in the Files app or shared. Overridden in tests.
+final undoDirectoryProvider = Provider<Future<Directory> Function()>(
+  (ref) => getApplicationSupportDirectory,
+);
+
+/// The safety copy taken before a restore overwrites the data on this
+/// phone (Roadmap 30, decision 1): a full backup file without a password,
+/// written by Roadmap 29's writer, plus one field of this phone's own
+/// (the "Last backup" day then; readers ignore unknown fields).
+///
+/// One copy at a time, replaced in two steps so a failure at any point
+/// never loses the copy there was:
+///
+/// 1. [stage]: the new copy goes to `previous.next.json` (written to a
+///    temporary name, flushed, then renamed);
+/// 2. the restore's database transaction runs;
+/// 3. [commit] renames it over `previous.json`; should the transaction
+///    fail, [discard] deletes it and `previous.json` stays as it was.
+///
+/// Should the app stop between 2 and 3, [tidy] on the next start finishes
+/// the job (see there). A staged copy still there blocks the next restore
+/// until then ([hasStaged]), so it is never written over.
+class UndoCopyStore {
+  UndoCopyStore(this._directory);
+
+  final Future<Directory> Function() _directory;
+
+  static const _folder = 'kalan-restore';
+  static const _current = 'previous.json';
+  static const _next = 'previous.next.json';
+  static const _partial = 'previous.next.json.part';
+  static const _deviceField = 'thisDevice';
+
+  Future<File> _file(String name) async {
+    final dir = Directory('${(await _directory()).path}/$_folder');
+    await dir.create(recursive: true);
+    return File('${dir.path}/$name');
+  }
+
+  /// The copy's file text with this phone's [lastFullBackup] added, and
+  /// the database's id counters ([sequences], table → last id) as they
+  /// were before the restore: a restore that went through always counts
+  /// them up, which is how [tidy] tells it happened.
+  static String withDevice(
+    String backupText,
+    LocalDate? lastFullBackup, {
+    Map<String, int> sequences = const {},
+  }) {
+    final json = jsonDecode(backupText) as Map<String, Object?>;
+    json[_deviceField] = {
+      'lastFullBackup': lastFullBackup?.toString(),
+      'sequences': sequences,
+    };
+    return '${const JsonEncoder.withIndent('  ').convert(json)}\n';
+  }
+
+  /// Whether a staged copy is waiting: a restore stopped halfway and is
+  /// not tidied yet. No new restore starts over it.
+  Future<bool> hasStaged() async => (await _file(_next)).existsSync();
+
+  /// Writes [text] as the copy waiting for its restore. Throws when it
+  /// cannot be written in full; then the restore must not go on.
+  Future<void> stage(String text) async {
+    final partial = await _file(_partial);
+    await partial.writeAsString(text, flush: true);
+    await partial.rename((await _file(_next)).path);
+  }
+
+  /// The restore went through: the staged copy becomes the copy.
+  Future<void> commit() async {
+    final next = await _file(_next);
+    await next.rename((await _file(_current)).path);
+  }
+
+  /// The restore did not go through: the staged copy goes, the copy
+  /// there was stays.
+  Future<void> discard() async {
+    await _delete(await _file(_next));
+    await _delete(await _file(_partial));
+  }
+
+  /// The copy's file text, or null when there is none. Throws when the
+  /// file is there but cannot be read.
+  Future<String?> read() => _readText(_current);
+
+  /// What [read] holds, or null when there is none or it does not read.
+  Future<UndoCopy?> info() async {
+    try {
+      final text = await read();
+      return text == null ? null : _info(text);
+    } on Object {
+      return null;
+    }
+  }
+
+  /// Once per start, before the copy is offered or a restore starts:
+  ///
+  /// - a staged copy left by a restore that stopped halfway goes only
+  ///   when the restore surely never happened: the id counters of the
+  ///   user's data ([sequences] now, see [restoreCountedTables]) are those
+  ///   it recorded AND the data on the phone ([currentData], the data
+  ///   object of a backup of it now) is what it copied. Otherwise it
+  ///   becomes the copy (the safer side: it may be the only copy of the
+  ///   data from before), also when its record does not read;
+  /// - a copy older than [undoCopyDays] days on [today] is deleted, and
+  ///   so is one whose content does not read.
+  ///
+  /// A file that cannot be read at all (an error from the system) is left
+  /// as it is and the error goes to the caller.
+  Future<void> tidy({
+    required LocalDate today,
+    required Future<Map<String, int>> Function() sequences,
+    required Future<Object?> Function() currentData,
+  }) async {
+    await _delete(await _file(_partial));
+    final staged = await _readText(_next);
+    if (staged != null) {
+      final recorded = _sequencesIn(staged);
+      final now = await sequences();
+      final countersSame =
+          recorded != null &&
+          restoreCountedTables.every(
+            (t) => (now[t] ?? 0) == (recorded[t] ?? 0),
+          );
+      var dataSame = false;
+      if (countersSame) {
+        final stagedData = (jsonDecode(staged) as Map<String, Object?>)['data'];
+        final current = await currentData();
+        dataSame =
+            stagedData != null &&
+            current != null &&
+            jsonEncode(stagedData) == jsonEncode(current);
+      }
+      if (countersSame && dataSame) {
+        await discard();
+      } else {
+        await commit();
+      }
+    }
+    final text = await read();
+    if (text == null) return;
+    final copy = _info(text);
+    if (copy == null || !undoCopyKept(copiedOn: copy.copiedOn, today: today)) {
+      await _delete(await _file(_current));
+    }
+  }
+
+  static Map<String, int>? _sequencesIn(String text) {
+    try {
+      final json = jsonDecode(text) as Map<String, Object?>;
+      final device = json[_deviceField]! as Map<String, Object?>;
+      return {
+        for (final MapEntry(:key, :value)
+            in (device['sequences']! as Map<String, Object?>).entries)
+          key: value! as int,
+      };
+    } on Object {
+      return null;
+    }
+  }
+
+  static UndoCopy? _info(String text) {
+    try {
+      final header = readBackupHeader(text);
+      final json = jsonDecode(text) as Map<String, Object?>;
+      final device = json[_deviceField];
+      final last = device is Map<String, Object?>
+          ? device['lastFullBackup']
+          : null;
+      return UndoCopy(
+        copiedOn: LocalDate.fromDateTime(header.createdAt.toLocal()),
+        lastFullBackup: last is String ? _parseDay(last) : null,
+      );
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<String?> _readText(String name) async {
+    final file = await _file(name);
+    if (!file.existsSync()) return null;
+    return file.readAsString();
+  }
+
+  static Future<void> _delete(File file) async {
+    try {
+      if (file.existsSync()) await file.delete();
+    } on FileSystemException {
+      // Gone already.
+    }
+  }
+}
+
+/// The tables whose id counters tell that a restore wrote rows: the
+/// user's data only (a snooze from a notification counts up its own).
+const restoreCountedTables = {
+  'sources',
+  'plans',
+  'payments',
+  'recurring_payments',
+};
+
+/// Deletes the copy of a picked file the system's picker left in one of
+/// the app's temporary folders [roots] (Android copies the file to its
+/// cache, iPhone to tmp): it may be a backup without a password. Files
+/// anywhere else are never touched, nor a path with "..".
+Future<void> deletePickedCopy(String path, List<Directory> roots) async {
+  if (path.isEmpty) return;
+  // On the path as given: File.uri would already have resolved "..".
+  final segments = path.split(RegExp(r'[/\\]'));
+  if (segments.contains('..') || segments.contains('.')) return;
+  final file = File(path).absolute;
+  for (final root in roots) {
+    final base = root.absolute.path;
+    if (file.path.startsWith(base.endsWith('/') ? base : '$base/')) {
+      await UndoCopyStore._delete(file);
+      return;
+    }
+  }
+}
+
+/// "2026-11-19"; null for anything else.
+LocalDate? _parseDay(String text) {
+  final m = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(text);
+  if (m == null) return null;
+  final (y, mo, d) = (int.parse(m[1]!), int.parse(m[2]!), int.parse(m[3]!));
+  if (mo < 1 || mo > 12 || d < 1 || d > LocalDate.daysInMonth(y, mo)) {
+    return null;
+  }
+  return LocalDate(y, mo, d);
+}
+
+/// Where a picker may leave its copy of the picked file (see
+/// [deletePickedCopy]): the app's temporary folders (on iPhone the
+/// picker's tmp is not the one path_provider gives). Overridden in tests.
+final pickedCopyDirectoriesProvider =
+    Provider<Future<List<Directory>> Function()>(
+      (ref) =>
+          () async => [await getTemporaryDirectory(), Directory.systemTemp],
+    );
+
+final undoCopyStoreProvider = Provider(
+  (ref) => UndoCopyStore(ref.watch(undoDirectoryProvider)),
+);

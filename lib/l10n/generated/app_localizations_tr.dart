@@ -2781,4 +2781,204 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get csvStatusArchived => 'arşivde';
+
+  @override
+  String get restoreHaveBackup => 'Yedeğim var';
+
+  @override
+  String get restoreFromBackup => 'Yedekten geri yükle';
+
+  @override
+  String get restoreIntro =>
+      'Kalan\'dan aldığın tam yedek dosyasını seç. Dosya yalnızca bu telefonda açılır; hiçbir yere gönderilmez.';
+
+  @override
+  String get restoreChooseFile => 'Dosya seç';
+
+  @override
+  String get restoreChooseOther => 'Başka bir dosya seç';
+
+  @override
+  String get restoreReading => 'Dosya okunuyor.';
+
+  @override
+  String get restorePasswordIntro =>
+      'Bu yedek parolalı. Yedeği alırken yazdığın parolayı gir.';
+
+  @override
+  String get restorePassword => 'Parola';
+
+  @override
+  String get restoreOpen => 'Aç';
+
+  @override
+  String get restoreErrorNotBackup => 'Bu dosya bir Kalan yedeği değil.';
+
+  @override
+  String get restoreErrorNewer =>
+      'Bu yedek Kalan\'ın daha yeni bir sürümüyle alınmış. Uygulamayı güncelleyip yeniden dene.';
+
+  @override
+  String get restoreErrorPassword => 'Parola doğru değil.';
+
+  @override
+  String get restoreErrorUnreadable => 'Dosya okunamadı. Başka bir yedek dene.';
+
+  @override
+  String get restoreErrorCopy =>
+      'Mevcut verinin kopyası alınamadı; hiçbir şey değişmedi. Yeniden dene.';
+
+  @override
+  String restoreSummaryDate(String date) {
+    return '$date tarihli yedek';
+  }
+
+  @override
+  String restoreSummaryPlans(int count, int open, int onHold, int archived) {
+    String _temp0 = intl.Intl.pluralLogic(
+      open,
+      locale: localeName,
+      other: '$open açık',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      onHold,
+      locale: localeName,
+      other: '$onHold beklemede',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      archived,
+      locale: localeName,
+      other: '$archived arşivde',
+    );
+    String _temp3 = intl.Intl.pluralLogic(
+      open,
+      locale: localeName,
+      other: '$open açık',
+    );
+    String _temp4 = intl.Intl.pluralLogic(
+      onHold,
+      locale: localeName,
+      other: '$onHold beklemede',
+    );
+    String _temp5 = intl.Intl.pluralLogic(
+      archived,
+      locale: localeName,
+      other: '$archived arşivde',
+    );
+    String _temp6 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plan ($_temp0, $_temp1, $_temp2)',
+      one: '1 plan ($_temp3, $_temp4, $_temp5)',
+      zero: 'Plan yok',
+    );
+    return '$_temp6';
+  }
+
+  @override
+  String restoreSummaryRecurring(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sabit ödeme',
+      one: '1 sabit ödeme',
+      zero: 'Sabit ödeme yok',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String restoreSummarySources(int sources, int cards) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sources,
+      locale: localeName,
+      other: '$sources kaynak',
+      one: '1 kaynak',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      cards,
+      locale: localeName,
+      other: '$cards kart',
+      one: '1 kart',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String restoreSummaryCurrency(String code) {
+    return 'Para birimi: $code';
+  }
+
+  @override
+  String restoreSummaryCurrencyChange(String code, String current) {
+    return 'Para birimi: $code olacak (şu an $current)';
+  }
+
+  @override
+  String get restoreReplaceNote =>
+      'Telefondaki verinin yerine bu yedek geçecek. Önce mevcut verinin bir kopyası alınır; 30 gün içinde geri dönebilirsin.';
+
+  @override
+  String get restoreButton => 'Geri yükle';
+
+  @override
+  String get restoreConfirmTitle => 'Bu yedek geri yüklensin mi?';
+
+  @override
+  String restoreConfirmBody(String date) {
+    return 'Telefondaki verinin yerine $date tarihli yedek geçecek. Mevcut verine 30 gün içinde Ayarlar > Veri\'den dönebilirsin.';
+  }
+
+  @override
+  String get restoreWorking => 'Geri yükleniyor.';
+
+  @override
+  String restoreDone(int plans, int recurring) {
+    String _temp0 = intl.Intl.pluralLogic(
+      plans,
+      locale: localeName,
+      other: '$plans plan',
+      one: '1 plan',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      recurring,
+      locale: localeName,
+      other: '$recurring sabit ödeme',
+      one: '1 sabit ödeme',
+    );
+    return 'Yedek geri yüklendi: $_temp0, $_temp1.';
+  }
+
+  @override
+  String get restoreProNote =>
+      'Pro\'yu daha önce aldıysan geri yükleyerek yeni plan ekleyebilirsin.';
+
+  @override
+  String undoRow(String date) {
+    return 'Önceki verine dön · $date';
+  }
+
+  @override
+  String get undoRowHint =>
+      'Son geri yüklemeden önceki verin. 30 gün saklanır.';
+
+  @override
+  String get undoConfirmTitle => 'Önceki verine dönülsün mü?';
+
+  @override
+  String undoConfirmBody(String date) {
+    return 'Telefondaki verinin yerine $date tarihli kopya geçecek. Şu anki verinin de bir kopyası alınır; 30 gün içinde geri dönebilirsin.';
+  }
+
+  @override
+  String get undoConfirmButton => 'Geri dön';
+
+  @override
+  String get undoDone => 'Önceki verine dönüldü.';
+
+  @override
+  String get undoFailed => 'Önceki veri yüklenemedi; hiçbir şey değişmedi.';
+
+  @override
+  String get restoreSummaryLabel => 'Yedekte bulunanlar';
 }
