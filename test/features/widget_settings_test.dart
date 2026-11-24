@@ -4,7 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/routing/routes.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/entitlement/pro_controller.dart';
+import 'package:kalan/entitlement/pro_rules.dart';
+import 'package:kalan/entitlement/pro_status_store.dart';
+import 'package:kalan/features/home_widget/lock_screen_left.dart';
 import 'package:kalan/features/home_widget/widget_amounts.dart';
+import 'package:kalan/features/home_widget/widget_gateway.dart';
 import 'package:kalan/features/home_widget/widget_sync.dart';
 import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
@@ -21,8 +26,10 @@ void main() {
   late FakeWidgetGateway gateway;
   late MemoryWidgetAmountsStore amounts;
   late FakeDeviceLock phone;
+  late MemoryLockScreenLeftStore left;
 
   setUp(() {
+    left = MemoryLockScreenLeftStore();
     phone = FakeDeviceLock();
     gateway = FakeWidgetGateway();
     amounts = MemoryWidgetAmountsStore();
@@ -34,6 +41,7 @@ void main() {
     bool widget = true,
     String? route,
     Locale locale = const Locale('tr', 'TR'),
+    bool iPhonePro = false,
   }) => pumpApp(
     tester,
     locale: locale,
@@ -50,6 +58,14 @@ void main() {
       widgetAmountsStoreProvider.overrideWithValue(amounts),
       if (widget) widgetGatewayProvider.overrideWithValue(gateway),
       if (route != null) initialRouteProvider.overrideWithValue(route),
+      // Lock Screen widget (32).
+      if (iPhonePro) ...[
+        lockScreenWidgetSupportedProvider.overrideWithValue(true),
+        lockScreenLeftStoreProvider.overrideWithValue(left),
+        proStatusStoreProvider.overrideWithValue(
+          MemoryProStatusStore(ProStatus.pro),
+        ),
+      ],
     ],
   );
 
@@ -142,5 +158,73 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('lock-screen')), findsNothing);
     expect(find.byKey(const ValueKey('home-number')), findsOneWidget);
+  });
+
+  // Lock Screen widget (32).
+  final leftSwitch = find.byKey(const ValueKey('lock-screen-left'));
+
+  testWidgets('"Kalan sayısını göster": iPhone with Pro, off by default', (
+    tester,
+  ) async {
+    await start(tester, iPhonePro: true);
+    await openPrivacy(tester);
+    await scrollTo(tester, leftSwitch);
+    expect(find.text('Kalan sayısını göster'), findsOneWidget);
+    expect(
+      find.text(
+        "Kilit ekranı widget'ında bu dönem kalan da görünür. "
+        'Tutarlar gizliyken görünmez.',
+      ),
+      findsOneWidget,
+    );
+    expect(tester.widget<SwitchListTile>(leftSwitch).value, isFalse);
+    await tester.tap(leftSwitch);
+    await tester.pumpAndSettle();
+    expect(left.read(), isTrue);
+  });
+
+  testWidgets('no switch without Pro or on other phones', (tester) async {
+    await start(tester);
+    await openPrivacy(tester);
+    expect(leftSwitch, findsNothing);
+  });
+
+  testWidgets('the Lock Screen widget\'s Pro note opens the Pro screen', (
+    tester,
+  ) async {
+    await start(tester, route: Routes.plans);
+    final router = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    ).read(routerProvider);
+    gateway.tap(WidgetTap.pro);
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), Routes.pro());
+    expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
+    // Again: not a second Pro screen; back goes home.
+    gateway.tap(WidgetTap.pro);
+    await tester.pumpAndSettle();
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), Routes.home);
+  });
+
+  testWidgets('a cold start from the Pro note: Pro over home', (tester) async {
+    gateway = FakeWidgetGateway(launchedBy: WidgetTap.pro);
+    await start(tester);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
+  });
+
+  testWidgets('with the app lock on, the lock screen covers Pro first', (
+    tester,
+  ) async {
+    phone.hold = true;
+    await start(tester, lock: true);
+    gateway.tap(WidgetTap.pro);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('lock-screen')), findsOneWidget);
+    phone.complete(DeviceAuthResult.success);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('pro-screen')), findsOneWidget);
   });
 }
