@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Flat surface token, the system corner; no gradient, shadow or
+     transparency. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/kalan_widget_surface" />
+    <corners android:radius="@dimen/kalan_widget_radius" />
+</shape>

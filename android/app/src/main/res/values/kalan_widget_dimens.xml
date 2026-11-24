@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Before Android 12: the usual launcher corner. -->
+    <dimen name="kalan_widget_radius">16dp</dimen>
+    <dimen name="kalan_widget_padding">16dp</dimen>
+</resources>

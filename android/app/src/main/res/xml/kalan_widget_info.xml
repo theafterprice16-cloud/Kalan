@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widget (Roadmap 31): about 2x2, resizable to about 4x2 and
+     wider (the medium layout with the next three payments). The app writes
+     its text; updatePeriodMillis is only a fallback for the midnight
+     redraw (KalanWidgetProvider). -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/kalan_widget_description"
+    android:initialLayout="@layout/kalan_widget_small"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="110dp"
+    android:previewLayout="@layout/kalan_widget_preview"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="10800000"
+    android:widgetCategory="home_screen" />

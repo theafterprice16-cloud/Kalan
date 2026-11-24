@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widget (Roadmap 31): its name and description in the
+     phone's widget list. The same text as widgetPickerName and
+     widgetPickerDescription in lib/l10n/app_en.arb (checked by
+     test/app/widget_platform_test.dart). Other languages: in the bulk
+     translation, as values-<lang>/kalan_widget_strings.xml. -->
+<resources>
+    <string name="kalan_widget_name">Kalan</string>
+    <string name="kalan_widget_description">What\'s left this period and upcoming payments.</string>
+</resources>

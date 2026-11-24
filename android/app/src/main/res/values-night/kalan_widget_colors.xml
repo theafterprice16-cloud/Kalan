@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home screen widget (Roadmap 31), dark mode: exact copies of the
+     KalanColors.dark tokens (lib/core/theme/kalan_colors.dart), checked by
+     test/app/widget_platform_test.dart. Never a new colour. -->
+<resources>
+    <color name="kalan_widget_surface">#19212B</color>
+    <color name="kalan_widget_text">#EFE9DD</color>
+    <color name="kalan_widget_text_muted">#A8B0BB</color>
+    <color name="kalan_widget_accent">#8FB8F2</color>
+    <color name="kalan_widget_negative">#EEC56E</color>
+</resources>

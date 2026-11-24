@@ -1,8 +1,15 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Local payment reminders only: no network permission and no
          exact-alarm permission (reminders are scheduled inexactly). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- home_widget (31) brings WorkManager, whose manifest asks for the
+         network state (only for jobs that wait for a network; Kalan has
+         none). Kalan never looks at the network: removed. -->
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"
+        tools:node="remove" />
     <application
         android:label="Kalan"
         android:name="${applicationName}"
@@ -26,6 +33,11 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- No deep links: a tap on the home screen widget (31) reaches
+                 the app only through home_widget, which opens home. -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -66,6 +78,25 @@
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
+        </receiver>
+        <!-- Home screen widget (31): reads only the text the app wrote; no
+             Dart runs. Redrawn on the app's update, after midnight and
+             when the clock, time zone, language or app changes. -->
+        <receiver
+            android:name=".KalanWidgetProvider"
+            android:exported="false"
+            android:label="@string/kalan_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/kalan_widget_info" />
         </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
