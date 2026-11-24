@@ -3,15 +3,23 @@
 // real font widths and large text, the main screens open without an
 // overflow. Where text would not fit it wraps or buttons stack; type is
 // never made smaller to fit.
+import 'dart:io';
+
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/app/app.dart';
+import 'package:kalan/core/backup/backup_summary.dart';
 import 'package:kalan/core/date/local_date.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/features/restore/restore_notice.dart';
+import 'package:kalan/features/restore/restore_service.dart';
+import 'package:kalan/features/restore/restore_undo.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
 import '../helpers/fonts.dart';
 import '../helpers/pseudo_l10n.dart';
+import '../helpers/restore_fakes.dart';
 
 final t = PseudoLocalizations.load();
 
@@ -30,7 +38,13 @@ Future<void> seedLong(AppDatabase db) async {
 }
 
 /// A phone ([size] in points) at text scale [scale], English device.
-Future<void> start(WidgetTester tester, Size size, double scale) async {
+Future<void> start(
+  WidgetTester tester,
+  Size size,
+  double scale, {
+  List<Override> extra = const [],
+  Future<void> Function(AppDatabase db) seed = seedLong,
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   tester.platformDispatcher.textScaleFactorTestValue = scale;
@@ -39,11 +53,12 @@ Future<void> start(WidgetTester tester, Size size, double scale) async {
   await pumpApp(
     tester,
     locale: const Locale('en', 'US'),
-    seed: seedLong,
+    seed: seed,
     overrides: [
       appLocalizationsDelegateProvider.overrideWithValue(
         const PseudoLocalizationsDelegate(),
       ),
+      ...extra,
     ],
   );
 }
@@ -140,6 +155,85 @@ void main() {
         await scrollThrough(tester);
       });
 
+      // Restore (30): every step of the screen, the go-back row in
+      // Settings and the Pro line on the home screen.
+      testWidgets('restore from backup', (tester) async {
+        final picker = FakePicker();
+        final dir = Directory.systemTemp.createTempSync('kalan-overflow');
+        addTearDown(() => dir.deleteSync(recursive: true));
+        await start(
+          tester,
+          size,
+          scale,
+          extra: [
+            ...restoreOverrides(picker, dir),
+            undoCopyProvider.overrideWith(
+              (ref) async => UndoCopy(
+                copiedOn: LocalDate(2026, 11, 19),
+                lastFullBackup: null,
+              ),
+            ),
+            restoreNoticeProvider.overrideWith(_SixRestored.new),
+          ],
+        );
+        await openTab(tester, t.navSettings);
+        await scrollTo(
+          tester,
+          find.byKey(const ValueKey('settings-undo-copy')),
+        );
+        await scrollThrough(tester);
+        await scrollTo(
+          tester,
+          find.byKey(const ValueKey('settings-restore-backup')),
+        );
+        await tap(
+          tester,
+          find.byKey(const ValueKey('settings-restore-backup')),
+        );
+        picker.pickBytes([0x89, 0x50, 0x4E, 0x47]);
+        await tap(tester, find.byKey(const ValueKey('restore-pick')));
+        await scrollThrough(tester);
+        picker.pickPath(encryptedFixture);
+        await tap(tester, find.byKey(const ValueKey('restore-pick')));
+        await tester.enterText(
+          find.byKey(const ValueKey('restore-password')),
+          'x',
+        );
+        await tester.pump();
+        await tap(tester, find.byKey(const ValueKey('restore-open')));
+        await scrollThrough(tester);
+        picker.pickPath(plainFixture);
+        await scrollTo(tester, find.text(t.restoreChooseOther));
+        await tap(tester, find.text(t.restoreChooseOther));
+        await scrollThrough(tester);
+        await scrollTo(tester, find.byKey(const ValueKey('restore-button')));
+        await tap(tester, find.byKey(const ValueKey('restore-button')));
+        expect(find.text(t.restoreConfirmTitle), findsOneWidget);
+      });
+
+      testWidgets('home with the Pro line after a restore', (tester) async {
+        await start(
+          tester,
+          size,
+          scale,
+          extra: [restoreNoticeProvider.overrideWith(_SixRestored.new)],
+          // Five open plans: none can be added, so the line shows.
+          seed: (db) async {
+            await seedLong(db);
+            for (final name in ['A', 'B', 'C']) {
+              await seedPayIn4(db, source: name);
+            }
+          },
+        );
+        await tester.pump();
+        // Below the big number: on a small phone with large text, further
+        // down.
+        await scrollTo(tester, find.byKey(const ValueKey('restore-pro-line')));
+        expect(find.byKey(const ValueKey('restore-pro-line')), findsOneWidget);
+        expect(find.text(t.proRestore), findsOneWidget);
+        await scrollThrough(tester);
+      });
+
       testWidgets('settings and the language picker', (tester) async {
         await start(tester, size, scale);
         await openTab(tester, t.navSettings);
@@ -149,4 +243,21 @@ void main() {
       });
     });
   }
+}
+
+/// A restore that brought six open plans; its message already shown.
+class _SixRestored extends RestoreNoticeController {
+  @override
+  RestoreNoticeState? build() => const RestoreNoticeState(
+    BackupSummary(
+      plans: 6,
+      open: 6,
+      onHold: 0,
+      archived: 0,
+      recurring: 0,
+      sources: 1,
+      cards: 0,
+    ),
+    shown: true,
+  );
 }

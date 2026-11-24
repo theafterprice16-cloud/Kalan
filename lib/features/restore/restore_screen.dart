@@ -330,16 +330,15 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
       ],
     ];
 
-    return PopScope(
-      // Writing cannot be left halfway by going back.
-      canPop: _step != RestoreStep.restoring,
-      child: Scaffold(
-        appBar: AppBar(title: Text(l10n.restoreFromBackup)),
-        body: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(KalanSpace.md),
-            children: children,
-          ),
+    // Going back never stops a restore halfway: it runs to its end in one
+    // transaction, whether the screen stays or not (no PopScope; the back
+    // gesture is kept, flutter-cross-ui 2.2).
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.restoreFromBackup)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(KalanSpace.md),
+          children: children,
         ),
       ),
     );

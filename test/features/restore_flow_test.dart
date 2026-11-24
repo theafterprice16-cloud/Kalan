@@ -6,19 +6,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kalan/core/backup/backup_file.dart';
 import 'package:kalan/core/routing/router.dart';
 import 'package:kalan/core/routing/routes.dart';
+import 'package:kalan/core/theme/theme_mode.dart';
 import 'package:kalan/data/backup/backup_collector.dart';
 import 'package:kalan/data/db/app_database.dart';
 import 'package:kalan/entitlement/pro_controller.dart';
 import 'package:kalan/features/export/backup_prefs.dart';
 import 'package:kalan/features/home/home_screen.dart';
+import 'package:kalan/features/lock/app_lock_controller.dart';
+import 'package:kalan/features/lock/app_lock_store.dart';
+import 'package:kalan/features/lock/device_lock_gateway.dart';
 import 'package:kalan/features/onboarding/onboarding_screen.dart';
+import 'package:kalan/features/privacy/amounts_hidden.dart';
 import 'package:kalan/features/reminders/reminder_providers.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../helpers/app_harness.dart';
+import '../helpers/fake_device_lock.dart';
 import '../helpers/fake_notifications.dart';
 import '../helpers/fake_store.dart';
 import '../helpers/restore_fakes.dart';
+import 'pro_test.dart' show fillFifthAndSave, limitText;
 
 /// Roadmap 30 on screen: "I have a backup" in setup, "Restore from
 /// backup" in Settings, the summary, the calm errors, "Go back to
@@ -312,8 +319,66 @@ void main() {
     );
     expect(find.textContaining('Yedek geri yüklendi'), findsNothing);
     expect(store.log, isNot(contains('restore')));
+    // A new plan meets 11's limit sheet; nothing is saved.
+    await fillFifthAndSave(tester);
+    expect(find.text(limitText), findsOneWidget);
+    expect(await db.select(db.plans).get(), hasLength(6));
+    await tester.tap(find.byKey(const ValueKey('pro-limit-not-now')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(store.log, isNot(contains('restore')));
     await tester.tap(find.byKey(const ValueKey('restore-pro-restore')));
     await tester.pumpAndSettle();
     expect(store.log, contains('restore'));
+  });
+
+  testWidgets('Example 8: lock, dark theme, language and hidden amounts '
+      'stay as they are', (tester) async {
+    tall(tester);
+    final lock = MemoryAppLockStore(const AppLockSettings(enabled: true));
+    final theme = MemoryThemeModeStore(ThemeMode.dark);
+    final hidden = MemoryAmountsHiddenStore(true);
+    final db = await pumpApp(
+      tester,
+      seed: (db) async {
+        await seedSettings(db, currency: 'EUR', localeCode: 'en');
+        await seedPayIn4(db, title: 'Kulaklık');
+      },
+      overrides: [
+        initialRouteProvider.overrideWithValue(Routes.restore),
+        ...restoreOverrides(picker, undoDir),
+        backupPrefsStoreProvider.overrideWithValue(prefs),
+        notificationGatewayProvider.overrideWithValue(notifications),
+        reminderDebounceProvider.overrideWithValue(Duration.zero),
+        storeGatewayProvider.overrideWithValue(store),
+        appLockStoreProvider.overrideWithValue(lock),
+        deviceLockGatewayProvider.overrideWithValue(FakeDeviceLock()),
+        appIsActiveProvider.overrideWithValue(() => true),
+        themeModeStoreProvider.overrideWithValue(theme),
+        amountsHiddenStoreProvider.overrideWithValue(hidden),
+      ],
+    );
+    // The lock opened with the phone's answer; the app is in English.
+    expect(find.text('Restore from backup'), findsOneWidget);
+    picker.pickPath(plainFixture);
+    await pickFile(tester);
+    await tester.tap(find.byKey(const ValueKey('restore-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('restore-confirm')));
+    await settle(tester);
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect((await db.select(db.appSettings).getSingle()).currencyCode, 'TRY');
+    // This phone's own choices did not move.
+    expect(lock.read().enabled, isTrue);
+    expect(theme.read(), ThemeMode.dark);
+    expect(hidden.read(), isTrue);
+    final s = await db.select(db.appSettings).getSingle();
+    expect(s.localeCode, 'en');
+    final context = tester.element(find.byType(HomeScreen));
+    expect(Theme.of(context).brightness, Brightness.dark);
+    expect(Localizations.localeOf(context).languageCode, 'en');
+    // Hidden amounts: the home screen still shows none.
+    expect(find.text('•••'), findsWidgets);
   });
 }
