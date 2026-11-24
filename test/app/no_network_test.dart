@@ -94,6 +94,9 @@ void main() {
     // dart:io only where a file is written, and then only its file
     // classes: the export file for the share sheet (Roadmap 29).
     const fileOnly = {
+      // The restore's safety copy, in the app's own folder (Roadmap 30).
+      'lib/features/restore/restore_undo.dart':
+          "import 'dart:io' show Directory, File, FileSystemException;",
       'lib/features/export/export_service.dart':
           "import 'dart:io' show Directory, File, FileSystemException;",
     };
