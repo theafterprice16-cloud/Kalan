@@ -103,7 +103,7 @@ class _RestoreNoticeState extends ConsumerState<RestoreNotice> {
     final busy = ref.watch(proControllerProvider).busy != ProBusy.none;
     return Padding(
       key: const ValueKey('restore-pro-line'),
-      padding: const EdgeInsets.fromLTRB(
+      padding: const EdgeInsetsDirectional.fromSTEB(
         KalanSpace.md,
         KalanSpace.sm,
         KalanSpace.md,

@@ -3801,7 +3801,7 @@ abstract class AppLocalizations {
   /// Restore from a backup file (Roadmap 30). Summary card: plans in the backup, then how many are open, on hold and in the archive.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No plans} =1{1 plan ({open} open, {onHold} on hold, {archived} archived)} other{{count} plans ({open} open, {onHold} on hold, {archived} archived)}}'**
+  /// **'{count, plural, =0{No plans} =1{1 plan ({open, plural, =1{1 open} other{{open} open}}, {onHold, plural, =1{1 on hold} other{{onHold} on hold}}, {archived, plural, =1{1 archived} other{{archived} archived}})} other{{count} plans ({open, plural, =1{1 open} other{{open} open}}, {onHold, plural, =1{1 on hold} other{{onHold} on hold}}, {archived, plural, =1{1 archived} other{{archived} archived}})}}'**
   String restoreSummaryPlans(int count, int open, int onHold, int archived);
 
   /// Restore from a backup file (Roadmap 30). Summary card: recurring payments in the backup.

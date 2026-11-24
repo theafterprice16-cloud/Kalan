@@ -606,7 +606,7 @@
   "restoreErrorUnreadable": "Dosya okunamadı. Başka bir yedek dene.",
   "restoreErrorCopy": "Mevcut verinin kopyası alınamadı; hiçbir şey değişmedi. Yeniden dene.",
   "restoreSummaryDate": "{date} tarihli yedek",
-  "restoreSummaryPlans": "{count, plural, =0{Plan yok} one{1 plan ({open} açık, {onHold} beklemede, {archived} arşivde)} other{{count} plan ({open} açık, {onHold} beklemede, {archived} arşivde)}}",
+  "restoreSummaryPlans": "{count, plural, =0{Plan yok} one{1 plan ({open, plural, other{{open} açık}}, {onHold, plural, other{{onHold} beklemede}}, {archived, plural, other{{archived} arşivde}})} other{{count} plan ({open, plural, other{{open} açık}}, {onHold, plural, other{{onHold} beklemede}}, {archived, plural, other{{archived} arşivde}})}}",
   "restoreSummaryRecurring": "{count, plural, =0{Sabit ödeme yok} one{1 sabit ödeme} other{{count} sabit ödeme}}",
   "restoreSummarySources": "{sources, plural, one{1 kaynak} other{{sources} kaynak}}, {cards, plural, one{1 kart} other{{cards} kart}}",
   "restoreSummaryCurrency": "Para birimi: {code}",

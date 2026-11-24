@@ -19,8 +19,9 @@ import '../../l10n/generated/app_localizations.dart';
 import 'restore_notice.dart';
 import 'restore_service.dart';
 
-/// Where the restore screen is in its flow (decision 6).
-enum RestoreStep { start, reading, password, summary, restoring }
+/// Where the restore screen is in its flow (decision 6). While a file is
+/// read the screen stays where it is, with a progress line.
+enum RestoreStep { start, password, summary, restoring }
 
 /// The calm sentence for a failure; null for none (a password is asked).
 String? restoreFailureText(AppLocalizations l10n, RestoreFailure? failure) =>
@@ -52,6 +53,9 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
   bool _hasData = false;
   bool _obscured = true;
 
+  /// Reading and checking the picked file (with its password).
+  bool _reading = false;
+
   /// Shown on the start step, or under the password field.
   RestoreFailure? _failure;
 
@@ -66,6 +70,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
   /// Back to the start with [failure] shown; the picked file is let go.
   void _fail(RestoreFailure failure) => setState(() {
     _step = RestoreStep.start;
+    _reading = false;
     _failure = failure;
     _bytes = null;
     _contents = null;
@@ -84,15 +89,21 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
     if (bytes == null || !mounted) return;
     _bytes = bytes;
     _password.clear();
+    // A new file: back to the start, where its reading shows.
+    setState(() {
+      _step = RestoreStep.start;
+      _contents = null;
+      _summary = null;
+    });
     await _read();
   }
 
   Future<void> _read() async {
     final bytes = _bytes;
-    if (bytes == null) return;
+    if (bytes == null || _reading) return;
     final password = _password.text;
     setState(() {
-      _step = RestoreStep.reading;
+      _reading = true;
       _failure = null;
     });
     try {
@@ -107,28 +118,36 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
         _contents = contents;
         _summary = BackupSummary.of(contents.data);
         _hasData = hasData;
+        _reading = false;
         _step = RestoreStep.summary;
       });
     } on RestoreException catch (e) {
       if (!mounted) return;
       switch (e.failure) {
         case RestoreFailure.passwordNeeded:
-          setState(() => _step = RestoreStep.password);
+          setState(() {
+            _reading = false;
+            _step = RestoreStep.password;
+          });
         case RestoreFailure.wrongPassword when password.isNotEmpty:
           // The field stays open; no limit on tries.
           setState(() {
+            _reading = false;
             _step = RestoreStep.password;
             _failure = RestoreFailure.wrongPassword;
           });
         default:
           _fail(e.failure);
       }
+    } on Object {
+      if (mounted) _fail(RestoreFailure.unreadable);
     }
   }
 
   Future<void> _confirmAndRestore() async {
     final contents = _contents;
-    if (contents == null) return;
+    // A second tap while it runs does nothing.
+    if (contents == null || _step == RestoreStep.restoring) return;
     if (_hasData) {
       final l10n = context.l10n;
       final date = context.longDate(_backupDay(contents));
@@ -151,7 +170,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
           ],
         ),
       );
-      if (ok != true || !mounted) return;
+      if (ok != true || !mounted || _step == RestoreStep.restoring) return;
     }
     setState(() => _step = RestoreStep.restoring);
     try {
@@ -163,6 +182,8 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
       context.go(Routes.home);
     } on RestoreException catch (e) {
       if (mounted) _fail(e.failure);
+    } on Object {
+      if (mounted) _fail(RestoreFailure.unreadable);
     }
   }
 
@@ -175,7 +196,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
     final colors = context.colors;
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodyMedium?.copyWith(color: colors.textMuted);
-    final busy = _step == RestoreStep.reading || _step == RestoreStep.restoring;
+    final busy = _reading || _step == RestoreStep.restoring;
     const gap = SizedBox(height: KalanSpace.md);
 
     Widget progress(String text) => Row(
@@ -198,7 +219,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
         : null;
 
     final children = <Widget>[
-      if (_step == RestoreStep.start || _step == RestoreStep.reading) ...[
+      if (_step == RestoreStep.start) ...[
         Text(l10n.restoreIntro, style: theme.textTheme.bodyLarge),
         if (failureText != null) ...[
           gap,
@@ -215,7 +236,7 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
           onPressed: busy ? null : () => unawaited(_pick()),
           child: Text(l10n.restoreChooseFile),
         ),
-        if (_step == RestoreStep.reading) ...[
+        if (_reading) ...[
           const SizedBox(height: KalanSpace.sm),
           progress(l10n.restoreReading),
         ],
@@ -226,12 +247,15 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
         TextField(
           key: const ValueKey('restore-password'),
           controller: _password,
+          enabled: !_reading,
           obscureText: _obscured,
           autofocus: true,
           autocorrect: false,
           enableSuggestions: false,
           textInputAction: TextInputAction.done,
-          onSubmitted: (_) => unawaited(_read()),
+          onSubmitted: (_) {
+            if (_password.text.isNotEmpty) unawaited(_read());
+          },
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             labelText: l10n.restorePassword,
@@ -254,14 +278,21 @@ class _RestoreScreenState extends ConsumerState<RestoreScreen> {
         const SizedBox(height: KalanSpace.lg),
         FilledButton(
           key: const ValueKey('restore-open'),
-          onPressed: _password.text.isEmpty ? null : () => unawaited(_read()),
+          onPressed: _password.text.isEmpty || _reading
+              ? null
+              : () => unawaited(_read()),
           child: Text(l10n.restoreOpen),
         ),
-        const SizedBox(height: KalanSpace.xs),
-        TextButton(
-          onPressed: () => unawaited(_pick()),
-          child: Text(l10n.restoreChooseOther),
-        ),
+        if (_reading) ...[
+          const SizedBox(height: KalanSpace.sm),
+          progress(l10n.restoreReading),
+        ] else ...[
+          const SizedBox(height: KalanSpace.xs),
+          TextButton(
+            onPressed: () => unawaited(_pick()),
+            child: Text(l10n.restoreChooseOther),
+          ),
+        ],
       ],
       if ((_step == RestoreStep.summary || _step == RestoreStep.restoring) &&
           _contents != null &&

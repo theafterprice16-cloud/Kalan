@@ -2836,13 +2836,43 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String restoreSummaryPlans(int count, int open, int onHold, int archived) {
     String _temp0 = intl.Intl.pluralLogic(
+      open,
+      locale: localeName,
+      other: '$open açık',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      onHold,
+      locale: localeName,
+      other: '$onHold beklemede',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      archived,
+      locale: localeName,
+      other: '$archived arşivde',
+    );
+    String _temp3 = intl.Intl.pluralLogic(
+      open,
+      locale: localeName,
+      other: '$open açık',
+    );
+    String _temp4 = intl.Intl.pluralLogic(
+      onHold,
+      locale: localeName,
+      other: '$onHold beklemede',
+    );
+    String _temp5 = intl.Intl.pluralLogic(
+      archived,
+      locale: localeName,
+      other: '$archived arşivde',
+    );
+    String _temp6 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count plan ($open açık, $onHold beklemede, $archived arşivde)',
-      one: '1 plan ($open açık, $onHold beklemede, $archived arşivde)',
+      other: '$count plan ($_temp0, $_temp1, $_temp2)',
+      one: '1 plan ($_temp3, $_temp4, $_temp5)',
       zero: 'Plan yok',
     );
-    return '$_temp0';
+    return '$_temp6';
   }
 
   @override
