@@ -66,6 +66,8 @@ Yol haritası maddeleri (0-47) için `/clear` sonrası hafıza. `kalan-gelistirm
 
 - 31. Ana ekran widget'ı (24 Kasım 2026): iOS (küçük ve orta) ve Android (2x2'den 4x2'ye büyüyen) widget; küçükte "Kalan" / büyük sayı / "14 Ara tarihine kadar", ortada ayrıca sıradaki üç ödeme (ad, tarih, tutar); gelir yoksa "Bu dönem ödemeler"; eksi dönem koyu safran; plan yoksa "Henüz ödeme yok.", kurulum yoksa "Kurulumu bitirmek için Kalan'ı aç.", 7 günden eski veride "Güncel bilgi için Kalan'ı aç." (tutar yok); uygulama bugün ve sonraki 7 gün için hazır metin yazar, widget hesap yapmaz, gece yarısı yeni günün (maaş gününde yeni dönemin) kaydına geçer; "Tutarları gizle" ya da kilit açık + yeni "Widget'ta tutarı göster" kapalıyken tutarlar "•••" ve depoya hiç gerçek tutar gitmez; anahtar Ayarlar > Gizlilik'te yalnızca kilit açıkken, varsayılan kapalı, cihaza özel; dokununca ana ekran (kilit açıksa önce kilit); uzun sayılar küçükte kısa biçim; Arapçada aynalı; renkler token kopyası (testli); herkese ücretsiz; şema değişmedi; yeni paket home_widget. iOS kısmı bulutta derlenemedi
 
+- 31 ardından (24 Kasım 2026): uygulamanın kendi iOS gizlilik bildirimi (takip yok, veri toplama yok; ayar deposu ve veritabanı dosyası gerekçeleri); App Store yüklemesinde uyarı ya da ret riskini kaldırır
+
 Ara işler:
 
 - Arayüz uyum düzenlemesi (18 Kasım 2026): iPhone'da sağdan kayan sayfa ve kenardan geri, Android'de öngörülü geri; onay pencereleri iPhone'da Apple düzeninde düz Kalan penceresi; anahtarlar iki telefonda mürekkep renginde; boşluk ve köşe ölçüleri tek dosyada; "ödendi" ve kayıtta hafif titreşim; bekçi testi ve iPhone golden'ları (40-43)
