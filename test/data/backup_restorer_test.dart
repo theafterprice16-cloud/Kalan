@@ -8,9 +8,12 @@ import 'package:kalan/core/backup/backup_data.dart';
 import 'package:kalan/core/backup/backup_file.dart';
 import 'package:kalan/core/backup/backup_summary.dart';
 import 'package:kalan/core/engine/engine.dart';
+import 'package:kalan/core/holidays/holidays.dart';
 import 'package:kalan/data/backup/backup_collector.dart';
 import 'package:kalan/data/backup/backup_restorer.dart';
 import 'package:kalan/data/db/app_database.dart';
+import 'package:kalan/data/repositories/holiday_repository.dart';
+import 'package:kalan/data/repositories/plan_repository.dart';
 
 import '../helpers/backup_seed.dart';
 
@@ -250,6 +253,39 @@ void main() {
       final bad = BackupData.fromJson(jsonDecode(jsonEncode(json)));
       await expectLater(restoreBackup(target, bad), throwsA(anything));
       expect(await everything(target), before);
+    });
+  });
+
+  group('holidays after a restore', () {
+    Future<bool> syncWith(List<CountryHolidays> countries) => HolidayRepository(
+      target,
+      PlanRepository(target),
+    ).sync(countries: countries, region: 'TR');
+
+    test('the same list on this phone moves nothing', () async {
+      await restoreBackup(target, backup);
+      final snapshot =
+          (await target.select(target.appSettings).getSingle()).appliedHolidays;
+      final before = await everything(target);
+      expect(
+        await syncWith([CountryHolidays.fromSnapshot(snapshot)!]),
+        isFalse,
+      );
+      expect(await everything(target), before);
+    });
+
+    test('a different list moves the card dates once', () async {
+      await restoreBackup(target, backup);
+      final other = CountryHolidays(
+        country: 'TR',
+        weekendDays: {6, 7},
+        lastYear: 2028,
+        holidayDays: {LocalDate(2027, 1, 5).epochDay},
+      );
+      expect(await syncWith([other]), isTrue);
+      final once = await everything(target);
+      expect(await syncWith([other]), isFalse);
+      expect(await everything(target), once);
     });
   });
 
