@@ -2993,4 +2993,51 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get restoreSummaryLabel => 'In this backup';
+
+  @override
+  String get widgetLeft => 'Left';
+
+  @override
+  String get widgetPaymentsThisPeriod => 'Payments this period';
+
+  @override
+  String widgetUntil(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String get widgetNoPayments => 'No payments yet.';
+
+  @override
+  String get widgetNoUpcoming => 'No upcoming payments.';
+
+  @override
+  String get widgetSetup => 'Open Kalan to finish setup.';
+
+  @override
+  String get widgetStale => 'Open Kalan for the latest.';
+
+  @override
+  String widgetSpokenSummary(String title, String amount, String date) {
+    return '$title $amount, until $date.';
+  }
+
+  @override
+  String widgetSpokenPayment(String name, String date, String amount) {
+    return '$name, $date, $amount.';
+  }
+
+  @override
+  String get widgetPickerName => 'Kalan';
+
+  @override
+  String get widgetPickerDescription =>
+      'What\'s left this period and upcoming payments.';
+
+  @override
+  String get widgetShowAmounts => 'Show amounts in widget';
+
+  @override
+  String get widgetShowAmountsHint =>
+      'When off, the home screen widget shows ••• instead of amounts.';
 }

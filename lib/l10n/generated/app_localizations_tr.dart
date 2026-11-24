@@ -2981,4 +2981,50 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get restoreSummaryLabel => 'Yedekte bulunanlar';
+
+  @override
+  String get widgetLeft => 'Kalan';
+
+  @override
+  String get widgetPaymentsThisPeriod => 'Bu dönem ödemeler';
+
+  @override
+  String widgetUntil(String date) {
+    return '$date tarihine kadar';
+  }
+
+  @override
+  String get widgetNoPayments => 'Henüz ödeme yok.';
+
+  @override
+  String get widgetNoUpcoming => 'Sıradaki ödeme yok.';
+
+  @override
+  String get widgetSetup => 'Kurulumu bitirmek için Kalan\'ı aç.';
+
+  @override
+  String get widgetStale => 'Güncel bilgi için Kalan\'ı aç.';
+
+  @override
+  String widgetSpokenSummary(String title, String amount, String date) {
+    return '$title $amount, $date tarihine kadar.';
+  }
+
+  @override
+  String widgetSpokenPayment(String name, String date, String amount) {
+    return '$name, $date, $amount.';
+  }
+
+  @override
+  String get widgetPickerName => 'Kalan';
+
+  @override
+  String get widgetPickerDescription => 'Bu dönem kalan ve sıradaki ödemeler.';
+
+  @override
+  String get widgetShowAmounts => 'Widget\'ta tutarı göster';
+
+  @override
+  String get widgetShowAmountsHint =>
+      'Kapalıyken ana ekran widget\'ında tutarların yerine ••• görünür.';
 }

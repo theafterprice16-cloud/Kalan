@@ -625,7 +625,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "de": [
@@ -1254,7 +1267,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "de_CH": [
@@ -1883,7 +1909,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "es": [
@@ -2512,7 +2551,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "es_419": [
@@ -3141,7 +3193,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "fr": [
@@ -3770,7 +3835,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "fr_CA": [
@@ -4399,7 +4477,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "id": [
@@ -5028,7 +5119,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "it": [
@@ -5657,7 +5761,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "ja": [
@@ -6286,7 +6403,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "nl": [
@@ -6915,7 +7045,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "pl": [
@@ -7544,7 +7687,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "pt": [
@@ -8173,7 +8329,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "pt_BR": [
@@ -8802,7 +8971,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "pt_PT": [
@@ -9431,7 +9613,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "ru": [
@@ -10060,7 +10255,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "sv": [
@@ -10689,7 +10897,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "vi": [
@@ -11318,7 +11539,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "zh": [
@@ -11947,7 +12181,20 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ],
 
   "zh_Hant": [
@@ -12576,6 +12823,19 @@
     "undoConfirmButton",
     "undoDone",
     "undoFailed",
-    "restoreSummaryLabel"
+    "restoreSummaryLabel",
+    "widgetLeft",
+    "widgetPaymentsThisPeriod",
+    "widgetUntil",
+    "widgetNoPayments",
+    "widgetNoUpcoming",
+    "widgetSetup",
+    "widgetStale",
+    "widgetSpokenSummary",
+    "widgetSpokenPayment",
+    "widgetPickerName",
+    "widgetPickerDescription",
+    "widgetShowAmounts",
+    "widgetShowAmountsHint"
   ]
 }

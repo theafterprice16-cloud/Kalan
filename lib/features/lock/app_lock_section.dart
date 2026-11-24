@@ -8,6 +8,8 @@ import '../../core/design/choice_dialog.dart';
 import '../../core/lock/app_lock_machine.dart';
 import '../../core/theme/kalan_theme.dart';
 import '../../data/db/app_database.dart';
+import '../home_widget/widget_amounts.dart';
+import '../home_widget/widget_sync.dart';
 import '../privacy/amounts_hidden.dart';
 import '../reminders/reminder_providers.dart';
 import 'app_lock_controller.dart';
@@ -173,6 +175,17 @@ class _AppLockSectionState extends ConsumerState<AppLockSection> {
             subtitle: Text(relockDelayLabel(context, lock.delay), style: muted),
             trailing: const Icon(Icons.chevron_right),
             onTap: _pickDelay,
+          ),
+        // Home screen widget (31): amounts are masked there while the
+        // lock is on, unless this is on. Only while the lock is on.
+        if (lock.enabled && ref.watch(widgetGatewayProvider).supported)
+          SwitchListTile.adaptive(
+            key: const ValueKey('widget-amounts'),
+            title: Text(l10n.widgetShowAmounts),
+            subtitle: Text(l10n.widgetShowAmountsHint, style: muted),
+            value: ref.watch(widgetAmountsProvider),
+            onChanged: (v) =>
+                unawaited(ref.read(widgetAmountsProvider.notifier).set(v)),
           ),
       ],
     );

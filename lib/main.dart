@@ -13,6 +13,9 @@ import 'entitlement/pro_controller.dart';
 import 'entitlement/pro_status_store.dart';
 import 'features/export/backup_prefs.dart';
 import 'features/export/export_service.dart';
+import 'features/home_widget/widget_amounts.dart';
+import 'features/home_widget/widget_gateway.dart';
+import 'features/home_widget/widget_sync.dart';
 import 'features/lock/app_lock_store.dart';
 import 'features/lock/device_lock_gateway.dart';
 import 'features/privacy/amounts_hidden.dart';
@@ -38,6 +41,10 @@ Future<void> main() async {
     amountsHiddenStoreProvider.overrideWithValue(
       await PrefsAmountsHiddenStore.open(),
     ),
+    // "Show amounts in widget" (31): this device's own.
+    widgetAmountsStoreProvider.overrideWithValue(
+      await PrefsWidgetAmountsStore.open(),
+    ),
     // Last full backup and its reminder switch (29): this device's own.
     backupPrefsStoreProvider.overrideWithValue(
       await SharedBackupPrefsStore.open(),
@@ -50,7 +57,9 @@ Future<void> main() async {
   if (phone) {
     overrides
       ..add(storeGatewayProvider.overrideWithValue(IapStoreGateway()))
-      ..add(deviceLockGatewayProvider.overrideWithValue(LocalAuthDeviceLock()));
+      ..add(deviceLockGatewayProvider.overrideWithValue(LocalAuthDeviceLock()))
+      // Home screen widget (31).
+      ..add(widgetGatewayProvider.overrideWithValue(const HomeWidgetGateway()));
   }
   if (!kIsWeb) {
     await refreshLocalTimeZone();

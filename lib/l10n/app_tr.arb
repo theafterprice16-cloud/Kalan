@@ -625,5 +625,18 @@
   "undoConfirmButton": "Geri dön",
   "undoDone": "Önceki verine dönüldü.",
   "undoFailed": "Önceki veri yüklenemedi; hiçbir şey değişmedi.",
-  "restoreSummaryLabel": "Yedekte bulunanlar"
+  "restoreSummaryLabel": "Yedekte bulunanlar",
+  "widgetLeft": "Kalan",
+  "widgetPaymentsThisPeriod": "Bu dönem ödemeler",
+  "widgetUntil": "{date} tarihine kadar",
+  "widgetNoPayments": "Henüz ödeme yok.",
+  "widgetNoUpcoming": "Sıradaki ödeme yok.",
+  "widgetSetup": "Kurulumu bitirmek için Kalan'ı aç.",
+  "widgetStale": "Güncel bilgi için Kalan'ı aç.",
+  "widgetSpokenSummary": "{title} {amount}, {date} tarihine kadar.",
+  "widgetSpokenPayment": "{name}, {date}, {amount}.",
+  "widgetPickerName": "Kalan",
+  "widgetPickerDescription": "Bu dönem kalan ve sıradaki ödemeler.",
+  "widgetShowAmounts": "Widget'ta tutarı göster",
+  "widgetShowAmountsHint": "Kapalıyken ana ekran widget'ında tutarların yerine ••• görünür."
 }

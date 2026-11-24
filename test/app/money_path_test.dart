@@ -63,6 +63,9 @@ void main() {
           'notifications: the planner decides (amountsInText)',
       'lib/features/currency/currency_picker.dart':
           "each currency's example amount, not the user's",
+      'lib/features/home_widget/widget_texts.dart':
+          'home screen widget (31): the snapshot builder decides '
+          '(widgetAmountsMasked)',
     };
     // The flow where the user types or edits an amount (fields and their
     // draft preview): never masked. How many calls each file may have.

@@ -8,9 +8,14 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/locale.dart';
+import '../../core/widget/widget_snapshot.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../home_widget/widget_amounts.dart';
+import '../home_widget/widget_gateway.dart';
+import '../home_widget/widget_sync.dart';
+import '../lock/app_lock_store.dart';
 import '../privacy/amounts_hidden.dart';
 import 'local_notifications.dart';
 import 'notification_gateway.dart';
@@ -71,6 +76,39 @@ Future<bool> _amountsHidden() async {
   }
 }
 
+/// The home screen widget's mask (31) from the device's storage, as the
+/// app left it. Masked when anything cannot be read: the widget never
+/// shows an amount by mistake.
+Future<bool> _widgetMasked() async {
+  try {
+    return widgetAmountsMasked(
+      hideAmounts: (await PrefsAmountsHiddenStore.open()).read(),
+      appLock: (await PrefsAppLockStore.open()).read().enabled,
+      showInWidget: (await PrefsWidgetAmountsStore.open()).read(),
+    );
+  } on Object {
+    return true;
+  }
+}
+
+/// Redraws the home screen widget (31) after a notification button
+/// changed what it shows. Best effort: the next app start or resume
+/// redraws it anyway.
+Future<void> _refreshWidget(AppDatabase db) async {
+  final masked = await _widgetMasked();
+  try {
+    await WidgetPublisher(
+      db: db,
+      gateway: const HomeWidgetGateway(),
+      now: DateTime.now,
+      localeFor: (s) => appLocale(s?.localeCode),
+      masked: () => masked,
+    ).publish();
+  } on Object {
+    // The widget keeps its last text until the app runs.
+  }
+}
+
 /// The real notification service, in the app language.
 Future<NotificationGateway> _gatewayFor(AppDatabase db) async {
   final settings = await SettingsRepository(db).get();
@@ -123,6 +161,10 @@ Future<void> reminderActionInBackground(NotificationResponse response) async {
             reschedule: false,
           );
       if (result.outcome == ReminderActionOutcome.ignored) return;
+      // A payment marked paid leaves the widget's next rows (31).
+      if (result.outcome == ReminderActionOutcome.markedPaid) {
+        await _refreshWidget(db);
+      }
       // Then the reminders. Should iOS stop Kalan before this, the next
       // app start or resume reschedules anyway.
       await _schedulerFor(
