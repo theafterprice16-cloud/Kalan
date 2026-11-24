@@ -12,9 +12,8 @@ void main() {
 
   test('the app bundle has a privacy manifest in its resources', () {
     expect(File(path).existsSync(), isTrue);
-    final project = File(
-      'ios/Runner.xcodeproj/project.pbxproj',
-    ).readAsStringSync();
+    final project = File('ios/Runner.xcodeproj/project.pbxproj')
+        .readAsStringSync();
     final runner = project.substring(
       project.indexOf('97C146EC1CF9000F007C117D /* Resources */ = {'),
     );
