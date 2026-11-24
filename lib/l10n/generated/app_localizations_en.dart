@@ -2785,6 +2785,178 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get csvStatusArchived => 'archived';
+
+  @override
+  String get restoreHaveBackup => 'I have a backup';
+
+  @override
+  String get restoreFromBackup => 'Restore from backup';
+
+  @override
+  String get restoreIntro =>
+      'Choose a full backup file you saved from Kalan. It is opened on this phone only and sent nowhere.';
+
+  @override
+  String get restoreChooseFile => 'Choose file';
+
+  @override
+  String get restoreChooseOther => 'Choose another file';
+
+  @override
+  String get restoreReading => 'Reading the file.';
+
+  @override
+  String get restorePasswordIntro =>
+      'This backup has a password. Enter the one you chose when you saved it.';
+
+  @override
+  String get restorePassword => 'Password';
+
+  @override
+  String get restoreOpen => 'Open';
+
+  @override
+  String get restoreErrorNotBackup => 'This file is not a Kalan backup.';
+
+  @override
+  String get restoreErrorNewer =>
+      'This backup was made with a newer version of Kalan. Update the app and try again.';
+
+  @override
+  String get restoreErrorPassword => 'The password is not right.';
+
+  @override
+  String get restoreErrorUnreadable =>
+      'The file could not be read. Try another backup.';
+
+  @override
+  String get restoreErrorCopy =>
+      'A copy of your current data could not be saved, so nothing changed. Try again.';
+
+  @override
+  String restoreSummaryDate(String date) {
+    return 'Backup from $date';
+  }
+
+  @override
+  String restoreSummaryPlans(int count, int open, int onHold, int archived) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count plans ($open open, $onHold on hold, $archived archived)',
+      one: '1 plan ($open open, $onHold on hold, $archived archived)',
+      zero: 'No plans',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String restoreSummaryRecurring(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recurring payments',
+      one: '1 recurring payment',
+      zero: 'No recurring payments',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String restoreSummarySources(int sources, int cards) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sources,
+      locale: localeName,
+      other: '$sources sources',
+      one: '1 source',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      cards,
+      locale: localeName,
+      other: '$cards cards',
+      one: '1 card',
+    );
+    return '$_temp0, $_temp1';
+  }
+
+  @override
+  String restoreSummaryCurrency(String code) {
+    return 'Currency: $code';
+  }
+
+  @override
+  String restoreSummaryCurrencyChange(String code, String current) {
+    return 'Currency will be $code (now $current)';
+  }
+
+  @override
+  String get restoreReplaceNote =>
+      'This backup will replace the data on this phone. A copy of your current data is kept first; you can go back within 30 days.';
+
+  @override
+  String get restoreButton => 'Restore';
+
+  @override
+  String get restoreConfirmTitle => 'Restore this backup?';
+
+  @override
+  String restoreConfirmBody(String date) {
+    return 'The backup from $date will replace the data on this phone. You can go back to your current data from Settings > Data within 30 days.';
+  }
+
+  @override
+  String get restoreWorking => 'Restoring.';
+
+  @override
+  String restoreDone(int plans, int recurring) {
+    String _temp0 = intl.Intl.pluralLogic(
+      plans,
+      locale: localeName,
+      other: '$plans plans',
+      one: '1 plan',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      recurring,
+      locale: localeName,
+      other: '$recurring recurring payments',
+      one: '1 recurring payment',
+    );
+    return 'Backup restored: $_temp0, $_temp1.';
+  }
+
+  @override
+  String get restoreProNote =>
+      'If you bought Pro before, restore it to add new plans.';
+
+  @override
+  String undoRow(String date) {
+    return 'Go back to previous data · $date';
+  }
+
+  @override
+  String get undoRowHint =>
+      'Your data from before the last restore, kept for 30 days.';
+
+  @override
+  String get undoConfirmTitle => 'Go back to previous data?';
+
+  @override
+  String undoConfirmBody(String date) {
+    return 'The copy from $date will replace the data on this phone. A copy of your current data is kept too; you can go back within 30 days.';
+  }
+
+  @override
+  String get undoConfirmButton => 'Go back';
+
+  @override
+  String get undoDone => 'Your previous data is back.';
+
+  @override
+  String get undoFailed =>
+      'Your previous data could not be loaded, so nothing changed.';
+
+  @override
+  String get restoreSummaryLabel => 'In this backup';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).

@@ -3707,6 +3707,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'archived'**
   String get csvStatusArchived;
+
+  /// Restore from a backup file (Roadmap 30). Text button on the first setup screen: restore a backup instead of setting up. Short.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a backup'**
+  String get restoreHaveBackup;
+
+  /// Restore from a backup file (Roadmap 30). Settings > Data row and the restore screen's title.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from backup'**
+  String get restoreFromBackup;
+
+  /// Restore from a backup file (Roadmap 30). Intro on the restore screen. Calm; stress that nothing leaves the phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a full backup file you saved from Kalan. It is opened on this phone only and sent nowhere.'**
+  String get restoreIntro;
+
+  /// Restore from a backup file (Roadmap 30). Primary button: opens the phone's file picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose file'**
+  String get restoreChooseFile;
+
+  /// Restore from a backup file (Roadmap 30). Text button under the summary or an error: pick a different file.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another file'**
+  String get restoreChooseOther;
+
+  /// Restore from a backup file (Roadmap 30). Next to a progress indicator while the file is read and checked.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the file.'**
+  String get restoreReading;
+
+  /// Restore from a backup file (Roadmap 30). Sakin ve açık; korkutma. Shown above the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup has a password. Enter the one you chose when you saved it.'**
+  String get restorePasswordIntro;
+
+  /// Restore from a backup file (Roadmap 30). Label of the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get restorePassword;
+
+  /// Restore from a backup file (Roadmap 30). Button under the password field: opens the encrypted file.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get restoreOpen;
+
+  /// Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) The picked file is not a Kalan backup (a photo, another app's file).
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a Kalan backup.'**
+  String get restoreErrorNotBackup;
+
+  /// Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.)
+  ///
+  /// In en, this message translates to:
+  /// **'This backup was made with a newer version of Kalan. Update the app and try again.'**
+  String get restoreErrorNewer;
+
+  /// Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) Under the password field, which stays open. No limit on tries.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is not right.'**
+  String get restoreErrorPassword;
+
+  /// Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) Damaged, too large or unreadable file. Nothing on the phone changed.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be read. Try another backup.'**
+  String get restoreErrorUnreadable;
+
+  /// Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) The safety copy taken before a restore could not be written; the restore did not start.
+  ///
+  /// In en, this message translates to:
+  /// **'A copy of your current data could not be saved, so nothing changed. Try again.'**
+  String get restoreErrorCopy;
+
+  /// Restore from a backup file (Roadmap 30). First line of the summary card: the backup's date (long date).
+  ///
+  /// In en, this message translates to:
+  /// **'Backup from {date}'**
+  String restoreSummaryDate(String date);
+
+  /// Restore from a backup file (Roadmap 30). Summary card: plans in the backup, then how many are open, on hold and in the archive.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No plans} =1{1 plan ({open} open, {onHold} on hold, {archived} archived)} other{{count} plans ({open} open, {onHold} on hold, {archived} archived)}}'**
+  String restoreSummaryPlans(int count, int open, int onHold, int archived);
+
+  /// Restore from a backup file (Roadmap 30). Summary card: recurring payments in the backup.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No recurring payments} =1{1 recurring payment} other{{count} recurring payments}}'**
+  String restoreSummaryRecurring(int count);
+
+  /// Restore from a backup file (Roadmap 30). Summary card: providers and bank accounts (sources), then cards.
+  ///
+  /// In en, this message translates to:
+  /// **'{sources, plural, =1{1 source} other{{sources} sources}}, {cards, plural, =1{1 card} other{{cards} cards}}'**
+  String restoreSummarySources(int sources, int cards);
+
+  /// Restore from a backup file (Roadmap 30). Summary card: the backup's currency (ISO code), the same as now.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency: {code}'**
+  String restoreSummaryCurrency(String code);
+
+  /// Restore from a backup file (Roadmap 30). Summary card: the backup's currency differs from the one in use. No conversion; amounts come back as saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency will be {code} (now {current})'**
+  String restoreSummaryCurrencyChange(String code, String current);
+
+  /// Restore from a backup file (Roadmap 30). Under the summary when the phone already has data. Plain and calm; not a warning.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup will replace the data on this phone. A copy of your current data is kept first; you can go back within 30 days.'**
+  String get restoreReplaceNote;
+
+  /// Restore from a backup file (Roadmap 30). Primary button under the summary; also the confirm dialog's button.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restoreButton;
+
+  /// Restore from a backup file (Roadmap 30). Confirm dialog title when the phone already has data.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore this backup?'**
+  String get restoreConfirmTitle;
+
+  /// Restore from a backup file (Roadmap 30). Confirm dialog text. Calm; says it can be undone.
+  ///
+  /// In en, this message translates to:
+  /// **'The backup from {date} will replace the data on this phone. You can go back to your current data from Settings > Data within 30 days.'**
+  String restoreConfirmBody(String date);
+
+  /// Restore from a backup file (Roadmap 30). Next to a progress indicator while the data is written.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring.'**
+  String get restoreWorking;
+
+  /// Restore from a backup file (Roadmap 30). Short message on the home screen after a restore.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored: {plans, plural, =1{1 plan} other{{plans} plans}}, {recurring, plural, =1{1 recurring payment} other{{recurring} recurring payments}}.'**
+  String restoreDone(int plans, int recurring);
+
+  /// Restore from a backup file (Roadmap 30). Calm line on the home screen after a restore brought more than 4 open plans to the free version; a Restore purchase button follows. Never pushy.
+  ///
+  /// In en, this message translates to:
+  /// **'If you bought Pro before, restore it to add new plans.'**
+  String get restoreProNote;
+
+  /// Restore from a backup file (Roadmap 30). Settings > Data row for 30 days after a restore; {date} is when the copy was made.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back to previous data · {date}'**
+  String undoRow(String date);
+
+  /// Restore from a backup file (Roadmap 30). Subtitle of the go-back row.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data from before the last restore, kept for 30 days.'**
+  String get undoRowHint;
+
+  /// Restore from a backup file (Roadmap 30). Confirm dialog title.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back to previous data?'**
+  String get undoConfirmTitle;
+
+  /// Restore from a backup file (Roadmap 30). Confirm dialog text. Calm; says it can be undone.
+  ///
+  /// In en, this message translates to:
+  /// **'The copy from {date} will replace the data on this phone. A copy of your current data is kept too; you can go back within 30 days.'**
+  String undoConfirmBody(String date);
+
+  /// Restore from a backup file (Roadmap 30). Confirm dialog's button.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get undoConfirmButton;
+
+  /// Restore from a backup file (Roadmap 30). Short message after going back.
+  ///
+  /// In en, this message translates to:
+  /// **'Your previous data is back.'**
+  String get undoDone;
+
+  /// Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.)
+  ///
+  /// In en, this message translates to:
+  /// **'Your previous data could not be loaded, so nothing changed.'**
+  String get undoFailed;
+
+  /// Restore from a backup file (Roadmap 30). Small muted label above the summary card's lines.
+  ///
+  /// In en, this message translates to:
+  /// **'In this backup'**
+  String get restoreSummaryLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -19,6 +19,7 @@ import '../features/reminders/background.dart';
 import '../features/reminders/local_notifications.dart';
 import '../features/reminders/reminder_actions.dart';
 import '../features/reminders/reminder_providers.dart';
+import '../features/restore/restore_service.dart' show undoTidyProvider;
 import '../l10n/generated/app_localizations.dart';
 import 'locale.dart';
 import 'providers.dart';
@@ -72,6 +73,9 @@ class _KalanAppState extends ConsumerState<KalanApp>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(reminderSyncProvider).request();
+      // Restore (30): a copy older than 30 days goes; a restore stopped
+      // halfway is finished.
+      unawaited(ref.read(undoTidyProvider.future));
       // App lock (27): a locked cold start asks the phone once.
       unawaited(ref.read(appLockProvider.notifier).start());
       // Launched by tapping a statement closing reminder: over home.

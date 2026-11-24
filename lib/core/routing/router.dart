@@ -18,6 +18,7 @@ import '../../features/plans/plans_screen.dart';
 import '../../features/pro/pro_screen.dart';
 import '../../features/recurring/recurring_edit_screen.dart';
 import '../../features/reminders/reminders_help_screen.dart';
+import '../../features/restore/restore_screen.dart';
 import '../../features/roadmap/roadmap_screen.dart';
 import '../../features/settings/pay_settings_screen.dart';
 import '../../features/settings/settings_screen.dart';
@@ -43,7 +44,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (!settings.hasValue) return null;
       final onboarded = settings.value != null;
       final atOnboarding = state.matchedLocation == Routes.onboarding;
-      if (!onboarded && !atOnboarding) return Routes.onboarding;
+      // "I have a backup" (30) opens the restore screen during setup.
+      final atRestore = state.matchedLocation == Routes.restore;
+      if (!onboarded && !atOnboarding && !atRestore) return Routes.onboarding;
       if (onboarded && atOnboarding) return Routes.home;
       return null;
     },
@@ -154,6 +157,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               : ExportKind.spreadsheet,
         ),
       ),
+      GoRoute(path: Routes.restore, builder: (_, _) => const RestoreScreen()),
       GoRoute(path: Routes.roadmap, builder: (_, _) => const RoadmapScreen()),
       GoRoute(
         path: '/pro',

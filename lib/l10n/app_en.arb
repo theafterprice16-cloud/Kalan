@@ -3031,5 +3031,213 @@
   "csvStatusArchived": "archived",
   "@csvStatusArchived": {
     "description": "Status word in the exported CSV file (Roadmap 29), lowercase like a value in a table cell. Kısa tut."
+  },
+  "restoreHaveBackup": "I have a backup",
+  "@restoreHaveBackup": {
+    "description": "Restore from a backup file (Roadmap 30). Text button on the first setup screen: restore a backup instead of setting up. Short."
+  },
+  "restoreFromBackup": "Restore from backup",
+  "@restoreFromBackup": {
+    "description": "Restore from a backup file (Roadmap 30). Settings > Data row and the restore screen's title."
+  },
+  "restoreIntro": "Choose a full backup file you saved from Kalan. It is opened on this phone only and sent nowhere.",
+  "@restoreIntro": {
+    "description": "Restore from a backup file (Roadmap 30). Intro on the restore screen. Calm; stress that nothing leaves the phone."
+  },
+  "restoreChooseFile": "Choose file",
+  "@restoreChooseFile": {
+    "description": "Restore from a backup file (Roadmap 30). Primary button: opens the phone's file picker."
+  },
+  "restoreChooseOther": "Choose another file",
+  "@restoreChooseOther": {
+    "description": "Restore from a backup file (Roadmap 30). Text button under the summary or an error: pick a different file."
+  },
+  "restoreReading": "Reading the file.",
+  "@restoreReading": {
+    "description": "Restore from a backup file (Roadmap 30). Next to a progress indicator while the file is read and checked."
+  },
+  "restorePasswordIntro": "This backup has a password. Enter the one you chose when you saved it.",
+  "@restorePasswordIntro": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin ve açık; korkutma. Shown above the password field."
+  },
+  "restorePassword": "Password",
+  "@restorePassword": {
+    "description": "Restore from a backup file (Roadmap 30). Label of the password field."
+  },
+  "restoreOpen": "Open",
+  "@restoreOpen": {
+    "description": "Restore from a backup file (Roadmap 30). Button under the password field: opens the encrypted file."
+  },
+  "restoreErrorNotBackup": "This file is not a Kalan backup.",
+  "@restoreErrorNotBackup": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) The picked file is not a Kalan backup (a photo, another app's file)."
+  },
+  "restoreErrorNewer": "This backup was made with a newer version of Kalan. Update the app and try again.",
+  "@restoreErrorNewer": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) "
+  },
+  "restoreErrorPassword": "The password is not right.",
+  "@restoreErrorPassword": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) Under the password field, which stays open. No limit on tries."
+  },
+  "restoreErrorUnreadable": "The file could not be read. Try another backup.",
+  "@restoreErrorUnreadable": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) Damaged, too large or unreadable file. Nothing on the phone changed."
+  },
+  "restoreErrorCopy": "A copy of your current data could not be saved, so nothing changed. Try again.",
+  "@restoreErrorCopy": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) The safety copy taken before a restore could not be written; the restore did not start."
+  },
+  "restoreSummaryDate": "Backup from {date}",
+  "@restoreSummaryDate": {
+    "description": "Restore from a backup file (Roadmap 30). First line of the summary card: the backup's date (long date).",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreSummaryPlans": "{count, plural, =0{No plans} =1{1 plan ({open} open, {onHold} on hold, {archived} archived)} other{{count} plans ({open} open, {onHold} on hold, {archived} archived)}}",
+  "@restoreSummaryPlans": {
+    "description": "Restore from a backup file (Roadmap 30). Summary card: plans in the backup, then how many are open, on hold and in the archive.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "open": {
+        "type": "int"
+      },
+      "onHold": {
+        "type": "int"
+      },
+      "archived": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreSummaryRecurring": "{count, plural, =0{No recurring payments} =1{1 recurring payment} other{{count} recurring payments}}",
+  "@restoreSummaryRecurring": {
+    "description": "Restore from a backup file (Roadmap 30). Summary card: recurring payments in the backup.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreSummarySources": "{sources, plural, =1{1 source} other{{sources} sources}}, {cards, plural, =1{1 card} other{{cards} cards}}",
+  "@restoreSummarySources": {
+    "description": "Restore from a backup file (Roadmap 30). Summary card: providers and bank accounts (sources), then cards.",
+    "placeholders": {
+      "sources": {
+        "type": "int"
+      },
+      "cards": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreSummaryCurrency": "Currency: {code}",
+  "@restoreSummaryCurrency": {
+    "description": "Restore from a backup file (Roadmap 30). Summary card: the backup's currency (ISO code), the same as now.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreSummaryCurrencyChange": "Currency will be {code} (now {current})",
+  "@restoreSummaryCurrencyChange": {
+    "description": "Restore from a backup file (Roadmap 30). Summary card: the backup's currency differs from the one in use. No conversion; amounts come back as saved.",
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreReplaceNote": "This backup will replace the data on this phone. A copy of your current data is kept first; you can go back within 30 days.",
+  "@restoreReplaceNote": {
+    "description": "Restore from a backup file (Roadmap 30). Under the summary when the phone already has data. Plain and calm; not a warning."
+  },
+  "restoreButton": "Restore",
+  "@restoreButton": {
+    "description": "Restore from a backup file (Roadmap 30). Primary button under the summary; also the confirm dialog's button."
+  },
+  "restoreConfirmTitle": "Restore this backup?",
+  "@restoreConfirmTitle": {
+    "description": "Restore from a backup file (Roadmap 30). Confirm dialog title when the phone already has data."
+  },
+  "restoreConfirmBody": "The backup from {date} will replace the data on this phone. You can go back to your current data from Settings > Data within 30 days.",
+  "@restoreConfirmBody": {
+    "description": "Restore from a backup file (Roadmap 30). Confirm dialog text. Calm; says it can be undone.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "restoreWorking": "Restoring.",
+  "@restoreWorking": {
+    "description": "Restore from a backup file (Roadmap 30). Next to a progress indicator while the data is written."
+  },
+  "restoreDone": "Backup restored: {plans, plural, =1{1 plan} other{{plans} plans}}, {recurring, plural, =1{1 recurring payment} other{{recurring} recurring payments}}.",
+  "@restoreDone": {
+    "description": "Restore from a backup file (Roadmap 30). Short message on the home screen after a restore.",
+    "placeholders": {
+      "plans": {
+        "type": "int"
+      },
+      "recurring": {
+        "type": "int"
+      }
+    }
+  },
+  "restoreProNote": "If you bought Pro before, restore it to add new plans.",
+  "@restoreProNote": {
+    "description": "Restore from a backup file (Roadmap 30). Calm line on the home screen after a restore brought more than 4 open plans to the free version; a Restore purchase button follows. Never pushy."
+  },
+  "undoRow": "Go back to previous data · {date}",
+  "@undoRow": {
+    "description": "Restore from a backup file (Roadmap 30). Settings > Data row for 30 days after a restore; {date} is when the copy was made.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "undoRowHint": "Your data from before the last restore, kept for 30 days.",
+  "@undoRowHint": {
+    "description": "Restore from a backup file (Roadmap 30). Subtitle of the go-back row."
+  },
+  "undoConfirmTitle": "Go back to previous data?",
+  "@undoConfirmTitle": {
+    "description": "Restore from a backup file (Roadmap 30). Confirm dialog title."
+  },
+  "undoConfirmBody": "The copy from {date} will replace the data on this phone. A copy of your current data is kept too; you can go back within 30 days.",
+  "@undoConfirmBody": {
+    "description": "Restore from a backup file (Roadmap 30). Confirm dialog text. Calm; says it can be undone.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "undoConfirmButton": "Go back",
+  "@undoConfirmButton": {
+    "description": "Restore from a backup file (Roadmap 30). Confirm dialog's button."
+  },
+  "undoDone": "Your previous data is back.",
+  "@undoDone": {
+    "description": "Restore from a backup file (Roadmap 30). Short message after going back."
+  },
+  "undoFailed": "Your previous data could not be loaded, so nothing changed.",
+  "@undoFailed": {
+    "description": "Restore from a backup file (Roadmap 30). Sakin; kullanıcıyı suçlama, ne yapabileceğini söyle. (Calm: never blame the user; say what they can do.) "
+  },
+  "restoreSummaryLabel": "In this backup",
+  "@restoreSummaryLabel": {
+    "description": "Restore from a backup file (Roadmap 30). Small muted label above the summary card's lines."
   }
 }

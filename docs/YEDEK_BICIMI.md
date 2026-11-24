@@ -1,6 +1,6 @@
 # Kalan yedek biçimi (sürüm 1)
 
-Yol haritası 29 (dışa aktarma) bu dosyayı yazar; 30 (geri yükleme) okur. Okuyucu `lib/core/backup/backup_file.dart` içindeki `readBackup`, model `lib/core/backup/backup_data.dart`. Bu belge ile uygulamanın yazdığı dosya `test/data/backup_collector_test.dart` içinde alan alan karşılaştırılır: aşağıdaki tablolarda olmayan bir alan dosyada çıkarsa ya da tablodaki bir alanın türü değişirse test kırmızı olur.
+Yol haritası 29 (dışa aktarma) bu dosyayı yazar; 30 (geri yükleme) okur. Okuyucu `lib/core/backup/backup_file.dart` içindeki `readBackup` (seçilen dosyanın baytlarıyla `readBackupBytes`: 50 MB üstü ve UTF-8 olmayan dosya okunmaz), model `lib/core/backup/backup_data.dart`. Bu belge ile uygulamanın yazdığı dosya `test/data/backup_collector_test.dart` içinde alan alan karşılaştırılır: aşağıdaki tablolarda olmayan bir alan dosyada çıkarsa ya da tablodaki bir alanın türü değişirse test kırmızı olur.
 
 ## Genel kurallar
 
@@ -174,7 +174,7 @@ Yanlış parola ile değiştirilmiş dosya birbirinden ayırt edilemez: ikisi de
 
 ## Anlamsal doğrulama
 
-Türler doğru olsa da şu durumlarda dosya `damaged` sayılır (`BackupData.validate`): bilinmeyen para birimi; ayın günü 1-31 dışında (maaş, ekstre, son ödeme); hatırlatma dakikası 0-1439 dışında; "kaç gün önce" 1, 2, 3, 5, 7 dışında; hesap kesim "kaç gün önce" 1 ya da 2 dışında; eksi gelir ya da eşik; 1'den küçük tutar, ek ücret, taksit başı ücret ya da ürün fiyatı; 1'den küçük taksit sayısı; eksi ertelenen ay; 1-365 dışında aralık; kaynak ya da sabit ödeme adı 1-60 karakter dışında, plan adı ya da ek ücret notu 80 karakterden uzun; tatil ülkesi 2 karakterden uzun; aynı numaralı iki kaynak, plan ya da sabit ödeme; bir planda aynı sıra numaralı iki ödeme; bir sabit ödemede aynı günlü iki tekrar; olmayan bir kaynağa bağlanan `sourceId` ya da `chargeSourceId`.
+Türler doğru olsa da şu durumlarda dosya `damaged` sayılır (`BackupData.validate`): bilinmeyen para birimi; ayın günü 1-31 dışında (maaş, ekstre, son ödeme); aylık maaşta `payDay`, haftalık ve iki haftalıkta `payAnchorDate` yok; hatırlatma dakikası 0-1439 dışında; "kaç gün önce" 1, 2, 3, 5, 7 dışında; hesap kesim "kaç gün önce" 1 ya da 2 dışında; eksi gelir ya da eşik; 1'den küçük tutar, ek ücret, taksit başı ücret ya da ürün fiyatı; 1'den küçük taksit sayısı; eksi ertelenen ay; 1-365 dışında aralık; kaynak ya da sabit ödeme adı 1-60 karakter dışında, plan adı ya da ek ücret notu 80 karakterden uzun; tatil ülkesi 2 karakterden uzun; aynı numaralı iki kaynak, plan ya da sabit ödeme; bir planda aynı sıra numaralı iki ödeme; bir sabit ödemede aynı günlü iki tekrar; olmayan bir kaynağa bağlanan `sourceId` ya da `chargeSourceId`.
 
 ## Okuma hataları
 
@@ -189,3 +189,12 @@ Türler doğru olsa da şu durumlarda dosya `damaged` sayılır (`BackupData.val
 ## Sürüm değişikliği
 
 Alan eklemek sürüm gerektirmez (eski okuyucu yok sayar). Bir alanın anlamını, adını ya da türünü değiştirmek, bir seçenek değerini yeniden adlandırmak ya da zorunlu alan eklemek `formatVersion`'ı artırır; okuyucu eski sürümleri okumaya devam eder.
+
+### Sürüm yükseltme kuralı (30)
+
+- Okuyucu her sürümü okur: dosyanın `formatVersion`'ı v ise ham `data` nesnesi `backupUpgradeSteps` içindeki v→v+1, v+1→v+2… adımlarıyla en yeni sürüme çevrilir (`upgradeBackupContent`, `lib/core/backup/backup_upgrade.dart`), sonra yeni bir dosya gibi okunur ve doğrulanır. Eksik adım ya da 1'den küçük sürüm `damaged`.
+- Her adım yalnızca kendi sürümünün değiştirdiğini değiştirir, kendi kopyası üzerinde çalışır ve bilinmeyen alanlara dokunmaz.
+- Şifreli dosyanın ek doğrulanan verisi (AAD) dosyanın kendi `formatVersion`'ıyla kurulur: eski bir şifreli dosya yeni uygulamada da açılır.
+- Zarfın kendisi (şifreleme alanları dahil) bir sürümde değişirse okuyucu o sürümün zarfını da ayrıca tanımalıdır; bugün zarf tek biçimdir.
+- Sürüm artınca: `backupFormatVersion` artırılır, `backupUpgradeSteps`'e adım eklenir, `test/fixtures` altındaki sürüm 1 dosyaları silinmez ve yeniden üretilmez (her sürümde yüklenmeleri test edilir), yeni sürümün kendi fixture'ları eklenir.
+- Geri yüklemenin bu telefona eklediği güvenlik kopyası da bu biçimde bir dosyadır; üst düzeyde yalnızca bu telefona ait `thisDevice` alanı (o anki "Son yedek" günü) vardır, okuyucu yok sayar. Kopya hiçbir zaman paylaşılmaz.
