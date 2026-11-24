@@ -1,0 +1,6 @@
+/* Home screen widget (Roadmap 31): name and description in the widget
+   gallery. The same text as widgetPickerName and widgetPickerDescription in
+   lib/l10n/app_en.arb (checked by test/app/widget_platform_test.dart).
+   Other languages: in the bulk translation, as <lang>.lproj files. */
+"widget.name" = "Kalan";
+"widget.description" = "What's left this period and upcoming payments.";

@@ -1,0 +1,4 @@
+/* The Turkish copy of widgetPickerName and widgetPickerDescription
+   (lib/l10n/app_tr.arb). */
+"widget.name" = "Kalan";
+"widget.description" = "Bu dönem kalan ve sıradaki ödemeler.";
