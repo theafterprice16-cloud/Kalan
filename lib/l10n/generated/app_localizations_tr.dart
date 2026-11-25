@@ -1584,6 +1584,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proFeatureUnlimitedPlans => 'Sınırsız açık plan';
 
   @override
+  String get proFeatureLockScreenWidget => 'Kilit ekranı widget\'ı';
+
+  @override
   String proPriceLine(String price) {
     return '$price · bir kez ödenir. Abonelik yok, yenileme yok.';
   }
@@ -3027,4 +3030,93 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get widgetShowAmountsHint =>
       'Kapalıyken ana ekran widget\'ında tutarların yerine ••• görünür.';
+
+  @override
+  String get lockScreenTitle => 'Kalan';
+
+  @override
+  String lockScreenToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bugün $count ödeme',
+      one: 'Bugün 1 ödeme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenPastDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Günü geçen $count ödeme',
+      one: 'Günü geçen 1 ödeme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenTomorrow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Yarın $count ödeme',
+      one: 'Yarın 1 ödeme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenInDays(int count, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$days gün sonra $count ödeme',
+      one: '$days gün sonra 1 ödeme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lockScreenNoUpcoming => 'Yaklaşan ödeme yok.';
+
+  @override
+  String get lockScreenTodayShort => 'Bugün';
+
+  @override
+  String get lockScreenPastDueShort => 'Geçti';
+
+  @override
+  String lockScreenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ödeme',
+      one: '1 ödeme',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenLeft(String amount) {
+    return 'Kalan $amount';
+  }
+
+  @override
+  String get lockScreenGateInline => 'Kalan Pro ile';
+
+  @override
+  String get lockScreenGate =>
+      'Kilit ekranı widget\'ı Kalan Pro ile kullanılabilir.';
+
+  @override
+  String get lockScreenOpen => 'Kalan\'ı aç';
+
+  @override
+  String get lockScreenShowLeft => 'Kalan sayısını göster';
+
+  @override
+  String get lockScreenShowLeftHint =>
+      'Kilit ekranı widget\'ında bu dönem kalan da görünür. Tutarlar gizliyken görünmez.';
 }

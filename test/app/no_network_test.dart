@@ -100,13 +100,16 @@ void main() {
 
   test('app code does not open sockets or HTTP clients', () {
     // dart:io only where a file is written, and then only its file
-    // classes: the export file for the share sheet (Roadmap 29).
+    // classes: the export file for the share sheet (Roadmap 29); and the
+    // system version (Platform), which opens nothing.
     const fileOnly = {
       // The restore's safety copy, in the app's own folder (Roadmap 30).
       'lib/features/restore/restore_undo.dart':
           "import 'dart:io' show Directory, File, FileSystemException;",
       'lib/features/export/export_service.dart':
           "import 'dart:io' show Directory, File, FileSystemException;",
+      // The iOS version only, for the Lock Screen widget (Roadmap 32).
+      'lib/app/phone_platform.dart': "import 'dart:io' show Platform;",
     };
     final offenders = <String>[];
     for (final entity in Directory('lib').listSync(recursive: true)) {

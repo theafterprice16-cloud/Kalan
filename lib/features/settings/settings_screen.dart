@@ -225,6 +225,8 @@ class SettingsScreen extends ConsumerWidget {
           SectionTitle(l10n.settingsPrivacySection),
           const HideAmountsTile(),
           AppLockSection(settings: s),
+          // Lock Screen widget (32): iPhone with Pro.
+          const LockScreenLeftTile(),
           // Data (29): export, last backup and its calm reminder.
           const DataSection(),
           const Divider(),

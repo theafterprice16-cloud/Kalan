@@ -61,6 +61,35 @@ class _Texts implements WidgetTexts {
   }) => '$name, $date, $amount.';
   @override
   bool get rightToLeft => false;
+  @override
+  String get lockTitle => 'Kalan';
+  @override
+  String lockToday(int count) => '$count today';
+  @override
+  String lockPastDue(int count) => '$count past due';
+  @override
+  String lockTomorrow(int count) => '$count tomorrow';
+  @override
+  String lockInDays({required int count, required int days}) =>
+      '$count in $days days';
+  @override
+  String get lockNoUpcoming => 'No upcoming payments.';
+  @override
+  String get lockTodayShort => 'Today';
+  @override
+  String get lockPastDueShort => 'Past due';
+  @override
+  String number(int value) => '#$value';
+  @override
+  String lockCount(int count) => '$count pay';
+  @override
+  String lockLeft(String amount) => 'Left $amount';
+  @override
+  String get lockGateInline => 'With Kalan Pro';
+  @override
+  String get lockGate => 'The Lock Screen widget comes with Kalan Pro.';
+  @override
+  String get lockOpen => 'Open Kalan';
 }
 
 final _period = PayPeriod(LocalDate(2026, 11, 15), LocalDate(2026, 12, 15));
@@ -112,6 +141,8 @@ WidgetDayText _one(
 ).days.single;
 
 void main() {
+  lockScreenTests();
+
   group('day record by period status (table)', () {
     for (final (name, summary, state, title, number) in [
       // Example 1: income entered, 12.450 left.
@@ -313,6 +344,203 @@ void main() {
     );
     expect((days.first as Map).keys, containsAll(['y', 'm', 'd', 'state']));
     expect(json['stale'], isNot(contains(RegExp('[0-9]'))));
+  });
+}
+
+LockDayText _lock(
+  LockDayCounts counts, {
+  PeriodSummary? summary,
+  LockScreenOptions options = const LockScreenOptions(pro: true),
+  bool masked = false,
+  WidgetTexts? texts,
+}) => buildWidgetSnapshot(
+  input: WidgetDaysInput([
+    WidgetDayInput(
+      date: _d20,
+      summary: summary ?? _summary(spokenFor: 1190000, income: 2435000),
+      upcoming: _rows,
+      lock: counts,
+    ),
+  ]),
+  masked: masked,
+  texts: texts ?? _Texts(),
+  lock: options,
+).days.single.lock!;
+
+final _d20 = LocalDate(2026, 11, 20);
+
+void lockScreenTests() {
+  group('Lock Screen (32): priority (table)', () {
+    for (final (name, counts, line, kind, center, count) in [
+      (
+        'today first, whatever else',
+        LockDayCounts(today: 2, pastDue: 3, nextDate: _d22, nextCount: 1),
+        '2 today',
+        LockCenter.word,
+        'Today',
+        '2 pay',
+      ),
+      (
+        'then past due',
+        LockDayCounts(pastDue: 1, nextDate: _d22, nextCount: 4),
+        '1 past due',
+        LockCenter.word,
+        'Past due',
+        '1 pay',
+      ),
+      (
+        'then tomorrow',
+        LockDayCounts(nextDate: LocalDate(2026, 11, 21), nextCount: 3),
+        '3 tomorrow',
+        LockCenter.number,
+        '#1',
+        '3 pay',
+      ),
+      (
+        'then in some days (example 1)',
+        LockDayCounts(nextDate: _d22, nextCount: 1),
+        '1 in 2 days',
+        LockCenter.number,
+        '#2',
+        '1 pay',
+      ),
+      (
+        'nothing ahead',
+        LockDayCounts.none,
+        'No upcoming payments.',
+        LockCenter.logo,
+        '',
+        '',
+      ),
+    ]) {
+      test(name, () {
+        final l = _lock(counts);
+        expect(
+          (l.line, l.centerKind, l.center, l.count),
+          (line, kind, center, count),
+        );
+      });
+    }
+  });
+
+  test("what's left: only with Pro, the option and nothing masked", () {
+    final counts = LockDayCounts(nextDate: _d22, nextCount: 1);
+    for (final (pro, showLeft, masked, left) in [
+      (true, true, false, 'Left 1245000u'),
+      (true, false, false, ''),
+      (true, true, true, ''),
+      (false, true, false, null),
+    ]) {
+      final day = buildWidgetSnapshot(
+        input: WidgetDaysInput([
+          WidgetDayInput(
+            date: _d20,
+            summary: _summary(spokenFor: 1190000, income: 2435000),
+            upcoming: _rows,
+            lock: counts,
+          ),
+        ]),
+        masked: masked,
+        texts: _Texts(),
+        lock: LockScreenOptions(pro: pro, showLeft: showLeft),
+      ).days.single;
+      expect(day.lock?.left, left, reason: '$pro $showLeft $masked');
+    }
+  });
+
+  test('no income: no "left" line, nothing formatted for it', () {
+    final texts = _Texts();
+    final l = _lock(
+      LockDayCounts(nextDate: _d22, nextCount: 1),
+      summary: _summary(spokenFor: 1190000),
+      options: const LockScreenOptions(pro: true, showLeft: true),
+      texts: texts,
+    );
+    expect(l.left, isEmpty);
+  });
+
+  test('masked: nothing formatted for the Lock Screen either', () {
+    final l = _lock(
+      const LockDayCounts(today: 1),
+      options: const LockScreenOptions(pro: true, showLeft: true),
+      masked: true,
+      texts: _Texts(failOnMoney: true),
+    );
+    expect(l.left, isEmpty);
+  });
+
+  test('a very long left takes the short form', () {
+    final l = _lock(
+      const LockDayCounts(today: 1),
+      summary: _summary(spokenFor: 0, income: 125450000),
+      options: const LockScreenOptions(pro: true, showLeft: true),
+      texts: _LongTexts(),
+    );
+    expect(l.left, 'Left 125450000s');
+  });
+
+  test('no payment amount in any Lock Screen text', () {
+    final s = buildWidgetSnapshot(
+      input: WidgetDaysInput([
+        WidgetDayInput(
+          date: _d20,
+          summary: _summary(spokenFor: 1190000, income: 2435000),
+          upcoming: _rows,
+          lock: LockDayCounts(today: 1, nextDate: _d22, nextCount: 1),
+        ),
+      ]),
+      masked: false,
+      texts: _Texts(),
+      lock: const LockScreenOptions(pro: true, showLeft: true),
+    );
+    final text = jsonEncode([s.lock.toJson(), s.days.single.lock!.toJson()]);
+    for (final p in _rows) {
+      expect(text, isNot(contains('${p.amountMinor}u')));
+    }
+  });
+
+  test('not Pro: no day text; the Pro note and the stale texts', () {
+    final s = buildWidgetSnapshot(
+      input: WidgetDaysInput([
+        WidgetDayInput(
+          date: _d20,
+          summary: _summary(spokenFor: 1, income: 2),
+          upcoming: const [],
+          lock: const LockDayCounts(today: 1),
+        ),
+      ]),
+      masked: false,
+      texts: _Texts(),
+    );
+    expect(s.days.single.lock, isNull);
+    expect(s.days.single.toJson(), isNot(contains('lock')));
+    final json = s.toJson()['lock']! as Map;
+    expect(json['pro'], isFalse);
+    expect(json['gateInline'], 'With Kalan Pro');
+    expect(json['gate'], 'The Lock Screen widget comes with Kalan Pro.');
+    expect(json['open'], 'Open Kalan');
+    expect(json['stale'], 'Open Kalan for the latest.');
+  });
+
+  test('lockScreenLeftShown: every combination (table)', () {
+    for (final showLeft in [false, true]) {
+      for (final hide in [false, true]) {
+        for (final appLock in [false, true]) {
+          for (final inWidget in [false, true]) {
+            expect(
+              lockScreenLeftShown(
+                showLeft: showLeft,
+                hideAmounts: hide,
+                appLock: appLock,
+                showInWidget: inWidget,
+              ),
+              showLeft && !hide && (!appLock || inWidget),
+              reason: '$showLeft $hide $appLock $inWidget',
+            );
+          }
+        }
+      }
+    }
   });
 }
 

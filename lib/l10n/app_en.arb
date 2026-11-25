@@ -1455,6 +1455,10 @@
   "@proFeatureUnlimitedPlans": {
     "description": "One line in the list of what Pro adds."
   },
+  "proFeatureLockScreenWidget": "Lock Screen widget",
+  "@proFeatureLockScreenWidget": {
+    "description": "One line in the list of what Pro adds (iPhone only). Use Apple's own name for the Lock Screen."
+  },
   "proPriceLine": "{price} · pay once. No subscription, nothing renews.",
   "@proPriceLine": {
     "placeholders": {
@@ -3325,5 +3329,98 @@
   "widgetShowAmountsHint": "When off, the home screen widget shows ••• instead of amounts.",
   "@widgetShowAmountsHint": {
     "description": "Subtitle of the 'Show amounts in widget' switch. ••• is the same three dots that replace hidden amounts in the app. Privacy preference (Roadmap 31). Neutral and short."
+  },
+  "lockScreenTitle": "Kalan",
+  "@lockScreenTitle": {
+    "description": "The app's name, shown above the line on the rectangular Lock Screen widget. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal. Keep the brand name as it is."
+  },
+  "lockScreenToday": "{count, plural, =1{1 payment today} other{{count} payments today}}",
+  "@lockScreenToday": {
+    "description": "How many unpaid payments are due today. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockScreenPastDue": "{count, plural, =1{1 past due} other{{count} past due}}",
+  "@lockScreenPastDue": {
+    "description": "How many unpaid payments are past their due date. Calm, no blame. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockScreenTomorrow": "{count, plural, =1{1 payment tomorrow} other{{count} payments tomorrow}}",
+  "@lockScreenTomorrow": {
+    "description": "How many payments are due tomorrow. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockScreenInDays": "{count, plural, =1{1 payment in {days, plural, =1{1 day} other{{days} days}}} other{{count} payments in {days, plural, =1{1 day} other{{days} days}}}}",
+  "@lockScreenInDays": {
+    "description": "How many payments are due on the next payment day, {days} days from today (2 or more). Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "lockScreenNoUpcoming": "No upcoming payments.",
+  "@lockScreenNoUpcoming": {
+    "description": "Shown when there is no unpaid payment ahead. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal."
+  },
+  "lockScreenTodayShort": "Today",
+  "@lockScreenTodayShort": {
+    "description": "Middle of the round Lock Screen widget when payments are due today; one short word. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal."
+  },
+  "lockScreenPastDueShort": "Past due",
+  "@lockScreenPastDueShort": {
+    "description": "Middle of the round Lock Screen widget when payments are past due; one or two short words, calm, no blame. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal."
+  },
+  "lockScreenCount": "{count, plural, =1{1 payment} other{{count} payments}}",
+  "@lockScreenCount": {
+    "description": "Small line under the number on the round Lock Screen widget. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockScreenLeft": "Left {amount}",
+  "@lockScreenLeft": {
+    "description": "What's left this pay period, under the line on the rectangular Lock Screen widget; only when the user turned it on. {amount} is already formatted. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal.",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "lockScreenGateInline": "With Kalan Pro",
+  "@lockScreenGateInline": {
+    "description": "The Lock Screen widget in one line when Pro is not on. Calm: no selling, no 'locked'. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal."
+  },
+  "lockScreenGate": "The Lock Screen widget comes with Kalan Pro.",
+  "@lockScreenGate": {
+    "description": "The rectangular Lock Screen widget when Pro is not on. Calm: no selling, no 'locked', no exclamation. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal."
+  },
+  "lockScreenOpen": "Open Kalan",
+  "@lockScreenOpen": {
+    "description": "Inline Lock Screen widget when its information is out of date or setup is not finished. Lock Screen widget (Roadmap 32); a very narrow space. Choose the shortest natural wording; never add an amount or anything personal."
+  },
+  "lockScreenShowLeft": "Show what's left",
+  "@lockScreenShowLeft": {
+    "description": "Settings > Privacy switch (iPhone, Pro): show what's left this pay period on the Lock Screen widget. Privacy preference. Neutral and short."
+  },
+  "lockScreenShowLeftHint": "The Lock Screen widget also shows what's left this period. Not while amounts are hidden.",
+  "@lockScreenShowLeftHint": {
+    "description": "Subtitle of the 'Show what's left' switch. Payment amounts are never on the Lock Screen; this adds only what's left. Neutral and short."
   }
 }

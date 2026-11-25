@@ -21,6 +21,7 @@ import 'package:kalan/entitlement/pro_rules.dart';
 import 'package:kalan/entitlement/pro_status_store.dart';
 import 'package:kalan/entitlement/store_gateway.dart';
 import 'package:kalan/features/export/backup_prefs.dart';
+import 'package:kalan/features/home_widget/lock_screen_left.dart';
 import 'package:kalan/features/home_widget/widget_sync.dart';
 import 'package:kalan/features/lock/app_lock_controller.dart';
 import 'package:kalan/features/lock/app_lock_store.dart';
@@ -1061,6 +1062,26 @@ void main() {
           await shoot(tester, '44-pro-free-$lang-$theme');
         });
 
+        // Lock Screen widget (32): its line on an iPhone only.
+        testWidgets('pro screen, free, iPhone, $lang', (tester) async {
+          await start(
+            tester,
+            locale: locale,
+            extra: [
+              ...proStore(price: price),
+              lockScreenWidgetSupportedProvider.overrideWithValue(true),
+            ],
+            route: Routes.pro(),
+          );
+          expect(
+            find.text(
+              lang == 'tr' ? "Kilit ekranı widget'ı" : 'Lock Screen widget',
+            ),
+            findsOneWidget,
+          );
+          await shoot(tester, '128-pro-free-iphone-$lang-$theme');
+        });
+
         testWidgets('fifth plan sheet, $lang', (tester) async {
           await limitSheet(tester, locale);
           await shoot(tester, '47-pro-limit-sheet-$lang-$theme');
@@ -1891,6 +1912,7 @@ void main() {
           bool screenLock = true,
           AppLockNotice? notice,
           bool widget = false,
+          bool lockScreen = false,
         }) async {
           final phone = FakeDeviceLock(hold: hold, screenLock: screenLock);
           await start(
@@ -1907,6 +1929,13 @@ void main() {
               // Home screen widget (31): a phone with the widget.
               if (widget)
                 widgetGatewayProvider.overrideWithValue(FakeWidgetGateway()),
+              // Lock Screen widget (32): an iPhone with Pro.
+              if (lockScreen) ...[
+                lockScreenWidgetSupportedProvider.overrideWithValue(true),
+                proStatusStoreProvider.overrideWithValue(
+                  MemoryProStatusStore(ProStatus.pro),
+                ),
+              ],
             ],
           );
           await loadImages(tester);
@@ -1974,6 +2003,17 @@ void main() {
           await openLock(tester);
           expect(find.byKey(const ValueKey('widget-amounts')), findsOneWidget);
           await shoot(tester, '126-settings-widget-amounts-$lang-$theme');
+        });
+
+        // Lock Screen widget (32): "Show what's left", iPhone with Pro,
+        // off by default; under the widget's own switch.
+        testWidgets('settings, lock screen left switch, $lang', (tester) async {
+          await startLocked(tester, widget: true, lockScreen: true);
+          await openLock(tester);
+          const key = ValueKey('lock-screen-left');
+          await scrollTo(tester, find.byKey(key));
+          expect(find.byKey(key), findsOneWidget);
+          await shoot(tester, '127-settings-lock-screen-left-$lang-$theme');
         });
       }
 

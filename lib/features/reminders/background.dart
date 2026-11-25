@@ -8,10 +8,15 @@ import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../../app/locale.dart';
+import '../../app/phone_platform.dart';
 import '../../core/widget/widget_snapshot.dart';
 import '../../data/db/app_database.dart';
 import '../../data/repositories/settings_repository.dart';
+import '../../entitlement/entitlement.dart';
+import '../../entitlement/pro_rules.dart';
+import '../../entitlement/pro_status_store.dart';
 import '../../l10n/generated/app_localizations.dart';
+import '../home_widget/lock_screen_left.dart';
 import '../home_widget/widget_amounts.dart';
 import '../home_widget/widget_gateway.dart';
 import '../home_widget/widget_sync.dart';
@@ -91,18 +96,68 @@ Future<bool> _widgetMasked() async {
   }
 }
 
-/// Redraws the home screen widget (31) after a notification button
-/// changed what it shows. Best effort: the next app start or resume
-/// redraws it anyway.
+/// The Lock Screen widget's Pro state and "Show what's left" (32) from
+/// the device's storage, as the app left them.
+Future<({ProStatus status, bool showLeft})?> _lockScreenChoices() =>
+    lockScreenChoicesFrom(
+      iOS: phoneHasLockScreenWidget,
+      proStatus: () async => (await PrefsProStatusStore.open()).read(),
+      showLeft: () async => lockScreenLeftShown(
+        showLeft: (await PrefsLockScreenLeftStore.open()).read(),
+        hideAmounts: (await PrefsAmountsHiddenStore.open()).read(),
+        appLock: (await PrefsAppLockStore.open()).read().enabled,
+        showInWidget: (await PrefsWidgetAmountsStore.open()).read(),
+      ),
+    );
+
+/// The background's Lock Screen choices (32). On an iPhone, null when the
+/// Pro state cannot be read: then nothing is written and the widget keeps
+/// its last text (a Pro user never sees the Pro note by mistake);
+/// elsewhere (no Lock Screen widget) such an error counts as not Pro, so
+/// the home screen widget is still redrawn. "Show what's left" unreadable
+/// counts as off, and it is off outside iPhones: no amount by mistake.
+@visibleForTesting
+Future<({ProStatus status, bool showLeft})?> lockScreenChoicesFrom({
+  required bool iOS,
+  required Future<ProStatus> Function() proStatus,
+  required Future<bool> Function() showLeft,
+}) async {
+  ProStatus status;
+  try {
+    status = await proStatus();
+  } on Object {
+    if (iOS) return null;
+    status = ProStatus.notPro;
+  }
+  try {
+    return (status: status, showLeft: iOS && await showLeft());
+  } on Object {
+    return (status: status, showLeft: false);
+  }
+}
+
+/// Redraws the home screen widget (31) and the Lock Screen widget (32)
+/// after a notification button changed what they show. Best effort: the
+/// next app start or resume redraws them anyway.
 Future<void> _refreshWidget(AppDatabase db) async {
   final masked = await _widgetMasked();
+  final lock = await _lockScreenChoices();
+  if (lock == null) return;
   try {
     await WidgetPublisher(
       db: db,
-      gateway: const HomeWidgetGateway(),
+      gateway: HomeWidgetGateway(lockScreen: phoneHasLockScreenWidget),
       now: DateTime.now,
       localeFor: (s) => appLocale(s?.localeCode),
       masked: () => masked,
+      lockScreen: (settings) => LockScreenOptions(
+        // The Settings test switch counts only in debug builds.
+        pro: KalanEntitlement(
+          status: lock.status,
+          debugProSwitch: settings?.debugPro ?? false,
+        ).isPro,
+        showLeft: lock.showLeft,
+      ),
     ).publish();
   } on Object {
     // The widget keeps its last text until the app runs.

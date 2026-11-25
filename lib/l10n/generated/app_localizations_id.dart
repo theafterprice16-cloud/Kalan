@@ -1571,6 +1571,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get proFeatureUnlimitedPlans => 'Unlimited open plans';
 
   @override
+  String get proFeatureLockScreenWidget => 'Lock Screen widget';
+
+  @override
   String proPriceLine(String price) {
     return '$price · pay once. No subscription, nothing renews.';
   }
@@ -3040,4 +3043,104 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get widgetShowAmountsHint =>
       'When off, the home screen widget shows ••• instead of amounts.';
+
+  @override
+  String get lockScreenTitle => 'Kalan';
+
+  @override
+  String lockScreenToday(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments today',
+      one: '1 payment today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenPastDue(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count past due',
+      one: '1 past due',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenTomorrow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments tomorrow',
+      one: '1 payment tomorrow',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenInDays(int count, int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    String _temp2 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments in $_temp0',
+      one: '1 payment in $_temp1',
+    );
+    return '$_temp2';
+  }
+
+  @override
+  String get lockScreenNoUpcoming => 'No upcoming payments.';
+
+  @override
+  String get lockScreenTodayShort => 'Today';
+
+  @override
+  String get lockScreenPastDueShort => 'Past due';
+
+  @override
+  String lockScreenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count payments',
+      one: '1 payment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String lockScreenLeft(String amount) {
+    return 'Left $amount';
+  }
+
+  @override
+  String get lockScreenGateInline => 'With Kalan Pro';
+
+  @override
+  String get lockScreenGate => 'The Lock Screen widget comes with Kalan Pro.';
+
+  @override
+  String get lockScreenOpen => 'Open Kalan';
+
+  @override
+  String get lockScreenShowLeft => 'Show what\'s left';
+
+  @override
+  String get lockScreenShowLeftHint =>
+      'The Lock Screen widget also shows what\'s left this period. Not while amounts are hidden.';
 }
